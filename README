@@ -5,6 +5,12 @@ virtualenv ve
 source ve/bin/activate
 pip install -r requirements.txt
 
+Una vez instaladas las dependencias solo hay que ejecutar alguno de los ejemplos, por ejemplo:
+python flask-restful.py
+Esto por defecto pone a la escucha un servidor web en http://0.0.0.0:5000/
+
+Para usar la API:
+
 curl -i http://0.0.0.0:5000/projects
 curl -i http://0.0.0.0:5000/projects/057ce063ee014dee885b13840774463c
 
