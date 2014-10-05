@@ -5,7 +5,7 @@ virtualenv ve
 source ve/bin/activate
 pip install -r requirements.txt
 
-curl -i http://0.0.0.0:5000/projects/
+curl -i http://0.0.0.0:5000/projects
 curl -i http://0.0.0.0:5000/projects/057ce063ee014dee885b13840774463c
 
 curl -i -X GET -H "Content-Type: application/json" -d '{"low_minimum":1000}' http://0.0.0.0:5000/projects/
@@ -13,7 +13,7 @@ curl -i -X GET -H "Content-Type: application/json" -d '{"high_minimum":2000}' ht
 curl -i -X GET -H "Content-Type: application/json" -d '{"low_minimum":1000,"high_minimum":2000}' http://0.0.0.0:5000/projects/
 
 Error:
-curl -i -X GET -H "Content-Type: application/json" http://0.0.0.0:5000/projects/
+curl -i -X GET -H "Content-Type: application/json" http://0.0.0.0:5000/projects
 
 HTTP/1.0 400 BAD REQUEST
 Content-Type: application/json
