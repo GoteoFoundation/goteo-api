@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from flask import abort
 from flask.ext.restful import Api, Resource, reqparse, fields, marshal
 
