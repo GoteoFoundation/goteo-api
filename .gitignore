@@ -1,3 +1,5 @@
 /ve
 *.pyc
 *~
+
+/config.py
