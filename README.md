@@ -10,19 +10,42 @@ En Ubuntu:
     mkvirtualenv goteoapi
     pip install -r requirements.txt
 
-Una vez instaladas las dependencias solo hay que activar el virtualenvironment y ejecutar la API:
+### Configuración
+
+Una vez instaladas las dependencias, hay que configurar los datos de conexión a la BD:
+    cp config.py.example config.py
+
+Editar el archivo config.py con los datos correctos.
+
+### Ejecución
+
+Solo nos queda activar el virtualenvironment y ejecutar la API:
 
     workon goteoapi
     ./flask-restful.py
 
 Esto por defecto pone a la escucha un servidor web en http://0.0.0.0:5000/
 
-Para usar la API:
+## Ejemplos de uso
+
+Lista de proyectos:
 
     curl -i http://0.0.0.0:5000/projects
+
+Detalles de un proyecto concreto:
+
     curl -i http://0.0.0.0:5000/projects/057ce063ee014dee885b13840774463c
+
+Listado de proyectos con un mínimo de 1000€:
+
     curl -i -X GET -H "Content-Type: application/json" -d '{"low_minimum":1000}' http://0.0.0.0:5000/projects/
+
+Listado de proyectos con un mínimo de hasta 2000€:
+
     curl -i -X GET -H "Content-Type: application/json" -d '{"high_minimum":2000}' http://0.0.0.0:5000/projects/
+
+Listado de proyectos con un mínimo entre 1000€ y 2000€:
+
     curl -i -X GET -H "Content-Type: application/json" -d '{"low_minimum":1000,"high_minimum":2000}' http://0.0.0.0:5000/projects/
 
 Error:
