@@ -21,7 +21,8 @@ class User(db.Model):
     # email = db.Column('email', String(255))
 
     def __repr__(self):
-        return '<Player %s %s>' % (self.username, self.email)
+        # FIX
+        return '<User %s: %s>' % (self.username, self.email)
 
 
 class Invest(db.Model):
@@ -31,6 +32,9 @@ class Invest(db.Model):
     user = db.Column('user', String(50))
     project = db.Column('project', String(50))
     status = db.Column('status', Integer)
+
+    def __repr__(self):
+        return '<Invest %d: %s>' % (self.investid, self.project)
 
 
 class Project(db.Model):
@@ -52,4 +56,4 @@ class Project(db.Model):
     # platform
 
     def __repr__(self):
-        return '<Project %s %s>' % (self.projectid, self.name)
+        return '<Project %s: %s>' % (self.projectid, self.name)
