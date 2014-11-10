@@ -1,6 +1,5 @@
 Flask==0.10.1
 Flask-RESTful==0.2.12
-Flask-Restless==0.14.2
 Flask-SQLAlchemy==2.0
 Jinja2==2.7.3
 MarkupSafe==0.23
