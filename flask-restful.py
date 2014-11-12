@@ -1,9 +1,14 @@
 #!/usr/bin/env python
-from flask import abort
-from flask.ext.restful import Api, Resource, reqparse, fields, marshal
+# -*- coding: utf-8 -*-
+from model import app, db
 
-from model import app, Project
+from api.reports.money import MoneyAPI
+from api.reports.rewards import RewardsAPI
+from api.reports.community import CommunityAPI
+from api.reports.projects import ProjectsAPI
+#from api.misc import ProjectListAPI, ProjectAPI
 
+from flask.ext.restful import Api
 api = Api(app)
 
 
@@ -20,61 +25,12 @@ curl -i -X GET -H "Content-Type: application/json" -d '{"high_minimum":20000}' h
 curl -i -X GET -H "Content-Type: application/json" -d '{"low_minimum":10000,"high_minimum":20000}' http://0.0.0.0:5000/projects/</br>
 """
 
-
-project_fields = {
-    'projectid': fields.String,
-    'name': fields.String,
-    'category': fields.String,
-    'minimum': fields.Integer,
-    'optimum': fields.Integer
-}
-
-
-class ProjectListAPI(Resource):
-    #decorators = [auth.login_required]
-
-    def __init__(self):
-        self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('low_minimum', type=str, default="", location='json')
-        self.reqparse.add_argument('high_minimum', type=str, default="", location='json')
-        super(ProjectListAPI, self).__init__()
-
-    def get(self):
-        args = self.reqparse.parse_args()
-        filters = {}
-        for k, v in args.iteritems():
-            if v is not None and k in ['low_minimum', 'high_minimum']:
-                filters[k] = v
-
-        projects = Project.query  # .all()
-        if filters['low_minimum']:
-            app.logger.debug('low')
-            projects = projects.filter(Project.minimum >= filters['low_minimum'])
-
-        if filters['high_minimum']:
-            app.logger.debug('high')
-            projects = projects.filter(Project.minimum <= filters['high_minimum'])
-
-        #return {'projects': map(lambda t: marshal(t, project_fields), projects)}
-        return {'projects': map(lambda t: {t.projectid: marshal(t, project_fields)}, projects)}
-
-
-class ProjectAPI(Resource):
-    #decorators = [auth.login_required]
-
-    def __init__(self):
-        super(ProjectAPI, self).__init__()
-
-    def get(self, project_id):
-        p = Project.query.filter_by(projectid=project_id).first()
-        if p is None:
-            abort(404)
-
-        return {'project': marshal(p, project_fields)}
-
-
-api.add_resource(ProjectListAPI, '/projects/', endpoint='projects')
-api.add_resource(ProjectAPI, '/projects/<string:project_id>', endpoint='project')
+#api.add_resource(ProjectListAPI, '/projects/', endpoint='projects1')
+#api.add_resource(ProjectAPI, '/projects/<string:project_id>', endpoint='project')
+api.add_resource(MoneyAPI, '/reports/money', endpoint='money')
+api.add_resource(ProjectsAPI, '/reports/projects', endpoint='projects')
+api.add_resource(CommunityAPI, '/reports/community', endpoint='community')
+api.add_resource(RewardsAPI, '/reports/rewards', endpoint='rewards')
 
 
 if __name__ == '__main__':
