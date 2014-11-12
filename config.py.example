@@ -1,6 +1,8 @@
+#
 dbhost = 'devgoteo.org'
 dbuser = 'goteo'
 dbpass = 'goteo1234'
 dbname = 'goteo'
 
+# Do not edit below here
 DB_URI = 'mysql://' + dbuser + ':' + dbpass + '@' + dbhost + '/' +dbname
