@@ -1,6 +1,9 @@
+# -*- coding: utf-8 -*-
+
 from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
-from sqlalchemy import Integer, String
+#from flask.ext.sqlalchemy import Pagination
+from sqlalchemy import Integer, String, Text
 import config
 
 # DB class
@@ -9,44 +12,52 @@ app = Flask(__name__, static_url_path="")
 app.config['SQLALCHEMY_DATABASE_URI'] = config.DB_URI
 app.config['SQLALCHEMY_ECHO'] = True
 app.config['DEBUG'] = True
+#app.config['SQLALCHEMY_POOL_TIMEOUT'] = 5
+#app.config['SQLALCHEMY_POOL_SIZE'] = 30
 db = SQLAlchemy(app)
+# app.config.from_pyfile(config)
 
 
-# DB classess
+# DB classes
 class User(db.Model):
     __tablename__ = 'user'
 
-    userid = db.Column('id', String(50), primary_key=True)
+    id = db.Column('id', String(50), primary_key=True)
     name = db.Column('name', String(100))
     # email = db.Column('email', String(255))
 
     def __repr__(self):
-        # FIX
-        return '<User %s: %s>' % (self.username, self.email)
+        return '<User %s: %s>' % (self.name, self.email)
 
 
 class Invest(db.Model):
     __tablename__ = 'invest'
 
-    investid = db.Column('id', Integer, primary_key=True)
+    METHOD_PAYPAL = 'paypal'
+    METHOD_TPV = 'tpv'
+    METHOD_CASH = 'cash'
+
+    id = db.Column('id', Integer, primary_key=True)
     user = db.Column('user', String(50))
-    project = db.Column('project', String(50))
+    project = db.Column('project', String(50), db.ForeignKey('project.id'))
     status = db.Column('status', Integer)
+    amount = db.Column('amount', Integer)
+    method = db.Column('method', String(20))
 
     def __repr__(self):
-        return '<Invest %d: %s>' % (self.investid, self.project)
+        return '<Invest %d: %s (%d EUR)>' % (self.id, self.project, self.amount)
 
 
 class Project(db.Model):
     __tablename__ = 'project'
 
-    projectid = db.Column('id', String(50), primary_key=True)
-    name = db.Column('name', String(255))  # tinytext
+    id = db.Column('id', String(50), primary_key=True)
+    name = db.Column('name', Text)
     category = db.Column('category', String(50))
     minimum = db.Column('mincost', Integer)
     optimum = db.Column('maxcost', Integer)
     #subtitle = db.Column('subtitle', String(255))
-    #status = db.Column('status', Integer)
+    status = db.Column('status', Integer)
     #created = db.Column('created', Date)
     #updated = db.Column('updated', Date)
     #published = db.Column('published', Date)
@@ -54,6 +65,18 @@ class Project(db.Model):
     # active_date
     # rewards
     # platform
+    #aportes = db.relationship('Invest', backref='project')
 
     def __repr__(self):
-        return '<Project %s: %s>' % (self.projectid, self.name)
+        return '<Project %s: %s>' % (self.id, self.name)
+
+
+class Call(db.Model):
+    __tablename__ = 'call'
+
+    id = db.Column('id', String(50), primary_key=True)
+    name = db.Column('name', Text)
+    amount = db.Column('amount', Integer)
+
+    def __repr__(self):
+        return '<Call %s: %s>' % (self.id, self.name)
