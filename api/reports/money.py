@@ -55,6 +55,7 @@ class MoneyAPI(Resource):
 
         # - [NEW] Suma recaudada en Convocatorias (Capital riego distribuido + crowd)
         # TODO
+        # Invest.METHOD_DROP
 
         # - Total 8% recaudado por Goteo
         # TODO: Comprobar
@@ -87,7 +88,18 @@ class MoneyAPI(Resource):
         if comprometido is None:
             abort(404)
 
+        # TypeError: Decimal('1420645') is not JSON serializable
+        # No se pueden donar centimos no? Hacer enteros?
+        #return {'total': int(total_recaudado[0])}
         return jsonify({'total': int(recaudado), 'devuelto': int(devuelto), 'limit-per-page': limit,
                         'paypal': paypal, 'tpv': tpv, # 'cash': cash,
                         'call_amount': call_amount,
                         'projects': map(lambda i: [i[0], {'recaudado': i[1]}], comprometido)})
+
+        #return {'total': str(total_recaudado[0])}
+
+        #return {'total': total_recaudado[0], 'projects': invests}
+        #return jsonify(invests)
+        #return {'invests': map(lambda i: {i[0]: i[1]}, invests)}
+        #return {'invests': {'pliegos': suma}}
+        #return {'invests': map(lambda i: {i.investid: marshal(i, invest_fields)}, invests)}

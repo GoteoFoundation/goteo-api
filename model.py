@@ -36,6 +36,7 @@ class Invest(db.Model):
     METHOD_PAYPAL = 'paypal'
     METHOD_TPV = 'tpv'
     METHOD_CASH = 'cash'
+    METHOD_DROP = 'drop'
 
     id = db.Column('id', Integer, primary_key=True)
     user = db.Column('user', String(50))
@@ -80,3 +81,13 @@ class Call(db.Model):
 
     def __repr__(self):
         return '<Call %s: %s>' % (self.id, self.name)
+
+
+class Category(db.Model):
+    __tablename__ = 'category'
+
+    id = db.Column('id', Integer, primary_key=True)
+    name = db.Column('name', Text)
+
+    def __repr__(self):
+        return '<Category %s>' % (self.name)
