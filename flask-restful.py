@@ -15,14 +15,15 @@ api = Api(app)
 @app.route('/')
 def hello_world():
     return """
-API de Goteo.org. <a href="/projects/">/projects/</a></br>
+API de Goteo.org.<br><br>
+<a href="/reports/money">/reports/money</a></br>
+<a href="/reports/projects">/reports/projects</a></br>
+<a href="/reports/community">/reports/community</a></br>
+<a href="/reports/rewards">/reports/rewards</a></br>
 </br>
-curl -i http://0.0.0.0:5000/projects/057ce063ee014dee885b13840774463c</br>
-</br>
-curl -i http://0.0.0.0:5000/projects/</br>
-curl -i -X GET -H "Content-Type: application/json" -d '{"low_minimum":10000}' http://0.0.0.0:5000/projects/</br>
-curl -i -X GET -H "Content-Type: application/json" -d '{"high_minimum":20000}' http://0.0.0.0:5000/projects/</br>
-curl -i -X GET -H "Content-Type: application/json" -d '{"low_minimum":10000,"high_minimum":20000}' http://0.0.0.0:5000/projects/</br>
+curl -i http://0.0.0.0:5000/reports/money</br>
+<br>
+curl -i -X GET -H "Content-Type: application/json" -d '{"from_date_invested":"2014-01-01"}' http://0.0.0.0:5000/reports/money<br>
 """
 
 #api.add_resource(ProjectListAPI, '/projects/', endpoint='projects1')
