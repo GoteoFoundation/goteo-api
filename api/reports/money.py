@@ -7,6 +7,7 @@ from model import Project, Invest, Call
 
 from flask.ext.sqlalchemy import sqlalchemy
 
+from datetime import date
 
 invest_fields = {
     'id': fields.Integer,
@@ -20,29 +21,56 @@ invest_fields = {
 class MoneyAPI(Resource):
 
     def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('from_date_invested', type=str, location='json')
+        self.reqparse.add_argument('to_date_invested', type=str, location='json')
+        self.reqparse.add_argument('from_date_charged', type=str, location='json')
+        self.reqparse.add_argument('to_date_charged', type=str, location='json')
+        self.reqparse.add_argument('limit', type=int, default=10, location='json')
+        self.reqparse.add_argument('project', type=str, action='append')
         super(MoneyAPI, self).__init__()
 
     def get(self):
         func = sqlalchemy.func
-        limit = 10
+        args = self.reqparse.parse_args()
+
+        filters = []
+        if args['from_date_invested']:
+            filters.append(Invest.date_invested >= args['from_date_invested'])
+        if args['to_date_invested']:
+            filters.append(Invest.date_invested <= args['to_date_invested'])
+        if args['from_date_charged']:
+            filters.append(Invest.date_charged >= args['from_date_charged'])
+        if args['to_date_charged']:
+            filters.append(Invest.date_charged <= args['to_date_charged'])
+
+        limit = args['limit']
+        #filters = and_(*filters)
 
         # -  [Renombrar dinero comprometido] Suma recaudada por la plataforma
-        comprometido = db.session.query(Invest.project, func.sum(Invest.amount)).group_by(Invest.project).limit(limit).all()
+        comprometido = db.session.query(Invest.project, func.sum(Invest.amount)).filter(*filters).group_by(Invest.project).limit(limit).all()
 
         # TODO: ??
-        recaudado = db.session.query(func.sum(Invest.amount)).scalar()
+        recaudado = db.session.query(func.sum(Invest.amount)).filter(*filters).scalar()
 
         # - Dinero devuelto (en proyectos archivados)
-        devuelto = db.session.query(func.sum(Invest.amount)).filter(Project.id==Invest.project, Project.status==4).scalar()
+        devuelto_filter = filters
+        devuelto_filter.append(Project.id==Invest.project)
+        devuelto_filter.append(Project.status==4)
+        devuelto = db.session.query(func.sum(Invest.amount)).filter(*devuelto_filter).scalar()
 
         # Á- [(SUPRIMIR EN INFORME] Perc. del comprometido que se ha devuelto
         # TODO: no se hace?
 
         #- Recaudado mediante PayPal
-        paypal = db.session.query(func.sum(Invest.amount)).filter(Invest.method==Invest.METHOD_PAYPAL).scalar()
+        paypal_filter = filters
+        paypal_filter.append(Invest.method==Invest.METHOD_PAYPAL)
+        paypal = db.session.query(func.sum(Invest.amount)).filter(*paypal_filter).scalar()
 
         #- Recaudado mediante TPV
-        tpv = db.session.query(func.sum(Invest.amount)).filter(Invest.method==Invest.METHOD_TPV).scalar()
+        tpv_filter = filters
+        tpv_filter.append(Invest.method==Invest.METHOD_TPV)
+        tpv = db.session.query(func.sum(Invest.amount)).filter(*tpv_filter).scalar()
 
         #cash = db.session.query(func.sum(Invest.amount)).filter(Invest.method==Invest.METHOD_CASH).scalar()
 
@@ -51,7 +79,7 @@ class MoneyAPI(Resource):
 
         # - [Renombrar] Capital Riego de Goteo (fondos captados de instituciones y empresas destinados a la bolsa de Capital Riego https://goteo.org/service/resources)
         # TODO: Comprobar que es correcto. Quitar las convocatorias de prueba que hay en la BD!!
-        call_amount = db.session.query(func.sum(Call.amount)).scalar()
+        call_amount = db.session.query(func.sum(Call.amount)).filter(*filters).scalar()
 
         # - [NEW] Suma recaudada en Convocatorias (Capital riego distribuido + crowd)
         # TODO

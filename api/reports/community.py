@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask.ext.restful import Resource
 
+from model import app, db
 from model import Invest, User, Category
 
 from flask.ext.sqlalchemy import sqlalchemy
@@ -64,7 +65,7 @@ class CommunityAPI(Resource):
         # - Porcentaje de usuarios en esta 1ª
         # - 2ª Categoría con más usuarios interesados
         # - Porcentaje de usuarios en esta 2ª
-        
+
         # - Top 10 Cofinanciadores (REVISAR como sacamos estos datos, excepto admines)
         # - Top 10 Cofinanciadores con más caudal (más generosos) excluir usuarios convocadores Y ADMINES
         # - Top 10 colaboradores
