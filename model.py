@@ -3,7 +3,7 @@
 from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
 #from flask.ext.sqlalchemy import Pagination
-from sqlalchemy import Integer, String, Text
+from sqlalchemy import Integer, String, Text, Date
 import config
 
 # DB class
@@ -44,6 +44,8 @@ class Invest(db.Model):
     status = db.Column('status', Integer)
     amount = db.Column('amount', Integer)
     method = db.Column('method', String(20))
+    date_invested = db.Column('invested', Date)
+    date_charged = db.Column('charged', Date)
 
     def __repr__(self):
         return '<Invest %d: %s (%d EUR)>' % (self.id, self.project, self.amount)
