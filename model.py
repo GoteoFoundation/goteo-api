@@ -4,7 +4,7 @@ from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
 #from flask.ext.sqlalchemy import Pagination
 from sqlalchemy import Integer, String, Text
-import config
+from config import config
 
 # DB class
 #app = Flask(__name__)
