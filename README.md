@@ -3,7 +3,10 @@
 ### Instalación
 En Ubuntu:
 
-    sudo apt-get install libevent1-dev virtualenvwrapper libmysqlclient-dev libpython-dev
+    sudo apt-get install python-setuptools python-dev build-essential
+    sudo apt-get install libevent1-dev libmysqlclient-dev libpython-dev
+    sudo apt-get install python-virtualenv virtualenvwrapper
+    sudo easy_install pip
     mkdir ~/.virtualenvs
     echo 'export WORKON_HOME=~/.virtualenvs' >> ~/.bashrc
     source ~/.bashrc
@@ -13,7 +16,7 @@ En Ubuntu:
 ### Configuración
 
 Una vez instaladas las dependencias, hay que configurar los datos de conexión a la BD:
-    cp config.py.example config.py
+    cp config/config.py.example config/config.py
 
 Editar el archivo config.py con los datos correctos.
 
