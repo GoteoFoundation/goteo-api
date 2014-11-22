@@ -93,7 +93,7 @@ class MoneyAPI(Resource):
         #return {'total': int(total_recaudado[0])}
         return jsonify({'total': int(recaudado), 'devuelto': int(devuelto), 'limit-per-page': limit,
                         'paypal': paypal, 'tpv': tpv, # 'cash': cash,
-                        'call_amount': float(call_amount),
+                        # 'call_amount': float(call_amount),
                         #TODO: Hay un error del tipo 'Python to JSON Serialization fails on Decimal'
                         #'projects': map(lambda i: [i[0], {'recaudado': i[1]}], comprometido)
                         })
