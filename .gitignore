@@ -1,6 +1,6 @@
 /ve
 *.pyc
 *~
-
+virtualenv
 config/config.py
 
