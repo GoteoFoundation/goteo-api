@@ -1,31 +1,52 @@
 ## API de Goteo basada en flask/sqlalchemy/flask-restful
 
 ### Instalación
-En Ubuntu:
+En Ubuntu 14.04, primero assegurase que se tienen todas las librerias:
 
-    sudo apt-get install python-setuptools python-dev build-essential
-    sudo apt-get install libevent1-dev libmysqlclient-dev libpython-dev
-    sudo apt-get install python-virtualenv virtualenvwrapper
-    sudo easy_install pip
+```bash
+sudo apt-get install python-setuptools python-dev build-essential
+sudo apt-get install libevent1-dev libmysqlclient-dev libpython-dev
+sudo apt-get install python-virtualenv virtualenvwrapper
+sudo easy_install pip
+```
+
+Para instalar el entorno local hay 2 opciones:
+
+1. La primera es tener los entornos centralizados en un solo sitio, para ello se usa el script mkvirtualenv:
+    ```bash
     mkdir ~/.virtualenvs
     echo 'export WORKON_HOME=~/.virtualenvs' >> ~/.bashrc
     source ~/.bashrc
     mkvirtualenv goteoapi
     pip install -r requirements.txt
+    ```
 
+2. La segunda està pensada para no entrometerse con ningun script personalizado (como el .bashrc). Simplemente crea el entorno "virtual" en una subcarpeta `virtualenv` (el mismo método que usa el servidor web), para ello se puede usar el script `deployer.sh` que actualiza las dependencias automaticamente:
+    ```bash
+    ./deployer.sh
+    ```
 ### Configuración
 
 Una vez instaladas las dependencias, hay que configurar los datos de conexión a la BD:
-    cp config/config.py.example config/config.py
+```bash
+cp config/config.py.example config/config.py
+```
 
-Editar el archivo config.py con los datos correctos.
+Editar el archivo `config.py` con los datos correctos.
 
 ### Ejecución
 
-Solo nos queda activar el virtualenvironment y ejecutar la API:
-
+1. Si se ha usado el método 1, entonces solo nos queda activar el virtualenvironment y ejecutar la API:
+    ```bash
     workon goteoapi
-    ./flask-restful.py
+    ./goteoapi-restful.py
+    ```
+
+2. En el caso del método 2 hay que ejectutar:
+    ```bash
+    source virtualenv/bin/activate
+    ./goteoapi-restful.py
+    ```
 
 Esto por defecto pone a la escucha un servidor web en http://0.0.0.0:5000/
 

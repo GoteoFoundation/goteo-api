@@ -33,6 +33,7 @@ api.add_resource(CommunityAPI, '/reports/community', endpoint='community')
 api.add_resource(RewardsAPI, '/reports/rewards', endpoint='rewards')
 
 
+#This part will not be executed under uWSGI module (nginx)
 if __name__ == '__main__':
     app.debug = True
     app.run(host='0.0.0.0')

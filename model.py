@@ -11,7 +11,13 @@ from config import config
 app = Flask(__name__, static_url_path="")
 app.config['SQLALCHEMY_DATABASE_URI'] = config.DB_URI
 app.config['SQLALCHEMY_ECHO'] = True
-app.config['DEBUG'] = True
+
+#
+# Read debug status from config
+if hasattr(config, 'debug'):
+    app.debug = bool(config.debug)
+    app.config['DEBUG'] = bool(config.debug)
+
 #app.config['SQLALCHEMY_POOL_TIMEOUT'] = 5
 #app.config['SQLALCHEMY_POOL_SIZE'] = 30
 db = SQLAlchemy(app)
