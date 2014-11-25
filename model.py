@@ -3,7 +3,7 @@
 from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
 #from flask.ext.sqlalchemy import Pagination
-from sqlalchemy import Integer, String, Text
+from sqlalchemy import Integer, String, Text, Date, Boolean
 from config import config
 
 # DB class
@@ -50,6 +50,8 @@ class Invest(db.Model):
     status = db.Column('status', Integer)
     amount = db.Column('amount', Integer)
     method = db.Column('method', String(20))
+    date_invested = db.Column('invested', Date)
+    date_charged = db.Column('charged', Date)
 
     def __repr__(self):
         return '<Invest %d: %s (%d EUR)>' % (self.id, self.project, self.amount)
@@ -66,8 +68,10 @@ class Project(db.Model):
     #subtitle = db.Column('subtitle', String(255))
     status = db.Column('status', Integer)
     #created = db.Column('created', Date)
-    #updated = db.Column('updated', Date)
-    #published = db.Column('published', Date)
+    date_passed = db.Column('passed', Date)
+    date_updated = db.Column('updated', Date)
+    date_published = db.Column('published', Date)
+    date_closed = db.Column('closed', Date)
     # total_funding
     # active_date
     # rewards
@@ -97,3 +101,50 @@ class Category(db.Model):
 
     def __repr__(self):
         return '<Category %s>' % (self.name)
+
+
+class Blog(db.Model):
+    __tablename__ = 'blog'
+
+    id = db.Column('id', Integer, primary_key=True)
+    type = db.Column('type', String(10))
+    owner = db.Column('owner', String(50))
+    active = db.Column('active', Integer)
+
+    def __repr__(self):
+        return '<Blog(%d) %s %s>' % (self.id, self.type, self.owner)
+
+
+class Post(db.Model):
+    __tablename__ = 'post'
+
+    id = db.Column('id', Integer, primary_key=True)
+    blog = db.Column('blog', Integer), db.ForeignKey('blog.id')
+    title = db.Column('title', Text)
+    date_publish = db.Column('publish', Boolean)
+
+    def __repr__(self):
+        return '<Post(%d) %s: %s>' % (self.id, self.blog, self.title[:50])
+
+
+class Reward(db.Model):
+    __tablename__ = 'reward'
+
+    id = db.Column('id', Integer, primary_key=True)
+    project = db.Column('project', String(50))
+    reward = db.Column('reward', Text)
+    type = db.Column('type', String(50))
+
+    def __repr__(self):
+        return '<Reward(%d) %s: %s>' % (self.id, self.project[:10], self.title[:50])
+
+
+# TODO: backrefs
+class InvestReward(db.Model):
+    __tablename__ = 'invest_reward'
+
+    invest = db.Column('invest', Integer, db.ForeignKey('invest.id'), primary_key=True)
+    reward = db.Column('reward', Integer, db.ForeignKey('reward.id'), primary_key=True)
+
+    def __repr__(self):
+        return '<Invest(%d) - Reward(%d)>' % (self.invest, self.reward)

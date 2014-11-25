@@ -1,16 +1,38 @@
 # -*- coding: utf-8 -*-
-from flask.ext.restful import Resource
-
+from model import app, db
 from model import Invest, User, Category
 
+from flask import abort, jsonify
+from flask.ext.restful import Resource, reqparse, fields, marshal
 from flask.ext.sqlalchemy import sqlalchemy
+from flask_restful_swagger import swagger
 
 
+class ModelClass():
+    pass
+
+
+@swagger.model
 class CommunityAPI(Resource):
 
     def __init__(self):
         super(CommunityAPI, self).__init__()
 
+    @swagger.operation(
+    notes='Community report',
+    responseClass=ModelClass.__name__,
+    nickname='upload',
+    responseMessages=[
+        {
+          "code": 200,
+          "message": "OK"
+        },
+        {
+          "code": 404,
+          "message": "Not found"
+        }
+      ]
+    )
     def get(self):
 
         func = sqlalchemy.func
@@ -42,7 +64,7 @@ class CommunityAPI(Resource):
         paypal = Invest.query.filter(Invest.method==Invest.METHOD_PAYPAL).count()
 
         # - Multi-Cofinanciadores usando PayPal
-        paypal_multicofi = _multicofi.filter(Invest.method==Invest.METHOD_PAYPAL)
+        paypal_multicofi = _multicofi.filter(Invest.method==Invest.METHOD_PAYPAL).count()
 
         # - Número de colaboradores
         # TODO
@@ -64,8 +86,13 @@ class CommunityAPI(Resource):
         # - Porcentaje de usuarios en esta 1ª
         # - 2ª Categoría con más usuarios interesados
         # - Porcentaje de usuarios en esta 2ª
-        
+
         # - Top 10 Cofinanciadores (REVISAR como sacamos estos datos, excepto admines)
         # - Top 10 Cofinanciadores con más caudal (más generosos) excluir usuarios convocadores Y ADMINES
         # - Top 10 colaboradores
-        pass
+
+        app.logger.debug('end check')
+
+        return jsonify({'users-cofi-perc': users_cofi_perc, 'multicofi': multicofi,
+                        'users-multicofi-perc': users_multicofi_perc, 'paypal': paypal,
+                        'paypal-multicofi': paypal_multicofi})

@@ -8,21 +8,44 @@ from api.reports.community import CommunityAPI
 from api.reports.projects import ProjectsAPI
 #from api.misc import ProjectListAPI, ProjectAPI
 
+from flask_restful_swagger import swagger
 from flask.ext.restful import Api
-api = Api(app)
-
+api = swagger.docs(Api(app), apiVersion='1.0')
+#api = Api(app)
 
 @app.route('/')
-def hello_world():
+def index():
     return """
-API de Goteo.org. <a href="/projects/">/projects/</a></br>
+API de Goteo.org.<br><br>
+<a href="/reports/">/reports/</a></br>
+<br>
+Swagger UI: <a href="http://0.0.0.0:5000/api/spec.html">http://0.0.0.0:5000/api/spec.html</a> (<a href="http://0.0.0.0:5000/api/spec.json">json</a>)
+"""
+
+@app.route('/reports/')
+def reports():
+    return """
+API de Goteo.org.<br><br>
+<a href="/reports/money">/reports/money</a></br>
+<a href="/reports/projects">/reports/projects</a></br>
+<a href="/reports/community">/reports/community</a></br>
+<a href="/reports/rewards">/reports/rewards</a></br>
 </br>
-curl -i http://0.0.0.0:5000/projects/057ce063ee014dee885b13840774463c</br>
-</br>
-curl -i http://0.0.0.0:5000/projects/</br>
-curl -i -X GET -H "Content-Type: application/json" -d '{"low_minimum":10000}' http://0.0.0.0:5000/projects/</br>
-curl -i -X GET -H "Content-Type: application/json" -d '{"high_minimum":20000}' http://0.0.0.0:5000/projects/</br>
-curl -i -X GET -H "Content-Type: application/json" -d '{"low_minimum":10000,"high_minimum":20000}' http://0.0.0.0:5000/projects/</br>
+curl -i http://0.0.0.0:5000/reports/money</br>
+<br>
+curl -i -X GET -H "Content-Type: application/json" -d '{"from_date_invested":"2014-01-01"}' http://0.0.0.0:5000/reports/money<br>
+curl -i -X GET -d project=hacks-cotidianos-en-pequeno-formato http://0.0.0.0:5000/reports/money<br>
+curl -i -X GET -d project=asd -d project=hacks-cotidianos-en-pequeno-formato http://0.0.0.0:5000/reports/money<br>
+curl -i -X GET -H "Content-Type: application/jon" -d '{"project":["socialgraph"]}' http://0.0.0.0:5000/reports/money<br>
+curl -i -X GET -H "Content-Type: application/jon" -d '{"project":["socialgraph","hacks-cotidianos-en-pequeno-formato"]}' http://0.0.0.0:5000/reports/money<br>
+
+<br><br>
+<a href="http://0.0.0.0:5000/reports/money?limit=2">curl -i -X GET -d limit=2 http://0.0.0.0:5000/reports/money</a><br>
+<a href="http://0.0.0.0:5000/reports/money?from_date=2014-01-01">curl -i -X GET -d from_date="2014-01-01" http://0.0.0.0:5000/reports/money</a><br>
+<a href="http://0.0.0.0:5000/reports/money?project=057ce063ee014dee885b13840774463c">curl -i -X GET -d project="057ce063ee014dee885b13840774463c" http://0.0.0.0:5000/reports/money</a><br>
+<a href="http://0.0.0.0:5000/reports/money?project=2a-edicio-in-situ&project=10-anys-de-l-antic-teatre">curl -i -X GET -d project=2a-edicio-in-situ -d project=10-anys-de-l-antic-teatre" http://0.0.0.0:5000/reports/money</a><br>
+<br>
+Swagger UI: <a href="http://0.0.0.0:5000/api/spec.html">http://0.0.0.0:5000/api/spec.html</a> (<a href="http://0.0.0.0:5000/api/spec.json">json</a>)
 """
 
 #api.add_resource(ProjectListAPI, '/projects/', endpoint='projects1')
