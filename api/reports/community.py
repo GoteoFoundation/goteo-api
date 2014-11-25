@@ -24,12 +24,12 @@ class CommunityAPI(Resource):
     nickname='upload',
     responseMessages=[
         {
-          "code": 201,
-          "message": "Created. The URL of the created blueprint should be in the Location header"
+          "code": 200,
+          "message": "OK"
         },
         {
-          "code": 405,
-          "message": "Invalid input"
+          "code": 404,
+          "message": "Not found"
         }
       ]
     )
