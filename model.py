@@ -30,6 +30,7 @@ class User(db.Model):
 
     id = db.Column('id', String(50), primary_key=True)
     name = db.Column('name', String(100))
+    active = db.Column('active', Integer)
     # email = db.Column('email', String(255))
 
     def __repr__(self):
@@ -45,13 +46,14 @@ class Invest(db.Model):
     METHOD_DROP = 'drop'
 
     id = db.Column('id', Integer, primary_key=True)
-    user = db.Column('user', String(50))
+    user = db.Column('user', String(50), db.ForeignKey('user.id'))
     project = db.Column('project', String(50), db.ForeignKey('project.id'))
     status = db.Column('status', Integer)
     amount = db.Column('amount', Integer)
     method = db.Column('method', String(20))
     date_invested = db.Column('invested', Date)
     date_charged = db.Column('charged', Date)
+    resign = db.Column('resign', Integer)
 
     def __repr__(self):
         return '<Invest %d: %s (%d EUR)>' % (self.id, self.project, self.amount)
@@ -61,6 +63,7 @@ class Project(db.Model):
     __tablename__ = 'project'
 
     id = db.Column('id', String(50), primary_key=True)
+    owner = db.Column('owner', String(50), db.ForeignKey('user.id'))
     name = db.Column('name', Text)
     category = db.Column('category', String(50))
     minimum = db.Column('mincost', Integer)
@@ -122,6 +125,7 @@ class Post(db.Model):
     blog = db.Column('blog', Integer), db.ForeignKey('blog.id')
     title = db.Column('title', Text)
     date_publish = db.Column('publish', Boolean)
+    author = db.Column('author', String(50), db.ForeignKey('user.id'))
 
     def __repr__(self):
         return '<Post(%d) %s: %s>' % (self.id, self.blog, self.title[:50])
@@ -131,9 +135,10 @@ class Reward(db.Model):
     __tablename__ = 'reward'
 
     id = db.Column('id', Integer, primary_key=True)
-    project = db.Column('project', String(50))
+    project = db.Column('project', String(50), db.ForeignKey('project.id'))
     reward = db.Column('reward', Text)
     type = db.Column('type', String(50))
+    amount = db.Column('amount', Integer)
 
     def __repr__(self):
         return '<Reward(%d) %s: %s>' % (self.id, self.project[:10], self.title[:50])
@@ -148,3 +153,27 @@ class InvestReward(db.Model):
 
     def __repr__(self):
         return '<Invest(%d) - Reward(%d)>' % (self.invest, self.reward)
+
+
+class Message(db.Model):
+    __tablename__ = 'message'
+
+    id = db.Column('id', Integer, primary_key=True)
+    project = db.Column('project', String(50), db.ForeignKey('project.id'))
+    user = db.Column('user', String(50), db.ForeignKey('user.id'))
+    thread = db.Column('thread', Integer)
+    blocked = db.Column('blocked', Integer)
+    # message = db.Column('message', Text)
+
+    def __repr__(self):
+        return '<Message(%d) from %s to project %s)>' % (self.id, self.user, self.project)
+
+
+class UserInterest(db.Model):
+    __tablename__ = 'user_interest'
+
+    user = db.Column('user', String(50), db.ForeignKey('user.id'), primary_key=True)
+    interest = db.Column('interest', Integer, db.ForeignKey('category.id'), primary_key=True)
+
+    def __repr__(self):
+        return '<UserInterest(%d) from %s to project %s)>' % (self.id, self.user, self.project)
