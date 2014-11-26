@@ -83,8 +83,8 @@ class ProjectsAPI(Resource):
         # % exito exitosos
         f_pub_projects2 = list(filters)
         f_pub_projects2.append(Project.status > 0)
-        and1 = and_(Project.date_passed is not None, Project.date_passed != '0000-00-00')
-        and2 = and_(Project.date_closed is not None, Project.date_closed != '0000-00-00')
+        and1 = and_(Project.date_passed != None, Project.date_passed != '0000-00-00')
+        and2 = and_(Project.date_closed != None, Project.date_closed != '0000-00-00')
         f_pub_projects2.append(or_(and1, and2))
         pub_projects2 = db.session.query(func.count(Project.id)).filter(*f_pub_projects2).scalar()
         p_succ_projects = float(succ_projects) / pub_projects2 * 100

@@ -127,7 +127,7 @@ class MoneyAPI(Resource):
         #call_amount = db.session.query(func.sum(Call.amount)).filter(*filters).scalar()
 
         # - [NEW] Suma recaudada en Convocatorias (Capital riego distribuido + crowd)
-        # TODO
+        # FIXME: Invest.method==DROP + invest.call==1 ?
         call_filter = list(filters)
         call_filter.append(Invest.method==Invest.METHOD_DROP)
         call_amount = db.session.query(func.sum(Invest.amount)).filter(*call_filter).scalar()
