@@ -184,6 +184,14 @@ class CommunityAPI(Resource):
         # - Top 10 colaboradores
         # TODO
 
+        def format_categorias(t):
+            total = t[0]
+            name = t[1]
+            perc = float(total) / users * 100
+            perc = round(perc, 2)
+            return {name: {'interesados': total, 'porcentaje': perc}}
+
+
         app.logger.debug('end check')
 
         return jsonify({'users': users,
@@ -194,8 +202,7 @@ class CommunityAPI(Resource):
                         'impulcolaboradores': impulcolaboradores,
                         'coficolaboradores': coficolaboradores,
                         'media-cofi': media_cofi, 'media-colab': media_colab,
-                        #'categorias': categorias})
-                        'categorias': map(lambda i: {i[1]: {'interesados': i[0], 'porcentaje': float(i[0]) / users * 100}}, categorias),
+                        'categorias': map(lambda i: format_categorias(i), categorias),
                         'categoria1': categorias[0][1], 'categoria2': categorias[1][1],
                         'perc-categoria1': perc_categoria1, 'perc-categoria2': perc_categoria2})
                         #'categories': ['a','b']})
