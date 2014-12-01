@@ -130,11 +130,15 @@ class MoneyAPI(Resource):
         #
         success_projects = Project.query.filter(Project.status.in_([4,5])).subquery()
 
+        # TODO: ??
+        recaudado = db.session.query(func.sum(Invest.amount)).filter(*filters).scalar()
+
         # -  [Renombrar dinero comprometido] Suma recaudada por la plataforma
         comprometido = db.session.query(Invest.project, func.sum(Invest.amount)).filter(*filters).group_by(Invest.project).limit(limit).all()
 
-        # TODO: ??
-        recaudado = db.session.query(func.sum(Invest.amount)).filter(*filters).scalar()
+        # TODO: Qué mostrar cuando no hay resultados?
+        if recaudado is None:
+            return jsonify({})
 
         # - Dinero devuelto (en proyectos archivados)
         devuelto_filter = list(filters)
@@ -167,37 +171,53 @@ class MoneyAPI(Resource):
         call_filter.append(Invest.method==Invest.METHOD_DROP)
         call_amount = db.session.query(func.sum(Invest.amount)).filter(*call_filter).scalar()
 
-
         # - Total 8% recaudado por Goteo
-        # TODO: Comprobar
-        #fee = recaudado * 0.08
-        #recaudado = db.session.query(func.sum(Invest.amount)).filter(*filters).scalar()
-        # select from success_projects
-        fee_amount = db.session.query
+        f_fee_amount = list(filters)
+        f_fee_amount.append(Project.status.in_([4, 5]))
+        f_fee_amount.append(Invest.status.in_([1, 3]))
+        fee_amount = db.session.query(func.sum(Invest.amount)).join(Project).filter(*f_fee_amount).scalar()
+        fee_amount = float(fee_amount) * 0.08
 
         # - Aporte medio por cofinanciador(micromecenas)
-        # TODO
-        # SELECT avg(amount) as a FROM `invest` group by user
-        #average-invest = db.session.query(func.avg(Invest.amount)).filter(*call_filter).group_by(Invest.user).scalar()
-        # Average per user
-        sub1 = db.session.query(func.avg(Invest.amount).label('amount')).filter(*filters).\
-                                        group_by(Invest.user).subquery()
+        # OJO: En reporting.php no calcula esto mismo
+        # FIXME: No deberían contar también los proyectos archivados?
+        f_avg_invest = list(filters)
+        f_avg_invest.append(Project.status.in_([4, 5]))
+        f_avg_invest.append(Invest.status.in_([1, 3]))
+        sub1 = db.session.query(func.avg(Invest.amount).label('amount')).join(Project)\
+                                        .filter(*f_avg_invest).group_by(Invest.user).subquery()
         average_invest = db.session.query(func.avg(sub1.c.amount)).scalar()
+        average_invest = round(average_invest, 2)
 
         # - Aporte medio por cofinanciador(micromecenas) mediante PayPal
-        # TODO
-        avg_paypal = filters
-        avg_paypal.append(Invest.method==Invest.METHOD_PAYPAL)
-        average_invest_paypal = db.session.query(func.avg(Invest.amount)).filter(*avg_paypal).group_by(Invest.user).scalar()
+        # OJO: En reporting.php no calcula esto mismo
+        # FIXME: No deberían contar también los proyectos archivados?
+        f_avg_paypal = list(f_avg_invest)
+        f_avg_paypal.append(Invest.method==Invest.METHOD_PAYPAL)
+        sub1 = db.session.query(func.avg(Invest.amount).label('amount')).join(Project)\
+                                        .filter(*f_avg_paypal).group_by(Invest.user).subquery()
+        average_invest_paypal = db.session.query(func.avg(sub1.c.amount)).scalar()
+        average_invest_paypal = 0 if average_invest_paypal is None else round(average_invest_paypal, 2)
 
         # - (Renombrar Coste mínimo medio por proyecto exitoso ] Presupuesto mínimo medio por proyecto exitoso
-        # TODO
+        # OJO: En reporting.php no calcula esto mismo
+        # FIXME: No debería excluir el 6?
+        f_avg_cost = list(filters)
+        f_avg_cost.append(Cost.required == 1)
+        f_avg_cost.append(Project.status.in_([3, 4, 5, 6]))
+        sub2 = db.session.query(func.avg(Cost.amount).label("amount")).join(Project, Project.id == Cost.project)\
+                                    .filter(*f_avg_cost).group_by(Cost.project).subquery()
+        average_cost = db.session.query(func.avg(sub2.c.amount)).scalar()
+        average_cost = round(average_cost, 2)
 
         # - Recaudación media por proyecto exitoso ( financiado )
-        # TODO
+        f_avg_minimum = list(filters)
+        f_avg_minimum.append(Invest.status.in_([1, 3]))
+        f_avg_minimum.append(Project.status.in_([4, 5]))
+        average_minimum = db.session.query(func.sum(Invest.amount) / func.count(func.distinct(Project.id)))\
+                                    .join(Project).filter(*f_avg_minimum).scalar()
+        average_minimum = round(average_minimum, 2)
 
-        # - Perc. medio de recaudación sobre el mínimo (número del dato anterior)
-        # TODO
 
         # (Nuevo) Dinero medio solo obtenido en 2a ronda
         # TODO
@@ -210,10 +230,6 @@ class MoneyAPI(Resource):
 
         app.logger.debug('end sql')
 
-        if comprometido is None or recaudado is None or devuelto is None:
-            abort(404)
-
-        app.logger.debug('end check')
         # TypeError: Decimal('1420645') is not JSON serializable
         # No se pueden donar centimos no? Hacer enteros?
         #return {'total': int(total_recaudado[0])}
