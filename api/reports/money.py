@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from model import app, db
-from model import Project, Invest, Call
+from model import Project, Invest, Call, Cost
 
 from flask import abort, jsonify
 from flask.ext.restful import Resource, reqparse, fields, marshal
@@ -18,16 +18,25 @@ invest_fields = {
 }
 
 @swagger.model
-class MoneyRequest:
+class MoneyResponse:
 
-    __name__ = "RecoverRequest"
+    __name__ = "MoneyResponse"
 
     resource_fields = {
-        'project': fields.String,
-        'from_date': fields.String,
+        'total': fields.Integer,
+        'devuelto': fields.Integer,
+        'results-per-page': fields.Integer,
+        'paypal-amount': fields.Integer,
+        'tpv-amount': fields.Integer,
+        'cash-amount': fields.Integer,
+        'call-amount': fields.Integer,
+        'average-invest': fields.Integer,
+        'projects': fields.List,
+        'fee-amount': fields.Integer,
         'to_date': fields.String,
         'limit': fields.Integer,
     }
+
 
 #@swagger.model
 class MoneyAPI(Resource):
@@ -37,20 +46,9 @@ class MoneyAPI(Resource):
         self.reqparse.add_argument('from_date', type=str)
         self.reqparse.add_argument('to_date', type=str)
         self.reqparse.add_argument('limit', type=int, default=10)
+        self.reqparse.add_argument('offset', type=int, default=0)
         self.reqparse.add_argument('project', type=str, action='append')
         super(MoneyAPI, self).__init__()
-
-    body = {
-        "allowMultiple": False,
-        #"dataType": "string",
-        "dataType": MoneyRequest.__name__,
-        "name": "project",
-        "description": "JSON object containing project(s) name",
-        #"paramType": "path",
-        "paramType": "body",
-        #"type": "MoneyReport",
-        "required": False
-    }
 
     successful = {
         "code": 200,
@@ -64,9 +62,46 @@ class MoneyAPI(Resource):
 
     @swagger.operation(
     notes='Money report',
-    responseClass='ModelClass',
-    nickname='get',
-    parameters=[body],
+    responseClass='MoneyResponse',
+    #nickname='get',
+    parameters=[
+        {
+            "paramType": "query",
+            "name": "project",
+            "description": "Filter by individual project(s)",
+            "required": False,
+            "dataType": "string",
+            "allowMultiple": True
+        },
+        {
+            "paramType": "query",
+            "name": "from_date",
+            "description": 'Filter from date. Ex. "2013-01-01"',
+            "required": False,
+            "dataType": "string"
+        },
+        {
+            "paramType": "query",
+            "name": "to_date",
+            "description": 'Filter until date.. Ex. "2014-01-01"',
+            "required": False,
+            "dataType": "string"
+        },
+        {
+            "paramType": "query",
+            "name": "limit",
+            "description": "Number of projects per page. Default = 10",
+            "required": False,
+            "dataType": "integer"
+        },
+        {
+            "paramType": "query",
+            "name": "offset",
+            "description": "Number of projects per page. Default = 0",
+            "required": False,
+            "dataType": "integer"
+        }
+    ],
     responseMessages=[successful, invalid_input])
     def get(self):
         func = sqlalchemy.func
