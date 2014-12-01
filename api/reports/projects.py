@@ -88,6 +88,7 @@ class ProjectsAPI(Resource):
         f_pub_projects2.append(or_(and1, and2))
         pub_projects2 = db.session.query(func.count(Project.id)).filter(*f_pub_projects2).scalar()
         p_succ_projects = float(succ_projects) / pub_projects2 * 100
+        p_succ_projects = round(p_succ_projects, 2)
 
         # -(nuevo) proyectos exitosos con campaña finalizada
         # TODO

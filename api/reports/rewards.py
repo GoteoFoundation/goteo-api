@@ -60,6 +60,11 @@ class RewardsAPI(Resource):
 
         app.logger.debug('start sql')
 
+        cofinanciadores = db.session.query(func.distinct(Invest.user)).filter(*filters).count()
+        def perc_invest(number):
+            perc = float(number) / cofinanciadores * 100  # %
+            return round(perc, 2)
+
         # - NÚMERO de cofinanciadores que renuncian a recompensa
         # FIXME: Invest.id not in InvestReWardTable.invest
         f_renuncias = list(filters)
@@ -69,8 +74,8 @@ class RewardsAPI(Resource):
 
         # (seleccionados por cofinanciador)
         # - Porcentaje de cofinanciadores que renuncian a recompensa
-        cofinanciadores = db.session.query(func.distinct(Invest.user)).filter(*filters).count()
-        perc_renuncias = float(renuncias) / cofinanciadores * 100
+
+        perc_renuncias = perc_invest(renuncias)
 
         f_recomp_dinero = list(filters)
         f_recomp_dinero.append(Reward.id != None)

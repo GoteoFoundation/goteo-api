@@ -64,19 +64,25 @@ class CommunityAPI(Resource):
         # - Número total de usuarios
         users = db.session.query(User).filter(*filters).count()
 
+        def perc_users(number):
+            perc = float(number) / users * 100
+            return round(perc, 2)
+
         # - Porcentaje (antes numero) de usuarios que se han dado de baja
         # FIXME: # Active=0, hide=1 + todos los datos borrados (2)
         f_bajas = list(filters)
         f_bajas.append(User.active == 0)
         bajas = db.session.query(User).filter(*f_bajas).count()
-        p_bajas = float(bajas) / users * 100
+        p_bajas = perc_users(bajas)
 
         # - Número de cofinanciadores
         _cofinanciadores = db.session.query(func.distinct(Invest.user)).filter(*filters) # .subquery()
         cofinanciadores = _cofinanciadores.count()
 
         # - NEW Porcentaje de usuarios cofinanciadores
-        users_cofi_perc = float(cofinanciadores) / users * 100  # %
+        users_cofi_perc = perc_users(cofinanciadores)
+        #users_cofi_perc = float(cofinanciadores) / users * 100  # %
+        #users_cofi_perc = _round(users_cofi_perc)
 
         app.logger.debug('multicofi')
         # - Multi-Cofinanciadores (a más de 1 proyecto)
@@ -87,7 +93,7 @@ class CommunityAPI(Resource):
         multicofi = _multicofi.count()
 
         # - NEW Porcentaje de Multi-Cofinanciadores (a más de 1 proyecto)
-        users_multicofi_perc = float(multicofi) / users * 100 # %
+        users_multicofi_perc = perc_users(multicofi)
 
         # - Cofinanciadores usando PayPal
         f_paypal = list(filters)
@@ -161,13 +167,13 @@ class CommunityAPI(Resource):
         categoria1 = categorias[0][1]
 
         # - Porcentaje de usuarios en esta 1ª
-        perc_categoria1 = float(categorias[0][0]) / users * 100
+        perc_categoria1 = perc_users(categorias[0][0])
 
         # - 2ª Categoría con más usuarios interesados
         categorias2 = categorias[1][1]
 
         # - Porcentaje de usuarios en esta 2ª
-        perc_categoria2 = float(categorias[1][0]) / users * 100
+        perc_categoria2 = perc_users(categorias[1][0])
 
         # - Top 10 Cofinanciadores (REVISAR como sacamos estos datos, excepto admines)
         # TODO
