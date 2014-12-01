@@ -218,30 +218,49 @@ class MoneyAPI(Resource):
                                     .join(Project).filter(*f_avg_minimum).scalar()
         average_minimum = round(average_minimum, 2)
 
+        # - Perc. medio de recaudación sobre el mínimo (número del dato anterior)
+        f_comprometido_success = list(filters)
+        f_comprometido_success.append(Invest.status.in_([1, 3]))
+        f_comprometido_success.append(Project.status.in_([4, 5]))
+        sub = db.session.query((func.sum(Invest.amount) / Project.minimum * 100 - 100).label('percent'))\
+                            .select_from(Invest).join(Project)\
+                            .filter(*f_comprometido_success).group_by(Invest.project).subquery()
+        comprometido_success = db.session.query(func.avg(sub.c.percent)).scalar()
+        comprometido_success = round(comprometido_success, 2)
 
         # (Nuevo) Dinero medio solo obtenido en 2a ronda
-        # TODO
+        f_avg_second_round = list(filters)
+        f_avg_second_round.append(Invest.date_invested >= Project.date_passed)
+        sub = db.session.query(func.sum(Invest.amount).label('amount')).join(Project)\
+                                            .filter(*f_avg_second_round).group_by(Project.id).subquery()
+        avg_second_round = db.session.query(func.avg(sub.c.amount)).scalar()
+        avg_second_round = round(avg_second_round, 2)
 
-        # - [Renombrar Dinero compr. medio en proyectoss archivados] Dinero recaudado de media en campañas fallidas
-        # TODO
+        # - [Renombrar Dinero compr. medio en proyectos archivados] Dinero recaudado de media en campañas fallidas
+        f_avg_failed = list(filters)
+        f_avg_failed.append(Project.status == 6)
+        f_avg_failed.append(Invest.status.in_([0, 4]))
+        avg_failed = db.session.query(func.sum(Invest.amount) / func.count(func.distinct(Project.id)))\
+                                        .join(Project).filter(*f_avg_failed).scalar()
+        avg_failed = round(avg_failed, 2)
 
-        # - [Renombrar]Perc.   dinero compr. medio (dinero recaudado de media) sobre mínimo (número del dato anterior)
-        # TODO
+        # - [Renombrar]Perc. dinero compr. medio (dinero recaudado de media) sobre mínimo (número del dato anterior)
+        # Perc. dinero compr. medio sobre mínimo',
+        f_comprometido_fail = list(filters)
+        f_comprometido_fail.append(Invest.status.in_([0, 4]))
+        f_comprometido_fail.append(Project.status == 6)
+        sub = db.session.query((func.sum(Invest.amount) / Project.minimum * 100).label('percent'))\
+                            .select_from(Invest).join(Project)\
+                            .filter(*f_comprometido_fail).group_by(Invest.project).subquery()
+        comprometido_fail = db.session.query(func.avg(sub.c.percent)).scalar()
+        comprometido_fail = round(comprometido_fail, 2)
 
-        app.logger.debug('end sql')
 
-        # TypeError: Decimal('1420645') is not JSON serializable
         # No se pueden donar centimos no? Hacer enteros?
-        #return {'total': int(total_recaudado[0])}
-        return jsonify({'total': int(recaudado), 'devuelto': int(devuelto), 'limit-per-page': limit,
+        return jsonify({'total': int(recaudado), 'devuelto': int(devuelto), 'results-per-page': limit,
                         'paypal-amount': paypal_amount, 'tpv-amount': tpv_amount, 'cash-amount': cash_amount,
                         'call-amount': call_amount, 'average-invest': average_invest,
-                        'projects': map(lambda i: [i[0], {'recaudado': i[1]}], comprometido)})
+                        'projects': map(lambda i: [i[0], {'recaudado': i[1]}], comprometido),
+                        'fee-amount': fee_amount, 'average-cost': average_cost})
 
-        #return {'total': str(total_recaudado[0])}
-
-        #return {'total': total_recaudado[0], 'projects': invests}
-        #return jsonify(invests)
-        #return {'invests': map(lambda i: {i[0]: i[1]}, invests)}
-        #return {'invests': {'pliegos': suma}}
         #return {'invests': map(lambda i: {i.investid: marshal(i, invest_fields)}, invests)}
