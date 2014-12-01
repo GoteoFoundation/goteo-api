@@ -166,7 +166,7 @@ class Message(db.Model):
     # message = db.Column('message', Text)
 
     def __repr__(self):
-        return '<Message(%d) from %s to project %s)>' % (self.id, self.user, self.project)
+        return '<Message(%d) from %s to project %s>' % (self.id, self.user, self.project)
 
 
 class UserInterest(db.Model):
@@ -176,4 +176,19 @@ class UserInterest(db.Model):
     interest = db.Column('interest', Integer, db.ForeignKey('category.id'), primary_key=True)
 
     def __repr__(self):
-        return '<UserInterest(%d) from %s to project %s)>' % (self.id, self.user, self.project)
+        return '<UserInterest from %s to project %s>' % (self.user, self.project)
+
+
+class Cost(db.Model):
+    __tablename__ = 'cost'
+
+    id = db.Column('id', Integer, primary_key=True)
+    cost = db.Column('cost', Text)
+    description = db.Column('description', Text)
+    type = db.Column('type', String(50))
+    project = db.Column('project', String(50))
+    amount = db.Column('amount', Integer)
+    required = db.Column('required', Integer)
+
+    def __repr__(self):
+        return '<Cost(%d) %s of project %s>' % (self.id, self.cost[:50], self.project)
