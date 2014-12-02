@@ -139,6 +139,7 @@ class Reward(db.Model):
     reward = db.Column('reward', Text)
     type = db.Column('type', String(50))
     amount = db.Column('amount', Integer)
+    icon = db.Column('icon', String(50))
 
     def __repr__(self):
         return '<Reward(%d) %s: %s>' % (self.id, self.project[:10], self.title[:50])
