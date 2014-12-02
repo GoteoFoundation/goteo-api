@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 from model import app, db
-from model import Invest, Reward, InvestReward
+from model import Invest, Reward, InvestReward, Project
 
 from flask import abort, jsonify
 from flask.ext.restful import Resource, reqparse, fields, marshal
 from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
 
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, desc
 
 
 class ModelClass():
@@ -22,6 +22,7 @@ class RewardsAPI(Resource):
         self.reqparse.add_argument('from_date', type=str)
         self.reqparse.add_argument('to_date', type=str)
         self.reqparse.add_argument('limit', type=int, default=10)
+        self.reqparse.add_argument('offset', type=int, default=0)
         self.reqparse.add_argument('project', type=str, action='append')
         super(RewardsAPI, self).__init__()
 
@@ -66,7 +67,7 @@ class RewardsAPI(Resource):
             return round(perc, 2)
 
         # - NÚMERO de cofinanciadores que renuncian a recompensa
-        # FIXME: Invest.id not in InvestReWardTable.invest
+        # FIXME: No incluir status=2?
         f_renuncias = list(filters)
         f_renuncias.append(Invest.resign == 1)
         f_renuncias.append(Invest.status.in_([0, 1, 3, 4]))
@@ -74,9 +75,9 @@ class RewardsAPI(Resource):
 
         # (seleccionados por cofinanciador)
         # - Porcentaje de cofinanciadores que renuncian a recompensa
-
         perc_renuncias = perc_invest(renuncias)
 
+        #
         f_recomp_dinero = list(filters)
         f_recomp_dinero.append(Reward.id != None)
         f_recomp_dinero.append(or_(Invest.resign == None, Invest.resign == 0))
@@ -117,12 +118,16 @@ class RewardsAPI(Resource):
         recomp_dinero400mas = db.session.query(func.sum(_recomp_dinero.c.amourew)).scalar()
 
         # - Tipo de recompensa más utilizada en proyectos exitosos
-        # TODO
-        # success_projects. Tipo ? Qué tipos hay?
+        # FIXME: Date: Project.published
+        f_favorite_reward = list(filters)
+        f_favorite_reward.append(Reward.type == 'individual')
+        f_favorite_reward.append(Project.status.in_([4, 5]))
+        favorite_reward = db.session.query(Reward.icon, func.count(Reward.project).label('uses')).join(Project)\
+                                        .filter(*f_favorite_reward).group_by(Reward.icon).order_by(desc('uses')).all()
 
-        app.logger.debug('end check')
 
         return jsonify({'renuncias': renuncias, 'perc-renuncias': perc_renuncias,
-                        'recomp-dinero15': recomp_dinero15, 'recomp-dinero30': recomp_dinero30,
-                        'recomp-dinero100': recomp_dinero100, 'recomp-dinero400': recomp_dinero400,
-                        'recomp-dinero400mas': recomp_dinero400mas})
+                        'rewards-per-amount': {'rewards-less-than-15': recomp_dinero15, 'rewards-between-15-30': recomp_dinero30,
+                                    'rewards-between-30-100': recomp_dinero100, 'rewards-between-100-400': recomp_dinero400,
+                                    'rewards-more-than-400': recomp_dinero400mas},
+                        'favorite-rewards': favorite_reward})
