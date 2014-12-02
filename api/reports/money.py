@@ -177,6 +177,7 @@ class MoneyAPI(Resource):
         f_fee_amount.append(Invest.status.in_([1, 3]))
         fee_amount = db.session.query(func.sum(Invest.amount)).join(Project).filter(*f_fee_amount).scalar()
         fee_amount = float(fee_amount) * 0.08
+        fee_amount = round(fee_amount, 2)
 
         # - Aporte medio por cofinanciador(micromecenas)
         # OJO: En reporting.php no calcula esto mismo

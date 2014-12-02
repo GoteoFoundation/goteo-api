@@ -21,6 +21,7 @@ class CommunityAPI(Resource):
         self.reqparse.add_argument('from_date', type=str)
         self.reqparse.add_argument('to_date', type=str)
         self.reqparse.add_argument('limit', type=int, default=10)
+        self.reqparse.add_argument('offset', type=int, default=0)
         self.reqparse.add_argument('project', type=str, action='append')
         super(CommunityAPI, self).__init__()
 

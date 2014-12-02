@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 from model import app, db
-from model import Project, Invest, Blog, Post
+from model import Project, Invest, Blog, Post, Message
 
 from flask import abort, jsonify
 from flask.ext.restful import Resource, reqparse, fields, marshal
 from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
 
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, desc
 
 
 class ModelClass():
@@ -22,6 +22,7 @@ class ProjectsAPI(Resource):
         self.reqparse.add_argument('from_date', type=str)
         self.reqparse.add_argument('to_date', type=str)
         self.reqparse.add_argument('limit', type=int, default=10)
+        self.reqparse.add_argument('offset', type=int, default=0)
         self.reqparse.add_argument('project', type=str, action='append')
         super(ProjectsAPI, self).__init__()
 
@@ -49,7 +50,7 @@ class ProjectsAPI(Resource):
         app.logger.debug(args['project'])
 
         filters = []
-        # TODO: Qué fechas coger? creacion, finalizacion?
+        # FIXME: Qué fechas coger depende del dato: creación, finalización...
         if args['from_date']:
             filters.append(Invest.date_invested >= args['from_date'])
         if args['to_date']:
@@ -91,39 +92,47 @@ class ProjectsAPI(Resource):
         p_succ_projects = round(p_succ_projects, 2)
 
         # -(nuevo) proyectos exitosos con campaña finalizada
-        # TODO
+        # FIXME: correcto?
+        f_succ_finished = list(filters)
+        f_succ_finished.append(Project.status == 4)
+        succ_finished = db.session.query(Project).filter(*f_succ_finished).count()
 
-        # _(nuevo)% éxito campañas finalizadas
-        # TODO
 
         # - Proyectos archivados Renombrar por Proyectos Fallidos
         f_fail_projects = list(filters)
         f_fail_projects.append(Project.status == 6)
         fail_projects = db.session.query(func.count(Project.id)).filter(*f_fail_projects).scalar()
 
+        # _(nuevo)% éxito campañas finalizadas
+        # FIXME: correcto?
+        p_succ_finished = float(succ_finished) / (succ_finished + fail_projects)
+        p_succ_finished = round(p_succ_finished, 2)
+
         # - Porcentaje media de recaudación conseguida por proyectos exitosos
-        # TODO
-        """
-            'label' => 'Recaudación media por proyecto exitoso',
-            'sql'   => "SELECT SUM(invest.amount) / COUNT(DISTINCT(project.id))
-                        FROM invest
-                        INNER JOIN project
-                            ON  project.id = invest.project
-                            AND project.status IN (4, 5)
-                        WHERE invest.status IN (1, 3)
-                        :investfilter
-                        ",
-        """
+        f_p_avg_success = list(filters)
+        f_p_avg_success.append(Invest.status.in_([1, 3]))
+        f_p_avg_success.append(Project.status.in_([4, 5]))
+        p_avg_success = db.session.query(func.sum(Invest.amount) / func.count(func.distinct(Project.id)))\
+                                        .join(Project).filter(*f_p_avg_success).scalar()
+        p_avg_success = round(p_avg_success, 2)
 
         # - (NUEVOS)10 Campañas con más cofinanciadores
         f_top10_projects = list(filters)
-        top10_projects = db.session.query(func.count(Invest.id)).filter(*f_top10_projects).group_by(Invest.project).limit(10).all()
+        top10_projects = db.session.query(Project.id, func.count(Invest.id).label('total')).join(Invest)\
+                                    .filter(*f_top10_projects).group_by(Invest.project)\
+                                    .order_by(desc('total')).limit(10).all()
 
         # - 10 Campañas con más colaboraciones
         f_top10_projects2 = list(filters)
+        top10_projects2 = db.session.query(Project.id, func.count(Message.id).label('total')).join(Message)\
+                            .filter(*f_top10_projects2).group_by(Message.project)\
+                            .order_by(desc('total')).limit(10).all()
 
         # - 10 Campañas que han recaudado más dinero
         f_top10_projects3 = list(filters)
+        top10_projects3 = db.session.query(Project.id, func.sum(Invest.id).label('total')).join(Invest)\
+                                                                .filter(*f_top10_projects3).group_by(Invest.project)\
+                                                                .order_by(desc('total')).limit(10).all()
 
         # - Campañas más rápidas en conseguir el mínimo (NUEVO)
         # TODO
@@ -136,6 +145,7 @@ class ProjectsAPI(Resource):
 
         app.logger.debug('end check')
 
-        return jsonify({'rev-projects': rev_projects, 'pub-projects': pub_projects,
-                        'succ-projects': succ_projects, 'perc-succ-projects': p_succ_projects,
-                        'fail-projects': fail_projects})
+        return jsonify({'received': rev_projects, 'published': pub_projects,
+                        'succesful': succ_projects, 'successful-percentage': p_succ_projects,
+                        'failed': fail_projects, 'top10-projects': top10_projects,
+                        'top10-projects2': top10_projects2, 'top10-projects3': top10_projects3})
