@@ -23,20 +23,23 @@ class MoneyResponse:
     __name__ = "MoneyResponse"
 
     resource_fields = {
-        'total': fields.Integer,
-        'devuelto': fields.Integer,
-        'results-per-page': fields.Integer,
-        'paypal-amount': fields.Integer,
-        'tpv-amount': fields.Integer,
-        'cash-amount': fields.Integer,
-        'call-amount': fields.Integer,
-        'average-invest': fields.Integer,
-        'projects': fields.List,
-        'fee-amount': fields.Integer,
-        'to_date': fields.String,
-        'limit': fields.Integer,
+        "average-failed": fields.Float,
+        "average-invest": fields.Float,
+        "average-invest-paypal": fields.Float,
+        "average-mincost": fields.Float,
+        "average-received": fields.Float,
+        "average-second-round": fields.Float,
+        "call-amount": fields.Integer,
+        "cash-amount": fields.Integer,
+        "comprometido": fields.Integer,
+        "comprometido-fail": fields.Float,
+        "comprometido-success": fields.Float,
+        "devuelto": fields.Integer,
+        "fee-amount": fields.Float,
+        "paypal-amount": fields.Integer,
+        "results-per-page": fields.Integer,
+        "tpv-amount": fields.Integer
     }
-
 
 #@swagger.model
 class MoneyAPI(Resource):
@@ -45,8 +48,7 @@ class MoneyAPI(Resource):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('from_date', type=str)
         self.reqparse.add_argument('to_date', type=str)
-        self.reqparse.add_argument('limit', type=int, default=10)
-        self.reqparse.add_argument('offset', type=int, default=0)
+        self.reqparse.add_argument('node', type=str)  # append
         self.reqparse.add_argument('project', type=str, action='append')
         super(MoneyAPI, self).__init__()
 
@@ -68,7 +70,7 @@ class MoneyAPI(Resource):
         {
             "paramType": "query",
             "name": "project",
-            "description": "Filter by individual project(s)",
+            "description": "Filter by individual project(s) separated by commas",
             "required": False,
             "dataType": "string",
             "allowMultiple": True
@@ -89,18 +91,26 @@ class MoneyAPI(Resource):
         },
         {
             "paramType": "query",
-            "name": "limit",
-            "description": "Number of projects per page. Default = 10",
+            "name": "node",
+            "description": 'Filter by node',
             "required": False,
-            "dataType": "integer"
-        },
-        {
-            "paramType": "query",
-            "name": "offset",
-            "description": "Number of projects per page. Default = 0",
-            "required": False,
-            "dataType": "integer"
+            "dataType": "string"
         }
+        #,
+        #{
+        #    "paramType": "query",
+        #    "name": "limit",
+        #    "description": "Number of projects per page. Default = 10",
+        #    "required": False,
+        #    "dataType": "integer"
+        #},
+        #{
+        #    "paramType": "query",
+        #    "name": "offset",
+        #    "description": "Number of projects per page. Default = 0",
+        #    "required": False,
+        #    "dataType": "integer"
+        #}
     ],
     responseMessages=[successful, invalid_input])
     def get(self):
@@ -119,7 +129,9 @@ class MoneyAPI(Resource):
         if args['project']:
             #filters.append(Invest.project.in_(args['project'][0]))
             filters.append(Invest.project.in_(args['project']))
-        limit = args['limit']
+        if args['node']:
+            pass
+        #limit = args['limit']
         #filters = and_(*filters)
 
         print(filters)
@@ -131,35 +143,45 @@ class MoneyAPI(Resource):
         success_projects = Project.query.filter(Project.status.in_([4,5])).subquery()
 
         # TODO: ??
-        recaudado = db.session.query(func.sum(Invest.amount)).filter(*filters).scalar()
+        #recaudado = db.session.query(func.sum(Invest.amount)).filter(*filters).scalar()
 
         # -  [Renombrar dinero comprometido] Suma recaudada por la plataforma
-        comprometido = db.session.query(Invest.project, func.sum(Invest.amount)).filter(*filters).group_by(Invest.project).limit(limit).all()
+        #comprometido = db.session.query(Invest.project, func.sum(Invest.amount)).filter(*filters).group_by(Invest.project).limit(limit).all()
+        f_comprometido = list(filters)
+        f_comprometido.append(Invest.status.in_([0, 1, 3, 4]))
+        comprometido = db.session.query(func.sum(Invest.amount)).filter(*f_comprometido).scalar()
 
         # TODO: Qué mostrar cuando no hay resultados?
-        if recaudado is None:
+        #if recaudado is None:
+        if comprometido is None:
             return jsonify({})
 
         # - Dinero devuelto (en proyectos archivados)
-        devuelto_filter = list(filters)
-        devuelto_filter.append(Project.id==Invest.project)
-        devuelto_filter.append(Project.status==4)
-        devuelto = db.session.query(func.sum(Invest.amount)).filter(*devuelto_filter).scalar()
+        f_devuelto = list(filters)
+        f_devuelto.append(Project.id==Invest.project)
+        f_devuelto.append(Project.status==4)
+        devuelto = db.session.query(func.sum(Invest.amount)).filter(*f_devuelto).scalar()
+        if devuelto is None:
+            devuelto = 0
 
         #- Recaudado mediante PayPal
-        paypal_filter = list(filters)
-        paypal_filter.append(Invest.method==Invest.METHOD_PAYPAL)
-        paypal_amount = db.session.query(func.sum(Invest.amount)).filter(*paypal_filter).scalar()
+        f_paypal_amount = list(filters)
+        f_paypal_amount.append(Invest.method==Invest.METHOD_PAYPAL)
+        paypal_amount = db.session.query(func.sum(Invest.amount)).filter(*f_paypal_amount).scalar()
+        if paypal_amount is None:
+            paypal_amount = 0
 
         #- Recaudado mediante TPV
-        tpv_filter = list(filters)
-        tpv_filter.append(Invest.method==Invest.METHOD_TPV)
-        tpv_amount = db.session.query(func.sum(Invest.amount)).filter(*tpv_filter).scalar()
+        f_tpv_amount = list(filters)
+        f_tpv_amount.append(Invest.method==Invest.METHOD_TPV)
+        tpv_amount = db.session.query(func.sum(Invest.amount)).filter(*f_tpv_amount).scalar()
 
         # - [Renombrar aportes manuales] Recaudado mediante transferencia bancaria directa
-        cash_filter = list(filters)
-        cash_filter.append(Invest.method==Invest.METHOD_CASH)
-        cash_amount = db.session.query(func.sum(Invest.amount)).filter(*cash_filter).scalar()
+        f_cash_amount = list(filters)
+        f_cash_amount.append(Invest.method==Invest.METHOD_CASH)
+        cash_amount = db.session.query(func.sum(Invest.amount)).filter(*f_cash_amount).scalar()
+        if cash_amount is None:
+            cash_amount = 0
 
         # - [Renombrar] Capital Riego de Goteo (fondos captados de instituciones y empresas destinados a la bolsa de Capital Riego https://goteo.org/service/resources)
         # TODO: Comprobar que es correcto. Quitar las convocatorias de prueba que hay en la BD!!
@@ -167,57 +189,56 @@ class MoneyAPI(Resource):
 
         # - [NEW] Suma recaudada en Convocatorias (Capital riego distribuido + crowd)
         # FIXME: Invest.method==DROP + invest.call==1 ?
-        call_filter = list(filters)
-        call_filter.append(Invest.method==Invest.METHOD_DROP)
-        call_amount = db.session.query(func.sum(Invest.amount)).filter(*call_filter).scalar()
+        f_call_amount = list(filters)
+        f_call_amount.append(Invest.method==Invest.METHOD_DROP)
+        call_amount = db.session.query(func.sum(Invest.amount)).filter(*f_call_amount).scalar()
+        if call_amount is None:
+            call_amount = 0
 
         # - Total 8% recaudado por Goteo
         f_fee_amount = list(filters)
         f_fee_amount.append(Project.status.in_([4, 5]))
         f_fee_amount.append(Invest.status.in_([1, 3]))
         fee_amount = db.session.query(func.sum(Invest.amount)).join(Project).filter(*f_fee_amount).scalar()
-        fee_amount = float(fee_amount) * 0.08
-        fee_amount = round(fee_amount, 2)
+        if fee_amount is None:
+            fee_amount = 0
+        else:
+            fee_amount = float(fee_amount) * 0.08
+            fee_amount = round(fee_amount, 2)
 
         # - Aporte medio por cofinanciador(micromecenas)
         # OJO: En reporting.php no calcula esto mismo
-        # FIXME: No deberían contar también los proyectos archivados?
-        f_avg_invest = list(filters)
-        f_avg_invest.append(Project.status.in_([4, 5]))
-        f_avg_invest.append(Invest.status.in_([1, 3]))
+        f_average_invest = list(filters)
+        f_average_invest.append(Project.status.in_([4, 5, 6]))
+        f_average_invest.append(Invest.status.in_([1, 3]))
         sub1 = db.session.query(func.avg(Invest.amount).label('amount')).join(Project)\
-                                        .filter(*f_avg_invest).group_by(Invest.user).subquery()
+                                        .filter(*f_average_invest).group_by(Invest.user).subquery()
         average_invest = db.session.query(func.avg(sub1.c.amount)).scalar()
-        average_invest = round(average_invest, 2)
+        average_invest = round(average_invest, 2) if average_invest is not None else 0
 
         # - Aporte medio por cofinanciador(micromecenas) mediante PayPal
         # OJO: En reporting.php no calcula esto mismo
-        # FIXME: No deberían contar también los proyectos archivados?
-        f_avg_paypal = list(f_avg_invest)
-        f_avg_paypal.append(Invest.method==Invest.METHOD_PAYPAL)
+        f_average_invest_paypal = list(f_average_invest)
+        f_average_invest_paypal.append(Invest.method==Invest.METHOD_PAYPAL)
         sub1 = db.session.query(func.avg(Invest.amount).label('amount')).join(Project)\
-                                        .filter(*f_avg_paypal).group_by(Invest.user).subquery()
+                                        .filter(*f_average_invest_paypal).group_by(Invest.user).subquery()
         average_invest_paypal = db.session.query(func.avg(sub1.c.amount)).scalar()
         average_invest_paypal = 0 if average_invest_paypal is None else round(average_invest_paypal, 2)
 
         # - (Renombrar Coste mínimo medio por proyecto exitoso ] Presupuesto mínimo medio por proyecto exitoso
         # OJO: En reporting.php no calcula esto mismo
-        # FIXME: No debería excluir el 6?
-        f_avg_cost = list(filters)
-        f_avg_cost.append(Cost.required == 1)
-        f_avg_cost.append(Project.status.in_([3, 4, 5, 6]))
-        sub2 = db.session.query(func.avg(Cost.amount).label("amount")).join(Project, Project.id == Cost.project)\
-                                    .filter(*f_avg_cost).group_by(Cost.project).subquery()
-        average_cost = db.session.query(func.avg(sub2.c.amount)).scalar()
-        average_cost = round(average_cost, 2)
+        f_average_mincost = list(filters)
+        f_average_mincost.append(Project.status.in_([4, 5]))
+        average_mincost = db.session.query(func.avg(Project.minimum)).filter(*f_average_mincost).scalar()
+        average_mincost = round(average_mincost, 2)
 
         # - Recaudación media por proyecto exitoso ( financiado )
-        f_avg_minimum = list(filters)
-        f_avg_minimum.append(Invest.status.in_([1, 3]))
-        f_avg_minimum.append(Project.status.in_([4, 5]))
-        average_minimum = db.session.query(func.sum(Invest.amount) / func.count(func.distinct(Project.id)))\
-                                    .join(Project).filter(*f_avg_minimum).scalar()
-        average_minimum = round(average_minimum, 2)
+        f_average_received = list(filters)
+        f_average_received.append(Invest.status.in_([1, 3]))
+        f_average_received.append(Project.status.in_([4, 5]))
+        average_received = db.session.query(func.sum(Invest.amount) / func.count(func.distinct(Project.id)))\
+                                    .join(Project).filter(*f_average_received).scalar()
+        average_received = 0 if average_received is None else round(average_received, 2)
 
         # - Perc. medio de recaudación sobre el mínimo (número del dato anterior)
         f_comprometido_success = list(filters)
@@ -227,23 +248,24 @@ class MoneyAPI(Resource):
                             .select_from(Invest).join(Project)\
                             .filter(*f_comprometido_success).group_by(Invest.project).subquery()
         comprometido_success = db.session.query(func.avg(sub.c.percent)).scalar()
-        comprometido_success = round(comprometido_success, 2)
-
+        comprometido_success = 0 if comprometido_success is None else round(comprometido_success, 2)
+        # FIXME: - 100
+        
         # (Nuevo) Dinero medio solo obtenido en 2a ronda
-        f_avg_second_round = list(filters)
-        f_avg_second_round.append(Invest.date_invested >= Project.date_passed)
+        f_average_second_round = list(filters)
+        f_average_second_round.append(Invest.date_invested >= Project.date_passed)
         sub = db.session.query(func.sum(Invest.amount).label('amount')).join(Project)\
-                                            .filter(*f_avg_second_round).group_by(Project.id).subquery()
-        avg_second_round = db.session.query(func.avg(sub.c.amount)).scalar()
-        avg_second_round = round(avg_second_round, 2)
+                                            .filter(*f_average_second_round).group_by(Project.id).subquery()
+        average_second_round = db.session.query(func.avg(sub.c.amount)).scalar()
+        average_second_round = round(average_second_round, 2)
 
         # - [Renombrar Dinero compr. medio en proyectos archivados] Dinero recaudado de media en campañas fallidas
-        f_avg_failed = list(filters)
-        f_avg_failed.append(Project.status == 6)
-        f_avg_failed.append(Invest.status.in_([0, 4]))
-        avg_failed = db.session.query(func.sum(Invest.amount) / func.count(func.distinct(Project.id)))\
-                                        .join(Project).filter(*f_avg_failed).scalar()
-        avg_failed = round(avg_failed, 2)
+        f_average_failed = list(filters)
+        f_average_failed.append(Project.status == 6)
+        f_average_failed.append(Invest.status.in_([0, 4]))
+        average_failed = db.session.query(func.sum(Invest.amount) / func.count(func.distinct(Project.id)))\
+                                        .join(Project).filter(*f_average_failed).scalar()
+        average_failed = round(average_failed, 2)
 
         # - [Renombrar]Perc. dinero compr. medio (dinero recaudado de media) sobre mínimo (número del dato anterior)
         # Perc. dinero compr. medio sobre mínimo',
@@ -258,10 +280,14 @@ class MoneyAPI(Resource):
 
 
         # No se pueden donar centimos no? Hacer enteros?
-        return jsonify({'total': int(recaudado), 'devuelto': int(devuelto), 'results-per-page': limit,
+        return jsonify({'comprometido': comprometido, 'devuelto': devuelto,
                         'paypal-amount': paypal_amount, 'tpv-amount': tpv_amount, 'cash-amount': cash_amount,
                         'call-amount': call_amount, 'average-invest': average_invest,
-                        'projects': map(lambda i: [i[0], {'recaudado': i[1]}], comprometido),
-                        'fee-amount': fee_amount, 'average-cost': average_cost})
+                        'average-invest-paypal': average_invest_paypal, 'average-mincost': average_mincost,
+                        'average-received': average_received, 'comprometido-success': comprometido_success,
+                        'average-second-round': average_second_round, 'average-failed': average_failed,
+                        'comprometido-fail': comprometido_fail, 'fee-amount': fee_amount})
+                        # 'results-per-page': limit,
+                        #'projects': map(lambda i: [i[0], {'recaudado': i[1]}], comprometido),
 
         #return {'invests': map(lambda i: {i.investid: marshal(i, invest_fields)}, invests)}
