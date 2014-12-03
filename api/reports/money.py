@@ -96,46 +96,27 @@ class MoneyAPI(Resource):
             "required": False,
             "dataType": "string"
         }
-        #,
-        #{
-        #    "paramType": "query",
-        #    "name": "limit",
-        #    "description": "Number of projects per page. Default = 10",
-        #    "required": False,
-        #    "dataType": "integer"
-        #},
-        #{
-        #    "paramType": "query",
-        #    "name": "offset",
-        #    "description": "Number of projects per page. Default = 0",
-        #    "required": False,
-        #    "dataType": "integer"
-        #}
+
     ],
     responseMessages=[successful, invalid_input])
     def get(self):
         func = sqlalchemy.func
         args = self.reqparse.parse_args()
 
-        print args
-        app.logger.debug('projects')
-        app.logger.debug(args['project'])
-
         filters = []
+        filters2 = []
         if args['from_date']:
             filters.append(Invest.date_invested >= args['from_date'])
+            filters2.append(Invest.date_invested >= args['from_date'])
         if args['to_date']:
             filters.append(Invest.date_invested <= args['to_date'])
+            filters2.append(Invest.date_invested >= args['from_date'])
         if args['project']:
-            #filters.append(Invest.project.in_(args['project'][0]))
             filters.append(Invest.project.in_(args['project']))
+            filters2.append(Project.id.in_(args['project']))  # para average_mincost
         if args['node']:
             pass
-        #limit = args['limit']
-        #filters = and_(*filters)
-
-        print(filters)
-        app.logger.debug('start sql')
+            #filters.append(Invest.project.in_(args['project']))
 
         #
         # Proyectos exitosos
@@ -150,16 +131,15 @@ class MoneyAPI(Resource):
         f_comprometido = list(filters)
         f_comprometido.append(Invest.status.in_([0, 1, 3, 4]))
         comprometido = db.session.query(func.sum(Invest.amount)).filter(*f_comprometido).scalar()
+        if comprometido is None:
+            comprometido = 0
 
         # TODO: Qué mostrar cuando no hay resultados?
-        #if recaudado is None:
-        if comprometido is None:
-            return jsonify({})
+        # return jsonify({})
 
         # - Dinero devuelto (en proyectos archivados)
         f_devuelto = list(filters)
-        f_devuelto.append(Project.id==Invest.project)
-        f_devuelto.append(Project.status==4)
+        f_devuelto.append(Invest.status==4)
         devuelto = db.session.query(func.sum(Invest.amount)).filter(*f_devuelto).scalar()
         if devuelto is None:
             devuelto = 0
@@ -175,6 +155,8 @@ class MoneyAPI(Resource):
         f_tpv_amount = list(filters)
         f_tpv_amount.append(Invest.method==Invest.METHOD_TPV)
         tpv_amount = db.session.query(func.sum(Invest.amount)).filter(*f_tpv_amount).scalar()
+        if tpv_amount is None:
+            tpv_amount = 0
 
         # - [Renombrar aportes manuales] Recaudado mediante transferencia bancaria directa
         f_cash_amount = list(filters)
@@ -210,11 +192,11 @@ class MoneyAPI(Resource):
         # OJO: En reporting.php no calcula esto mismo
         f_average_invest = list(filters)
         f_average_invest.append(Project.status.in_([4, 5, 6]))
-        f_average_invest.append(Invest.status.in_([1, 3]))
+        f_average_invest.append(Invest.status > 0)
         sub1 = db.session.query(func.avg(Invest.amount).label('amount')).join(Project)\
                                         .filter(*f_average_invest).group_by(Invest.user).subquery()
         average_invest = db.session.query(func.avg(sub1.c.amount)).scalar()
-        average_invest = round(average_invest, 2) if average_invest is not None else 0
+        average_invest = 0 if average_invest is None else round(average_invest, 2)
 
         # - Aporte medio por cofinanciador(micromecenas) mediante PayPal
         # OJO: En reporting.php no calcula esto mismo
@@ -227,10 +209,10 @@ class MoneyAPI(Resource):
 
         # - (Renombrar Coste mínimo medio por proyecto exitoso ] Presupuesto mínimo medio por proyecto exitoso
         # OJO: En reporting.php no calcula esto mismo
-        f_average_mincost = list(filters)
+        f_average_mincost = list(filters2)
         f_average_mincost.append(Project.status.in_([4, 5]))
         average_mincost = db.session.query(func.avg(Project.minimum)).filter(*f_average_mincost).scalar()
-        average_mincost = round(average_mincost, 2)
+        average_mincost = 0 if average_mincost is None else round(average_mincost, 2)
 
         # - Recaudación media por proyecto exitoso ( financiado )
         f_average_received = list(filters)
@@ -250,14 +232,14 @@ class MoneyAPI(Resource):
         comprometido_success = db.session.query(func.avg(sub.c.percent)).scalar()
         comprometido_success = 0 if comprometido_success is None else round(comprometido_success, 2)
         # FIXME: - 100
-        
+
         # (Nuevo) Dinero medio solo obtenido en 2a ronda
         f_average_second_round = list(filters)
         f_average_second_round.append(Invest.date_invested >= Project.date_passed)
         sub = db.session.query(func.sum(Invest.amount).label('amount')).join(Project)\
                                             .filter(*f_average_second_round).group_by(Project.id).subquery()
         average_second_round = db.session.query(func.avg(sub.c.amount)).scalar()
-        average_second_round = round(average_second_round, 2)
+        average_second_round = 0 if average_second_round is None else round(average_second_round, 2)
 
         # - [Renombrar Dinero compr. medio en proyectos archivados] Dinero recaudado de media en campañas fallidas
         f_average_failed = list(filters)
@@ -265,7 +247,7 @@ class MoneyAPI(Resource):
         f_average_failed.append(Invest.status.in_([0, 4]))
         average_failed = db.session.query(func.sum(Invest.amount) / func.count(func.distinct(Project.id)))\
                                         .join(Project).filter(*f_average_failed).scalar()
-        average_failed = round(average_failed, 2)
+        average_failed = 0 if average_failed is None else round(average_failed, 2)
 
         # - [Renombrar]Perc. dinero compr. medio (dinero recaudado de media) sobre mínimo (número del dato anterior)
         # Perc. dinero compr. medio sobre mínimo',
@@ -276,18 +258,23 @@ class MoneyAPI(Resource):
                             .select_from(Invest).join(Project)\
                             .filter(*f_comprometido_fail).group_by(Invest.project).subquery()
         comprometido_fail = db.session.query(func.avg(sub.c.percent)).scalar()
-        comprometido_fail = round(comprometido_fail, 2)
-
+        comprometido_fail = 0 if comprometido_fail is None else round(comprometido_fail, 2)
 
         # No se pueden donar centimos no? Hacer enteros?
-        return jsonify({'comprometido': comprometido, 'devuelto': devuelto,
-                        'paypal-amount': paypal_amount, 'tpv-amount': tpv_amount, 'cash-amount': cash_amount,
-                        'call-amount': call_amount, 'average-invest': average_invest,
-                        'average-invest-paypal': average_invest_paypal, 'average-mincost': average_mincost,
-                        'average-received': average_received, 'comprometido-success': comprometido_success,
-                        'average-second-round': average_second_round, 'average-failed': average_failed,
-                        'comprometido-fail': comprometido_fail, 'fee-amount': fee_amount})
-                        # 'results-per-page': limit,
-                        #'projects': map(lambda i: [i[0], {'recaudado': i[1]}], comprometido),
+        res = {'comprometido': comprometido, 'devuelto': devuelto,
+                'paypal-amount': paypal_amount, 'tpv-amount': tpv_amount, 'cash-amount': cash_amount,
+                'call-amount': call_amount, 'average-invest': average_invest,
+                'average-invest-paypal': average_invest_paypal, 'average-mincost': average_mincost,
+                'average-received': average_received, 'comprometido-success': comprometido_success,
+                'average-second-round': average_second_round, 'average-failed': average_failed,
+                'comprometido-fail': comprometido_fail, 'fee-amount': fee_amount}
+                # 'results-per-page': limit,
+                #'projects': map(lambda i: [i[0], {'recaudado': i[1]}], comprometido),
 
+        res['filters'] = {}
+        for k, v in args.items():
+            if v is not None:
+                res['filters'][k] = v
+
+        return jsonify(res)
         #return {'invests': map(lambda i: {i.investid: marshal(i, invest_fields)}, invests)}
