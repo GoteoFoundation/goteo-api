@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from model import app, db
-from model import Project, Invest, Call, Cost
+from model import Project, Invest, Call, Cost, InvestNode
 
 from flask import abort, jsonify
 from flask.ext.restful import Resource, reqparse, fields, marshal
@@ -48,7 +48,7 @@ class MoneyAPI(Resource):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('from_date', type=str)
         self.reqparse.add_argument('to_date', type=str)
-        self.reqparse.add_argument('node', type=str)  # append
+        self.reqparse.add_argument('node', type=str, action='append')
         self.reqparse.add_argument('project', type=str, action='append')
         super(MoneyAPI, self).__init__()
 
@@ -92,7 +92,7 @@ class MoneyAPI(Resource):
         {
             "paramType": "query",
             "name": "node",
-            "description": 'Filter by node',
+            "description": 'Filter by individual node(s) separated by commas',
             "required": False,
             "dataType": "string"
         }
@@ -115,8 +115,10 @@ class MoneyAPI(Resource):
             filters.append(Invest.project.in_(args['project']))
             filters2.append(Project.id.in_(args['project']))  # para average_mincost
         if args['node']:
-            pass
-            #filters.append(Invest.project.in_(args['project']))
+            filters.append(Invest.id == InvestNode.invest_id)
+            filters2.append(Invest.id == InvestNode.invest_id)
+            filters.append(InvestNode.invest_node.in_(args['node']))
+            filters2.append(InvestNode.invest_node.in_(args['node']))
 
         #
         # Proyectos exitosos
