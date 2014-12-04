@@ -75,9 +75,11 @@ class ProjectsAPI(Resource):
         pub_projects = db.session.query(func.count(Project.id)).filter(*f_pub_projects).scalar()
 
         # - Proyectos exitosos (llegan al mínimo pueden estar en campaña)
+        # FIXME: (Project.status > 0)
         f_succ_projects = list(filters)
         f_succ_projects.append(Project.date_passed is not None)
         f_succ_projects.append(Project.date_passed != '0000-00-00')
+        #f_succ_projects.append(Project.status.in_([3, 4, 5]))
         f_succ_projects.append(Project.status > 0)
         succ_projects = db.session.query(func.count(Project.id)).filter(*f_succ_projects).scalar()
 
@@ -96,7 +98,6 @@ class ProjectsAPI(Resource):
         f_succ_finished = list(filters)
         f_succ_finished.append(Project.status == 4)
         succ_finished = db.session.query(Project).filter(*f_succ_finished).count()
-
 
         # - Proyectos archivados Renombrar por Proyectos Fallidos
         f_fail_projects = list(filters)
@@ -117,21 +118,24 @@ class ProjectsAPI(Resource):
         p_avg_success = round(p_avg_success, 2)
 
         # - (NUEVOS)10 Campañas con más cofinanciadores
-        f_top10_projects = list(filters)
-        top10_projects = db.session.query(Project.id, func.count(Invest.id).label('total')).join(Invest)\
-                                    .filter(*f_top10_projects).group_by(Invest.project)\
+        f_top10_investors = list(filters)
+        top10_investors = db.session.query(Project.id, func.count(Invest.id).label('total')).join(Invest)\
+                                    .filter(*f_top10_investors).group_by(Invest.project)\
                                     .order_by(desc('total')).limit(10).all()
 
         # - 10 Campañas con más colaboraciones
-        f_top10_projects2 = list(filters)
-        top10_projects2 = db.session.query(Project.id, func.count(Message.id).label('total')).join(Message)\
-                            .filter(*f_top10_projects2).group_by(Message.project)\
+        f_top10_collaborations = list(filters)
+        top10_collaborations = db.session.query(Project.id, func.count(Message.id).label('total')).join(Message)\
+                            .filter(*f_top10_collaborations).group_by(Message.project)\
                             .order_by(desc('total')).limit(10).all()
 
         # - 10 Campañas que han recaudado más dinero
-        f_top10_projects3 = list(filters)
-        top10_projects3 = db.session.query(Project.id, func.sum(Invest.id).label('total')).join(Invest)\
-                                                                .filter(*f_top10_projects3).group_by(Invest.project)\
+        # FIXME: correcto?
+        f_top10_invests = list(filters)
+        f_top10_invests.append(Project.status == 4)
+        f_top10_invests.append(Invest.status.in_([0, 1, 3]))
+        top10_invests = db.session.query(Project.id, func.sum(Invest.amount).label('total')).join(Invest)\
+                                                                .filter(*f_top10_invests).group_by(Invest.project)\
                                                                 .order_by(desc('total')).limit(10).all()
 
         # - Campañas más rápidas en conseguir el mínimo (NUEVO)
@@ -140,6 +144,7 @@ class ProjectsAPI(Resource):
         # Lo que pasa es que va a haber primero proyectos de poco dinero.
 
         # - Media de posts proyecto exitoso
+        # TODO
         # Project.status 4,5
         # AVG(blog)
 
@@ -147,5 +152,5 @@ class ProjectsAPI(Resource):
 
         return jsonify({'received': rev_projects, 'published': pub_projects,
                         'succesful': succ_projects, 'successful-percentage': p_succ_projects,
-                        'failed': fail_projects, 'top10-projects': top10_projects,
-                        'top10-projects2': top10_projects2, 'top10-projects3': top10_projects3})
+                        'failed': fail_projects, 'top10-investors': top10_investors,
+                        'top10-collaborations': top10_collaborations, 'top10-invests': top10_invests})

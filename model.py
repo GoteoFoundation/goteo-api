@@ -146,6 +146,17 @@ class Reward(db.Model):
 
 
 # TODO: backrefs
+class InvestNode(db.Model):
+    __tablename__ = 'invest_node'
+
+    invest_id = db.Column('invest_id', Integer, db.ForeignKey('invest.id'), primary_key=True)
+    invest_node = db.Column('invest_node', String(50))
+
+    def __repr__(self):
+        return '<Invest %d in node %s>' % (self.invest_id, self.invest_node)
+
+
+# TODO: backrefs
 class InvestReward(db.Model):
     __tablename__ = 'invest_reward'
 
