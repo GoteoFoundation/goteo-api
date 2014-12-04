@@ -41,7 +41,7 @@ class MoneyResponse:
         "tpv-amount": fields.Integer
     }
 
-#@swagger.model
+
 class MoneyAPI(Resource):
 
     def __init__(self):
@@ -115,6 +115,7 @@ class MoneyAPI(Resource):
             filters.append(Invest.project.in_(args['project']))
             filters2.append(Project.id.in_(args['project']))  # para average_mincost
         if args['node']:
+            # TODO: Performance-killer!
             filters.append(Invest.id == InvestNode.invest_id)
             filters2.append(Invest.id == InvestNode.invest_id)
             filters.append(InvestNode.invest_node.in_(args['node']))

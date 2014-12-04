@@ -10,8 +10,17 @@ from flask_restful_swagger import swagger
 from sqlalchemy import and_, or_, desc
 
 
-class ModelClass():
-    pass
+@swagger.model
+class RewardsResponse:
+
+    __name__ = "RewardsResponse"
+
+    resource_fields = {
+        "favorite-rewards": fields.List,
+        "perc-renuncias": fields.Float,
+        "renuncias": fields.Integer,
+        "rewards-per-amount": fields.List
+    }
 
 
 @swagger.model
@@ -21,33 +30,60 @@ class RewardsAPI(Resource):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('from_date', type=str)
         self.reqparse.add_argument('to_date', type=str)
-        self.reqparse.add_argument('limit', type=int, default=10)
-        self.reqparse.add_argument('offset', type=int, default=0)
+        self.reqparse.add_argument('node', type=str, action='append')
         self.reqparse.add_argument('project', type=str, action='append')
         super(RewardsAPI, self).__init__()
 
+    successful = {
+        "code": 200,
+         "message": "OK"
+    }
+
+    invalid_input = {
+        "code": 404,
+         "message": "Not found"
+    }
+
     @swagger.operation(
     notes='Rewards report',
-    responseClass=ModelClass.__name__,
-    nickname='upload',
-    responseMessages=[
+    responseClass='RewardsResponse',
+    #nickname='upload',
+    parameters=[
         {
-          "code": 200,
-          "message": "OK"
+            "paramType": "query",
+            "name": "project",
+            "description": "Filter by individual project(s) separated by commas",
+            "required": False,
+            "dataType": "string",
+            "allowMultiple": True
         },
         {
-          "code": 404,
-          "message": "Not found"
+            "paramType": "query",
+            "name": "from_date",
+            "description": 'Filter from date. Ex. "2013-01-01"',
+            "required": False,
+            "dataType": "string"
+        },
+        {
+            "paramType": "query",
+            "name": "to_date",
+            "description": 'Filter until date.. Ex. "2014-01-01"',
+            "required": False,
+            "dataType": "string"
+        },
+        {
+            "paramType": "query",
+            "name": "node",
+            "description": 'Filter by individual node(s) separated by commas',
+            "required": False,
+            "dataType": "string"
         }
-      ]
-    )
+
+    ],
+    responseMessages=[successful, invalid_input])
     def get(self):
         func = sqlalchemy.func
         args = self.reqparse.parse_args()
-
-        print args
-        app.logger.debug('projects')
-        app.logger.debug(args['project'])
 
         filters = []
         # TODO: Qué fechas coger? creacion, finalizacion?
@@ -57,10 +93,10 @@ class RewardsAPI(Resource):
             filters.append(Invest.date_invested <= args['to_date'])
         if args['project']:
             filters.append(Invest.project.in_(args['project'][0]))
-        limit = args['limit']
+        if args['node']:
+            pass
 
-        app.logger.debug('start sql')
-
+        #
         cofinanciadores = db.session.query(func.distinct(Invest.user)).filter(*filters).count()
         def perc_invest(number):
             perc = float(number) / cofinanciadores * 100  # %
@@ -125,9 +161,15 @@ class RewardsAPI(Resource):
         favorite_reward = db.session.query(Reward.icon, func.count(Reward.project).label('uses')).join(Project)\
                                         .filter(*f_favorite_reward).group_by(Reward.icon).order_by(desc('uses')).all()
 
+        res = {'renuncias': renuncias, 'perc-renuncias': perc_renuncias,
+                'rewards-per-amount': {'rewards-less-than-15': recomp_dinero15,
+                    'rewards-between-15-30': recomp_dinero30, 'rewards-between-30-100': recomp_dinero100,
+                    'rewards-between-100-400': recomp_dinero400, 'rewards-more-than-400': recomp_dinero400mas},
+                'favorite-rewards': favorite_reward}
 
-        return jsonify({'renuncias': renuncias, 'perc-renuncias': perc_renuncias,
-                        'rewards-per-amount': {'rewards-less-than-15': recomp_dinero15, 'rewards-between-15-30': recomp_dinero30,
-                                    'rewards-between-30-100': recomp_dinero100, 'rewards-between-100-400': recomp_dinero400,
-                                    'rewards-more-than-400': recomp_dinero400mas},
-                        'favorite-rewards': favorite_reward})
+        res['filters'] = {}
+        for k, v in args.items():
+            if v is not None:
+                res['filters'][k] = v
+
+        return jsonify(res)

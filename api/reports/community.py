@@ -9,44 +9,93 @@ from flask_restful_swagger import swagger
 
 from sqlalchemy import desc
 
-class ModelClass():
-    pass
-
 
 @swagger.model
+class CommunityResponse:
+
+    __name__ = "CommunityResponse"
+
+    resource_fields = {
+        "categoria1": fields.String,
+        "categoria2": fields.String,
+        "categorias": fields.List,
+        "coficolaboradores": fields.Integer,
+        "impulcofinanciadores": fields.Integer,
+        "impulcolaboradores": fields.Integer,
+        "media-cofi": fields.Float,
+        "media-colab": fields.Float,
+        "multicofi": fields.Integer,
+        "paypal": fields.Integer,
+        "paypal-multicofi": fields.Integer,
+        "perc-bajas": fields.Float,
+        "perc-categoria1": fields.Float,
+        "perc-categoria2": fields.Float,
+        "users": fields.Integer,
+        "users-cofi-perc": fields.Float,
+        "users-multicofi-perc": fields.Float
+    }
+
+
 class CommunityAPI(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('from_date', type=str)
         self.reqparse.add_argument('to_date', type=str)
-        self.reqparse.add_argument('limit', type=int, default=10)
-        self.reqparse.add_argument('offset', type=int, default=0)
+        self.reqparse.add_argument('node', type=str, action='append')
         self.reqparse.add_argument('project', type=str, action='append')
         super(CommunityAPI, self).__init__()
 
+    successful = {
+        "code": 200,
+         "message": "OK"
+    }
+
+    invalid_input = {
+        "code": 404,
+         "message": "Not found"
+    }
+
     @swagger.operation(
     notes='Community report',
-    responseClass=ModelClass.__name__,
-    nickname='upload',
-    responseMessages=[
+    responseClass='CommunityResponse',
+    #nickname='upload',
+    parameters=[
         {
-          "code": 200,
-          "message": "OK"
+            "paramType": "query",
+            "name": "project",
+            "description": "Filter by individual project(s) separated by commas",
+            "required": False,
+            "dataType": "string",
+            "allowMultiple": True
         },
         {
-          "code": 404,
-          "message": "Not found"
+            "paramType": "query",
+            "name": "from_date",
+            "description": 'Filter from date. Ex. "2013-01-01"',
+            "required": False,
+            "dataType": "string"
+        },
+        {
+            "paramType": "query",
+            "name": "to_date",
+            "description": 'Filter until date.. Ex. "2014-01-01"',
+            "required": False,
+            "dataType": "string"
+        },
+        {
+            "paramType": "query",
+            "name": "node",
+            "description": 'Filter by individual node(s) separated by commas',
+            "required": False,
+            "dataType": "string"
         }
-      ]
-    )
+
+    ],
+    responseMessages=[successful, invalid_input])
     def get(self):
         func = sqlalchemy.func
         args = self.reqparse.parse_args()
-
-        print args
-        app.logger.debug('projects')
-        app.logger.debug(args['project'])
 
         filters = []
         if args['from_date']:
@@ -55,7 +104,8 @@ class CommunityAPI(Resource):
             filters.append(Invest.date_invested <= args['to_date'])
         if args['project']:
             filters.append(Invest.project.in_(args['project']))
-        limit = args['limit']
+        if args['node']:
+            pass
 
         # - Número total de usuarios formados en Goteo (num de proyectos enviados a revisión + inscrito talleres )
         # TODO
@@ -192,18 +242,22 @@ class CommunityAPI(Resource):
             perc = round(perc, 2)
             return {name: {'interesados': total, 'porcentaje': perc}}
 
+        res = {'users': users,
+                'users-cofi-perc': users_cofi_perc, 'multicofi': multicofi,
+                'users-multicofi-perc': users_multicofi_perc, 'paypal': paypal,
+                'paypal-multicofi': paypal_multicofi, 'perc-bajas': p_bajas,
+                'impulcofinanciadores': impulcofinanciadores,
+                'impulcolaboradores': impulcolaboradores,
+                'coficolaboradores': coficolaboradores,
+                'media-cofi': media_cofi, 'media-colab': media_colab,
+                'categorias': map(lambda i: format_categorias(i), categorias),
+                'categoria1': categorias[0][1], 'categoria2': categorias[1][1],
+                'perc-categoria1': perc_categoria1, 'perc-categoria2': perc_categoria2}
+                #'categories': ['a','b']})
 
-        app.logger.debug('end check')
+        res['filters'] = {}
+        for k, v in args.items():
+            if v is not None:
+                res['filters'][k] = v
 
-        return jsonify({'users': users,
-                        'users-cofi-perc': users_cofi_perc, 'multicofi': multicofi,
-                        'users-multicofi-perc': users_multicofi_perc, 'paypal': paypal,
-                        'paypal-multicofi': paypal_multicofi, 'perc-bajas': p_bajas,
-                        'impulcofinanciadores': impulcofinanciadores,
-                        'impulcolaboradores': impulcolaboradores,
-                        'coficolaboradores': coficolaboradores,
-                        'media-cofi': media_cofi, 'media-colab': media_colab,
-                        'categorias': map(lambda i: format_categorias(i), categorias),
-                        'categoria1': categorias[0][1], 'categoria2': categorias[1][1],
-                        'perc-categoria1': perc_categoria1, 'perc-categoria2': perc_categoria2})
-                        #'categories': ['a','b']})
+        return jsonify(res)

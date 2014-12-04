@@ -10,8 +10,21 @@ from flask_restful_swagger import swagger
 from sqlalchemy import and_, or_, desc
 
 
-class ModelClass():
-    pass
+@swagger.model
+class ProjectsResponse:
+
+    __name__ = "ProjectsResponse"
+
+    resource_fields = {
+        "failed": fields.Integer,
+        "published": fields.Integer,
+        "received": fields.Integer,
+        "succesful": fields.Integer,
+        "successful-percentage": fields.Float,
+        "top10-collaborations": fields.List,
+        "top10-investors": fields.List,
+        "top10-invests": fields.List,
+    }
 
 
 @swagger.model
@@ -21,33 +34,60 @@ class ProjectsAPI(Resource):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('from_date', type=str)
         self.reqparse.add_argument('to_date', type=str)
-        self.reqparse.add_argument('limit', type=int, default=10)
-        self.reqparse.add_argument('offset', type=int, default=0)
+        self.reqparse.add_argument('node', type=str, action='append')
         self.reqparse.add_argument('project', type=str, action='append')
         super(ProjectsAPI, self).__init__()
 
+    successful = {
+        "code": 200,
+         "message": "OK"
+    }
+
+    invalid_input = {
+        "code": 404,
+         "message": "Not found"
+    }
+
     @swagger.operation(
     notes='Projects report',
-    responseClass=ModelClass.__name__,
-    nickname='upload',
-    responseMessages=[
+    responseClass='ProjectsResponse',
+    #nickname='upload',
+    parameters=[
         {
-          "code": 200,
-          "message": "OK"
+            "paramType": "query",
+            "name": "project",
+            "description": "Filter by individual project(s) separated by commas",
+            "required": False,
+            "dataType": "string",
+            "allowMultiple": True
         },
         {
-          "code": 404,
-          "message": "Not found"
+            "paramType": "query",
+            "name": "from_date",
+            "description": 'Filter from date. Ex. "2013-01-01"',
+            "required": False,
+            "dataType": "string"
+        },
+        {
+            "paramType": "query",
+            "name": "to_date",
+            "description": 'Filter until date.. Ex. "2014-01-01"',
+            "required": False,
+            "dataType": "string"
+        },
+        {
+            "paramType": "query",
+            "name": "node",
+            "description": 'Filter by individual node(s) separated by commas',
+            "required": False,
+            "dataType": "string"
         }
-      ]
-    )
+
+    ],
+    responseMessages=[successful, invalid_input])
     def get(self):
         func = sqlalchemy.func
         args = self.reqparse.parse_args()
-
-        print args
-        app.logger.debug('projects')
-        app.logger.debug(args['project'])
 
         filters = []
         # FIXME: Qué fechas coger depende del dato: creación, finalización...
@@ -57,9 +97,8 @@ class ProjectsAPI(Resource):
             filters.append(Invest.date_invested <= args['to_date'])
         if args['project']:
             filters.append(Invest.project.in_(args['project'][0]))
-        limit = args['limit']
-
-        app.logger.debug('start sql')
+        if args['node']:
+            pass
 
         # - Proyectos enviados a revisión (renombrar Proyectos recibidos)
         f_rev_projects = list(filters)
@@ -114,7 +153,7 @@ class ProjectsAPI(Resource):
         f_p_avg_success.append(Invest.status.in_([1, 3]))
         f_p_avg_success.append(Project.status.in_([4, 5]))
         p_avg_success = db.session.query(func.sum(Invest.amount) / func.count(func.distinct(Project.id)))\
-                                        .join(Project).filter(*f_p_avg_success).scalar()
+                                    .join(Project).filter(*f_p_avg_success).scalar()
         p_avg_success = round(p_avg_success, 2)
 
         # - (NUEVOS)10 Campañas con más cofinanciadores
@@ -135,8 +174,8 @@ class ProjectsAPI(Resource):
         f_top10_invests.append(Project.status == 4)
         f_top10_invests.append(Invest.status.in_([0, 1, 3]))
         top10_invests = db.session.query(Project.id, func.sum(Invest.amount).label('total')).join(Invest)\
-                                                                .filter(*f_top10_invests).group_by(Invest.project)\
-                                                                .order_by(desc('total')).limit(10).all()
+                                    .filter(*f_top10_invests).group_by(Invest.project)\
+                                    .order_by(desc('total')).limit(10).all()
 
         # - Campañas más rápidas en conseguir el mínimo (NUEVO)
         # TODO
@@ -147,10 +186,51 @@ class ProjectsAPI(Resource):
         # TODO
         # Project.status 4,5
         # AVG(blog)
+        """
+        array(
+            'label' => 'Media de posts proyecto exitoso',
+            'sql'   => "SELECT (
+                                SELECT SUM(posts)
+                                FROM (
+                                    SELECT COUNT(post.id) as posts
+                                    FROM post
+                                    INNER JOIN blog
+                                        ON   blog.id = post.blog
+                                        AND  blog.type = 'project'
+                                    INNER JOIN project
+                                        ON  project.id = blog.owner
+                                        AND project.status IN (4, 5)
+                                    WHERE post.publish = 1
+                                    GROUP BY post.blog
+                                    ) as temp1
+                            )
+                            / (
+                                SELECT COUNT(*)
+                                FROM (
+                                    SELECT project.id
+                                    FROM post
+                                    INNER JOIN blog
+                                        ON   blog.id = post.blog
+                                        AND  blog.type = 'project'
+                                    INNER JOIN project
+                                        ON  project.id = blog.owner
+                                        AND project.status IN (4, 5)
+                                    WHERE post.publish = 1
+                                    GROUP BY post.blog
+                                    ) as numero_proyectos
+                            ) as average
+                        FROM dual
+                        ",
+        """
 
-        app.logger.debug('end check')
+        res = {'received': rev_projects, 'published': pub_projects,
+                'succesful': succ_projects, 'successful-percentage': p_succ_projects,
+                'failed': fail_projects, 'top10-investors': top10_investors,
+                'top10-collaborations': top10_collaborations, 'top10-invests': top10_invests}
 
-        return jsonify({'received': rev_projects, 'published': pub_projects,
-                        'succesful': succ_projects, 'successful-percentage': p_succ_projects,
-                        'failed': fail_projects, 'top10-investors': top10_investors,
-                        'top10-collaborations': top10_collaborations, 'top10-invests': top10_invests})
+        res['filters'] = {}
+        for k, v in args.items():
+            if v is not None:
+                res['filters'][k] = v
+        
+        return jsonify(res)
