@@ -104,20 +104,19 @@ class MoneyAPI(Resource):
         args = self.reqparse.parse_args()
 
         filters = []
-        filters2 = []
+        filters2 = [] # para average_mincost
         if args['from_date']:
             filters.append(Invest.date_invested >= args['from_date'])
             filters2.append(Invest.date_invested >= args['from_date'])
         if args['to_date']:
             filters.append(Invest.date_invested <= args['to_date'])
-            filters2.append(Invest.date_invested >= args['from_date'])
+            filters2.append(Invest.date_invested <= args['to_date'])
         if args['project']:
             filters.append(Invest.project.in_(args['project']))
-            filters2.append(Project.id.in_(args['project']))  # para average_mincost
+            filters2.append(Project.id.in_(args['project']))
         if args['node']:
-            # TODO: Performance-killer!
             filters.append(Invest.id == InvestNode.invest_id)
-            filters2.append(Invest.id == InvestNode.invest_id)
+            filters2.append(Project.id == InvestNode.project_id)
             filters.append(InvestNode.invest_node.in_(args['node']))
             filters2.append(InvestNode.invest_node.in_(args['node']))
 
