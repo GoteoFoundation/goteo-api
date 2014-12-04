@@ -149,6 +149,10 @@ class Reward(db.Model):
 class InvestNode(db.Model):
     __tablename__ = 'invest_node'
 
+    user_id = db.Column('user_id', String(50))
+    user_node = db.Column('user_node', String(50))
+    project_id = db.Column('project_id', String(50))
+    project_node = db.Column('project_node', String(50))
     invest_id = db.Column('invest_id', Integer, db.ForeignKey('invest.id'), primary_key=True)
     invest_node = db.Column('invest_node', String(50))
 
