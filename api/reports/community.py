@@ -12,6 +12,7 @@ from sqlalchemy import desc
 
 @swagger.model
 class CommunityResponse:
+    """CommunityResponse"""
 
     __name__ = "CommunityResponse"
 
@@ -19,6 +20,8 @@ class CommunityResponse:
         "categoria1": fields.String,
         "categoria2": fields.String,
         "categorias": fields.List,
+        "cofinanciadores": fields.Integer,
+        "colaboradores": fields.Integer,
         "coficolaboradores": fields.Integer,
         "impulcofinanciadores": fields.Integer,
         "impulcolaboradores": fields.Integer,
@@ -32,8 +35,13 @@ class CommunityResponse:
         "perc-categoria2": fields.Float,
         "users": fields.Integer,
         "users-cofi-perc": fields.Float,
-        "users-multicofi-perc": fields.Float
+        "users-multicofi-perc": fields.Float,
+        "top10-cofi": fields.List,
+        "top10-cofi2": fields.List,
+        "top10-colab": fields.List
     }
+
+    required = []
 
 
 class CommunityAPI(Resource):
@@ -46,20 +54,16 @@ class CommunityAPI(Resource):
         self.reqparse.add_argument('project', type=str, action='append')
         super(CommunityAPI, self).__init__()
 
-    successful = {
-        "code": 200,
-         "message": "OK"
-    }
-
     invalid_input = {
-        "code": 404,
-         "message": "Not found"
+        "code": 400,
+        "message": "Invalid parameters"
     }
 
     @swagger.operation(
+    summary='Community report',
     notes='Community report',
     responseClass='CommunityResponse',
-    #nickname='upload',
+    nickname='community',
     parameters=[
         {
             "paramType": "query",
@@ -92,8 +96,37 @@ class CommunityAPI(Resource):
         }
 
     ],
-    responseMessages=[successful, invalid_input])
+    responseMessages=[invalid_input])
     def get(self):
+        """Get the Community Report
+
+        Descripción de los valores devueltos:
+        <strong>users</strong>: Número total de usuarios registrados
+        <strong>perc-bajas</strong>: Porcentaje de usuarios que se han dado de baja
+        <strong>cofinanciadores</strong>: Número de cofinanciadores
+        <strong>users-cofi-perc</strong>: % usuarios registrados que son cofinanciadores
+        <strong>coficolaboradores</strong>: Número de cofinanciadores que colaboran
+        <strong>multicofi</strong>: Número de Multi-Cofinanciadores (a más de 1 proyecto)
+        <strong>users-multicofi-perc</strong>: % de Multi-Cofinanciadores (a más de 1 proyecto)
+        <strong>paypal</strong>: Número de cofinanciadores que usan PayPal
+        <strong>paypal-multicofi</strong>: Número de Multi-Cofinanciadores que usan PayPal
+        <strong>colaboradores</strong>: Número de colaboradores
+        <strong>media-cofi</strong>: Media de cofinanciadores por proyecto exitoso
+        <strong>media-colab</strong>: Media de colaboradores por proyecto
+        <strong>impulcofinanciadores</strong>: Número de impulsores que cofinancian a otros
+        <strong>impulcolaboradores</strong>: Número de impulsores que colaboran con otros
+        <strong>categoria1</strong>: 1ª categoría con más usuarios interesados
+        <strong>perc-categoria1</strong>: % usuarios en esta 1ª categoría
+        <strong>categoria2</strong>: 2ª categoría con más usuarios interesados
+        <strong>perc-categoria2</strong>: % usuarios en esta 2ª categoría
+        <strong>top10-cofi</strong>: Top 10 cofinanciadores
+        <strong>top10-cofi2</strong>: Top 10 cofinanciadores con más caudal (más generosos) sin incluir usuarios convocadores
+        <strong>top10-colab</strong>: Top 10 colaboradores
+
+        <strong>categorias</strong>:
+
+        Además se añade el campo "filters"
+        """
         func = sqlalchemy.func
         args = self.reqparse.parse_args()
 
@@ -246,6 +279,7 @@ class CommunityAPI(Resource):
                 'users-cofi-perc': users_cofi_perc, 'multicofi': multicofi,
                 'users-multicofi-perc': users_multicofi_perc, 'paypal': paypal,
                 'paypal-multicofi': paypal_multicofi, 'perc-bajas': p_bajas,
+                'colaboradores': colaboradores,
                 'impulcofinanciadores': impulcofinanciadores,
                 'impulcolaboradores': impulcolaboradores,
                 'coficolaboradores': coficolaboradores,

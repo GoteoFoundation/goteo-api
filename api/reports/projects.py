@@ -21,9 +21,14 @@ class ProjectsResponse:
         "received": fields.Integer,
         "succesful": fields.Integer,
         "successful-percentage": fields.Float,
-        "top10-collaborations": fields.List,
+        "successful-finished": fields.Integer,
+        "successful-finished-perc": fields.Float,
+        "average-success-percentage": fields.Float,
         "top10-investors": fields.List,
+        "top10-collaborations": fields.List,
         "top10-invests": fields.List,
+        "top10-fastest": fields.List,
+        "average-successful-posts": fields.Float,
     }
 
 
@@ -38,20 +43,16 @@ class ProjectsAPI(Resource):
         self.reqparse.add_argument('project', type=str, action='append')
         super(ProjectsAPI, self).__init__()
 
-    successful = {
-        "code": 200,
-         "message": "OK"
-    }
-
     invalid_input = {
-        "code": 404,
-         "message": "Not found"
+        "code": 400,
+        "message": "Invalid parameters"
     }
 
     @swagger.operation(
+    summary='Projects report',
     notes='Projects report',
     responseClass='ProjectsResponse',
-    #nickname='upload',
+    nickname='projects',
     parameters=[
         {
             "paramType": "query",
@@ -84,8 +85,27 @@ class ProjectsAPI(Resource):
         }
 
     ],
-    responseMessages=[successful, invalid_input])
+    responseMessages=[invalid_input])
     def get(self):
+        """Get the Projects Report
+
+        Descripción de los valores devueltos:
+        <strong>failed</strong>: Proyectos fallidos
+        <strong>published</strong>: Proyectos publicados
+        <strong>received</strong>: Proyectos recibidos (enviados a revisión)
+        <strong>succesful</strong>: Proyectos exitosos (alcanzaron el mínimo)
+        <strong>successful-percentage</strong>: % de proyectos exitosos
+        <strong>successful-finished</strong>: Número de proyectos exitosos con campaña finalizada
+        <strong>successful-finished-perc</strong>: % éxito campañas finalizadas
+        <strong>top10-collaborations</strong>: Las 10 campañas con más colaboraciones
+        <strong>top10-investors</strong>: Las 10 campañas con más cofinanciadores
+        <strong>top10-invests</strong>: Las 10 campañas que han recaudado más dinero
+        <strong>average-success-percentage</strong>: % de recaudación media conseguida por proyectos exitosos
+        <strong>top10-fastest</strong>: Las 10 campañas más rápidas en conseguir el mínimo
+        <strong>average-successful-posts</strong>: Media de posts en proyectos exitosos
+
+        Además se añade el campo "filters"
+        """
         func = sqlalchemy.func
         args = self.reqparse.parse_args()
 
@@ -232,5 +252,5 @@ class ProjectsAPI(Resource):
         for k, v in args.items():
             if v is not None:
                 res['filters'][k] = v
-        
+
         return jsonify(res)

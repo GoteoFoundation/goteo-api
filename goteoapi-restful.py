@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from model import app, db
+from model import app
 
 from flask import request
 
@@ -12,8 +12,9 @@ from api.reports.projects import ProjectsAPI
 
 from flask_restful_swagger import swagger
 from flask.ext.restful import Api
-api = swagger.docs(Api(app), apiVersion='1.0')
+api = swagger.docs(Api(app), apiVersion='1.0', description='Goteo.org API')
 #api = Api(app)
+
 
 @app.route('/')
 def index():
@@ -23,6 +24,7 @@ API de Goteo.org.<br><br>
 <br>
 Swagger UI: <a href="http://{host}/api/spec.html">http://{host}/api/spec.html</a> (<a href="http://{host}/api/spec.json">json</a>)
 """.format(host=request.host)
+
 
 @app.route('/reports/')
 def reports():

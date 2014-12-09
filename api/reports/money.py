@@ -19,7 +19,7 @@ invest_fields = {
 
 @swagger.model
 class MoneyResponse:
-
+    """MoneyResponse"""
     __name__ = "MoneyResponse"
 
     resource_fields = {
@@ -30,14 +30,14 @@ class MoneyResponse:
         "average-received": fields.Float,
         "average-second-round": fields.Float,
         "call-amount": fields.Integer,
+        "call-committed-amount": fields.Integer,
         "cash-amount": fields.Integer,
-        "comprometido": fields.Integer,
+        "committed": fields.Integer,
         "comprometido-fail": fields.Float,
         "comprometido-success": fields.Float,
         "devuelto": fields.Integer,
         "fee-amount": fields.Float,
         "paypal-amount": fields.Integer,
-        "results-per-page": fields.Integer,
         "tpv-amount": fields.Integer
     }
 
@@ -52,20 +52,16 @@ class MoneyAPI(Resource):
         self.reqparse.add_argument('project', type=str, action='append')
         super(MoneyAPI, self).__init__()
 
-    successful = {
-        "code": 200,
-         "message": "OK"
-    }
-
     invalid_input = {
-        "code": 404,
-         "message": "Not found"
+        "code": 400,
+        "message": "Invalid parameters"
     }
 
     @swagger.operation(
+    summary='Money report',
     notes='Money report',
     responseClass='MoneyResponse',
-    #nickname='get',
+    nickname='money',
     parameters=[
         {
             "paramType": "query",
@@ -98,8 +94,30 @@ class MoneyAPI(Resource):
         }
 
     ],
-    responseMessages=[successful, invalid_input])
+    responseMessages=[invalid_input])
     def get(self):
+        """Get the Money Report
+
+        Descripción de los valores devueltos:
+        <strong>average-failed</strong>: Recaudación media por proyectos que no alcanzaron el mínimo
+        <strong>average-invest</strong>: Aportación media por cofinanciador (micromecenas)
+        <strong>average-invest-paypal</strong>: Aportación media por cofinanciador (micromecenas) a través de PayPal
+        <strong>average-mincost</strong>: Coste medio de los proyectos exitosos
+        <strong>average-received</strong>: Recaudación media por proyectos exitosos (que sí alcanzaron el mínimo)
+        <strong>average-second-round</strong>: Recaudación media en segunda ronda
+        <strong>call-amount</strong>: Suma recaudada en Convocatorias (Capital riego distribuido + crowd)
+        <strong>call-committed-amount</strong>: Capital Riego de Goteo (fondos captados de instituciones y empresas destinados a la bolsa de <a href="https://goteo.org/service/resources">Capital Riego</a>)
+        <strong>cash-amount</strong>: Suma recaudada mediante transferencia bancaria directa
+        <strong>committed</strong>: Suma recaudada por la plataforma
+        <strong>comprometido-fail</strong>: Porcentaje de recaudación media sobre el mínimo en proyectos fallidos
+        <strong>comprometido-success</strong>: Porcentaje de recaudación media sobre el mínimo en proyectos exitosos
+        <strong>devuelto</strong>: Dinero devuelto (en proyectos archivados)
+        <strong>fee-amount</strong>: Total 8% recaudado por Goteo
+        <strong>paypal-amount</strong>: Suma recaudada mediante PayPal
+        <strong>tpv-amount</strong>: Suma recaudada mediante TPV
+
+        Además se añade el campo "filters"
+        """
         func = sqlalchemy.func
         args = self.reqparse.parse_args()
 

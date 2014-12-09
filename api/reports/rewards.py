@@ -9,8 +9,22 @@ from flask_restful_swagger import swagger
 
 from sqlalchemy import and_, or_, desc
 
+@swagger.model
+class RewardsPerAmount:
+    resource_fields = {
+        "rewards-between-100-400": fields.Integer,
+        "rewards-between-15-30": fields.Integer,
+        "rewards-between-30-100": fields.Integer,
+        "rewards-less-than-15": fields.Integer,
+        "rewards-more-than-400": fields.Integer
+    }
+    required = ['rewards-between-100-400', 'rewards-between-15-30', 'rewards-between-30-100',
+                'rewards-less-than-15', 'rewards-more-than-400']
 
 @swagger.model
+@swagger.nested(
+    rewards_per_amount=RewardsPerAmount.__name__)
+    #rewards-per-amount=RewardsPerAmount.__name__)
 class RewardsResponse:
 
     __name__ = "RewardsResponse"
@@ -19,8 +33,10 @@ class RewardsResponse:
         "favorite-rewards": fields.List,
         "perc-renuncias": fields.Float,
         "renuncias": fields.Integer,
-        "rewards-per-amount": fields.List
+        "rewards_per_amount": fields.Nested(RewardsPerAmount.resource_fields)  # FIXME: parametros con guiones
     }
+
+    required = ['favorite-rewards', 'perc-renuncias', 'renuncias', 'rewards_per_amount']
 
 
 @swagger.model
@@ -34,20 +50,16 @@ class RewardsAPI(Resource):
         self.reqparse.add_argument('project', type=str, action='append')
         super(RewardsAPI, self).__init__()
 
-    successful = {
-        "code": 200,
-         "message": "OK"
-    }
-
     invalid_input = {
-        "code": 404,
-         "message": "Not found"
+        "code": 400,
+         "message": "Invalid parameters"
     }
 
     @swagger.operation(
+    summary='Rewards report',
     notes='Rewards report',
     responseClass='RewardsResponse',
-    #nickname='upload',
+    nickname='rewards',
     parameters=[
         {
             "paramType": "query",
@@ -80,8 +92,26 @@ class RewardsAPI(Resource):
         }
 
     ],
-    responseMessages=[successful, invalid_input])
+    responseMessages=[invalid_input])
     def get(self):
+        """Get the Rewards Report
+
+        Descripción de los valores devueltos:
+
+        <strong>renuncias</strong>: Número de cofinanciadores que renuncian a recompensa
+        <strong>perc-renuncias</strong>: % cofinanciadores que renuncian a recompensa
+        <strong>favorite-rewards</strong>: Tipo de recompensa más utilizada en proyectos exitosos
+
+        <strong>rewards-between-100-400</strong>: Recompensa elegida de 100 a 400 euros
+        <strong>rewards-between-15-30</strong>: Recompensa elegida de 15 a 30 euros
+        <strong>rewards-between-30-100</strong>: Recompensa elegida de 30 a 100 euros
+        <strong>rewards-less-than-15</strong>: Recompensa elegida de menos de 15 euros
+        <strong>rewards-more-than-400</strong>: Recompensa elegida de más de 400 euros
+
+        <strong>rewards_per_amount</strong>:
+
+        Además se añade el campo "filters"
+        """
         func = sqlalchemy.func
         args = self.reqparse.parse_args()
 
