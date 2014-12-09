@@ -18,8 +18,7 @@ class RewardsPerAmount:
         "rewards-less-than-15": fields.Integer,
         "rewards-more-than-400": fields.Integer
     }
-    required = ['rewards-between-100-400', 'rewards-between-15-30', 'rewards-between-30-100',
-                'rewards-less-than-15', 'rewards-more-than-400']
+    required = resource_fields.keys()
 
 @swagger.model
 @swagger.nested(
@@ -36,7 +35,7 @@ class RewardsResponse:
         "rewards_per_amount": fields.Nested(RewardsPerAmount.resource_fields)  # FIXME: parametros con guiones
     }
 
-    required = ['favorite-rewards', 'perc-renuncias', 'renuncias', 'rewards_per_amount']
+    required = resource_fields.keys()
 
 
 @swagger.model

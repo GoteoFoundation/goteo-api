@@ -41,6 +41,8 @@ class MoneyResponse:
         "tpv-amount": fields.Integer
     }
 
+    required = resource_fields.keys()
+
 
 class MoneyAPI(Resource):
 

@@ -31,6 +31,8 @@ class ProjectsResponse:
         "average-successful-posts": fields.Float,
     }
 
+    required = resource_fields.keys()
+
 
 @swagger.model
 class ProjectsAPI(Resource):

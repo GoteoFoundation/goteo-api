@@ -40,8 +40,8 @@ class CommunityResponse:
         "top10-cofi2": fields.List,
         "top10-colab": fields.List
     }
-
-    required = []
+    
+    required = resource_fields.keys()
 
 
 class CommunityAPI(Resource):
