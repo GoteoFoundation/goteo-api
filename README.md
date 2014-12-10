@@ -86,3 +86,14 @@ Error:
         "message": "Bad Request",
         "status": 400
     }
+
+## Notas
+
+Durante el desarrollo de la API sale la [versión 2.0](https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md)
+de la especificación de swagger y por otra parte flask-restful-swagger solo soporta la versión 1.2.
+
+La versión 2.0 incluye, entre otras muchas mejoras, la posibilidad de especificar parámetros múltiples desde la interfaz web
+de la forma: http://URL?opt=bar&opt=foo
+
+Más información aquí:
+https://github.com/rantav/flask-restful-swagger/issues/50#issuecomment-65641980
