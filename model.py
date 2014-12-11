@@ -31,10 +31,23 @@ class User(db.Model):
     id = db.Column('id', String(50), primary_key=True)
     name = db.Column('name', String(100))
     active = db.Column('active', Integer)
+    hide = db.Column('hide', Integer)
+    node = db.Column('node', String(50), db.ForeignKey('node.id'))
     # email = db.Column('email', String(255))
 
     def __repr__(self):
         return '<User %s: %s>' % (self.name, self.email)
+
+
+class UserRole(db.Model):
+    __tablename__ = 'user_role'
+
+    user_id = db.Column('user_id', String(50), db.ForeignKey('user.id'), primary_key=True)
+    role_id = db.Column('role_id', String(50), primary_key=True)
+    node_id = db.Column('node_id', String(50), db.ForeignKey('node.id'))
+
+    def __repr__(self):
+        return '<UserRole %s: %s>' % (self.user_id, self.role_id)
 
 
 class Invest(db.Model):
@@ -65,7 +78,7 @@ class Project(db.Model):
     id = db.Column('id', String(50), primary_key=True)
     owner = db.Column('owner', String(50), db.ForeignKey('user.id'))
     name = db.Column('name', Text)
-    category = db.Column('category', String(50))
+    category = db.Column('category', String(50), db.ForeignKey('category.id'))
     minimum = db.Column('mincost', Integer)
     optimum = db.Column('maxcost', Integer)
     #subtitle = db.Column('subtitle', String(255))
@@ -75,6 +88,7 @@ class Project(db.Model):
     date_updated = db.Column('updated', Date)
     date_published = db.Column('published', Date)
     date_closed = db.Column('closed', Date)
+    node = db.Column('node', String(50), db.ForeignKey('node.id'))
     # total_funding
     # active_date
     # rewards
@@ -83,6 +97,17 @@ class Project(db.Model):
 
     def __repr__(self):
         return '<Project %s: %s>' % (self.id, self.name)
+
+
+class Node(db.Model):
+    __tablename__ = 'node'
+
+    id = db.Column('id', String(50), primary_key=True)
+    name = db.Column('name', String(256))
+    active = db.Column('active', Integer)
+
+    def __repr__(self):
+        return '<Node(%d): %s>' % (self.id, self.name)
 
 
 class Call(db.Model):
@@ -106,6 +131,16 @@ class Category(db.Model):
         return '<Category %s>' % (self.name)
 
 
+class ProjectCategory(db.Model):
+    __tablename__ = 'project_category'
+
+    project = db.Column('project', String(50), db.ForeignKey('project.id'), primary_key=True)
+    category = db.Column('category', Integer, db.ForeignKey('category.id'), primary_key=True)
+
+    def __repr__(self):
+        return '<Category %s>' % (self.name)
+
+
 class Blog(db.Model):
     __tablename__ = 'blog'
 
@@ -122,10 +157,11 @@ class Post(db.Model):
     __tablename__ = 'post'
 
     id = db.Column('id', Integer, primary_key=True)
-    blog = db.Column('blog', Integer), db.ForeignKey('blog.id')
+    blog = db.Column('blog', Integer, db.ForeignKey('blog.id'))
     title = db.Column('title', Text)
-    date_publish = db.Column('publish', Boolean)
+    date_publish = db.Column('date', Date)
     author = db.Column('author', String(50), db.ForeignKey('user.id'))
+    publish = db.Column('publish', Integer)
 
     def __repr__(self):
         return '<Post(%d) %s: %s>' % (self.id, self.blog, self.title[:50])

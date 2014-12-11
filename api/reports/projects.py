@@ -43,6 +43,7 @@ class ProjectsAPI(Resource):
         self.reqparse.add_argument('to_date', type=str)
         self.reqparse.add_argument('node', type=str, action='append')
         self.reqparse.add_argument('project', type=str, action='append')
+        self.reqparse.add_argument('category', type=str, action='append')
         super(ProjectsAPI, self).__init__()
 
     invalid_input = {
@@ -84,6 +85,13 @@ class ProjectsAPI(Resource):
             "description": 'Filter by individual node(s) separated by commas',
             "required": False,
             "dataType": "string"
+        },
+        {
+            "paramType": "query",
+            "name": "category",
+            "description": 'Filter by project categories separated by commas',
+            "required": False,
+            "dataType": "string"
         }
 
     ],
@@ -120,17 +128,23 @@ class ProjectsAPI(Resource):
         if args['project']:
             filters.append(Invest.project.in_(args['project'][0]))
         if args['node']:
+            #
+            filters.append(Project.node.in_(args['node']))
+            #
+            #filters.append(Project.id == InvestNode.project_id)
+            #filters.append(InvestNode.project_node.in_(args['node']))
+        if args['category']:
             pass
 
         # - Proyectos enviados a revisión (renombrar Proyectos recibidos)
         f_rev_projects = list(filters)
-        f_rev_projects.append(Project.date_updated is not None)
+        f_rev_projects.append(Project.date_updated != None)
         f_rev_projects.append(Project.date_updated != '0000-00-00')
         rev_projects = db.session.query(func.count(Project.id)).filter(*f_rev_projects).scalar()
 
         # - Proyectos publicados
         f_pub_projects = list(filters)
-        f_pub_projects.append(Project.date_published is not None)
+        f_pub_projects.append(Project.date_published != None)
         f_pub_projects.append(Project.date_published != '0000-00-00')
         f_pub_projects.append(Project.status > 0)
         pub_projects = db.session.query(func.count(Project.id)).filter(*f_pub_projects).scalar()
@@ -138,7 +152,7 @@ class ProjectsAPI(Resource):
         # - Proyectos exitosos (llegan al mínimo pueden estar en campaña)
         # FIXME: (Project.status > 0)
         f_succ_projects = list(filters)
-        f_succ_projects.append(Project.date_passed is not None)
+        f_succ_projects.append(Project.date_passed != None)
         f_succ_projects.append(Project.date_passed != '0000-00-00')
         #f_succ_projects.append(Project.status.in_([3, 4, 5]))
         f_succ_projects.append(Project.status > 0)
@@ -151,13 +165,16 @@ class ProjectsAPI(Resource):
         and2 = and_(Project.date_closed != None, Project.date_closed != '0000-00-00')
         f_pub_projects2.append(or_(and1, and2))
         pub_projects2 = db.session.query(func.count(Project.id)).filter(*f_pub_projects2).scalar()
-        p_succ_projects = float(succ_projects) / pub_projects2 * 100
-        p_succ_projects = round(p_succ_projects, 2)
+        if pub_projects2 == 0:
+            p_succ_projects = 0
+        else:
+            p_succ_projects = float(succ_projects) / pub_projects2 * 100
+            p_succ_projects = round(p_succ_projects, 2)
 
         # -(nuevo) proyectos exitosos con campaña finalizada
         # FIXME: correcto?
         f_succ_finished = list(filters)
-        f_succ_finished.append(Project.status == 4)
+        f_succ_finished.append(Project.status.in_([4, 5]))
         succ_finished = db.session.query(Project).filter(*f_succ_finished).count()
 
         # - Proyectos archivados Renombrar por Proyectos Fallidos
@@ -167,8 +184,11 @@ class ProjectsAPI(Resource):
 
         # _(nuevo)% éxito campañas finalizadas
         # FIXME: correcto?
-        p_succ_finished = float(succ_finished) / (succ_finished + fail_projects)
-        p_succ_finished = round(p_succ_finished, 2)
+        if succ_finished == 0 and fail_projects == 0:
+            p_succ_finished = 0
+        else:
+            p_succ_finished = float(succ_finished) / (succ_finished + fail_projects)
+            p_succ_finished = round(p_succ_finished, 2)
 
         # - Porcentaje media de recaudación conseguida por proyectos exitosos
         f_p_avg_success = list(filters)
@@ -176,15 +196,20 @@ class ProjectsAPI(Resource):
         f_p_avg_success.append(Project.status.in_([4, 5]))
         p_avg_success = db.session.query(func.sum(Invest.amount) / func.count(func.distinct(Project.id)))\
                                     .join(Project).filter(*f_p_avg_success).scalar()
-        p_avg_success = round(p_avg_success, 2)
+        if p_avg_success is None:
+            p_avg_success = 0
+        else:
+            p_avg_success = round(p_avg_success, 2)
 
         # - (NUEVOS)10 Campañas con más cofinanciadores
+        # FIXME: invest.status?
         f_top10_investors = list(filters)
         top10_investors = db.session.query(Project.id, func.count(Invest.id).label('total')).join(Invest)\
                                     .filter(*f_top10_investors).group_by(Invest.project)\
                                     .order_by(desc('total')).limit(10).all()
 
         # - 10 Campañas con más colaboraciones
+        # FIXME: correcto?
         f_top10_collaborations = list(filters)
         top10_collaborations = db.session.query(Project.id, func.count(Message.id).label('total')).join(Message)\
                             .filter(*f_top10_collaborations).group_by(Message.project)\
@@ -193,7 +218,7 @@ class ProjectsAPI(Resource):
         # - 10 Campañas que han recaudado más dinero
         # FIXME: correcto?
         f_top10_invests = list(filters)
-        f_top10_invests.append(Project.status == 4)
+        f_top10_invests.append(Project.status.in_([4, 5]))
         f_top10_invests.append(Invest.status.in_([0, 1, 3]))
         top10_invests = db.session.query(Project.id, func.sum(Invest.amount).label('total')).join(Invest)\
                                     .filter(*f_top10_invests).group_by(Invest.project)\
@@ -203,52 +228,26 @@ class ProjectsAPI(Resource):
         # TODO
         # Contar Invest.date_invested ordenadas que suman Project.minimum. Coger el que tenga menos dias. ¿10?
         # Lo que pasa es que va a haber primero proyectos de poco dinero.
-
+        top10_fastest = 0
+        # passed - published
+        db.session.query(func.daytime)
         # - Media de posts proyecto exitoso
-        # TODO
-        # Project.status 4,5
-        # AVG(blog)
-        """
-        array(
-            'label' => 'Media de posts proyecto exitoso',
-            'sql'   => "SELECT (
-                                SELECT SUM(posts)
-                                FROM (
-                                    SELECT COUNT(post.id) as posts
-                                    FROM post
-                                    INNER JOIN blog
-                                        ON   blog.id = post.blog
-                                        AND  blog.type = 'project'
-                                    INNER JOIN project
-                                        ON  project.id = blog.owner
-                                        AND project.status IN (4, 5)
-                                    WHERE post.publish = 1
-                                    GROUP BY post.blog
-                                    ) as temp1
-                            )
-                            / (
-                                SELECT COUNT(*)
-                                FROM (
-                                    SELECT project.id
-                                    FROM post
-                                    INNER JOIN blog
-                                        ON   blog.id = post.blog
-                                        AND  blog.type = 'project'
-                                    INNER JOIN project
-                                        ON  project.id = blog.owner
-                                        AND project.status IN (4, 5)
-                                    WHERE post.publish = 1
-                                    GROUP BY post.blog
-                                    ) as numero_proyectos
-                            ) as average
-                        FROM dual
-                        ",
-        """
+        f_avg_succ_posts = list(filters)
+        f_avg_succ_posts.append(Post.publish == 1)
+        sq1 = db.session.query(func.count(Project.id).label('posts')).select_from(Post)\
+                            .join(Blog, and_(Blog.id == Post.blog, Blog.type == 'project'))\
+                            .join(Project, and_(Project.id == Blog.owner, Project.status.in_([4, 5])))\
+                            .filter(*f_avg_succ_posts).group_by(Post.blog).subquery()
+        avg_succ_posts = db.session.query(func.avg(sq1.c.posts)).scalar()
 
-        res = {'received': rev_projects, 'published': pub_projects,
+
+        res = {'received': rev_projects, 'published': pub_projects, 'failed': fail_projects,
                 'succesful': succ_projects, 'successful-percentage': p_succ_projects,
-                'failed': fail_projects, 'top10-investors': top10_investors,
-                'top10-collaborations': top10_collaborations, 'top10-invests': top10_invests}
+                'top10-collaborations': top10_collaborations, 'top10-invests': top10_invests,
+                'top10-fastest': top10_fastest, 'top10-investors': top10_investors,
+                'successful-finished': succ_finished, 'successful-finished-perc': p_succ_finished,
+                'average-success-percentage': p_avg_success, 'average-successful-posts': avg_succ_posts
+                }
 
         res['filters'] = {}
         for k, v in args.items():

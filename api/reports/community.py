@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from model import app, db
-from model import Invest, User, Category, Message, Project, UserInterest
+from model import Invest, InvestNode, User, Category, Message, Project, UserInterest, UserRole
 
 from flask import abort, jsonify
 from flask.ext.restful import Resource, reqparse, fields, marshal
@@ -40,7 +40,7 @@ class CommunityResponse:
         "top10-cofi2": fields.List,
         "top10-colab": fields.List
     }
-    
+
     required = resource_fields.keys()
 
 
@@ -52,6 +52,7 @@ class CommunityAPI(Resource):
         self.reqparse.add_argument('to_date', type=str)
         self.reqparse.add_argument('node', type=str, action='append')
         self.reqparse.add_argument('project', type=str, action='append')
+        self.reqparse.add_argument('category', type=str, action='append')
         super(CommunityAPI, self).__init__()
 
     invalid_input = {
@@ -93,6 +94,13 @@ class CommunityAPI(Resource):
             "description": 'Filter by individual node(s) separated by commas',
             "required": False,
             "dataType": "string"
+        },
+        {
+            "paramType": "query",
+            "name": "category",
+            "description": 'Filter by project categories separated by commas',
+            "required": False,
+            "dataType": "string"
         }
 
     ],
@@ -131,13 +139,27 @@ class CommunityAPI(Resource):
         args = self.reqparse.parse_args()
 
         filters = []
+        filters2 = []
+        filters3 = []
         if args['from_date']:
             filters.append(Invest.date_invested >= args['from_date'])
+            filters2.append(Invest.date_invested >= args['from_date'])
+            filters3.append(Invest.date_invested >= args['from_date'])
         if args['to_date']:
             filters.append(Invest.date_invested <= args['to_date'])
+            filters2.append(Invest.date_invested <= args['to_date'])
+            filters3.append(Invest.date_invested <= args['to_date'])
         if args['project']:
             filters.append(Invest.project.in_(args['project']))
+            filters2.append(Invest.project.in_(args['project']))
+            filters3.append(Invest.project.in_(args['project']))
         if args['node']:
+            filters.append(Invest.id == InvestNode.invest_id)
+            filters.append(InvestNode.invest_node.in_(args['node']))
+            filters2.append(User.node.in_(args['node']))
+            filters3.append(UserInterest.user == User.id)
+            filters3.append(User.node.in_(args['node']))
+        if args['category']:
             pass
 
         # - Número total de usuarios formados en Goteo (num de proyectos enviados a revisión + inscrito talleres )
@@ -146,32 +168,37 @@ class CommunityAPI(Resource):
         # Campo owner de projectos con status > 1. PD: Estado 1 draft, contarlos? Y status < 6 (descartado)
 
         # - Número total de usuarios
-        users = db.session.query(User).filter(*filters).count()
+        f_users = list(filters2)
+        users = db.session.query(User).filter(*f_users).count()
 
         def perc_users(number):
+            if users == 0:
+                return 0
             perc = float(number) / users * 100
             return round(perc, 2)
 
         # - Porcentaje (antes numero) de usuarios que se han dado de baja
         # FIXME: # Active=0, hide=1 + todos los datos borrados (2)
-        f_bajas = list(filters)
+        f_bajas = list(filters2)
         f_bajas.append(User.active == 0)
+        f_bajas.append(User.hide == 1)
         bajas = db.session.query(User).filter(*f_bajas).count()
         p_bajas = perc_users(bajas)
 
         # - Número de cofinanciadores
-        _cofinanciadores = db.session.query(func.distinct(Invest.user)).filter(*filters) # .subquery()
-        cofinanciadores = _cofinanciadores.count()
+        f_cofinanciadores = list(filters)
+        _cofinanciadores = db.session.query(func.distinct(Invest.user)).filter(*f_cofinanciadores) # .subquery()
+        cofinanciadores = int(_cofinanciadores.count())
 
         # - NEW Porcentaje de usuarios cofinanciadores
         users_cofi_perc = perc_users(cofinanciadores)
         #users_cofi_perc = float(cofinanciadores) / users * 100  # %
         #users_cofi_perc = _round(users_cofi_perc)
 
-        app.logger.debug('multicofi')
         # - Multi-Cofinanciadores (a más de 1 proyecto)
         # FIXME: filters: WHERE invest.status IN (0, 1, 3, 4)
-        _multicofi = db.session.query(Invest.user).filter(*filters).group_by(Invest.user).\
+        f_multicofi = list(filters)
+        _multicofi = db.session.query(Invest.user).filter(*f_multicofi).group_by(Invest.user).\
                                                     having(func.count(Invest.user) > 1).\
                                                     having(func.count(Invest.project) > 1)
         multicofi = _multicofi.count()
@@ -191,15 +218,18 @@ class CommunityAPI(Resource):
 
         # - Número de colaboradores
         f_colaboradores = list(filters)
-        _colaboradores = db.session.query(func.distinct(Message.user)).filter(*filters).subquery()
-        colaboradores = _colaboradores.count()
+        if args['node']:
+            f_colaboradores.append(Message.user == User.id)
+        _colaboradores = db.session.query(func.distinct(Message.user)).filter(*f_colaboradores) # .subquery()
+        colaboradores = int(_colaboradores.count())
 
         # - Cofinanciadores que colaboran
         # FIXME: WHERE invest.status IN (0, 1, 3, 4)? reporting.php
-        sq = db.session.query(Message.id).filter(Message.blocked == 1).subquery()
+        sq_blocked = db.session.query(Message.id).filter(Message.blocked == 1).subquery()
+        #
         f_coficolaboradores = list(filters)
         f_coficolaboradores.append(Message.thread > 0)
-        f_coficolaboradores.append(Message.thread.in_(sq))
+        f_coficolaboradores.append(Message.thread.in_(sq_blocked))
         coficolaboradores = db.session.query(func.count(func.distinct(Invest.user)))\
                                             .join(Message, Message.user == Invest.user)\
                                             .filter(*f_coficolaboradores).scalar()
@@ -211,6 +241,8 @@ class CommunityAPI(Resource):
                                     .join(Project, Invest.project == Project.id)\
                                     .filter(*f_media_cofi).group_by(Invest.project).subquery()
         media_cofi = db.session.query(func.avg(sq.c.co)).scalar()
+        if media_cofi is None:
+            media_cofi = 0
 
         # - Media de colaboradores por proyecto
         # FIXME: exitoso? Cuando es exitoso y cuando no?
@@ -220,21 +252,23 @@ class CommunityAPI(Resource):
                                     .join(Project, Message.project == Project.id)\
                                     .filter(*f_media_colab).group_by(Message.project).subquery()
         media_colab = db.session.query(func.avg(sq.c.co)).scalar()
+        if media_colab is None:
+            media_colab = 0
 
         # - Núm. impulsores que cofinancian a otros
         # FIXME:
         # AND project.status IN (3, 4, 5, 6)
         # WHERE invest.status IN (0, 1, 3, 4)
         # AND invest.project != project.id
+        f_impulcofinanciadores = list(filters)
         impulcofinanciadores = db.session.query(func.count(func.distinct(Project.owner)))\
                                                 .join(Invest, Invest.user == Project.owner)\
-                                                .filter(*filters).scalar()
+                                                .filter(*f_impulcofinanciadores).scalar()
 
         # - Núm. impulsores que colaboran con otros
-        sq = db.session.query(Message.id).filter(Message.blocked == 1).subquery()
         f_impulcolaboradores = list(filters)
         f_impulcolaboradores.append(Message.thread > 0)
-        f_impulcolaboradores.append(Message.thread.in_(sq))
+        f_impulcolaboradores.append(Message.thread.in_(sq_blocked))
         f_impulcolaboradores.append(Message.project != Project.id)
         # FIXME: project.status IN (3, 4, 5, 6)
         impulcolaboradores = db.session.query(func.count(func.distinct(Project.owner)))\
@@ -244,29 +278,54 @@ class CommunityAPI(Resource):
 
 
         # - 1ª Categoría con más usuarios interesados
+        f_categorias = list(filters3)
         categorias = db.session.query(func.count(UserInterest.user), Category.name)\
-                        .join(Category).group_by(UserInterest.interest)\
+                        .join(Category).filter(*f_categorias).group_by(UserInterest.interest)\
                         .order_by(desc(func.count(UserInterest.user))).all()
 
-        categoria1 = categorias[0][1]
+        print categorias
 
-        # - Porcentaje de usuarios en esta 1ª
-        perc_categoria1 = perc_users(categorias[0][0])
+        if len(categorias) >= 1:
+            categoria1 = categorias[0][1]
 
-        # - 2ª Categoría con más usuarios interesados
-        categorias2 = categorias[1][1]
+            # - Porcentaje de usuarios en esta 1ª
+            perc_categoria1 = perc_users(categorias[0][0])
+        else:
+            categoria1 = None
+            perc_categoria1 = 0
 
-        # - Porcentaje de usuarios en esta 2ª
-        perc_categoria2 = perc_users(categorias[1][0])
+        if len(categorias) >= 2:
+            # - 2ª Categoría con más usuarios interesados
+            categoria2 = categorias[1][1]
+
+            # - Porcentaje de usuarios en esta 2ª
+            perc_categoria2 = perc_users(categorias[1][0])
+        else:
+            categoria2 = None
+            perc_categoria2 = 0
 
         # - Top 10 Cofinanciadores (REVISAR como sacamos estos datos, excepto admines)
-        # TODO
+        f_top10_investors = list(filters)
+        f_top10_investors.append(Invest.user == UserRole.user_id)
+        f_top10_investors.append(~UserRole.role_id.in_(['admin', 'superadmin']))
+        top10_investors = db.session.query(Invest.user, func.count(Invest.id).label('total'))\
+                                    .filter(*f_top10_investors).group_by(Invest.user)\
+                                    .order_by(desc('total')).limit(10).all()
 
         # - Top 10 Cofinanciadores con más caudal (más generosos) excluir usuarios convocadores Y ADMINES
-        # TODO
+        f_top10_invests = list(filters)
+        f_top10_invests.append(Invest.user == UserRole.user_id)
+        f_top10_invests.append(~UserRole.role_id.in_(['admin', 'superadmin']))
+        # FIXME: excluir usuarios convocadores
+        top10_invests = db.session.query(Invest.user, func.sum(Invest.amount).label('total'))\
+                                    .filter(*f_top10_invests).group_by(Invest.user)\
+                                    .order_by(desc('total')).limit(10).all()
 
         # - Top 10 colaboradores
-        # TODO
+        f_top10_collaborations = list(filters)
+        top10_collaborations = db.session.query(Message.user, func.count(Message.id).label('total'))\
+                            .filter(*f_top10_collaborations).group_by(Message.user)\
+                            .order_by(desc('total')).limit(10).all()
 
         def format_categorias(t):
             total = t[0]
@@ -285,8 +344,10 @@ class CommunityAPI(Resource):
                 'coficolaboradores': coficolaboradores,
                 'media-cofi': media_cofi, 'media-colab': media_colab,
                 'categorias': map(lambda i: format_categorias(i), categorias),
-                'categoria1': categorias[0][1], 'categoria2': categorias[1][1],
-                'perc-categoria1': perc_categoria1, 'perc-categoria2': perc_categoria2}
+                'categoria1': categoria1, 'categoria2': categoria2,
+                'perc-categoria1': perc_categoria1, 'perc-categoria2': perc_categoria2,
+                'top10-investors': top10_investors, 'top10-invests': top10_invests,
+                'top10-collaborations': top10_collaborations}
                 #'categories': ['a','b']})
 
         res['filters'] = {}

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from model import app, db
-from model import Invest, Reward, InvestReward, Project
+from model import Invest, Reward, InvestReward, InvestNode, Project
 
 from flask import abort, jsonify
 from flask.ext.restful import Resource, reqparse, fields, marshal
@@ -47,6 +47,7 @@ class RewardsAPI(Resource):
         self.reqparse.add_argument('to_date', type=str)
         self.reqparse.add_argument('node', type=str, action='append')
         self.reqparse.add_argument('project', type=str, action='append')
+        self.reqparse.add_argument('category', type=str, action='append')
         super(RewardsAPI, self).__init__()
 
     invalid_input = {
@@ -88,6 +89,13 @@ class RewardsAPI(Resource):
             "description": 'Filter by individual node(s) separated by commas',
             "required": False,
             "dataType": "string"
+        },
+        {
+            "paramType": "query",
+            "name": "category",
+            "description": 'Filter by project categories separated by commas',
+            "required": False,
+            "dataType": "string"
         }
 
     ],
@@ -115,19 +123,32 @@ class RewardsAPI(Resource):
         args = self.reqparse.parse_args()
 
         filters = []
+        filters2 = []
         # TODO: Qué fechas coger? creacion, finalizacion?
         if args['from_date']:
             filters.append(Invest.date_invested >= args['from_date'])
+            filters2.append(Invest.date_invested >= args['from_date'])
         if args['to_date']:
             filters.append(Invest.date_invested <= args['to_date'])
+            filters2.append(Invest.date_invested <= args['to_date'])
         if args['project']:
             filters.append(Invest.project.in_(args['project'][0]))
+            filters2.append(Invest.project.in_(args['project'][0]))
         if args['node']:
+            # FIXME: invest_node o project_node ?
+            filters.append(Invest.id == InvestNode.invest_id)
+            filters2.append(Project.id == InvestNode.project_id)
+            filters.append(InvestNode.project_node.in_(args['node']))
+            filters2.append(InvestNode.project_node.in_(args['node']))
+        if args['category']:
             pass
 
         #
         cofinanciadores = db.session.query(func.distinct(Invest.user)).filter(*filters).count()
+
         def perc_invest(number):
+            if cofinanciadores == 0:
+                return 0
             perc = float(number) / cofinanciadores * 100  # %
             return round(perc, 2)
 
@@ -136,8 +157,9 @@ class RewardsAPI(Resource):
         f_renuncias = list(filters)
         f_renuncias.append(Invest.resign == 1)
         f_renuncias.append(Invest.status.in_([0, 1, 3, 4]))
-        renuncias = db.session.query(func.count(Invest.id)).filter(*f_renuncias).count()
-
+        renuncias = db.session.query(Invest.id).filter(*f_renuncias).count()
+        app.logger.debug('renun')
+        app.logger.debug(renuncias)
         # (seleccionados por cofinanciador)
         # - Porcentaje de cofinanciadores que renuncian a recompensa
         perc_renuncias = perc_invest(renuncias)
@@ -153,6 +175,8 @@ class RewardsAPI(Resource):
         _recomp_dinero = db.session.query(func.count(Invest.id).label("amourew")).join(InvestReward).join(Reward)\
                             .filter(*f_recomp_dinero15).group_by(Reward.id).subquery()
         recomp_dinero15 = db.session.query(func.sum(_recomp_dinero.c.amourew)).scalar()
+        if recomp_dinero15 is None:
+            recomp_dinero15 = 0
 
         # - Recompensa elegida de 15 a 30 euros
         f_recomp_dinero30 = list(f_recomp_dinero)
@@ -160,6 +184,8 @@ class RewardsAPI(Resource):
         _recomp_dinero = db.session.query(func.count(Invest.id).label("amourew")).join(InvestReward).join(Reward)\
                             .filter(*f_recomp_dinero30).group_by(Reward.id).subquery()
         recomp_dinero30 = db.session.query(func.sum(_recomp_dinero.c.amourew)).scalar()
+        if recomp_dinero30 is None:
+            recomp_dinero30 = 0
 
         # - Recompensa elegida de 30 a 100 euros
         f_recomp_dinero100 = list(f_recomp_dinero)
@@ -167,6 +193,8 @@ class RewardsAPI(Resource):
         _recomp_dinero = db.session.query(func.count(Invest.id).label("amourew")).join(InvestReward).join(Reward)\
                             .filter(*f_recomp_dinero100).group_by(Reward.id).subquery()
         recomp_dinero100 = db.session.query(func.sum(_recomp_dinero.c.amourew)).scalar()
+        if recomp_dinero100 is None:
+            recomp_dinero100 = 0
 
         # - Recompensa elegida de 100 a 400 euros
         f_recomp_dinero400 = list(f_recomp_dinero)
@@ -174,6 +202,8 @@ class RewardsAPI(Resource):
         _recomp_dinero = db.session.query(func.count(Invest.id).label("amourew")).join(InvestReward).join(Reward)\
                             .filter(*f_recomp_dinero400).group_by(Reward.id).subquery()
         recomp_dinero400 = db.session.query(func.sum(_recomp_dinero.c.amourew)).scalar()
+        if recomp_dinero400 is None:
+            recomp_dinero400 = 0
 
         # - Recompensa elegida de más de 400 euros
         f_recomp_dinero400mas = list(f_recomp_dinero)
@@ -181,10 +211,12 @@ class RewardsAPI(Resource):
         _recomp_dinero = db.session.query(func.count(Invest.id).label("amourew")).join(InvestReward).join(Reward)\
                             .filter(*f_recomp_dinero400).group_by(Reward.id).subquery()
         recomp_dinero400mas = db.session.query(func.sum(_recomp_dinero.c.amourew)).scalar()
+        if recomp_dinero400mas is None:
+            recomp_dinero400mas = 0
 
         # - Tipo de recompensa más utilizada en proyectos exitosos
         # FIXME: Date: Project.published
-        f_favorite_reward = list(filters)
+        f_favorite_reward = list(filters2)
         f_favorite_reward.append(Reward.type == 'individual')
         f_favorite_reward.append(Project.status.in_([4, 5]))
         favorite_reward = db.session.query(Reward.icon, func.count(Reward.project).label('uses')).join(Project)\
