@@ -230,7 +230,8 @@ class ProjectsAPI(Resource):
         # Lo que pasa es que va a haber primero proyectos de poco dinero.
         top10_fastest = 0
         # passed - published
-        db.session.query(func.daytime)
+        #db.session.query(func.daytime)
+        
         # - Media de posts proyecto exitoso
         f_avg_succ_posts = list(filters)
         f_avg_succ_posts.append(Post.publish == 1)
