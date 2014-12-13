@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from model import app, db
-from model import Project, Invest, Call, Cost, InvestNode
+from model import Project, ProjectCategory, Category, Invest, Call, Cost, InvestNode
 
 from flask import abort, jsonify
 from flask.ext.restful import Resource, reqparse, fields, marshal
 from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
+from sqlalchemy.orm.exc import NoResultFound
 
 from datetime import date
 
@@ -52,7 +53,8 @@ class MoneyAPI(Resource):
         self.reqparse.add_argument('to_date', type=str)
         self.reqparse.add_argument('node', type=str, action='append')
         self.reqparse.add_argument('project', type=str, action='append')
-        self.reqparse.add_argument('category', type=str, action='append')
+        self.reqparse.add_argument('category', type=str)
+        self.reqparse.add_argument('location', type=str)
         super(MoneyAPI, self).__init__()
 
     invalid_input = {
@@ -150,19 +152,20 @@ class MoneyAPI(Resource):
         if args['category']:
             # Buscar en categorias de proyectos o en intereses de usuarios?
             #ProjectCategory.category
-            #UserInterest.interest
+            try:
+                category_id = db.session.query(Category.id).filter(Category.name == args['category']).one()
+            except NoResultFound:
+                return {}  # TODO: Return empty
+
+            filters.append(Invest.project == ProjectCategory.project)
+            filters2.append(Invest.project == ProjectCategory.project)
+            filters.append(ProjectCategory.category == category_id)
+            filters2.append(ProjectCategory.category == category_id)
+        if args['location']:
+            # location: user.location del invest
             pass
 
-        #
-        # Proyectos exitosos
-        #
-        success_projects = Project.query.filter(Project.status.in_([4,5])).subquery()
-
-        # TODO: ??
-        #recaudado = db.session.query(func.sum(Invest.amount)).filter(*filters).scalar()
-
         # -  [Renombrar dinero comprometido] Suma recaudada por la plataforma
-        #comprometido = db.session.query(Invest.project, func.sum(Invest.amount)).filter(*filters).group_by(Invest.project).limit(limit).all()
         f_comprometido = list(filters)
         f_comprometido.append(Invest.status.in_([0, 1, 3, 4]))
         comprometido = db.session.query(func.sum(Invest.amount)).filter(*f_comprometido).scalar()
@@ -180,6 +183,7 @@ class MoneyAPI(Resource):
             devuelto = 0
 
         #- Recaudado mediante PayPal
+        #FIXME: No quitamos los devueltos?
         f_paypal_amount = list(filters)
         f_paypal_amount.append(Invest.method==Invest.METHOD_PAYPAL)
         paypal_amount = db.session.query(func.sum(Invest.amount)).filter(*f_paypal_amount).scalar()

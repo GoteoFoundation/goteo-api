@@ -172,7 +172,6 @@ class ProjectsAPI(Resource):
             p_succ_projects = round(p_succ_projects, 2)
 
         # -(nuevo) proyectos exitosos con campaña finalizada
-        # FIXME: correcto?
         f_succ_finished = list(filters)
         f_succ_finished.append(Project.status.in_([4, 5]))
         succ_finished = db.session.query(Project).filter(*f_succ_finished).count()

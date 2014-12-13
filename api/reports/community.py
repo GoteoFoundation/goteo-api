@@ -245,7 +245,6 @@ class CommunityAPI(Resource):
             media_cofi = 0
 
         # - Media de colaboradores por proyecto
-        # FIXME: exitoso? Cuando es exitoso y cuando no?
         f_media_colab = list(filters)
         f_media_colab.append(Project.status.in_([4, 5]))
         sq = db.session.query(func.count(func.distinct(Message.user)).label("co"))\
@@ -313,6 +312,7 @@ class CommunityAPI(Resource):
                                     .order_by(desc('total')).limit(10).all()
 
         # - Top 10 Cofinanciadores con más caudal (más generosos) excluir usuarios convocadores Y ADMINES
+        #FIXME: Usar user.amount (campo precalculado), y con rol convocador. Usuarios como owner en tabla call
         f_top10_invests = list(filters)
         f_top10_invests.append(Invest.user == UserRole.user_id)
         f_top10_invests.append(~UserRole.role_id.in_(['admin', 'superadmin']))

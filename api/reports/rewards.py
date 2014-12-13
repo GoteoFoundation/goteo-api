@@ -169,6 +169,7 @@ class RewardsAPI(Resource):
         f_recomp_dinero.append(Reward.id != None)
         f_recomp_dinero.append(or_(Invest.resign == None, Invest.resign == 0))
 
+        # OJO: Como en reporting.php, no filtra por proyectos publicados
         # - Recompensa elegida de menos de 15 euros
         f_recomp_dinero15 = list(f_recomp_dinero)
         f_recomp_dinero15.append(Reward.amount < 15)
