@@ -154,6 +154,7 @@ class MoneyAPI(Resource):
             #ProjectCategory.category
             try:
                 category_id = db.session.query(Category.id).filter(Category.name == args['category']).one()
+                category_id = category_id[0]
             except NoResultFound:
                 return {}  # TODO: Return empty
 
