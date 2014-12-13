@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from model import app, db
-from model import Invest, InvestNode, User, Category, Message, Project, UserInterest, UserRole
+from model import Invest, InvestNode, User, Category, Message, Project, UserInterest, UserRole, ProjectCategory
 
 from flask import abort, jsonify
 from flask.ext.restful import Resource, reqparse, fields, marshal
 from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
+from sqlalchemy.orm.exc import NoResultFound
 
 from sqlalchemy import desc
 
@@ -52,7 +53,8 @@ class CommunityAPI(Resource):
         self.reqparse.add_argument('to_date', type=str)
         self.reqparse.add_argument('node', type=str, action='append')
         self.reqparse.add_argument('project', type=str, action='append')
-        self.reqparse.add_argument('category', type=str, action='append')
+        self.reqparse.add_argument('category', type=str)
+        self.reqparse.add_argument('location', type=str)
         super(CommunityAPI, self).__init__()
 
     invalid_input = {
@@ -98,7 +100,14 @@ class CommunityAPI(Resource):
         {
             "paramType": "query",
             "name": "category",
-            "description": 'Filter by project categories separated by commas',
+            "description": 'Filter by project category',
+            "required": False,
+            "dataType": "string"
+        },
+        {
+            "paramType": "query",
+            "name": "location",
+            "description": 'Filter by project location (Lat,lon,Km)',
             "required": False,
             "dataType": "string"
         }
@@ -141,6 +150,7 @@ class CommunityAPI(Resource):
         filters = []
         filters2 = []
         filters3 = []
+        filters4 = []
         if args['from_date']:
             filters.append(Invest.date_invested >= args['from_date'])
             filters2.append(Invest.date_invested >= args['from_date'])
@@ -160,6 +170,19 @@ class CommunityAPI(Resource):
             filters3.append(UserInterest.user == User.id)
             filters3.append(User.node.in_(args['node']))
         if args['category']:
+            try:
+                category_id = db.session.query(Category.id).filter(Category.name == args['category']).one()
+                category_id = category_id[0]
+            except NoResultFound:
+                return {"error": "Invalid category"}  # TODO: Return empty, http 400
+
+            filters.append(Invest.project == ProjectCategory.project)
+            filters.append(ProjectCategory.category == category_id)
+            # filters2 y filters3 no hacen uso
+            filters4.append(Message.project == ProjectCategory.project)
+            filters4.append(ProjectCategory.category == category_id)
+        if args['location']:
+            # location: user
             pass
 
         # - Número total de usuarios formados en Goteo (num de proyectos enviados a revisión + inscrito talleres )
@@ -282,8 +305,6 @@ class CommunityAPI(Resource):
                         .join(Category).filter(*f_categorias).group_by(UserInterest.interest)\
                         .order_by(desc(func.count(UserInterest.user))).all()
 
-        print categorias
-
         if len(categorias) >= 1:
             categoria1 = categorias[0][1]
 
@@ -322,7 +343,7 @@ class CommunityAPI(Resource):
                                     .order_by(desc('total')).limit(10).all()
 
         # - Top 10 colaboradores
-        f_top10_collaborations = list(filters)
+        f_top10_collaborations = list(filters4)
         top10_collaborations = db.session.query(Message.user, func.count(Message.id).label('total'))\
                             .filter(*f_top10_collaborations).group_by(Message.user)\
                             .order_by(desc('total')).limit(10).all()

@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from model import app, db
-from model import Project, Invest, Blog, Post, Message
+from model import Blog, Category, Invest, Message, Post, Project, ProjectCategory
 
 from flask import abort, jsonify
 from flask.ext.restful import Resource, reqparse, fields, marshal
 from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
+from sqlalchemy.orm.exc import NoResultFound
 
 from sqlalchemy import and_, or_, desc
 
@@ -43,7 +44,8 @@ class ProjectsAPI(Resource):
         self.reqparse.add_argument('to_date', type=str)
         self.reqparse.add_argument('node', type=str, action='append')
         self.reqparse.add_argument('project', type=str, action='append')
-        self.reqparse.add_argument('category', type=str, action='append')
+        self.reqparse.add_argument('category', type=str)
+        self.reqparse.add_argument('location', type=str)
         super(ProjectsAPI, self).__init__()
 
     invalid_input = {
@@ -89,7 +91,14 @@ class ProjectsAPI(Resource):
         {
             "paramType": "query",
             "name": "category",
-            "description": 'Filter by project categories separated by commas',
+            "description": 'Filter by project category',
+            "required": False,
+            "dataType": "string"
+        },
+        {
+            "paramType": "query",
+            "name": "location",
+            "description": 'Filter by project location (Lat,lon,Km)',
             "required": False,
             "dataType": "string"
         }
@@ -134,6 +143,16 @@ class ProjectsAPI(Resource):
             #filters.append(Project.id == InvestNode.project_id)
             #filters.append(InvestNode.project_node.in_(args['node']))
         if args['category']:
+            try:
+                category_id = db.session.query(Category.id).filter(Category.name == args['category']).one()
+                category_id = category_id[0]
+            except NoResultFound:
+                return {"error": "Invalid category"}  # TODO: Return empty, http 400
+
+            filters.append(Project.id == ProjectCategory.project)
+            filters.append(ProjectCategory.category == category_id)
+        if args['location']:
+            # location: project.owner (impuslor)
             pass
 
         # - Proyectos enviados a revisión (renombrar Proyectos recibidos)
@@ -230,7 +249,7 @@ class ProjectsAPI(Resource):
         top10_fastest = 0
         # passed - published
         #db.session.query(func.daytime)
-        
+
         # - Media de posts proyecto exitoso
         f_avg_succ_posts = list(filters)
         f_avg_succ_posts.append(Post.publish == 1)

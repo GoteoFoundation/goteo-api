@@ -18,6 +18,8 @@ invest_fields = {
     'amount': fields.Integer
 }
 
+func = sqlalchemy.func
+
 @swagger.model
 class MoneyResponse:
     """MoneyResponse"""
@@ -100,7 +102,14 @@ class MoneyAPI(Resource):
         {
             "paramType": "query",
             "name": "category",
-            "description": 'Filter by project categories separated by commas',
+            "description": 'Filter by project category',
+            "required": False,
+            "dataType": "string"
+        },
+        {
+            "paramType": "query",
+            "name": "location",
+            "description": 'Filter by project location (Lat,lon,Km)',
             "required": False,
             "dataType": "string"
         }
@@ -130,7 +139,6 @@ class MoneyAPI(Resource):
 
         Además se añade el campo "filters"
         """
-        func = sqlalchemy.func
         args = self.reqparse.parse_args()
 
         filters = []
@@ -150,13 +158,11 @@ class MoneyAPI(Resource):
             filters.append(InvestNode.invest_node.in_(args['node']))
             filters2.append(InvestNode.invest_node.in_(args['node']))
         if args['category']:
-            # Buscar en categorias de proyectos o en intereses de usuarios?
-            #ProjectCategory.category
             try:
                 category_id = db.session.query(Category.id).filter(Category.name == args['category']).one()
                 category_id = category_id[0]
             except NoResultFound:
-                return {}  # TODO: Return empty
+                return {"error": "Invalid category"}  # TODO: Return empty, http 400
 
             filters.append(Invest.project == ProjectCategory.project)
             filters2.append(Invest.project == ProjectCategory.project)

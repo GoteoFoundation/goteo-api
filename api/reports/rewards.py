@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from model import app, db
-from model import Invest, Reward, InvestReward, InvestNode, Project
+from model import Category, Invest, Reward, InvestReward, InvestNode, Project, ProjectCategory
 
 from flask import abort, jsonify
 from flask.ext.restful import Resource, reqparse, fields, marshal
 from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
+from sqlalchemy.orm.exc import NoResultFound
 
 from sqlalchemy import and_, or_, desc
 
@@ -47,7 +48,8 @@ class RewardsAPI(Resource):
         self.reqparse.add_argument('to_date', type=str)
         self.reqparse.add_argument('node', type=str, action='append')
         self.reqparse.add_argument('project', type=str, action='append')
-        self.reqparse.add_argument('category', type=str, action='append')
+        self.reqparse.add_argument('category', type=str)
+        self.reqparse.add_argument('location', type=str)
         super(RewardsAPI, self).__init__()
 
     invalid_input = {
@@ -93,7 +95,14 @@ class RewardsAPI(Resource):
         {
             "paramType": "query",
             "name": "category",
-            "description": 'Filter by project categories separated by commas',
+            "description": 'Filter by project category',
+            "required": False,
+            "dataType": "string"
+        },
+        {
+            "paramType": "query",
+            "name": "location",
+            "description": 'Filter by project location (Lat,lon,Km)',
             "required": False,
             "dataType": "string"
         }
@@ -141,6 +150,18 @@ class RewardsAPI(Resource):
             filters.append(InvestNode.project_node.in_(args['node']))
             filters2.append(InvestNode.project_node.in_(args['node']))
         if args['category']:
+            try:
+                category_id = db.session.query(Category.id).filter(Category.name == args['category']).one()
+                category_id = category_id[0]
+            except NoResultFound:
+                return {"error": "Invalid category"}  # TODO: Return empty, http 400
+
+            filters.append(Invest.project == ProjectCategory.project)
+            filters2.append(Project.id == ProjectCategory.project)
+            filters.append(ProjectCategory.category == category_id)
+            filters2.append(ProjectCategory.category == category_id)
+        if args['location']:
+            # location: user.location que elige la recompensa
             pass
 
         #
@@ -158,8 +179,7 @@ class RewardsAPI(Resource):
         f_renuncias.append(Invest.resign == 1)
         f_renuncias.append(Invest.status.in_([0, 1, 3, 4]))
         renuncias = db.session.query(Invest.id).filter(*f_renuncias).count()
-        app.logger.debug('renun')
-        app.logger.debug(renuncias)
+
         # (seleccionados por cofinanciador)
         # - Porcentaje de cofinanciadores que renuncian a recompensa
         perc_renuncias = perc_invest(renuncias)
