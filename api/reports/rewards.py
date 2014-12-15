@@ -10,6 +10,19 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from sqlalchemy import and_, or_, desc
 
+# DEBUG
+import time
+def debug_time(func):
+    def new_f(*args, **kwargs):
+        time_start = time.time()
+        res = func(*args, **kwargs)
+        total_time = time.time() - time_start
+        app.logger.debug('Time ' + func.__name__ + ': ' + str(total_time))
+        return res
+    return new_f
+db.session.query = debug_time(db.session.query)
+
+
 @swagger.model
 class RewardsPerAmount:
     resource_fields = {
@@ -128,6 +141,7 @@ class RewardsAPI(Resource):
 
         Además se añade el campo "filters"
         """
+        time_start = time.time()
         func = sqlalchemy.func
         args = self.reqparse.parse_args()
 
@@ -249,6 +263,7 @@ class RewardsAPI(Resource):
                     'rewards-between-100-400': recomp_dinero400, 'rewards-more-than-400': recomp_dinero400mas},
                 'favorite-rewards': favorite_reward}
 
+        res['time-elapsed'] = time.time() - time_start
         res['filters'] = {}
         for k, v in args.items():
             if v is not None:

@@ -7,8 +7,19 @@ from flask.ext.restful import Resource, reqparse, fields, marshal
 from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
 from sqlalchemy.orm.exc import NoResultFound
-
 from sqlalchemy import desc
+
+# DEBUG
+import time
+def debug_time(func):
+    def new_f(*args, **kwargs):
+        time_start = time.time()
+        res = func(*args, **kwargs)
+        total_time = time.time() - time_start
+        app.logger.debug('Time ' + func.__name__ + ': ' + str(total_time))
+        return res
+    return new_f
+db.session.query = debug_time(db.session.query)
 
 
 @swagger.model
@@ -144,6 +155,7 @@ class CommunityAPI(Resource):
 
         Además se añade el campo "filters"
         """
+        time_start = time.time()
         func = sqlalchemy.func
         args = self.reqparse.parse_args()
 
@@ -185,11 +197,6 @@ class CommunityAPI(Resource):
             # location: user
             pass
 
-        # - Número total de usuarios formados en Goteo (num de proyectos enviados a revisión + inscrito talleres )
-        # TODO
-        # Inscritos en talleres no se puede saber. Project.updated o estado > 1, Negociación o posterior.
-        # Campo owner de projectos con status > 1. PD: Estado 1 draft, contarlos? Y status < 6 (descartado)
-
         # - Número total de usuarios
         f_users = list(filters2)
         users = db.session.query(User).filter(*f_users).count()
@@ -201,7 +208,7 @@ class CommunityAPI(Resource):
             return round(perc, 2)
 
         # - Porcentaje (antes numero) de usuarios que se han dado de baja
-        # FIXME: # Active=0, hide=1 + todos los datos borrados (2)
+        # Nota: faltarían además de los que se han dado de baja, los que han pedido que borremos datos por LOPD (que son muy pocos)
         f_bajas = list(filters2)
         f_bajas.append(User.active == 0)
         f_bajas.append(User.hide == 1)
@@ -242,6 +249,7 @@ class CommunityAPI(Resource):
         # - Número de colaboradores
         f_colaboradores = list(filters)
         if args['node']:
+            #FIXME: Revisar
             f_colaboradores.append(Message.user == User.id)
         _colaboradores = db.session.query(func.distinct(Message.user)).filter(*f_colaboradores) # .subquery()
         colaboradores = int(_colaboradores.count())
@@ -371,6 +379,7 @@ class CommunityAPI(Resource):
                 'top10-collaborations': top10_collaborations}
                 #'categories': ['a','b']})
 
+        res['time-elapsed'] = time.time() - time_start
         res['filters'] = {}
         for k, v in args.items():
             if v is not None:

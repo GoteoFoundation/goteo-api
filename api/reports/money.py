@@ -20,6 +20,17 @@ invest_fields = {
 
 func = sqlalchemy.func
 
+# DEBUG
+import time
+def debug_time(func):
+    def new_f(*args, **kwargs):
+        time_start = time.time()
+        res = func(*args, **kwargs)
+        total_time = time.time() - time_start
+        app.logger.debug('Time ' + func.__name__ + ': ' + str(total_time))
+        return res
+    return new_f
+
 @swagger.model
 class MoneyResponse:
     """MoneyResponse"""
@@ -139,6 +150,8 @@ class MoneyAPI(Resource):
 
         Además se añade el campo "filters"
         """
+        time_start = time.time()
+
         args = self.reqparse.parse_args()
 
         filters = []
@@ -240,6 +253,7 @@ class MoneyAPI(Resource):
                 'comprometido-fail': comprometido_fail, 'fee-amount': fee_amount}
                 #'projects': map(lambda i: [i[0], {'recaudado': i[1]}], comprometido),
 
+        res['time-elapsed'] = time.time() - time_start
         res['filters'] = {}
         for k, v in args.items():
             if v is not None:
@@ -361,6 +375,7 @@ class MoneyAPI(Resource):
         average_failed = 0 if average_failed is None else round(average_failed, 2)
         return average_failed
 
+    @debug_time
     def _comprometido_fail(self, f_comprometido_fail=[]):
         f_comprometido_fail.append(Invest.status.in_([0, 4]))
         f_comprometido_fail.append(Project.status == 6)
