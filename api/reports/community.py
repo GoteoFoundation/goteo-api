@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from model import app, db
-from model import Invest, InvestNode, User, Category, Message, Project, UserInterest, UserRole, ProjectCategory
+from model import Invest, InvestNode, User, Category, Message, Project, UserInterest, UserRole, ProjectCategory, Call
 
 from flask import abort, jsonify
 from flask.ext.restful import Resource, reqparse, fields, marshal
@@ -342,11 +342,12 @@ class CommunityAPI(Resource):
 
         # - Top 10 Cofinanciadores con más caudal (más generosos) excluir usuarios convocadores Y ADMINES
         convocadores = db.session.query(Call.owner).filter(Call.status > 2).all()
-        roles = map(lambda c: c[0], convocadores)
-        roles.extend(['admin', 'superadmin'])
+        convocadores = map(lambda c: c[0], convocadores)
+
         f_top10_invests = list(filters)
         f_top10_invests.append(Invest.user == UserRole.user_id)
-        f_top10_invests.append(~UserRole.role_id.in_(roles))
+        f_top10_invests.append(~Invest.user.in_(convocadores))
+        f_top10_invests.append(~UserRole.role_id.in_(['admin', 'superadmin']))
         top10_invests = db.session.query(Invest.user, func.sum(Invest.amount).label('total'))\
                                     .filter(*f_top10_invests).group_by(Invest.user)\
                                     .order_by(desc('total')).limit(10).all()
