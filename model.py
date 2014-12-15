@@ -3,7 +3,8 @@
 from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
 #from flask.ext.sqlalchemy import Pagination
-from sqlalchemy import Integer, String, Text, Date, Boolean
+from sqlalchemy import Integer, String, Text, Date, Boolean, Float
+# TODO: Probar tipo UnicodeText para Category.name
 from config import config
 
 # DB class
@@ -116,6 +117,8 @@ class Call(db.Model):
     id = db.Column('id', String(50), primary_key=True)
     name = db.Column('name', Text)
     amount = db.Column('amount', Integer)
+    owner = db.Column('owner', String(50))
+    status = db.Column('status', Integer)
 
     def __repr__(self):
         return '<Call %s: %s>' % (self.id, self.name)
