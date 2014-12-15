@@ -181,11 +181,9 @@ class ProjectsAPI(Resource):
         pub_projects = db.session.query(func.count(Project.id)).filter(*f_pub_projects).scalar()
 
         # - Proyectos exitosos (llegan al mínimo pueden estar en campaña)
-        # FIXME: (Project.status > 0)
         f_succ_projects = list(filters)
         f_succ_projects.append(Project.date_passed != None)
         f_succ_projects.append(Project.date_passed != '0000-00-00')
-        #f_succ_projects.append(Project.status.in_([3, 4, 5]))
         f_succ_projects.append(Project.status > 0)
         succ_projects = db.session.query(func.count(Project.id)).filter(*f_succ_projects).scalar()
 
@@ -213,7 +211,6 @@ class ProjectsAPI(Resource):
         fail_projects = db.session.query(func.count(Project.id)).filter(*f_fail_projects).scalar()
 
         # _(nuevo)% éxito campañas finalizadas
-        # FIXME: correcto?
         if succ_finished == 0 and fail_projects == 0:
             p_succ_finished = 0
         else:
@@ -239,28 +236,18 @@ class ProjectsAPI(Resource):
                                     .order_by(desc('total')).limit(10).all()
 
         # - 10 Campañas con más colaboraciones
-        # FIXME: correcto?
         f_top10_collaborations = list(filters)
         top10_collaborations = db.session.query(Project.id, func.count(Message.id).label('total')).join(Message)\
                             .filter(*f_top10_collaborations).group_by(Message.project)\
                             .order_by(desc('total')).limit(10).all()
 
         # - 10 Campañas que han recaudado más dinero
-        # FIXME: correcto?
         f_top10_invests = list(filters)
         f_top10_invests.append(Project.status.in_([4, 5]))
         f_top10_invests.append(Invest.status.in_([0, 1, 3]))
         top10_invests = db.session.query(Project.id, func.sum(Invest.amount).label('total')).join(Invest)\
                                     .filter(*f_top10_invests).group_by(Invest.project)\
                                     .order_by(desc('total')).limit(10).all()
-
-        # - Campañas más rápidas en conseguir el mínimo (NUEVO)
-        # TODO
-        # Contar Invest.date_invested ordenadas que suman Project.minimum. Coger el que tenga menos dias. ¿10?
-        # Lo que pasa es que va a haber primero proyectos de poco dinero.
-        top10_fastest = 0
-        # passed - published
-        #db.session.query(func.daytime)
 
         # - Media de posts proyecto exitoso
         f_avg_succ_posts = list(filters)

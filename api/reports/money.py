@@ -199,9 +199,11 @@ class MoneyAPI(Resource):
         paypal_amount = self._paypal_amount(list(filters))
 
         #- Recaudado mediante TPV
+        #FIXME: No quitamos los devueltos?
         tpv_amount = self._tpv_amount(list(filters))
 
         # - [Renombrar aportes manuales] Recaudado mediante transferencia bancaria directa
+        #FIXME: No quitamos los devueltos?
         cash_amount = self._cash_amount(list(filters))
 
         # - [Renombrar] Capital Riego de Goteo (fondos captados de instituciones y empresas destinados a la bolsa de Capital Riego https://goteo.org/service/resources)
@@ -210,6 +212,7 @@ class MoneyAPI(Resource):
 
         # - [NEW] Suma recaudada en Convocatorias (Capital riego distribuido + crowd)
         # FIXME: Invest.method==DROP + invest.call==1 ?
+        #FIXME: No quitamos los devueltos?
         call_amount = self._call_amount(list(filters))
 
         # - Total 8% recaudado por Goteo

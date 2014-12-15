@@ -253,9 +253,9 @@ class RewardsAPI(Resource):
         # FIXME: Date: Project.published
         f_favorite_reward = list(filters2)
         f_favorite_reward.append(Reward.type == 'individual')
-        f_favorite_reward.append(Project.status.in_([4, 5]))
-        favorite_reward = db.session.query(Reward.icon, func.count(Reward.project).label('uses')).join(Project)\
-                                        .filter(*f_favorite_reward).group_by(Reward.icon).order_by(desc('uses')).all()
+        favorite_reward = db.session.query(Reward.icon, func.count(Reward.project).label('uses'))\
+                                .join(Project, and_(Project.id == Reward.project, Project.status.in_([4, 5])))\
+                                .filter(*f_favorite_reward).group_by(Reward.icon).order_by(desc('uses')).all()
 
         res = {'renuncias': renuncias, 'perc-renuncias': perc_renuncias,
                 'rewards-per-amount': {'rewards-less-than-15': recomp_dinero15,

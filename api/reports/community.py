@@ -226,8 +226,8 @@ class CommunityAPI(Resource):
         #users_cofi_perc = _round(users_cofi_perc)
 
         # - Multi-Cofinanciadores (a más de 1 proyecto)
-        # FIXME: filters: WHERE invest.status IN (0, 1, 3, 4)
         f_multicofi = list(filters)
+        f_multicofi.append(Invest.status.in_([0, 1, 3, 4]))
         _multicofi = db.session.query(Invest.user).filter(*f_multicofi).group_by(Invest.user).\
                                                     having(func.count(Invest.user) > 1).\
                                                     having(func.count(Invest.project) > 1)
@@ -255,12 +255,12 @@ class CommunityAPI(Resource):
         colaboradores = int(_colaboradores.count())
 
         # - Cofinanciadores que colaboran
-        # FIXME: WHERE invest.status IN (0, 1, 3, 4)? reporting.php
         sq_blocked = db.session.query(Message.id).filter(Message.blocked == 1).subquery()
         #
         f_coficolaboradores = list(filters)
         f_coficolaboradores.append(Message.thread > 0)
         f_coficolaboradores.append(Message.thread.in_(sq_blocked))
+        f_coficolaboradores.append(Invest.status.in_([0, 1, 3, 4]))
         coficolaboradores = db.session.query(func.count(func.distinct(Invest.user)))\
                                             .join(Message, Message.user == Invest.user)\
                                             .filter(*f_coficolaboradores).scalar()
@@ -286,26 +286,21 @@ class CommunityAPI(Resource):
             media_colab = 0
 
         # - Núm. impulsores que cofinancian a otros
-        # FIXME:
-        # AND project.status IN (3, 4, 5, 6)
-        # WHERE invest.status IN (0, 1, 3, 4)
-        # AND invest.project != project.id
         f_impulcofinanciadores = list(filters)
-        impulcofinanciadores = db.session.query(func.count(func.distinct(Project.owner)))\
-                                                .join(Invest, Invest.user == Project.owner)\
-                                                .filter(*f_impulcofinanciadores).scalar()
+        f_impulcofinanciadores.append(Invest.status.in_([3, 4, 5, 6]))
+        f_impulcofinanciadores.append(Invest.project != Project.id)
+        impulcofinanciadores = db.session.query(func.count(func.distinct(Invest.user)))\
+                                    .join(Project, and_(Project.owner == Invest.user, Project.status.in_([3, 4, 5, 6])))\
+                                    .filter(*f_impulcofinanciadores).scalar()
 
         # - Núm. impulsores que colaboran con otros
         f_impulcolaboradores = list(filters)
         f_impulcolaboradores.append(Message.thread > 0)
         f_impulcolaboradores.append(Message.thread.in_(sq_blocked))
         f_impulcolaboradores.append(Message.project != Project.id)
-        # FIXME: project.status IN (3, 4, 5, 6)
-        impulcolaboradores = db.session.query(func.count(func.distinct(Project.owner)))\
-                                                .join(Message, Message.user == Project.owner)\
-                                                .filter(*f_impulcolaboradores).scalar()
-
-
+        impulcolaboradores = db.session.query(func.count(func.distinct(Message.user)))\
+                                    .join(Project, and_(Project.owner == Message.user, Project.status.in_([3, 4, 5, 6])))\
+                                    .filter(*f_impulcolaboradores).scalar()
 
         # - 1ª Categoría con más usuarios interesados
         f_categorias = list(filters3)
