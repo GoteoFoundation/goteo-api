@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from model import app, db
 from model import Category, Invest, Reward, InvestReward, InvestNode, Project, ProjectCategory
+from model import Location, LocationItem
 
 from flask import abort, jsonify
 from flask.ext.restful import Resource, reqparse, fields, marshal
@@ -114,7 +115,7 @@ class RewardsAPI(Resource):
         {
             "paramType": "query",
             "name": "location",
-            "description": 'Filter by project location (Lat,lon,Km)',
+            "description": 'Filter by user location related to the reward (Lat,lon,Km)',
             "required": False,
             "dataType": "string"
         }
@@ -128,7 +129,7 @@ class RewardsAPI(Resource):
 
         <strong>renuncias</strong>: Número de cofinanciadores que renuncian a recompensa
         <strong>perc-renuncias</strong>: % cofinanciadores que renuncian a recompensa
-        <strong>favorite-rewards</strong>: Tipo de recompensa más utilizada en proyectos exitosos
+        <strong>favorite-rewards</strong>: Tipo de recompensa más utilizada en proyectos exitosos. Nota: no le afecta el filtro location.
 
         <strong>rewards-between-100-400</strong>: Recompensa elegida de 100 a 400 euros
         <strong>rewards-between-15-30</strong>: Recompensa elegida de 15 a 30 euros
@@ -174,8 +175,26 @@ class RewardsAPI(Resource):
             filters.append(ProjectCategory.category == category_id)
             filters2.append(ProjectCategory.category == category_id)
         if args['location']:
-            # location: user.location que elige la recompensa
-            pass
+            # Filtra por la localización del usuario que elige la recompensa
+            # No hace falta filters2, ya que ese filtra por proyecto, no por usuario
+
+            location = args['location'].split(",")
+            if len(location) != 3:
+                return {"error": "Invalid parameter: location"}  # TODO: Return empty, http 400
+
+            from geopy.distance import VincentyDistance
+            latitude, longitude, radius = location
+
+            locations = db.session.query(Location.id, Location.lat, Location.lon).all()
+            locations = filter(lambda l: VincentyDistance((latitude, longitude), (l[1], l[2])).km <= int(radius), locations)
+            locations_ids = map(lambda l: int(l[0]), locations)
+
+            if locations_ids == []:
+                return {"error": "No locations in the specified range"}  # TODO: Return empty, http 400
+
+            filters.append(Invest.user == LocationItem.item)
+            filters.append(LocationItem.type == 'user')
+            filters.append(LocationItem.id.in_(locations_ids))
 
         #
         cofinanciadores = db.session.query(func.distinct(Invest.user)).filter(*filters).count()

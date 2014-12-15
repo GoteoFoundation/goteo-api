@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from model import app, db
 from model import Blog, Category, Invest, Message, Post, Project, ProjectCategory
+from model import Location, LocationItem
 
 from flask import abort, jsonify
 from flask.ext.restful import Resource, reqparse, fields, marshal
@@ -107,7 +108,7 @@ class ProjectsAPI(Resource):
         {
             "paramType": "query",
             "name": "location",
-            "description": 'Filter by project location (Lat,lon,Km)',
+            "description": 'Filter by projects location of project owner (Lat,lon,Km)',
             "required": False,
             "dataType": "string"
         }
@@ -161,8 +162,23 @@ class ProjectsAPI(Resource):
             filters.append(Project.id == ProjectCategory.project)
             filters.append(ProjectCategory.category == category_id)
         if args['location']:
-            # location: project.owner (impuslor)
-            pass
+            location = args['location'].split(",")
+            if len(location) != 3:
+                return {"error": "Invalid parameter: location"}  # TODO: Return empty, http 400
+
+            from geopy.distance import VincentyDistance
+            latitude, longitude, radius = location
+
+            locations = db.session.query(Location.id, Location.lat, Location.lon).all()
+            locations = filter(lambda l: VincentyDistance((latitude, longitude), (l[1], l[2])).km <= int(radius), locations)
+            locations_ids = map(lambda l: int(l[0]), locations)
+
+            if locations_ids == []:
+                return {"error": "No locations in the specified range"}  # TODO: Return empty, http 400
+
+            filters.append(Project.owner == LocationItem.item)
+            filters.append(LocationItem.type == 'user')
+            filters.append(LocationItem.id.in_(locations_ids))
 
         # - Proyectos enviados a revisión (renombrar Proyectos recibidos)
         f_rev_projects = list(filters)
