@@ -39,7 +39,6 @@ class ProjectsResponse:
         "top10-investors": fields.List,
         "top10-collaborations": fields.List,
         "top10-invests": fields.List,
-        "top10-fastest": fields.List,
         "average-successful-posts": fields.Float,
     }
 
@@ -131,7 +130,6 @@ class ProjectsAPI(Resource):
         <strong>top10-investors</strong>: Las 10 campañas con más cofinanciadores
         <strong>top10-invests</strong>: Las 10 campañas que han recaudado más dinero
         <strong>average-success-percentage</strong>: % de recaudación media conseguida por proyectos exitosos
-        <strong>top10-fastest</strong>: Las 10 campañas más rápidas en conseguir el mínimo
         <strong>average-successful-posts</strong>: Media de posts en proyectos exitosos
 
         Además se añade el campo "filters"
@@ -262,7 +260,7 @@ class ProjectsAPI(Resource):
         res = {'received': rev_projects, 'published': pub_projects, 'failed': fail_projects,
                 'succesful': succ_projects, 'successful-percentage': p_succ_projects,
                 'top10-collaborations': top10_collaborations, 'top10-invests': top10_invests,
-                'top10-fastest': top10_fastest, 'top10-investors': top10_investors,
+                'top10-investors': top10_investors,
                 'successful-finished': succ_finished, 'successful-finished-perc': p_succ_finished,
                 'average-success-percentage': p_avg_success, 'average-successful-posts': avg_succ_posts
                 }

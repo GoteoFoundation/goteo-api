@@ -7,7 +7,7 @@ from flask.ext.restful import Resource, reqparse, fields, marshal
 from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy import desc
+from sqlalchemy import and_, desc
 
 # DEBUG
 import time
