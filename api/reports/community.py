@@ -161,27 +161,33 @@ class CommunityAPI(Resource):
         args = self.reqparse.parse_args()
 
         filters = []
-        filters2 = []
-        filters3 = []
-        filters4 = []
+        filters2 = []  # para num de usuarios y bajas
+        filters3 = []  # para categorias
+        filters4 = []  # para las relacionadas con Colaboradores
         if args['from_date']:
             filters.append(Invest.date_invested >= args['from_date'])
             filters2.append(Invest.date_invested >= args['from_date'])
             filters3.append(Invest.date_invested >= args['from_date'])
+            filters4.append(Message.date >= args['from_date'])
         if args['to_date']:
             filters.append(Invest.date_invested <= args['to_date'])
             filters2.append(Invest.date_invested <= args['to_date'])
             filters3.append(Invest.date_invested <= args['to_date'])
+            filters4.append(Message.date <= args['to_date'])
         if args['project']:
             filters.append(Invest.project.in_(args['project']))
             filters2.append(Invest.project.in_(args['project']))
             filters3.append(Invest.project.in_(args['project']))
+            filters4.append(Message.project.in_(args['project']))
         if args['node']:
+            #TODO: project_node o invest_node?
             filters.append(Invest.id == InvestNode.invest_id)
             filters.append(InvestNode.invest_node.in_(args['node']))
             filters2.append(User.node.in_(args['node']))
             filters3.append(UserInterest.user == User.id)
             filters3.append(User.node.in_(args['node']))
+            filters4.append(Message.user == User.id)
+            filters4.append(User.node.in_(args['node']))
         if args['category']:
             try:
                 category_id = db.session.query(Category.id).filter(Category.name == args['category']).one()
@@ -273,7 +279,7 @@ class CommunityAPI(Resource):
         paypal_multicofi = _multicofi.filter(*f_paypal_multicofi).count()
 
         # - Número de colaboradores
-        f_colaboradores = list(filters)
+        f_colaboradores = list(filters4)
         if args['node']:
             #FIXME: Revisar
             f_colaboradores.append(Message.user == User.id)
@@ -302,7 +308,7 @@ class CommunityAPI(Resource):
             media_cofi = 0
 
         # - Media de colaboradores por proyecto
-        f_media_colab = list(filters)
+        f_media_colab = list(filters4)
         f_media_colab.append(Project.status.in_([4, 5]))
         sq = db.session.query(func.count(func.distinct(Message.user)).label("co"))\
                                     .join(Project, Message.project == Project.id)\
@@ -320,7 +326,7 @@ class CommunityAPI(Resource):
                                     .filter(*f_impulcofinanciadores).scalar()
 
         # - Núm. impulsores que colaboran con otros
-        f_impulcolaboradores = list(filters)
+        f_impulcolaboradores = list(filters4)
         f_impulcolaboradores.append(Message.thread > 0)
         f_impulcolaboradores.append(Message.thread.in_(sq_blocked))
         f_impulcolaboradores.append(Message.project != Project.id)

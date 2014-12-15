@@ -155,7 +155,7 @@ class MoneyAPI(Resource):
         args = self.reqparse.parse_args()
 
         filters = []
-        filters2 = [] # para average_mincost
+        filters2 = []  # para average_mincost
         if args['from_date']:
             filters.append(Invest.date_invested >= args['from_date'])
             filters2.append(Invest.date_invested >= args['from_date'])

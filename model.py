@@ -3,7 +3,7 @@
 from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
 #from flask.ext.sqlalchemy import Pagination
-from sqlalchemy import Integer, String, Text, Date, Boolean, Float
+from sqlalchemy import Integer, String, Text, Date, DateTime, Boolean, Float
 # TODO: Probar tipo UnicodeText para Category.name
 from config import config
 
@@ -218,6 +218,7 @@ class Message(db.Model):
     user = db.Column('user', String(50), db.ForeignKey('user.id'))
     thread = db.Column('thread', Integer)
     blocked = db.Column('blocked', Integer)
+    date = db.Column('date', DateTime)
     # message = db.Column('message', Text)
 
     def __repr__(self):

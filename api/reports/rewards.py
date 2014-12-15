@@ -146,7 +146,7 @@ class RewardsAPI(Resource):
         args = self.reqparse.parse_args()
 
         filters = []
-        filters2 = []
+        filters2 = []  # para favorite_reward
         # TODO: Qué fechas coger? creacion, finalizacion?
         if args['from_date']:
             filters.append(Invest.date_invested >= args['from_date'])
@@ -177,7 +177,7 @@ class RewardsAPI(Resource):
         if args['location']:
             # Filtra por la localización del usuario que elige la recompensa
             # No hace falta filters2, ya que ese filtra por proyecto, no por usuario
-
+            
             location = args['location'].split(",")
             if len(location) != 3:
                 return {"error": "Invalid parameter: location"}  # TODO: Return empty, http 400

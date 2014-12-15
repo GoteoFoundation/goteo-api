@@ -141,17 +141,13 @@ class ProjectsAPI(Resource):
         filters = []
         # FIXME: Qué fechas coger depende del dato: creación, finalización...
         if args['from_date']:
-            filters.append(Invest.date_invested >= args['from_date'])
+            filters.append(Project.date_published >= args['from_date'])
         if args['to_date']:
-            filters.append(Invest.date_invested <= args['to_date'])
+            filters.append(Project.date_published <= args['to_date'])
         if args['project']:
-            filters.append(Invest.project.in_(args['project'][0]))
+            filters.append(Project.id.in_(args['project']))
         if args['node']:
-            #
             filters.append(Project.node.in_(args['node']))
-            #
-            #filters.append(Project.id == InvestNode.project_id)
-            #filters.append(InvestNode.project_node.in_(args['node']))
         if args['category']:
             try:
                 category_id = db.session.query(Category.id).filter(Category.name == args['category']).one()
@@ -270,6 +266,10 @@ class ProjectsAPI(Resource):
                             .join(Project, and_(Project.id == Blog.owner, Project.status.in_([4, 5])))\
                             .filter(*f_avg_succ_posts).group_by(Post.blog).subquery()
         avg_succ_posts = db.session.query(func.avg(sq1.c.posts)).scalar()
+        if avg_succ_posts is None:
+            avg_succ_posts = 0
+        else:
+            avg_succ_posts = round(avg_succ_posts, 2)
 
 
         res = {'received': rev_projects, 'published': pub_projects, 'failed': fail_projects,
