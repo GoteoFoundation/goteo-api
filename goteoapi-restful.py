@@ -19,31 +19,34 @@ api = swagger.docs(Api(app), apiVersion='1.0', description='Goteo.org API')
 @app.route('/')
 def index():
     return """
-API de Goteo.org.<br><br>
+<h1>API de Goteo.org</h1>
+This API is compatible with <a href="http://swagger.io/">Swagger</a> specification. See: <a href="http://{host}/api/spec.html">html</a> and <a href="http://{host}/api/spec.json">json</a>.
+<h3>Sections:</h3>
 <a href="/reports/">/reports/</a></br>
 <br>
-Swagger UI: <a href="http://{host}/api/spec.html">http://{host}/api/spec.html</a> (<a href="http://{host}/api/spec.json">json</a>)
+
 """.format(host=request.host)
 
 
 @app.route('/reports/')
 def reports():
     return """
-API de Goteo.org.<br><br>
+<h1>API de Goteo.org</h1>
+This API is compatible with <a href="http://swagger.io/">Swagger</a> specification. See: <a href="http://{host}/api/spec.html">html</a> and <a href="http://{host}/api/spec.json">json</a>.
+<h3>Endpoints:</h3>
 <a href="/reports/money">/reports/money</a></br>
 <a href="/reports/projects">/reports/projects</a></br>
 <a href="/reports/community">/reports/community</a></br>
 <a href="/reports/rewards">/reports/rewards</a></br>
-</br>
+<h3>URL examples:</h3>
+<a href="http://{host}/reports/money?from_date=2014-01-01">http://{host}/reports/money?from_date=2014-01-01</a><br>
+<a href="http://{host}/reports/money?project=diagonal">http://{host}/reports/money?project=diagonal</a><br>
+<h3>curl examples:</h3>
+<span style="font-family: monospace;">
 curl -i http://{host}/reports/money</br>
-<br>
-<br>
-<a href="http://{host}/reports/money?limit=2">curl -i -X GET -d limit=2 http://{host}/reports/money</a><br>
-<a href="http://{host}/reports/money?from_date=2014-01-01">curl -i -X GET -d from_date="2014-01-01" http://{host}/reports/money</a><br>
-<a href="http://{host}/reports/money?project=057ce063ee014dee885b13840774463c">curl -i -X GET -d project="057ce063ee014dee885b13840774463c" http://{host}/reports/money</a><br>
-<a href="http://{host}/reports/money?project=2a-edicio-in-situ&project=10-anys-de-l-antic-teatre">curl -i -X GET -d project=2a-edicio-in-situ -d project=10-anys-de-l-antic-teatre" http://{host}/reports/money</a><br>
-<br>
-Swagger UI: <a href="http://{host}/api/spec.html">http://{host}/api/spec.html</a> (<a href="http://{host}/api/spec.json">json</a>)
+curl -i -X GET -d from_date="2014-01-01" http://{host}/reports/money<br>
+curl -i -X GET -d project="diagonal" http://{host}/reports/money<br>
+</span>
 """.format(host=request.host)
 
 #api.add_resource(ProjectListAPI, '/projects/', endpoint='projects1')
