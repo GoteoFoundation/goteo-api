@@ -199,9 +199,6 @@ class MoneyAPI(Resource):
             filters.append(Invest.user == LocationItem.item)
             filters.append(LocationItem.type == 'user')
             filters.append(LocationItem.id.in_(locations_ids))
-            filters2.append(Invest.user == LocationItem.item)
-            filters2.append(LocationItem.type == 'user')
-            filters2.append(LocationItem.id.in_(locations_ids))
 
 
         # TODO: Qué mostrar cuando no hay resultados?
