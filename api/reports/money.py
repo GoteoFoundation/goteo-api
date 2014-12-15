@@ -134,7 +134,7 @@ class MoneyAPI(Resource):
         <strong>average-failed</strong>: Recaudación media por proyectos que no alcanzaron el mínimo
         <strong>average-invest</strong>: Aportación media por cofinanciador (micromecenas)
         <strong>average-invest-paypal</strong>: Aportación media por cofinanciador (micromecenas) a través de PayPal
-        <strong>average-mincost</strong>: Coste medio de los proyectos exitosos
+        <strong>average-mincost</strong>: Coste medio de los proyectos exitosos. Nota: no le afecta el filtro location.
         <strong>average-received</strong>: Recaudación media por proyectos exitosos (que sí alcanzaron el mínimo)
         <strong>average-second-round</strong>: Recaudación media en segunda ronda
         <strong>call-amount</strong>: Suma recaudada en Convocatorias (Capital riego distribuido + crowd)
@@ -262,13 +262,6 @@ class MoneyAPI(Resource):
         return jsonify(res)
         #return {'invests': map(lambda i: {i.investid: marshal(i, invest_fields)}, invests)}
 
-    def _paypal_amount(self, f_paypal_amount=[]):
-        f_paypal_amount.append(Invest.method==Invest.METHOD_PAYPAL)
-        paypal_amount = db.session.query(func.sum(Invest.amount)).filter(*f_paypal_amount).scalar()
-        if paypal_amount is None:
-            paypal_amount = 0
-        return paypal_amount
-
     def _comprometido(self, f_comprometido=[]):
         f_comprometido.append(Invest.status.in_([0, 1, 3, 4]))
         comprometido = db.session.query(func.sum(Invest.amount)).filter(*f_comprometido).scalar()
@@ -282,6 +275,13 @@ class MoneyAPI(Resource):
         if devuelto is None:
             devuelto = 0
         return devuelto
+
+    def _paypal_amount(self, f_paypal_amount=[]):
+        f_paypal_amount.append(Invest.method==Invest.METHOD_PAYPAL)
+        paypal_amount = db.session.query(func.sum(Invest.amount)).filter(*f_paypal_amount).scalar()
+        if paypal_amount is None:
+            paypal_amount = 0
+        return paypal_amount
 
     def _tpv_amount(self, f_tpv_amount=[]):
         f_tpv_amount.append(Invest.method==Invest.METHOD_TPV)

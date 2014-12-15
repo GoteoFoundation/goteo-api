@@ -48,9 +48,9 @@ class CommunityResponse:
         "users": fields.Integer,
         "users-cofi-perc": fields.Float,
         "users-multicofi-perc": fields.Float,
-        "top10-cofi": fields.List,
-        "top10-cofi2": fields.List,
-        "top10-colab": fields.List
+        "top10-investors": fields.List,
+        "top10-invests": fields.List,
+        "top10-collaborations": fields.List
     }
 
     required = resource_fields.keys()
@@ -147,9 +147,9 @@ class CommunityAPI(Resource):
         <strong>perc-categoria1</strong>: % usuarios en esta 1ª categoría
         <strong>categoria2</strong>: 2ª categoría con más usuarios interesados
         <strong>perc-categoria2</strong>: % usuarios en esta 2ª categoría
-        <strong>top10-cofi</strong>: Top 10 cofinanciadores
-        <strong>top10-cofi2</strong>: Top 10 cofinanciadores con más caudal (más generosos) sin incluir usuarios convocadores
-        <strong>top10-colab</strong>: Top 10 colaboradores
+        <strong>top10-investors</strong>: Top 10 cofinanciadores
+        <strong>top10-invests</strong>: Top 10 cofinanciadores con más caudal (más generosos) sin incluir usuarios convocadores
+        <strong>top10-collaborations</strong>: Top 10 colaboradores
 
         <strong>categorias</strong>:
 
@@ -341,11 +341,12 @@ class CommunityAPI(Resource):
                                     .order_by(desc('total')).limit(10).all()
 
         # - Top 10 Cofinanciadores con más caudal (más generosos) excluir usuarios convocadores Y ADMINES
-        #FIXME: Usar user.amount (campo precalculado), y con rol convocador. Usuarios como owner en tabla call
+        convocadores = db.session.query(Call.owner).filter(Call.status > 2).all()
+        roles = map(lambda c: c[0], convocadores)
+        roles.extend(['admin', 'superadmin'])
         f_top10_invests = list(filters)
         f_top10_invests.append(Invest.user == UserRole.user_id)
-        f_top10_invests.append(~UserRole.role_id.in_(['admin', 'superadmin']))
-        # FIXME: excluir usuarios convocadores
+        f_top10_invests.append(~UserRole.role_id.in_(roles))
         top10_invests = db.session.query(Invest.user, func.sum(Invest.amount).label('total'))\
                                     .filter(*f_top10_invests).group_by(Invest.user)\
                                     .order_by(desc('total')).limit(10).all()
