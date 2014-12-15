@@ -247,3 +247,29 @@ class Cost(db.Model):
 
     def __repr__(self):
         return '<Cost(%d) %s of project %s>' % (self.id, self.cost[:50], self.project)
+
+
+class Location(db.Model):
+    __tablename__ = 'location'
+
+    id = db.Column('id', Integer, primary_key=True)
+    location = db.Column('location', Text)
+    region = db.Column('region', Text)
+    country = db.Column('country', Text)
+    lon = db.Column('lon', Float)
+    lat = db.Column('lat', Float)
+    valid = db.Column('valid', Integer)
+
+    def __repr__(self):
+        return '<Location(%d) %s, %s (%s)>' % (self.id, self.location, self.region, self.country)
+
+
+class LocationItem(db.Model):
+    __tablename__ = 'location_item'
+
+    id = db.Column('location', Integer, primary_key=True)
+    item = db.Column('item', String(50), primary_key=True)
+    type = db.Column('type', String(7), primary_key=True)
+
+    def __repr__(self):
+        return '<LocationItem: (%s)%s in location %d>' % (self.type, self.item, self.id)
