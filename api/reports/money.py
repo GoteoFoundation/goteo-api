@@ -156,20 +156,25 @@ class MoneyAPI(Resource):
 
         filters = []
         filters2 = []  # para average_mincost
+        filters3 = []  # para call_committed_amount
         if args['from_date']:
             filters.append(Invest.date_invested >= args['from_date'])
             filters2.append(Invest.date_invested >= args['from_date'])
+            filters3.append(Call.date_published >= args['from_date'])
         if args['to_date']:
             filters.append(Invest.date_invested <= args['to_date'])
             filters2.append(Invest.date_invested <= args['to_date'])
+            filters3.append(Call.date_published <= args['to_date'])
         if args['project']:
             filters.append(Invest.project.in_(args['project']))
             filters2.append(Project.id.in_(args['project']))
+            # no afecta a filters3
         if args['node']:
             filters.append(Invest.id == InvestNode.invest_id)
             filters2.append(Project.id == InvestNode.project_id)
             filters.append(InvestNode.invest_node.in_(args['node']))
             filters2.append(InvestNode.invest_node.in_(args['node']))
+            # FIXME: Call.node?
         if args['category']:
             try:
                 category_id = db.session.query(Category.id).filter(Category.name == args['category']).one()
@@ -181,6 +186,7 @@ class MoneyAPI(Resource):
             filters2.append(Invest.project == ProjectCategory.project)
             filters.append(ProjectCategory.category == category_id)
             filters2.append(ProjectCategory.category == category_id)
+            # no afecta a filters3
         if args['location']:
             location = args['location'].split(",")
             if len(location) != 3:
@@ -199,6 +205,7 @@ class MoneyAPI(Resource):
             filters.append(Invest.user == LocationItem.item)
             filters.append(LocationItem.type == 'user')
             filters.append(LocationItem.id.in_(locations_ids))
+            # no afecta a filters2 ni filters3
 
 
         # TODO: Qué mostrar cuando no hay resultados?
@@ -223,11 +230,9 @@ class MoneyAPI(Resource):
         cash_amount = self._cash_amount(list(filters))
 
         # - [Renombrar] Capital Riego de Goteo (fondos captados de instituciones y empresas destinados a la bolsa de Capital Riego https://goteo.org/service/resources)
-        # TODO: Comprobar que es correcto. Quitar las convocatorias de prueba que hay en la BD!!
-        #call_amount = db.session.query(func.sum(Call.amount)).filter(*filters).scalar()
+        call_committed_amount = self._call_committed_amount(list(filters3))
 
         # - [NEW] Suma recaudada en Convocatorias (Capital riego distribuido + crowd)
-        # FIXME: Invest.method==DROP + invest.call==1 ?
         #FIXME: No quitamos los devueltos?
         call_amount = self._call_amount(list(filters))
 
@@ -266,6 +271,7 @@ class MoneyAPI(Resource):
         res = {'comprometido': comprometido, 'devuelto': devuelto,
                 'paypal-amount': paypal_amount, 'tpv-amount': tpv_amount, 'cash-amount': cash_amount,
                 'call-amount': call_amount, 'average-invest': average_invest,
+                'call-committed-amount': call_committed_amount,
                 'average-invest-paypal': average_invest_paypal, 'average-mincost': average_mincost,
                 'average-received': average_received, 'comprometido-success': comprometido_success,
                 'average-second-round': average_second_round, 'average-failed': average_failed,
@@ -316,8 +322,16 @@ class MoneyAPI(Resource):
             cash_amount = 0
         return cash_amount
 
+    def _call_committed_amount(self, f_call_committed_amount=[]):
+        f_call_committed_amount.append(Call.status > 2)
+        call_committed_amount = db.session.query(func.sum(Call.amount)).filter(*f_call_committed_amount).scalar()
+        if call_committed_amount is None:
+            call_committed_amount = 0
+        return call_committed_amount
+
     def _call_amount(self, f_call_amount=[]):
         f_call_amount.append(Invest.method==Invest.METHOD_DROP)
+        f_call_amount.append(Invest.call != None)
         call_amount = db.session.query(func.sum(Invest.amount)).filter(*f_call_amount).scalar()
         if call_amount is None:
             call_amount = 0

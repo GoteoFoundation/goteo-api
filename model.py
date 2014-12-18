@@ -68,6 +68,7 @@ class Invest(db.Model):
     date_invested = db.Column('invested', Date)
     date_charged = db.Column('charged', Date)
     resign = db.Column('resign', Integer)
+    call = db.Column('call', String(50))
 
     def __repr__(self):
         return '<Invest %d: %s (%d EUR)>' % (self.id, self.project, self.amount)
@@ -119,6 +120,7 @@ class Call(db.Model):
     amount = db.Column('amount', Integer)
     owner = db.Column('owner', String(50))
     status = db.Column('status', Integer)
+    date_published = db.Column('published', Date)
 
     def __repr__(self):
         return '<Call %s: %s>' % (self.id, self.name)
