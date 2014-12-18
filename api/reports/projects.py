@@ -232,10 +232,7 @@ class ProjectsAPI(Resource):
         f_p_avg_success.append(Project.status.in_([4, 5]))
         p_avg_success = db.session.query(func.sum(Invest.amount) / func.count(func.distinct(Project.id)))\
                                     .join(Project).filter(*f_p_avg_success).scalar()
-        if p_avg_success is None:
-            p_avg_success = 0
-        else:
-            p_avg_success = round(p_avg_success, 2)
+        p_avg_success = 0 if p_avg_success is None else round(p_avg_success, 2)
 
         # - (NUEVOS)10 Campañas con más cofinanciadores
         # FIXME: invest.status?
