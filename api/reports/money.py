@@ -332,6 +332,7 @@ class MoneyAPI(Resource):
     def _call_amount(self, f_call_amount=[]):
         f_call_amount.append(Invest.method==Invest.METHOD_DROP)
         f_call_amount.append(Invest.call != None)
+        f_call_amount.append(Invest.status.in_([1, 3]))
         call_amount = db.session.query(func.sum(Invest.amount)).filter(*f_call_amount).scalar()
         if call_amount is None:
             call_amount = 0
