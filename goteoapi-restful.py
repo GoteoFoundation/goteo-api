@@ -41,11 +41,13 @@ This API is compatible with <a href="http://swagger.io/">Swagger</a> specificati
 <h3>URL examples:</h3>
 <a href="http://{host}/reports/money?from_date=2014-01-01">http://{host}/reports/money?from_date=2014-01-01</a><br>
 <a href="http://{host}/reports/money?project=diagonal">http://{host}/reports/money?project=diagonal</a><br>
+<a href="http://{host}/reports/projects?location=36.716667,-4.416667,100">http://{host}/reports/projects?location=36.716667,-4.416667,100</a><br>
 <h3>curl examples:</h3>
 <span style="font-family: monospace;">
 curl -i http://{host}/reports/money</br>
 curl -i -X GET -d from_date="2014-01-01" http://{host}/reports/money<br>
 curl -i -X GET -d project="diagonal" http://{host}/reports/money<br>
+curl -i -X GET -d location="36.716667,-4.416667,100" http://{host}/reports/projects
 </span>
 """.format(host=request.host)
 
