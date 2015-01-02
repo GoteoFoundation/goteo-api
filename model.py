@@ -5,6 +5,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 #from flask.ext.sqlalchemy import Pagination
 from sqlalchemy import Integer, String, Text, Date, DateTime, Boolean, Float
 # TODO: Probar tipo UnicodeText para Category.name
+from flask_redis import Redis
 from config import config
 
 # DB class
@@ -12,6 +13,9 @@ from config import config
 app = Flask(__name__, static_url_path="")
 app.config['SQLALCHEMY_DATABASE_URI'] = config.DB_URI
 app.config['SQLALCHEMY_ECHO'] = True
+app.config['REDIS_URL'] = "redis://devgoteo.org:6379/0"
+#app.config['SQLALCHEMY_POOL_TIMEOUT'] = 5
+#app.config['SQLALCHEMY_POOL_SIZE'] = 30
 
 #
 # Read debug status from config
@@ -19,11 +23,10 @@ if hasattr(config, 'debug'):
     app.debug = bool(config.debug)
     app.config['DEBUG'] = bool(config.debug)
 
-#app.config['SQLALCHEMY_POOL_TIMEOUT'] = 5
-#app.config['SQLALCHEMY_POOL_SIZE'] = 30
-db = SQLAlchemy(app)
-# app.config.from_pyfile(config)
 
+# app.config.from_pyfile(config)
+db = SQLAlchemy(app)
+redis = Redis(app)
 
 # DB classes
 class User(db.Model):

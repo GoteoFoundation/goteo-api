@@ -10,6 +10,8 @@ from flask_restful_swagger import swagger
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import and_, or_, desc
 
+from decorators import *
+
 # DEBUG
 import time
 def debug_time(func):
@@ -115,6 +117,7 @@ class ProjectsAPI(Resource):
 
     ],
     responseMessages=[invalid_input])
+    @ratelimit()
     def get(self):
         """Get the Projects Report
 

@@ -10,6 +10,8 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from datetime import date
 
+from decorators import *
+
 invest_fields = {
     'id': fields.Integer,
     'user': fields.String,
@@ -127,6 +129,7 @@ class MoneyAPI(Resource):
 
     ],
     responseMessages=[invalid_input])
+    @ratelimit()
     def get(self):
         """Get the Money Report
 

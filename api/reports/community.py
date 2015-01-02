@@ -10,6 +10,8 @@ from flask_restful_swagger import swagger
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import and_, desc
 
+from decorators import *
+
 # DEBUG
 import time
 def debug_time(func):
@@ -126,6 +128,7 @@ class CommunityAPI(Resource):
 
     ],
     responseMessages=[invalid_input])
+    @ratelimit()
     def get(self):
         """Get the Community Report
 
