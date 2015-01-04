@@ -1,8 +1,9 @@
 import time
 from functools import update_wrapper
-from flask import request, g
+from flask import request, g, session
 
 from model import app, redis
+from sqlalchemy.orm.exc import NoResultFound
 
 
 class RateLimit(object):
@@ -28,15 +29,12 @@ def get_view_rate_limit():
 def on_over_limit(limit):
     return 'You hit the rate limit', 400
 
-def ratelimit(limit=300, per=60 * 15, send_x_headers=True,
-              over_limit=on_over_limit,
-              scope_func=lambda: request.remote_addr,
-              key_func=lambda: request.endpoint):
+def ratelimit(limit=300, per=60 * 15, send_x_headers=True, over_limit=on_over_limit):
     def decorator(f):
         def rate_limited(*args, **kwargs):
             #key = 'rate-limit/%s/%s/' % (key_func(), scope_func())
             #print key_func(), scope_func() # community 127.0.0.1
-            key = 'rate-limit/%s/' % scope_func()
+            key = 'rate-limit/%s/' % request.authorization.username
             rlimit = RateLimit(key, limit, per, send_x_headers)
             g._view_rate_limit = rlimit
             if over_limit is not None and rlimit.over_limit:
@@ -56,9 +54,30 @@ def inject_x_rate_headers(response):
     return response
 
 
-"""
-@app.route('/rate-limited')
-@ratelimit(limit=300, per=60 * 15)
-def index():
-    return '<h1>This is a rate limited response</h1>'
-"""
+######################### auth #########################
+# Based on http://flask.pocoo.org/snippets/8/
+
+from functools import wraps
+from flask import request, Response
+from model import db, UserApi
+
+from datetime import datetime
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if auth:
+            try:
+                user = db.session.query(UserApi).filter(UserApi.user == auth.username, UserApi.key == auth.password).one()
+                if user.expiration_date <= datetime.today():
+                    print user.expiration_date, '<=', datetime.today()
+                    return Response('You API key has expired!\n')
+                return f(*args, **kwargs)
+            except NoResultFound:
+                """Sends a 401 response that enables basic auth"""
+                return Response(
+                'You need a key in order to use our API. Please contact us and we will provide you one!\n', 401,
+                {'WWW-Authenticate': 'Basic realm="Goteo.org API"'})
+
+    return decorated

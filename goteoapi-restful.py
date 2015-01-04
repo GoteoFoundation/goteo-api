@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from model import app
+from decorators import *
 
 from flask import request
 
@@ -15,8 +16,8 @@ from flask.ext.restful import Api
 api = swagger.docs(Api(app), apiVersion='1.0', description='Goteo.org API')
 #api = Api(app)
 
-
 @app.route('/')
+@requires_auth
 def index():
     return """
 <h1>API de Goteo.org</h1>
@@ -29,6 +30,7 @@ This API is compatible with <a href="http://swagger.io/">Swagger</a> specificati
 
 
 @app.route('/reports/')
+@requires_auth
 def reports():
     return """
 <h1>API de Goteo.org</h1>
@@ -47,7 +49,9 @@ This API is compatible with <a href="http://swagger.io/">Swagger</a> specificati
 curl -i http://{host}/reports/money</br>
 curl -i -X GET -d from_date="2014-01-01" http://{host}/reports/money<br>
 curl -i -X GET -d project="diagonal" http://{host}/reports/money<br>
-curl -i -X GET -d location="36.716667,-4.416667,100" http://{host}/reports/projects
+curl -i -X GET -d location="36.716667,-4.416667,100" http://{host}/reports/projects<br>
+<br>
+curl --basic --user "user:key" http://0.0.0.0:5000/reports/
 </span>
 """.format(host=request.host)
 

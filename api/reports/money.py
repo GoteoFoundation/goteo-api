@@ -129,6 +129,7 @@ class MoneyAPI(Resource):
 
     ],
     responseMessages=[invalid_input])
+    @requires_auth
     @ratelimit()
     def get(self):
         """Get the Money Report

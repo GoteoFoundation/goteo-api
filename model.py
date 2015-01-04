@@ -279,3 +279,14 @@ class LocationItem(db.Model):
 
     def __repr__(self):
         return '<LocationItem: (%s)%s in location %d>' % (self.type, self.item, self.id)
+
+
+class UserApi(db.Model):
+    __tablename__ = 'user_api'
+
+    user = db.Column('user_id', String(50), primary_key=True)
+    key = db.Column('key', String(50))
+    expiration_date = db.Column('expiration_date', DateTime)
+
+    def __repr__(self):
+        return '<UserApi: %s %s (%s)>' % (self.user, self.key, self.expiration_date)

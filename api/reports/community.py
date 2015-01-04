@@ -128,6 +128,7 @@ class CommunityAPI(Resource):
 
     ],
     responseMessages=[invalid_input])
+    @requires_auth
     @ratelimit()
     def get(self):
         """Get the Community Report

@@ -124,6 +124,7 @@ class RewardsAPI(Resource):
 
     ],
     responseMessages=[invalid_input])
+    @requires_auth
     @ratelimit()
     def get(self):
         """Get the Rewards Report
@@ -180,7 +181,7 @@ class RewardsAPI(Resource):
         if args['location']:
             # Filtra por la localización del usuario que elige la recompensa
             # No hace falta filters2, ya que ese filtra por proyecto, no por usuario
-            
+
             location = args['location'].split(",")
             if len(location) != 3:
                 return {"error": "Invalid parameter: location"}  # TODO: Return empty, http 400

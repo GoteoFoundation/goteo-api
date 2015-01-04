@@ -117,6 +117,7 @@ class ProjectsAPI(Resource):
 
     ],
     responseMessages=[invalid_input])
+    @requires_auth
     @ratelimit()
     def get(self):
         """Get the Projects Report
@@ -230,6 +231,7 @@ class ProjectsAPI(Resource):
             p_succ_finished = round(p_succ_finished, 2)
 
         # - Porcentaje media de recaudación conseguida por proyectos exitosos
+        # FIXME:   "average-success-percentage": 6784.22,
         f_p_avg_success = list(filters)
         f_p_avg_success.append(Invest.status.in_([1, 3]))
         f_p_avg_success.append(Project.status.in_([4, 5]))
