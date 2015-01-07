@@ -157,14 +157,14 @@ class ProjectsAPI(Resource):
                 category_id = db.session.query(Category.id).filter(Category.name == args['category']).one()
                 category_id = category_id[0]
             except NoResultFound:
-                return {"error": "Invalid category"}  # TODO: Return empty, http 400
+                return {"error": "Invalid category"}, 400
 
             filters.append(Project.id == ProjectCategory.project)
             filters.append(ProjectCategory.category == category_id)
         if args['location']:
             location = args['location'].split(",")
             if len(location) != 3:
-                return {"error": "Invalid parameter: location"}  # TODO: Return empty, http 400
+                return {"error": "Invalid parameter: location"}, 400
 
             from geopy.distance import VincentyDistance
             latitude, longitude, radius = location
@@ -174,7 +174,7 @@ class ProjectsAPI(Resource):
             locations_ids = map(lambda l: int(l[0]), locations)
 
             if locations_ids == []:
-                return {"error": "No locations in the specified range"}  # TODO: Return empty, http 400
+                return {"error": "No locations in the specified range"}, 400
 
             filters.append(Project.owner == LocationItem.item)
             filters.append(LocationItem.type == 'user')
