@@ -4,7 +4,7 @@ from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
 #from flask.ext.sqlalchemy import Pagination
 from sqlalchemy import Integer, String, Text, Date, DateTime, Boolean, Float
-# TODO: Probar tipo UnicodeText para Category.name
+
 from flask_redis import Redis
 from config import config
 
