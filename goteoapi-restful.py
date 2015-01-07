@@ -16,6 +16,7 @@ from flask.ext.restful import Api
 api = swagger.docs(Api(app), apiVersion='1.0', description='Goteo.org API')
 #api = Api(app)
 
+
 @app.route('/')
 @requires_auth
 def index():
@@ -51,7 +52,7 @@ curl -i -X GET -d from_date="2014-01-01" http://{host}/reports/money<br>
 curl -i -X GET -d project="diagonal" http://{host}/reports/money<br>
 curl -i -X GET -d location="36.716667,-4.416667,100" http://{host}/reports/projects<br>
 <br>
-curl --basic --user "user:key" http://0.0.0.0:5000/reports/
+curl --basic --user "user:key" http://{host}/reports/
 </span>
 """.format(host=request.host)
 
