@@ -189,7 +189,6 @@ class Reward(db.Model):
         return '<Reward(%d) %s: %s>' % (self.id, self.project[:10], self.title[:50])
 
 
-# TODO: backrefs
 class InvestNode(db.Model):
     __tablename__ = 'invest_node'
 
@@ -204,7 +203,6 @@ class InvestNode(db.Model):
         return '<Invest %d in node %s>' % (self.invest_id, self.invest_node)
 
 
-# TODO: backrefs
 class InvestReward(db.Model):
     __tablename__ = 'invest_reward'
 

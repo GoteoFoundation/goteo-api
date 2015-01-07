@@ -79,5 +79,8 @@ def requires_auth(f):
                 return Response(
                 'You need a key in order to use our API. Please contact us and we will provide you one!\n', 401,
                 {'WWW-Authenticate': 'Basic realm="Goteo.org API"'})
-
+        else:
+            return Response(
+            'You need a key in order to use our API. Please contact us and we will provide you one!\n', 401,
+            {'WWW-Authenticate': 'Basic realm="Goteo.org API"'})
     return decorated
