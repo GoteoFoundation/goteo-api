@@ -52,7 +52,7 @@ curl -i -X GET -d from_date="2014-01-01" http://{host}/reports/money<br>
 curl -i -X GET -d project="diagonal" http://{host}/reports/money<br>
 curl -i -X GET -d location="36.716667,-4.416667,100" http://{host}/reports/projects<br>
 <br>
-curl --basic --user "user:key" http://{host}/reports/
+curl -i --basic --user "user:key" http://{host}/reports/
 </span>
 """.format(host=request.host)
 

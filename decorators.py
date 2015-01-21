@@ -5,16 +5,17 @@ from flask import request, g, session
 from model import app, redis
 from sqlalchemy.orm.exc import NoResultFound
 
+from config import config
+
 
 class RateLimit(object):
     expiration_window = 10
 
-    def __init__(self, key_prefix, limit, per, send_x_headers):
+    def __init__(self, key_prefix, limit, per):
         self.reset = (int(time.time()) // per) * per + per
         self.key = key_prefix + str(self.reset)
         self.limit = limit
         self.per = per
-        self.send_x_headers = send_x_headers
         p = redis.pipeline()
         p.incr(self.key)
         p.expireat(self.key, self.reset + self.expiration_window)
@@ -29,13 +30,11 @@ def get_view_rate_limit():
 def on_over_limit(limit):
     return 'You hit the rate limit', 400
 
-def ratelimit(limit=300, per=60 * 15, send_x_headers=True, over_limit=on_over_limit):
+def ratelimit(limit=config.requests_limit, per=config.requests_time, over_limit=on_over_limit):
     def decorator(f):
         def rate_limited(*args, **kwargs):
-            #key = 'rate-limit/%s/%s/' % (key_func(), scope_func())
-            #print key_func(), scope_func() # community 127.0.0.1
             key = 'rate-limit/%s/' % request.authorization.username
-            rlimit = RateLimit(key, limit, per, send_x_headers)
+            rlimit = RateLimit(key, limit, per)
             g._view_rate_limit = rlimit
             if over_limit is not None and rlimit.over_limit:
                 return over_limit(rlimit)
@@ -46,7 +45,7 @@ def ratelimit(limit=300, per=60 * 15, send_x_headers=True, over_limit=on_over_li
 @app.after_request
 def inject_x_rate_headers(response):
     limit = get_view_rate_limit()
-    if limit and limit.send_x_headers:
+    if limit:
         h = response.headers
         h.add('X-RateLimit-Remaining', str(limit.remaining))
         h.add('X-RateLimit-Limit', str(limit.limit))
