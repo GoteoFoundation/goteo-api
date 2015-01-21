@@ -67,4 +67,20 @@ api.add_resource(RewardsAPI, '/reports/rewards', endpoint='rewards')
 #This part will not be executed under uWSGI module (nginx)
 if __name__ == '__main__':
     app.debug = True
-    app.run(host='0.0.0.0')
+
+    if app.debug:
+        import os
+        module_path = os.path.dirname(swagger.__file__)
+        module_path = os.path.join(module_path, 'static')
+        extra_dirs = [module_path, ]
+        extra_files = extra_dirs[:]
+        for extra_dir in extra_dirs:
+            for dirname, dirs, files in os.walk(extra_dir):
+                for filename in files:
+                    filename = os.path.join(dirname, filename)
+                    if os.path.isfile(filename):
+                        extra_files.append(filename)
+    else:
+        extra_files = []
+
+    app.run(host='0.0.0.0', extra_files=extra_files)
