@@ -10,6 +10,8 @@ from flask_restful_swagger import swagger
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import and_, or_, desc
 
+from decorators import *
+
 # DEBUG
 import time
 def debug_time(func):
@@ -122,6 +124,8 @@ class RewardsAPI(Resource):
 
     ],
     responseMessages=[invalid_input])
+    @requires_auth
+    @ratelimit()
     def get(self):
         """Get the Rewards Report
 
@@ -168,7 +172,7 @@ class RewardsAPI(Resource):
                 category_id = db.session.query(Category.id).filter(Category.name == args['category']).one()
                 category_id = category_id[0]
             except NoResultFound:
-                return {"error": "Invalid category"}  # TODO: Return empty, http 400
+                return {"error": "Invalid category"}, 400
 
             filters.append(Invest.project == ProjectCategory.project)
             filters2.append(Project.id == ProjectCategory.project)
@@ -177,20 +181,24 @@ class RewardsAPI(Resource):
         if args['location']:
             # Filtra por la localización del usuario que elige la recompensa
             # No hace falta filters2, ya que ese filtra por proyecto, no por usuario
-            
+
             location = args['location'].split(",")
             if len(location) != 3:
-                return {"error": "Invalid parameter: location"}  # TODO: Return empty, http 400
+                return {"error": "Invalid parameter: location"}, 400
 
             from geopy.distance import VincentyDistance
             latitude, longitude, radius = location
 
+            radius = int(radius)
+            if radius > 500 or radius < 0:
+                return {"error": "Radius must be a value between 0 and 500 Km"}, 400
+
             locations = db.session.query(Location.id, Location.lat, Location.lon).all()
-            locations = filter(lambda l: VincentyDistance((latitude, longitude), (l[1], l[2])).km <= int(radius), locations)
+            locations = filter(lambda l: VincentyDistance((latitude, longitude), (l[1], l[2])).km <= radius, locations)
             locations_ids = map(lambda l: int(l[0]), locations)
 
             if locations_ids == []:
-                return {"error": "No locations in the specified range"}  # TODO: Return empty, http 400
+                return {"error": "No locations in the specified range"}, 400
 
             filters.append(Invest.user == LocationItem.item)
             filters.append(LocationItem.type == 'user')

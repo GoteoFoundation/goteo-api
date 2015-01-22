@@ -4,6 +4,11 @@ dbuser = 'goteo'
 dbpass = 'goteo1234'
 dbname = 'goteo'
 
+# api requests rate limit
+# Users are allowed 300 requests in 15 minutes
+requests_limit = 300
+requests_time = 60 * 15
+
 #debug
 debug = True
 

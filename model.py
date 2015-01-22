@@ -4,7 +4,8 @@ from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
 #from flask.ext.sqlalchemy import Pagination
 from sqlalchemy import Integer, String, Text, Date, DateTime, Boolean, Float
-# TODO: Probar tipo UnicodeText para Category.name
+
+from flask_redis import Redis
 from config import config
 
 # DB class
@@ -12,6 +13,9 @@ from config import config
 app = Flask(__name__, static_url_path="")
 app.config['SQLALCHEMY_DATABASE_URI'] = config.DB_URI
 app.config['SQLALCHEMY_ECHO'] = True
+app.config['REDIS_URL'] = "redis://devgoteo.org:6379/0"
+#app.config['SQLALCHEMY_POOL_TIMEOUT'] = 5
+#app.config['SQLALCHEMY_POOL_SIZE'] = 30
 
 #
 # Read debug status from config
@@ -19,11 +23,10 @@ if hasattr(config, 'debug'):
     app.debug = bool(config.debug)
     app.config['DEBUG'] = bool(config.debug)
 
-#app.config['SQLALCHEMY_POOL_TIMEOUT'] = 5
-#app.config['SQLALCHEMY_POOL_SIZE'] = 30
-db = SQLAlchemy(app)
-# app.config.from_pyfile(config)
 
+# app.config.from_pyfile(config)
+db = SQLAlchemy(app)
+redis = Redis(app)
 
 # DB classes
 class User(db.Model):
@@ -186,7 +189,6 @@ class Reward(db.Model):
         return '<Reward(%d) %s: %s>' % (self.id, self.project[:10], self.title[:50])
 
 
-# TODO: backrefs
 class InvestNode(db.Model):
     __tablename__ = 'invest_node'
 
@@ -201,7 +203,6 @@ class InvestNode(db.Model):
         return '<Invest %d in node %s>' % (self.invest_id, self.invest_node)
 
 
-# TODO: backrefs
 class InvestReward(db.Model):
     __tablename__ = 'invest_reward'
 
@@ -276,3 +277,14 @@ class LocationItem(db.Model):
 
     def __repr__(self):
         return '<LocationItem: (%s)%s in location %d>' % (self.type, self.item, self.id)
+
+
+class UserApi(db.Model):
+    __tablename__ = 'user_api'
+
+    user = db.Column('user_id', String(50), primary_key=True)
+    key = db.Column('key', String(50))
+    expiration_date = db.Column('expiration_date', DateTime)
+
+    def __repr__(self):
+        return '<UserApi: %s %s (%s)>' % (self.user, self.key, self.expiration_date)

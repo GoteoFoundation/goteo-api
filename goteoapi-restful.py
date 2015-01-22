@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from model import app
+from decorators import *
 
 from flask import request
 
@@ -17,6 +18,7 @@ api = swagger.docs(Api(app), apiVersion='1.0', description='Goteo.org API')
 
 
 @app.route('/')
+@requires_auth
 def index():
     return """
 <h1>API de Goteo.org</h1>
@@ -29,6 +31,7 @@ This API is compatible with <a href="http://swagger.io/">Swagger</a> specificati
 
 
 @app.route('/reports/')
+@requires_auth
 def reports():
     return """
 <h1>API de Goteo.org</h1>
@@ -47,7 +50,9 @@ This API is compatible with <a href="http://swagger.io/">Swagger</a> specificati
 curl -i http://{host}/reports/money</br>
 curl -i -X GET -d from_date="2014-01-01" http://{host}/reports/money<br>
 curl -i -X GET -d project="diagonal" http://{host}/reports/money<br>
-curl -i -X GET -d location="36.716667,-4.416667,100" http://{host}/reports/projects
+curl -i -X GET -d location="36.716667,-4.416667,100" http://{host}/reports/projects<br>
+<br>
+curl -i --basic --user "user:key" http://{host}/reports/
 </span>
 """.format(host=request.host)
 
@@ -62,4 +67,20 @@ api.add_resource(RewardsAPI, '/reports/rewards', endpoint='rewards')
 #This part will not be executed under uWSGI module (nginx)
 if __name__ == '__main__':
     app.debug = True
-    app.run(host='0.0.0.0')
+
+    if app.debug:
+        import os
+        module_path = os.path.dirname(swagger.__file__)
+        module_path = os.path.join(module_path, 'static')
+        extra_dirs = [module_path, ]
+        extra_files = extra_dirs[:]
+        for extra_dir in extra_dirs:
+            for dirname, dirs, files in os.walk(extra_dir):
+                for filename in files:
+                    filename = os.path.join(dirname, filename)
+                    if os.path.isfile(filename):
+                        extra_files.append(filename)
+    else:
+        extra_files = []
+
+    app.run(host='0.0.0.0', extra_files=extra_files)

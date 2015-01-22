@@ -7,6 +7,7 @@ En Ubuntu 14.04, primero assegurase que se tienen todas las librerias:
 sudo apt-get install python-setuptools python-dev build-essential
 sudo apt-get install libevent1-dev libmysqlclient-dev libpython-dev
 sudo apt-get install python-virtualenv virtualenvwrapper
+sudo apt-get install redis-server python-redis
 sudo easy_install pip
 ```
 
