@@ -13,7 +13,7 @@ from config import config
 app = Flask(__name__, static_url_path="")
 app.config['SQLALCHEMY_DATABASE_URI'] = config.DB_URI
 app.config['SQLALCHEMY_ECHO'] = True
-app.config['REDIS_URL'] = "redis://devgoteo.org:6379/0"
+app.config['REDIS_URL'] = config.REDIS_URI
 #app.config['SQLALCHEMY_POOL_TIMEOUT'] = 5
 #app.config['SQLALCHEMY_POOL_SIZE'] = 30
 

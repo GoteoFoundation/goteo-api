@@ -8,6 +8,10 @@ dbname = 'goteo'
 # Users are allowed 300 requests in 15 minutes
 requests_limit = 300
 requests_time = 60 * 15
+auth_enabled = True
+
+# redis
+REDIS_URI = "redis://devgoteo.org:6379/0"
 
 #debug
 debug = True

@@ -65,11 +65,13 @@ from datetime import datetime
 def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
+        if not config.auth_enabled:
+            return f(*args, **kwargs)
         auth = request.authorization
         if auth:
             try:
                 user = db.session.query(UserApi).filter(UserApi.user == auth.username, UserApi.key == auth.password).one()
-                if user.expiration_date <= datetime.today():
+                if user.expiration_date is not None and user.expiration_date <= datetime.today():
                     print user.expiration_date, '<=', datetime.today()
                     return Response('You API key has expired!\n')
                 return f(*args, **kwargs)
