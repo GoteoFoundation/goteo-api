@@ -65,6 +65,8 @@ from datetime import datetime
 def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
+        if not config.auth_enabled:
+            return f(*args, **kwargs)
         auth = request.authorization
         if auth:
             try:
