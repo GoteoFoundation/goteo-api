@@ -71,7 +71,7 @@ def requires_auth(f):
         if auth:
             try:
                 user = db.session.query(UserApi).filter(UserApi.user == auth.username, UserApi.key == auth.password).one()
-                if user.expiration_date <= datetime.today():
+                if user.expiration_date is not None and user.expiration_date <= datetime.today():
                     print user.expiration_date, '<=', datetime.today()
                     return Response('You API key has expired!\n')
                 return f(*args, **kwargs)
