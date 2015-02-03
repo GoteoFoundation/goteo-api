@@ -362,21 +362,25 @@ class CommunityAPI(Resource):
             perc_categoria2 = 0
 
         # - Top 10 Cofinanciadores (REVISAR como sacamos estos datos, excepto admines)
+        admines = db.session.query(UserRole.user_id).filter(UserRole.role_id.in_(['admin', 'superadmin'])).all()
+        admines = map(lambda c: c[0], admines)
+
         f_top10_investors = list(filters)
-        f_top10_investors.append(Invest.user == UserRole.user_id)
-        f_top10_investors.append(~UserRole.role_id.in_(['admin', 'superadmin']))
+        f_top10_investors.append(~Invest.user.in_(admines))
         top10_investors = db.session.query(Invest.user, func.count(Invest.id).label('total'))\
                                     .filter(*f_top10_investors).group_by(Invest.user)\
                                     .order_by(desc('total')).limit(10).all()
+
 
         # - Top 10 Cofinanciadores con más caudal (más generosos) excluir usuarios convocadores Y ADMINES
         convocadores = db.session.query(Call.owner).filter(Call.status > 2).all()
         convocadores = map(lambda c: c[0], convocadores)
 
+        convocadoresadmines = convocadores
+        convocadoresadmines.extend(admines)
+        convocadoresadmines = set(convocadoresadmines)
         f_top10_invests = list(filters)
-        f_top10_invests.append(Invest.user == UserRole.user_id)
-        f_top10_invests.append(~Invest.user.in_(convocadores))
-        f_top10_invests.append(~UserRole.role_id.in_(['admin', 'superadmin']))
+        f_top10_invests.append(~Invest.user.in_(convocadoresadmines))
         top10_invests = db.session.query(Invest.user, func.sum(Invest.amount).label('total'))\
                                     .filter(*f_top10_invests).group_by(Invest.user)\
                                     .order_by(desc('total')).limit(10).all()
