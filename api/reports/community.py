@@ -366,6 +366,7 @@ class CommunityAPI(Resource):
         admines = map(lambda c: c[0], admines)
 
         f_top10_investors = list(filters)
+        f_top10_investors.append(Invest.status.in_([0, 1, 3, 4]))
         f_top10_investors.append(~Invest.user.in_(admines))
         top10_investors = db.session.query(Invest.user, func.count(Invest.id).label('total'))\
                                     .filter(*f_top10_investors).group_by(Invest.user)\
@@ -380,6 +381,7 @@ class CommunityAPI(Resource):
         convocadoresadmines.extend(admines)
         convocadoresadmines = set(convocadoresadmines)
         f_top10_invests = list(filters)
+        f_top10_invests.append(Invest.status.in_([0, 1, 3, 4]))
         f_top10_invests.append(~Invest.user.in_(convocadoresadmines))
         top10_invests = db.session.query(Invest.user, func.sum(Invest.amount).label('total'))\
                                     .filter(*f_top10_invests).group_by(Invest.user)\
