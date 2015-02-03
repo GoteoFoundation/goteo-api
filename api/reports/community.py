@@ -240,7 +240,7 @@ class CommunityAPI(Resource):
 
         # - Número total de usuarios
         f_users = list(filters2)
-        users = db.session.query(User).filter(*f_users).count()
+        users = db.session.query(func.count(User.id)).filter(*f_users).scalar()
 
         def perc_users(number):
             if users == 0:
@@ -253,18 +253,15 @@ class CommunityAPI(Resource):
         f_bajas = list(filters2)
         f_bajas.append(User.active == 0)
         f_bajas.append(User.hide == 1)
-        bajas = db.session.query(User).filter(*f_bajas).count()
+        bajas = db.session.query(func.count(User.id)).filter(*f_bajas).scalar()
         p_bajas = perc_users(bajas)
 
         # - Número de cofinanciadores
         f_cofinanciadores = list(filters)
-        _cofinanciadores = db.session.query(func.distinct(Invest.user)).filter(*f_cofinanciadores) # .subquery()
-        cofinanciadores = int(_cofinanciadores.count())
+        cofinanciadores = db.session.query(func.count(func.distinct(Invest.user))).filter(*f_cofinanciadores).scalar()
 
         # - NEW Porcentaje de usuarios cofinanciadores
         users_cofi_perc = perc_users(cofinanciadores)
-        #users_cofi_perc = float(cofinanciadores) / users * 100  # %
-        #users_cofi_perc = _round(users_cofi_perc)
 
         # - Multi-Cofinanciadores (a más de 1 proyecto)
         f_multicofi = list(filters)
@@ -280,7 +277,7 @@ class CommunityAPI(Resource):
         # - Cofinanciadores usando PayPal
         f_paypal = list(filters)
         f_paypal.append(Invest.method==Invest.METHOD_PAYPAL)
-        paypal = db.session.query(Invest).filter(*f_paypal).count()
+        paypal = db.session.query(func.count(Invest.id)).filter(*f_paypal).scalar()
 
         # - Multi-Cofinanciadores usando PayPal
         f_paypal_multicofi = list(filters)
@@ -289,11 +286,7 @@ class CommunityAPI(Resource):
 
         # - Número de colaboradores
         f_colaboradores = list(filters4)
-        if args['node']:
-            #FIXME: Revisar
-            f_colaboradores.append(Message.user == User.id)
-        _colaboradores = db.session.query(func.distinct(Message.user)).filter(*f_colaboradores) # .subquery()
-        colaboradores = int(_colaboradores.count())
+        colaboradores = db.session.query(func.count(func.distinct(Message.user))).filter(*f_colaboradores).scalar()
 
         # - Cofinanciadores que colaboran
         sq_blocked = db.session.query(Message.id).filter(Message.blocked == 1).subquery()
