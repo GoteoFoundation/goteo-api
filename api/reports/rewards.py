@@ -155,12 +155,15 @@ class RewardsAPI(Resource):
         if args['from_date']:
             filters.append(Invest.date_invested >= args['from_date'])
             filters2.append(Invest.date_invested >= args['from_date'])
+            filters2.append(Invest.project == Project.id)
         if args['to_date']:
             filters.append(Invest.date_invested <= args['to_date'])
             filters2.append(Invest.date_invested <= args['to_date'])
+            filters2.append(Invest.project == Project.id)
         if args['project']:
             filters.append(Invest.project.in_(args['project'][0]))
             filters2.append(Invest.project.in_(args['project'][0]))
+            filters2.append(Invest.project == Project.id)
         if args['node']:
             # FIXME: invest_node o project_node ?
             filters.append(Invest.id == InvestNode.invest_id)

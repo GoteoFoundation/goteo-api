@@ -171,17 +171,23 @@ class CommunityAPI(Resource):
         if args['from_date']:
             filters.append(Invest.date_invested >= args['from_date'])
             filters2.append(Invest.date_invested >= args['from_date'])
+            filters2.append(Invest.user == User.id)
             filters3.append(Invest.date_invested >= args['from_date'])
+            filters3.append(Invest.user == UserInterest.user)
             filters4.append(Message.date >= args['from_date'])
         if args['to_date']:
             filters.append(Invest.date_invested <= args['to_date'])
             filters2.append(Invest.date_invested <= args['to_date'])
+            filters2.append(Invest.user == User.id)
             filters3.append(Invest.date_invested <= args['to_date'])
+            filters3.append(Invest.user == UserInterest.user)
             filters4.append(Message.date <= args['to_date'])
         if args['project']:
             filters.append(Invest.project.in_(args['project']))
             filters2.append(Invest.project.in_(args['project']))
+            filters2.append(User.id == Invest.user)
             filters3.append(Invest.project.in_(args['project']))
+            filters3.append(UserInterest.user == Invest.user)
             filters4.append(Message.project.in_(args['project']))
         if args['node']:
             #TODO: project_node o invest_node?
