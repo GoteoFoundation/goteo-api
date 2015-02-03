@@ -28,6 +28,7 @@ if hasattr(config, 'debug'):
 db = SQLAlchemy(app)
 redis = Redis(app)
 
+
 # DB classes
 class User(db.Model):
     __tablename__ = 'user'
@@ -257,23 +258,29 @@ class Location(db.Model):
     __tablename__ = 'location'
 
     id = db.Column('id', Integer, primary_key=True)
-    location = db.Column('location', Text)
-    region = db.Column('region', Text)
-    country = db.Column('country', Text)
-    lon = db.Column('lon', Float)
-    lat = db.Column('lat', Float)
+    city = db.Column('city', String(255))
+    region = db.Column('region', String(255))
+    country = db.Column('country', String(255))
+    country_code = db.Column('country_code', String(2))
+    lon = db.Column('longitude', Float)
+    lat = db.Column('latitude', Float)
     valid = db.Column('valid', Integer)
+    modified = db.Column('modified', DateTime)
 
     def __repr__(self):
-        return '<Location(%d) %s, %s (%s)>' % (self.id, self.location, self.region, self.country)
+        return '<Location(%d) %s, %s (%s)>' % (self.id, self.city, self.region, self.country)
 
 
 class LocationItem(db.Model):
     __tablename__ = 'location_item'
 
-    id = db.Column('location', Integer, primary_key=True)
+    id = db.Column('location', Integer)
     item = db.Column('item', String(50), primary_key=True)
     type = db.Column('type', String(7), primary_key=True)
+    method = db.Column('method', String(50))
+    locable = db.Column('locable', Integer)
+    info = db.Column('info', String(255))
+    modified = db.Column('modified', DateTime)
 
     def __repr__(self):
         return '<LocationItem: (%s)%s in location %d>' % (self.type, self.item, self.id)
