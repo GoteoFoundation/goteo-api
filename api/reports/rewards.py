@@ -11,18 +11,13 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import and_, or_, desc
 
 from decorators import *
+from config import config
+
+import time
 
 # DEBUG
-import time
-def debug_time(func):
-    def new_f(*args, **kwargs):
-        time_start = time.time()
-        res = func(*args, **kwargs)
-        total_time = time.time() - time_start
-        app.logger.debug('Time ' + func.__name__ + ': ' + str(total_time))
-        return res
-    return new_f
-db.session.query = debug_time(db.session.query)
+if config.debug:
+    db.session.query = debug_time(db.session.query)
 
 
 @swagger.model

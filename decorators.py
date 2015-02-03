@@ -85,3 +85,14 @@ def requires_auth(f):
             'You need a key in order to use our API. Please contact us and we will provide you one!\n', 401,
             {'WWW-Authenticate': 'Basic realm="Goteo.org API"'})
     return decorated
+
+
+############################ debug ############################
+def debug_time(func):
+    def new_f(*args, **kwargs):
+        time_start = time.time()
+        res = func(*args, **kwargs)
+        total_time = time.time() - time_start
+        app.logger.debug('Time ' + func.__name__ + ': ' + str(total_time))
+        return res
+    return new_f
