@@ -203,7 +203,7 @@ class RewardsAPI(Resource):
             filters.append(LocationItem.id.in_(locations_ids))
 
         #
-        cofinanciadores = db.session.query(func.distinct(Invest.user)).filter(*filters).count()
+        cofinanciadores = db.session.query(func.count(func.distinct(Invest.user))).filter(*filters).scalar()
 
         def perc_invest(number):
             if cofinanciadores == 0:
@@ -216,7 +216,7 @@ class RewardsAPI(Resource):
         f_renuncias = list(filters)
         f_renuncias.append(Invest.resign == 1)
         f_renuncias.append(Invest.status.in_([0, 1, 3, 4]))
-        renuncias = db.session.query(Invest.id).filter(*f_renuncias).count()
+        renuncias = db.session.query(func.count(Invest.id)).filter(*f_renuncias).scalar()
 
         # (seleccionados por cofinanciador)
         # - Porcentaje de cofinanciadores que renuncian a recompensa
