@@ -58,6 +58,7 @@ class MoneyResponse:
 
 
 class MoneyAPI(Resource):
+    """Get Money Statistics"""
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()

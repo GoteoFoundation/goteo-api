@@ -39,10 +39,16 @@ if hasattr(settings, 'links'):
 else:
 	links = {
 		'Developers Documentation' : 'http://developers.goteo.org',
-		'Swagger Interface' : 'http://api.goteo.org/v1/api/'
+		'Swagger Interface' : 'http://api.goteo.org/v1/api/spec.html'
 	}
 
-#Api version
+# Generic valid auths
+if hasattr(settings, 'users'):
+	users = settings.users
+else:
+	users = {}
+
+# Api version
 version = 1.0
 
 # DB URI

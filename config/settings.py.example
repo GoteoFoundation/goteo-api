@@ -33,5 +33,12 @@ description = 'Goteo.org API'
 # Usefull links for general messages
 links = {
 	'Developers Documentation' : 'http://developers.goteo.org',
-	'Swagger Interface' : 'http://api.goteo.org/v1/api/'
+	'Swagger Interface' : '/api/spec.html'
+}
+
+# Built-in Users Authentication
+# Users can be bind to a ip or a ip range using a mask (eg: ip/mask)
+
+users = {
+	'goteo' : {'password':'goteo', 'remotes' : ['127.0.0.0/16', '192.168.0.0/24']}
 }

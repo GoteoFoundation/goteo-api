@@ -55,6 +55,7 @@ class CommunityResponse:
 
 
 class CommunityAPI(Resource):
+    """Get Community Statistics"""
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()

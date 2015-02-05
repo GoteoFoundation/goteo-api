@@ -51,6 +51,7 @@ class RewardsResponse:
 
 @swagger.model
 class RewardsAPI(Resource):
+    """Get Rewards Statistics"""
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()

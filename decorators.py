@@ -1,11 +1,16 @@
 import time
 from functools import update_wrapper
-from flask import request, g, session
+from flask import request, g, session, jsonify
 from model import app
 from sqlalchemy.orm.exc import NoResultFound
 from flask_redis import Redis
 
 from config import config
+
+
+#
+# REDIS RATE LIMITER
+# ==================
 
 if app.config['REDIS_URL'] is not False:
     redis = Redis(app)
@@ -32,17 +37,21 @@ def get_view_rate_limit():
     return getattr(g, '_view_rate_limit', None)
 
 def on_over_limit(limit):
-    return 'You hit the rate limit', 400
+    resp = jsonify(code=400, message='Too many requests')
+    resp.status_code = 400
+    return resp
 
 def ratelimit(limit=config.requests_limit, per=config.requests_time, over_limit=on_over_limit):
     def decorator(f):
         def rate_limited(*args, **kwargs):
             if not config.requests_limit:
                 return f(*args, **kwargs)
+
             if config.auth_enabled:
                 key = 'rate-limit/%s/' % request.authorization.username
             else:
-                key = 'rate-limit/%s/'
+                remote_ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
+                key = 'rate-limit/%s' % remote_ip
 
             rlimit = RateLimit(key, limit, per)
             g._view_rate_limit = rlimit
@@ -63,37 +72,67 @@ def inject_x_rate_headers(response):
     return response
 
 
-######################### auth #########################
+#
+# BASIC AUTH DECORATOR
+# ====================
 # Based on http://flask.pocoo.org/snippets/8/
 
 from functools import wraps
-from flask import request, Response
 from model import db, UserApi
-
+from netaddr import IPSet, AddrFormatError
 from datetime import datetime
+
+def check_auth(username, password):
+    """Checks username & password authentication"""
+
+    #try some built-in auth first
+    if config.users and username in config.users and 'password' in config.users[username]:
+        user = config.users[username]
+        if user['password'] == password:
+            if 'remotes' in user:
+                try:
+                    remote_ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
+                    if remote_ip in IPSet(user['remotes']):
+                        return True
+                except AddrFormatError:
+                    "continue"
+
+            else:
+                return True
+
+    #Try the key-password values in sql
+    try:
+        user = db.session.query(UserApi).filter(UserApi.user == username, UserApi.key == password).one()
+        if user.expiration_date is not None and user.expiration_date <= datetime.today():
+            # print user.expiration_date, '<=', datetime.today()
+            return 'API Key expired. Please get new valid key! '
+        return True
+    except NoResultFound:
+        return 'Acces denied: Invalid username or password!'
+
+    return False
+
 
 def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         if not config.auth_enabled:
             return f(*args, **kwargs)
+
         auth = request.authorization
+        msg = 'You need a key in order to use our API. Please contact us and we will provide you one!'
         if auth:
-            try:
-                user = db.session.query(UserApi).filter(UserApi.user == auth.username, UserApi.key == auth.password).one()
-                if user.expiration_date is not None and user.expiration_date <= datetime.today():
-                    print user.expiration_date, '<=', datetime.today()
-                    return Response('You API key has expired!\n')
+            ok = check_auth(auth.username, auth.password)
+            if(ok is True):
                 return f(*args, **kwargs)
-            except NoResultFound:
-                """Sends a 401 response that enables basic auth"""
-                return Response(
-                'You need a key in order to use our API. Please contact us and we will provide you one!\n', 401,
-                {'WWW-Authenticate': 'Basic realm="Goteo.org API"'})
-        else:
-            return Response(
-            'You need a key in order to use our API. Please contact us and we will provide you one!\n', 401,
-            {'WWW-Authenticate': 'Basic realm="Goteo.org API"'})
+            elif(ok is not False):
+                msg = str(ok)
+
+        resp = jsonify(code=401, message=msg)
+        resp.status_code = 401
+        resp.headers.add('WWW-Authenticate', 'Basic realm="Goteo.org API"')
+        return resp
+
     return decorated
 
 

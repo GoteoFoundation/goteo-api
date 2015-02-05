@@ -45,6 +45,7 @@ class ProjectsResponse:
 
 @swagger.model
 class ProjectsAPI(Resource):
+    """Get Projects Statistics"""
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
