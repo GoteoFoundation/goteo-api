@@ -1,4 +1,9 @@
-# database
+#
+# USE THIS FILE TO CONFIGURE THE GOTEO-API
+#
+
+# Mysql Goteo Database (mandatory)
+# ================================
 dbhost = 'devgoteo.org'
 dbuser = 'goteo'
 dbpass = 'goteo1234'
@@ -6,23 +11,26 @@ dbname = 'goteo'
 
 
 # Optional config:
+# ================
 
 # api requests rate limit
 # Users are allowed 300 requests in 15 minutes
 requests_limit = 300
 requests_time = 60 * 15
 
-# redis
-REDIS_URI = "redis://devgoteo.org:6379/0"
+# redis (mandatory if requests_limit activated)
+redis_uri = "redis://devgoteo.org:6379/0"
 
 # Use Http Authentication
 auth_enabled = True
 
-# debug
+# debug (False by default)
 debug = True
 
+# Opcional description for general messages
 description = 'Goteo.org API'
 
+# Usefull links for general messages
 links = {
 	'Developers Documentation' : 'http://developers.goteo.org',
 	'Swagger Interface' : 'http://api.goteo.org/v1/api/'

@@ -39,7 +39,11 @@ def ratelimit(limit=config.requests_limit, per=config.requests_time, over_limit=
         def rate_limited(*args, **kwargs):
             if not config.requests_limit:
                 return f(*args, **kwargs)
-            key = 'rate-limit/%s/' % request.authorization.username
+            if config.auth_enabled:
+                key = 'rate-limit/%s/' % request.authorization.username
+            else:
+                key = 'rate-limit/%s/'
+
             rlimit = RateLimit(key, limit, per)
             g._view_rate_limit = rlimit
             if over_limit is not None and rlimit.over_limit:
