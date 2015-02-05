@@ -21,19 +21,19 @@ api = swagger.docs(Api(app), apiVersion='1.0', description='Goteo.org API')
 
 @app.errorhandler(404)
 def page_not_found_404(e):
-     return jsonify(status='ERROR', error=404, message=str(e), links=config.links),
+     return jsonify(code=404, message=str(e), links=config.links),
 
 @app.errorhandler(403)
 def page_not_found_403(e):
-     return jsonify(status='ERROR', error=403, message=str(e), links=config.links),
+     return jsonify(code=403, message=str(e), links=config.links),
 
 @app.errorhandler(410)
 def page_not_found_410(e):
-     return jsonify(status='ERROR', error=410, message=str(e), links=config.links),
+     return jsonify(code=410, message=str(e), links=config.links),
 
 @app.errorhandler(500)
 def page_not_found_500(e):
-     return jsonify(status='ERROR', error=500, message=str(e), links=config.links),
+     return jsonify(code=500, message=str(e), links=config.links),
 
 def has_no_empty_params(rule):
     defaults = rule.defaults if rule.defaults is not None else ()
@@ -43,6 +43,11 @@ def has_no_empty_params(rule):
 @app.route('/')
 @requires_auth
 def index():
+    return jsonify(code=200, message='Goteo API v' + str(config.version), links=config.links)
+
+@app.route('/api-map')
+@requires_auth
+def api_map():
     routes = []
     for rule in app.url_map.iter_rules():
         # Filter out rules we can't navigate to in a browser
@@ -50,7 +55,7 @@ def index():
         if "GET" in rule.methods and has_no_empty_params(rule):
             url = url_for(rule.endpoint)
             routes.append((url, rule.endpoint))
-    return jsonify(status='OK', message='Goteo API v' + str(config.version), routes=routes, links=config.links)
+    return jsonify(code=200, message='Goteo API v' + str(config.version), routes=routes, links=config.links)
 
 
 @app.route('/reports/')

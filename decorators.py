@@ -1,12 +1,16 @@
 import time
 from functools import update_wrapper
 from flask import request, g, session
-
-from model import app, redis
+from model import app
 from sqlalchemy.orm.exc import NoResultFound
+from flask_redis import Redis
 
 from config import config
 
+if app.config['REDIS_URL'] is not False:
+    redis = Redis(app)
+else:
+    redis = False
 
 class RateLimit(object):
     expiration_window = 10
@@ -33,6 +37,8 @@ def on_over_limit(limit):
 def ratelimit(limit=config.requests_limit, per=config.requests_time, over_limit=on_over_limit):
     def decorator(f):
         def rate_limited(*args, **kwargs):
+            if not config.requests_limit:
+                return f(*args, **kwargs)
             key = 'rate-limit/%s/' % request.authorization.username
             rlimit = RateLimit(key, limit, per)
             g._view_rate_limit = rlimit

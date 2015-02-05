@@ -4,20 +4,26 @@ dbuser = 'goteo'
 dbpass = 'goteo1234'
 dbname = 'goteo'
 
+
+# Optional config:
+
 # api requests rate limit
 # Users are allowed 300 requests in 15 minutes
 requests_limit = 300
 requests_time = 60 * 15
-auth_enabled = True
 
 # redis
 REDIS_URI = "redis://devgoteo.org:6379/0"
 
-#debug
+# Use Http Authentication
+auth_enabled = True
+
+# debug
 debug = True
+
+description = 'Goteo.org API'
 
 links = {
 	'Developers Documentation' : 'http://developers.goteo.org',
 	'Swagger Interface' : 'http://api.goteo.org/v1/api/'
 }
-c

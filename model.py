@@ -3,9 +3,8 @@
 from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
 #from flask.ext.sqlalchemy import Pagination
-from sqlalchemy import Integer, String, Text, Date, DateTime, Boolean, Float
+from sqlalchemy import Integer, String, Text, Date, DateTime, Float
 
-from flask_redis import Redis
 from config import config
 
 # DB class
@@ -26,7 +25,6 @@ if hasattr(config, 'debug'):
 
 # app.config.from_pyfile(config)
 db = SQLAlchemy(app)
-redis = Redis(app)
 
 
 # DB classes
