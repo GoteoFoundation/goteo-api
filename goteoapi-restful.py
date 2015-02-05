@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from config import config
 from model import app
 from decorators import *
 
-from flask import request
-from flask import jsonify
+from flask import request, jsonify, url_for
 
 from api.reports.money import MoneyAPI
 from api.reports.rewards import RewardsAPI
@@ -14,36 +14,43 @@ from api.reports.projects import ProjectsAPI
 
 from flask_restful_swagger import swagger
 from flask.ext.restful import Api
+
+
 api = swagger.docs(Api(app), apiVersion='1.0', description='Goteo.org API')
 #api = Api(app)
 
 @app.errorhandler(404)
-def page_not_found(e):
-     return jsonify(error=404, text=str(e)),
+def page_not_found_404(e):
+     return jsonify(status='ERROR', error=404, message=str(e), links=config.links),
 
 @app.errorhandler(403)
-def page_not_found(e):
-     return jsonify(error=403, text=str(e)),
+def page_not_found_403(e):
+     return jsonify(status='ERROR', error=403, message=str(e), links=config.links),
 
 @app.errorhandler(410)
-def page_not_found(e):
-     return jsonify(error=410, text=str(e)),
+def page_not_found_410(e):
+     return jsonify(status='ERROR', error=410, message=str(e), links=config.links),
 
 @app.errorhandler(500)
-def page_not_found(e):
-     return jsonify(error=500, text=str(e)),
+def page_not_found_500(e):
+     return jsonify(status='ERROR', error=500, message=str(e), links=config.links),
+
+def has_no_empty_params(rule):
+    defaults = rule.defaults if rule.defaults is not None else ()
+    arguments = rule.arguments if rule.arguments is not None else ()
+    return len(defaults) >= len(arguments)
 
 @app.route('/')
 @requires_auth
 def index():
-    return """
-<h1>API de Goteo.org</h1>
-This API is compatible with <a href="http://swagger.io/">Swagger</a> specification. See: <a href="http://{host}/api/spec.html">html</a> and <a href="http://{host}/api/spec.json">json</a>.
-<h3>Sections:</h3>
-<a href="/reports/">/reports/</a></br>
-<br>
-
-""".format(host=request.host)
+    routes = []
+    for rule in app.url_map.iter_rules():
+        # Filter out rules we can't navigate to in a browser
+        # and rules that require parameters
+        if "GET" in rule.methods and has_no_empty_params(rule):
+            url = url_for(rule.endpoint)
+            routes.append((url, rule.endpoint))
+    return jsonify(status='OK', message='Goteo API v' + str(config.version), routes=routes, links=config.links)
 
 
 @app.route('/reports/')
