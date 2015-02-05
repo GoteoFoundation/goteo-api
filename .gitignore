@@ -2,5 +2,5 @@
 *.pyc
 *~
 virtualenv
-config/config.py
+config/settings.py
 
