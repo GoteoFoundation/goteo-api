@@ -124,22 +124,7 @@ class RewardsAPI(Resource):
     @ratelimit()
     def get(self):
         """Get the Rewards Report
-
-        Descripción de los valores devueltos:
-
-        <strong>renuncias</strong>: Número de cofinanciadores que renuncian a recompensa
-        <strong>perc-renuncias</strong>: % cofinanciadores que renuncian a recompensa
-        <strong>favorite-rewards</strong>: Tipo de recompensa más utilizada en proyectos exitosos. Nota: no le afecta el filtro location.
-
-        <strong>rewards-between-100-400</strong>: Recompensa elegida de 100 a 400 euros
-        <strong>rewards-between-15-30</strong>: Recompensa elegida de 15 a 30 euros
-        <strong>rewards-between-30-100</strong>: Recompensa elegida de 30 a 100 euros
-        <strong>rewards-less-than-15</strong>: Recompensa elegida de menos de 15 euros
-        <strong>rewards-more-than-400</strong>: Recompensa elegida de más de 400 euros
-
-        <strong>rewards_per_amount</strong>:
-
-        Además se añade el campo "filters"
+        <a href="http://developers.goteo.org/reports#rewards">developers.goteo.org/reports#rewards</a>
         """
         time_start = time.time()
         func = sqlalchemy.func

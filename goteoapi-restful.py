@@ -5,7 +5,6 @@ from model import app
 from decorators import *
 
 from flask import jsonify
-import inspect
 
 from api.reports.money import MoneyAPI
 from api.reports.rewards import RewardsAPI
@@ -50,7 +49,8 @@ def index():
     return jsonify(code=200, version=config.version, message=config.description + ' v' + str(config.version), endpoints=func_list, links=config.links)
 
 # Reports home
-@app.route('/reports/', endpoint='api_reports')
+@app.route('/reports/')
+@app.route('/reports', endpoint='api_reports')
 @requires_auth
 @ratelimit()
 def reports():
@@ -66,10 +66,10 @@ def reports():
 # ROUTE CLASSES
 #api.add_resource(ProjectListAPI, '/projects/', endpoint='projects1')
 #api.add_resource(ProjectAPI, '/projects/<string:project_id>', endpoint='project')
-api.add_resource(MoneyAPI, '/reports/money', endpoint='api_reports_money')
-api.add_resource(ProjectsAPI, '/reports/projects', endpoint='api_reports_projects')
-api.add_resource(CommunityAPI, '/reports/community', endpoint='api_reports_community')
-api.add_resource(RewardsAPI, '/reports/rewards', endpoint='api_reports_rewards')
+api.add_resource(MoneyAPI, '/reports/money', '/reports/money/', endpoint='api_reports_money')
+api.add_resource(ProjectsAPI, '/reports/projects', '/reports/projects/', endpoint='api_reports_projects')
+api.add_resource(CommunityAPI, '/reports/community', '/reports/community/', endpoint='api_reports_community')
+api.add_resource(RewardsAPI, '/reports/rewards', '/reports/rewards/', endpoint='api_reports_rewards')
 
 
 #This part will not be executed under uWSGI module (nginx)

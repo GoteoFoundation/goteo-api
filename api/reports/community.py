@@ -127,34 +127,8 @@ class CommunityAPI(Resource):
     @requires_auth
     @ratelimit()
     def get(self):
-        """Get the Community Report
-
-        Descripción de los valores devueltos:
-        <strong>users</strong>: Número total de usuarios registrados
-        <strong>perc-bajas</strong>: Porcentaje de usuarios que se han dado de baja
-        <strong>cofinanciadores</strong>: Número de cofinanciadores
-        <strong>users-cofi-perc</strong>: % usuarios registrados que son cofinanciadores
-        <strong>coficolaboradores</strong>: Número de cofinanciadores que colaboran
-        <strong>multicofi</strong>: Número de Multi-Cofinanciadores (a más de 1 proyecto)
-        <strong>users-multicofi-perc</strong>: % de Multi-Cofinanciadores (a más de 1 proyecto)
-        <strong>paypal</strong>: Número de cofinanciadores que usan PayPal
-        <strong>paypal-multicofi</strong>: Número de Multi-Cofinanciadores que usan PayPal
-        <strong>colaboradores</strong>: Número de colaboradores
-        <strong>media-cofi</strong>: Media de cofinanciadores por proyecto exitoso
-        <strong>media-colab</strong>: Media de colaboradores por proyecto
-        <strong>impulcofinanciadores</strong>: Número de impulsores que cofinancian a otros
-        <strong>impulcolaboradores</strong>: Número de impulsores que colaboran con otros
-        <strong>categoria1</strong>: 1ª categoría con más usuarios interesados
-        <strong>perc-categoria1</strong>: % usuarios en esta 1ª categoría
-        <strong>categoria2</strong>: 2ª categoría con más usuarios interesados
-        <strong>perc-categoria2</strong>: % usuarios en esta 2ª categoría
-        <strong>top10-investors</strong>: Top 10 cofinanciadores
-        <strong>top10-invests</strong>: Top 10 cofinanciadores con más caudal (más generosos) sin incluir usuarios convocadores
-        <strong>top10-collaborations</strong>: Top 10 colaboradores
-
-        <strong>categorias</strong>:
-
-        Además se añade el campo "filters"
+        """Get the community reports
+        <a href="http://developers.goteo.org/reports#community">developers.goteo.org/reports#community</a>
         """
         time_start = time.time()
         func = sqlalchemy.func

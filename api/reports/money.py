@@ -131,26 +131,7 @@ class MoneyAPI(Resource):
     @ratelimit()
     def get(self):
         """Get the Money Report
-
-        Descripción de los valores devueltos:
-        <strong>average-failed</strong>: Recaudación media por proyectos que no alcanzaron el mínimo
-        <strong>average-invest</strong>: Aportación media por cofinanciador (micromecenas)
-        <strong>average-invest-paypal</strong>: Aportación media por cofinanciador (micromecenas) a través de PayPal
-        <strong>average-mincost</strong>: Coste medio de los proyectos exitosos. Nota: no le afecta el filtro location.
-        <strong>average-received</strong>: Recaudación media por proyectos exitosos (que sí alcanzaron el mínimo)
-        <strong>average-second-round</strong>: Recaudación media en segunda ronda
-        <strong>call-amount</strong>: Suma recaudada en Convocatorias (Capital riego distribuido + crowd)
-        <strong>call-committed-amount</strong>: Capital Riego de Goteo (fondos captados de instituciones y empresas destinados a la bolsa de <a href="https://goteo.org/service/resources">Capital Riego</a>)
-        <strong>cash-amount</strong>: Suma recaudada mediante transferencia bancaria directa
-        <strong>committed</strong>: Suma recaudada por la plataforma
-        <strong>comprometido-fail</strong>: Porcentaje de recaudación media sobre el mínimo en proyectos fallidos
-        <strong>comprometido-success</strong>: Porcentaje de recaudación media sobre el mínimo en proyectos exitosos
-        <strong>devuelto</strong>: Dinero devuelto (en proyectos archivados)
-        <strong>fee-amount</strong>: Total 8% recaudado por Goteo
-        <strong>paypal-amount</strong>: Suma recaudada mediante PayPal
-        <strong>tpv-amount</strong>: Suma recaudada mediante TPV
-
-        Además se añade el campo "filters"
+        <a href="http://developers.goteo.org/reports#money">developers.goteo.org/reports#money</a>
         """
         time_start = time.time()
 

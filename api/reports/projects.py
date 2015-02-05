@@ -118,22 +118,7 @@ class ProjectsAPI(Resource):
     @ratelimit()
     def get(self):
         """Get the Projects Report
-
-        Descripción de los valores devueltos:
-        <strong>failed</strong>: Proyectos fallidos
-        <strong>published</strong>: Proyectos publicados
-        <strong>received</strong>: Proyectos recibidos (enviados a revisión)
-        <strong>succesful</strong>: Proyectos exitosos (alcanzaron el mínimo)
-        <strong>successful-percentage</strong>: % de proyectos exitosos
-        <strong>successful-finished</strong>: Número de proyectos exitosos con campaña finalizada
-        <strong>successful-finished-perc</strong>: % éxito campañas finalizadas
-        <strong>top10-collaborations</strong>: Las 10 campañas con más colaboraciones
-        <strong>top10-investors</strong>: Las 10 campañas con más cofinanciadores
-        <strong>top10-invests</strong>: Las 10 campañas que han recaudado más dinero
-        <strong>average-success-percentage</strong>: % de recaudación media conseguida por proyectos exitosos
-        <strong>average-successful-posts</strong>: Media de posts en proyectos exitosos
-
-        Además se añade el campo "filters"
+        <a href="http://developers.goteo.org/reports#projects">developers.goteo.org/reports#projects</a>
         """
         time_start = time.time()
         func = sqlalchemy.func
