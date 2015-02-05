@@ -4,6 +4,7 @@ from model import app
 from decorators import *
 
 from flask import request
+from flask import jsonify
 
 from api.reports.money import MoneyAPI
 from api.reports.rewards import RewardsAPI
@@ -16,6 +17,21 @@ from flask.ext.restful import Api
 api = swagger.docs(Api(app), apiVersion='1.0', description='Goteo.org API')
 #api = Api(app)
 
+@app.errorhandler(404)
+def page_not_found(e):
+     return jsonify(error=404, text=str(e)),
+
+@app.errorhandler(403)
+def page_not_found(e):
+     return jsonify(error=403, text=str(e)),
+
+@app.errorhandler(410)
+def page_not_found(e):
+     return jsonify(error=410, text=str(e)),
+
+@app.errorhandler(500)
+def page_not_found(e):
+     return jsonify(error=500, text=str(e)),
 
 @app.route('/')
 @requires_auth
