@@ -173,7 +173,7 @@ class CommunityAPI(Resource):
                 category_id = db.session.query(Category.id).filter(Category.name == args['category']).one()
                 category_id = category_id[0]
             except NoResultFound:
-                return {"error": "Invalid category"}, 400
+                return bad_request("Invalid category")
 
             filters.append(Invest.project == ProjectCategory.project)
             filters.append(ProjectCategory.category == category_id)
@@ -184,21 +184,21 @@ class CommunityAPI(Resource):
             # Filtra por la localización del usuario
             location = args['location'].split(",")
             if len(location) != 3:
-                return {"error": "Invalid parameter: location"}, 400
+                return bad_request("Invalid parameter: location")
 
             from geopy.distance import VincentyDistance
             latitude, longitude, radius = location
 
             radius = int(radius)
             if radius > 500 or radius < 0:
-                return {"error": "Radius must be a value between 0 and 500 Km"}, 400
+                return bad_request("Radius must be a value between 0 and 500 Km")
 
             locations = db.session.query(Location.id, Location.lat, Location.lon).all()
             locations = filter(lambda l: VincentyDistance((latitude, longitude), (l[1], l[2])).km <= radius, locations)
             locations_ids = map(lambda l: int(l[0]), locations)
 
             if locations_ids == []:
-                return {"error": "No locations in the specified range"}, 400
+                return bad_request("No locations in the specified range")
 
             filters.append(Invest.user == LocationItem.item)
             filters.append(LocationItem.type == 'user')
@@ -217,37 +217,27 @@ class CommunityAPI(Resource):
         f_users = list(filters2)
         users = db.session.query(func.count(User.id)).filter(*f_users).scalar()
 
-        def perc_users(number):
-            if users == 0:
-                return 0
-            perc = float(number) / users * 100
-            return round(perc, 2)
-
         # - Porcentaje (antes numero) de usuarios que se han dado de baja
         # Nota: faltarían además de los que se han dado de baja, los que han pedido que borremos datos por LOPD (que son muy pocos)
         f_bajas = list(filters2)
         f_bajas.append(User.active == 0)
         f_bajas.append(User.hide == 1)
         bajas = db.session.query(func.count(User.id)).filter(*f_bajas).scalar()
-        p_bajas = perc_users(bajas)
 
         # - Número de cofinanciadores
         f_cofinanciadores = list(filters)
         cofinanciadores = db.session.query(func.count(func.distinct(Invest.user))).filter(*f_cofinanciadores).scalar()
 
-        # - NEW Porcentaje de usuarios cofinanciadores
-        users_cofi_perc = perc_users(cofinanciadores)
-
         # - Multi-Cofinanciadores (a más de 1 proyecto)
         f_multicofi = list(filters)
-        f_multicofi.append(Invest.status.in_([0, 1, 3, 4]))
+        f_multicofi.append(Invest.status.in_([config.INVEST_STATUS_PENDING,
+                                              config.INVEST_STATUS_CHARGED,
+                                              config.INVEST_STATUS_PAID,
+                                              config.INVEST_STATUS_RETURNED]))
         _multicofi = db.session.query(Invest.user).filter(*f_multicofi).group_by(Invest.user).\
                                                     having(func.count(Invest.user) > 1).\
                                                     having(func.count(Invest.project) > 1)
         multicofi = _multicofi.count()
-
-        # - NEW Porcentaje de Multi-Cofinanciadores (a más de 1 proyecto)
-        users_multicofi_perc = perc_users(multicofi)
 
         # - Cofinanciadores usando PayPal
         f_paypal = list(filters)
@@ -269,14 +259,18 @@ class CommunityAPI(Resource):
         f_coficolaboradores = list(filters)
         f_coficolaboradores.append(Message.thread > 0)
         f_coficolaboradores.append(Message.thread.in_(sq_blocked))
-        f_coficolaboradores.append(Invest.status.in_([0, 1, 3, 4]))
+        f_coficolaboradores.append(Invest.status.in_([config.INVEST_STATUS_PENDING,
+                                                      config.INVEST_STATUS_CHARGED,
+                                                      config.INVEST_STATUS_PAID,
+                                                      config.INVEST_STATUS_RETURNED]))
         coficolaboradores = db.session.query(func.count(func.distinct(Invest.user)))\
                                             .join(Message, Message.user == Invest.user)\
                                             .filter(*f_coficolaboradores).scalar()
 
         # - Media de cofinanciadores por proyecto exitoso
         f_media_cofi = list(filters)
-        f_media_cofi.append(Project.status.in_([4, 5]))
+        f_media_cofi.append(Project.status.in_([config.PROJECT_STATUS_FUNDED,
+                                                config.PROJECT_STATUS_FULLFILED]))
         sq = db.session.query(func.count(func.distinct(Invest.user)).label("co"))\
                                     .join(Project, Invest.project == Project.id)\
                                     .filter(*f_media_cofi).group_by(Invest.project).subquery()
@@ -286,7 +280,8 @@ class CommunityAPI(Resource):
 
         # - Media de colaboradores por proyecto
         f_media_colab = list(filters4)
-        f_media_colab.append(Project.status.in_([4, 5]))
+        f_media_colab.append(Project.status.in_([config.PROJECT_STATUS_FUNDED,
+                                                 config.PROJECT_STATUS_FULLFILED]))
         sq = db.session.query(func.count(func.distinct(Message.user)).label("co"))\
                                     .join(Project, Message.project == Project.id)\
                                     .filter(*f_media_colab).group_by(Message.project).subquery()
@@ -296,10 +291,17 @@ class CommunityAPI(Resource):
 
         # - Núm. impulsores que cofinancian a otros
         f_impulcofinanciadores = list(filters)
-        f_impulcofinanciadores.append(Invest.status.in_([3, 4, 5, 6]))
+        f_impulcofinanciadores.append(Invest.status.in_([config.INVEST_STATUS_PAID,
+                                                         config.INVEST_STATUS_RETURNED,
+                                                         config.INVEST_STATUS_RELOCATED]))
         f_impulcofinanciadores.append(Invest.project != Project.id)
         impulcofinanciadores = db.session.query(func.count(func.distinct(Invest.user)))\
-                                    .join(Project, and_(Project.owner == Invest.user, Project.status.in_([3, 4, 5, 6])))\
+                                    .join(Project, and_(Project.owner == Invest.user, Project.status.in_([
+                                        config.PROJECT_STATUS_FUNDED,
+                                        config.PROJECT_STATUS_FULLFILED,
+                                        config.PROJECT_STATUS_IN_CAMPAIGN,
+                                        config.PROJECT_STATUS_UNFUNDED
+                                     ])))\
                                     .filter(*f_impulcofinanciadores).scalar()
 
         # - Núm. impulsores que colaboran con otros
@@ -308,7 +310,12 @@ class CommunityAPI(Resource):
         f_impulcolaboradores.append(Message.thread.in_(sq_blocked))
         f_impulcolaboradores.append(Message.project != Project.id)
         impulcolaboradores = db.session.query(func.count(func.distinct(Message.user)))\
-                                    .join(Project, and_(Project.owner == Message.user, Project.status.in_([3, 4, 5, 6])))\
+                                    .join(Project, and_(Project.owner == Message.user, Project.status.in_([
+                                        config.PROJECT_STATUS_FUNDED,
+                                        config.PROJECT_STATUS_FULLFILED,
+                                        config.PROJECT_STATUS_IN_CAMPAIGN,
+                                        config.PROJECT_STATUS_UNFUNDED
+                                    ])))\
                                     .filter(*f_impulcolaboradores).scalar()
 
         # - 1ª Categoría con más usuarios interesados
@@ -319,54 +326,67 @@ class CommunityAPI(Resource):
 
         if len(categorias) >= 1:
             categoria1 = categorias[0][1]
-
-            # - Porcentaje de usuarios en esta 1ª
-            perc_categoria1 = perc_users(categorias[0][0])
+            # - usuarios en esta 1ª
+            users_categoria1 = categorias[0][0]
         else:
             categoria1 = None
-            perc_categoria1 = 0
+            users_categoria1 = 0
 
         if len(categorias) >= 2:
             # - 2ª Categoría con más usuarios interesados
             categoria2 = categorias[1][1]
-
-            # - Porcentaje de usuarios en esta 2ª
-            perc_categoria2 = perc_users(categorias[1][0])
+            # - usuarios en esta 2ª
+            users_categoria2 = categorias[1][0]
         else:
             categoria2 = None
-            perc_categoria2 = 0
+            users_categoria2 = 0
 
-        # - Top 10 Cofinanciadores (REVISAR como sacamos estos datos, excepto admines)
-        admines = db.session.query(UserRole.user_id).filter(UserRole.role_id.in_(['admin', 'superadmin'])).all()
-        admines = map(lambda c: c[0], admines)
+        #Listado de usuarios que no cuentan para estadisticias (admin, convocatorias)
+        admines = db.session.query(UserRole.user_id).filter(UserRole.role_id == 'superadmin').all()
+        convocadores = db.session.query(Call.owner).filter(Call.status > config.CALL_STATUS_REVIEWING).all()
+        users_exclude = map(lambda c: c[0], admines)
+        users_exclude.extend(map(lambda c: c[0], convocadores))
+        # convertir en conjunto para evitar repeticiones
+        users_exclude = set(users_exclude)
+        # print('USERS EXCLUDE:', users_exclude)
 
-        f_top10_investors = list(filters)
-        f_top10_investors.append(Invest.status.in_([0, 1, 3, 4]))
-        f_top10_investors.append(~Invest.user.in_(admines))
-        top10_investors = db.session.query(Invest.user, func.count(Invest.id).label('total'))\
-                                    .filter(*f_top10_investors).group_by(Invest.user)\
-                                    .order_by(desc('total')).limit(10).all()
+        # - Top 10 Cofinanciadores (con mayor numero de contribuciones, excepto usuarios convocadores o superadmins)
+        f_top10_multidonors = list(filters)
+        f_top10_multidonors.append(Invest.status.in_([config.INVEST_STATUS_PENDING,
+                                                 config.INVEST_STATUS_CHARGED,
+                                                 config.INVEST_STATUS_PAID,
+                                                 config.INVEST_STATUS_RETURNED]))
+        f_top10_multidonors.append(~Invest.user.in_(users_exclude))
+        top10_multidonors = db.session.query(Invest.user, func.count(Invest.id).label('contributions'), func.sum(Invest.amount).label('amount'))\
+                                    .filter(*f_top10_multidonors).group_by(Invest.user)\
+                                    .order_by(desc('contributions')).limit(10).all()
 
 
         # - Top 10 Cofinanciadores con más caudal (más generosos) excluir usuarios convocadores Y ADMINES
-        convocadores = db.session.query(Call.owner).filter(Call.status > 2).all()
-        convocadores = map(lambda c: c[0], convocadores)
-
-        convocadoresadmines = convocadores
-        convocadoresadmines.extend(admines)
-        convocadoresadmines = set(convocadoresadmines)
-        f_top10_invests = list(filters)
-        f_top10_invests.append(Invest.status.in_([0, 1, 3, 4]))
-        f_top10_invests.append(~Invest.user.in_(convocadoresadmines))
-        top10_invests = db.session.query(Invest.user, func.sum(Invest.amount).label('total'))\
-                                    .filter(*f_top10_invests).group_by(Invest.user)\
-                                    .order_by(desc('total')).limit(10).all()
+        f_top10_donors = list(filters)
+        f_top10_donors.append(Invest.status.in_([config.INVEST_STATUS_PENDING,
+                                                      config.INVEST_STATUS_CHARGED,
+                                                      config.INVEST_STATUS_PAID,
+                                                      config.INVEST_STATUS_RETURNED]))
+        f_top10_donors.append(~Invest.user.in_(users_exclude))
+        top10_donors = db.session.query(Invest.user, func.count(Invest.id).label('contributions'), func.sum(Invest.amount).label('amount'))\
+                                    .filter(*f_top10_donors).group_by(Invest.user)\
+                                    .order_by(desc('amount')).limit(10).all()
 
         # - Top 10 colaboradores
         f_top10_collaborations = list(filters4)
-        top10_collaborations = db.session.query(Message.user, func.count(Message.id).label('total'))\
+        top10_collaborations = db.session.query(Message.user, func.count(Message.id).label('interactions'))\
                             .filter(*f_top10_collaborations).group_by(Message.user)\
-                            .order_by(desc('total')).limit(10).all()
+                            .order_by(desc('interactions')).limit(10).all()
+
+        def percent(number, base=None):
+            "Porcentaje en base a un total (por defecto users)"
+            if base is None:
+                base = users
+            if base == 0:
+                return 0
+            perc = float(number) / base * 100
+            return round(perc, 2)
 
         def format_categorias(t):
             total = t[0]
@@ -375,21 +395,31 @@ class CommunityAPI(Resource):
             perc = round(perc, 2)
             return {name: {'interesados': total, 'porcentaje': perc}}
 
-        res = {'users': users,
-                'users-cofi-perc': users_cofi_perc, 'multicofi': multicofi,
-                'users-multicofi-perc': users_multicofi_perc, 'paypal': paypal,
-                'paypal-multicofi': paypal_multicofi, 'perc-bajas': p_bajas,
-                'colaboradores': colaboradores,
-                'impulcofinanciadores': impulcofinanciadores,
-                'impulcolaboradores': impulcolaboradores,
-                'coficolaboradores': coficolaboradores,
-                'media-cofi': media_cofi, 'media-colab': media_colab,
-                'categorias': map(lambda i: format_categorias(i), categorias),
-                'categoria1': categoria1, 'categoria2': categoria2,
-                'perc-categoria1': perc_categoria1, 'perc-categoria2': perc_categoria2,
-                'top10-investors': top10_investors, 'top10-invests': top10_invests,
-                'top10-collaborations': top10_collaborations}
-                #'categories': ['a','b']})
+        res = { 'users': users,
+                'donors': cofinanciadores,
+                'percentage-donors-users': percent(cofinanciadores),
+                'percentage-unsubscribed-users': percent(bajas),
+                'donors-collaborators': coficolaboradores,
+                'multidonors': multicofi,
+                'percentage-multidonor-donors': percent(multicofi, cofinanciadores),
+                'percentage-multidonor-users': percent(multicofi),
+                'paypal-donors': paypal,
+                'paypal-multidonors': paypal_multicofi,
+                'collaborators': colaboradores,
+                'average-donors': media_cofi,
+                'average-collaborators': media_colab,
+                'creators-donors': impulcofinanciadores,
+                'creators-collaborators': impulcolaboradores,
+                'leading-category': categoria1,
+                'users-leading-category': users_categoria1,
+                'percentage-users-leading-category': percent(users_categoria1),
+                'second-category': categoria2,
+                'users-second-category': users_categoria2,
+                'percentage-users-second-category': percent(users_categoria2),
+                'categories': map(lambda i: format_categorias(i), categorias),
+                'top10-donors': top10_donors,
+                'top10-multidonors': top10_multidonors,
+                'top10-collaborators': top10_collaborations}
 
         res['time-elapsed'] = time.time() - time_start
         res['filters'] = {}
