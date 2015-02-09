@@ -41,8 +41,8 @@ class RewardsResponse:
 
     resource_fields = {
         "favorite-rewards": fields.List,
-        "perc-renuncias": fields.Float,
-        "renuncias": fields.Integer,
+        "percentage-reward-refusal": fields.Float,
+        "reward-refusal": fields.Integer,
         "rewards_per_amount": fields.Nested(RewardsPerAmount.resource_fields)  # FIXME: parametros con guiones
     }
 
@@ -64,8 +64,8 @@ class RewardsAPI(Resource):
         super(RewardsAPI, self).__init__()
 
     invalid_input = {
-        "code": 400,
-         "message": "Invalid parameters"
+        "error": 400,
+        "message": "Invalid parameters"
     }
 
     @swagger.operation(
@@ -156,7 +156,7 @@ class RewardsAPI(Resource):
                 category_id = db.session.query(Category.id).filter(Category.name == args['category']).one()
                 category_id = category_id[0]
             except NoResultFound:
-                return {"error": "Invalid category"}, 400
+                return bad_request("Invalid category")
 
             filters.append(Invest.project == ProjectCategory.project)
             filters2.append(Project.id == ProjectCategory.project)
@@ -168,21 +168,21 @@ class RewardsAPI(Resource):
 
             location = args['location'].split(",")
             if len(location) != 3:
-                return {"error": "Invalid parameter: location"}, 400
+                return bad_request("Invalid parameter: location")
 
             from geopy.distance import VincentyDistance
             latitude, longitude, radius = location
 
             radius = int(radius)
             if radius > 500 or radius < 0:
-                return {"error": "Radius must be a value between 0 and 500 Km"}, 400
+                return bad_request("Radius must be a value between 0 and 500 Km")
 
             locations = db.session.query(Location.id, Location.lat, Location.lon).all()
             locations = filter(lambda l: VincentyDistance((latitude, longitude), (l[1], l[2])).km <= radius, locations)
             locations_ids = map(lambda l: int(l[0]), locations)
 
             if locations_ids == []:
-                return {"error": "No locations in the specified range"}, 400
+                return bad_request("No locations in the specified range")
 
             filters.append(Invest.user == LocationItem.item)
             filters.append(LocationItem.type == 'user')
@@ -264,14 +264,21 @@ class RewardsAPI(Resource):
         f_favorite_reward = list(filters2)
         f_favorite_reward.append(Reward.type == 'individual')
         favorite_reward = db.session.query(Reward.icon, func.count(Reward.project).label('uses'))\
-                                .join(Project, and_(Project.id == Reward.project, Project.status.in_([4, 5])))\
+                                .join(Project, and_(Project.id == Reward.project, Project.status.in_([config.PROJECT_STATUS_IN_CAMPAIGN, config.PROJECT_STATUS_FUNDED])))\
                                 .filter(*f_favorite_reward).group_by(Reward.icon).order_by(desc('uses')).all()
 
-        res = {'renuncias': renuncias, 'perc-renuncias': perc_renuncias,
-                'rewards-per-amount': {'rewards-less-than-15': recomp_dinero15,
-                    'rewards-between-15-30': recomp_dinero30, 'rewards-between-30-100': recomp_dinero100,
-                    'rewards-between-100-400': recomp_dinero400, 'rewards-more-than-400': recomp_dinero400mas},
-                'favorite-rewards': favorite_reward}
+        res = {
+                'reward-refusal': renuncias,
+                'percentage-reward-refusal': perc_renuncias,
+                'rewards-per-amount': {
+                    'rewards-less-than-15': recomp_dinero15,
+                    'rewards-between-15-30': recomp_dinero30,
+                    'rewards-between-30-100': recomp_dinero100,
+                    'rewards-between-100-400': recomp_dinero400,
+                    'rewards-more-than-400': recomp_dinero400mas
+                },
+                'favorite-rewards': favorite_reward
+        }
 
         res['time-elapsed'] = time.time() - time_start
         res['filters'] = {}

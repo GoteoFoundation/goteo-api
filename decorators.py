@@ -7,6 +7,11 @@ from flask_redis import Redis
 
 from config import config
 
+#Error handling
+def bad_request(message):
+     resp = jsonify(error=400, message=str(message))
+     resp.status_code = 400
+     return resp
 
 #
 # REDIS RATE LIMITER

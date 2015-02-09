@@ -53,3 +53,7 @@ version = 1.0
 
 # DB URI
 DB_URI = 'mysql://' + settings.dbuser + ':' + settings.dbpass + '@' + settings.dbhost + '/' + settings.dbname
+
+#USEFULL VARS
+PROJECT_STATUS_IN_CAMPAIGN = 3
+PROJECT_STATUS_FUNDED = 4

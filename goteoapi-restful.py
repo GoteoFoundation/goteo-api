@@ -25,10 +25,9 @@ api = swagger.docs(Api(app), apiVersion=config.version, description=config.descr
 @app.errorhandler(404)
 @app.errorhandler(410)
 def page_not_found(e):
-     resp = jsonify(code=e.code, message=str(e), links=config.links)
+     resp = jsonify(error=e.code, message=str(e), links=config.links)
      resp.status_code = e.code
      return resp
-
 
 #
 # Routing
@@ -46,7 +45,7 @@ def index():
         # Filter out rules non Goteo-api rules
         if "GET" in rule.methods and rule.endpoint.startswith('api_') and not rule.rule.endswith('/') or rule.rule == '/':
             func_list[rule.rule] = app.view_functions[rule.endpoint].__doc__
-    return jsonify(code=200, version=config.version, message=config.description + ' v' + str(config.version), endpoints=func_list, links=config.links)
+    return jsonify(version=config.version, message=config.description + ' v' + str(config.version), endpoints=func_list, links=config.links)
 
 # Reports home
 @app.route('/reports/')
@@ -61,7 +60,7 @@ def reports():
         # Filter out rules non Goteo-api rules
         if "GET" in rule.methods and rule.endpoint.startswith('api_reports_') and not rule.rule.endswith('/'):
             func_list[rule.rule] = app.view_functions[rule.endpoint].__doc__
-    return jsonify(code=200, message='Collected Statistics of Goteo.org', endpoints=func_list)
+    return jsonify(message='Collected Statistics of Goteo.org', endpoints=func_list)
 
 # ROUTE CLASSES
 #api.add_resource(ProjectListAPI, '/projects/', endpoint='projects1')
