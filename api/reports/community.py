@@ -136,7 +136,7 @@ class CommunityAPI(Resource):
 
         filters = []
         filters2 = []  # para num de usuarios y bajas
-        filters3 = []  # para categorias
+        filters3 = [Category.name != '']  # para categorias
         filters4 = []  # para las relacionadas con Colaboradores
         if args['from_date']:
             filters.append(Invest.date_invested >= args['from_date'])
@@ -241,7 +241,7 @@ class CommunityAPI(Resource):
 
         # - Cofinanciadores usando PayPal
         f_paypal = list(filters)
-        f_paypal.append(Invest.method==Invest.METHOD_PAYPAL)
+        f_paypal.append(Invest.method == Invest.METHOD_PAYPAL)
         paypal = db.session.query(func.count(Invest.id)).filter(*f_paypal).scalar()
 
         # - Multi-Cofinanciadores usando PayPal
@@ -318,28 +318,12 @@ class CommunityAPI(Resource):
                                     ])))\
                                     .filter(*f_impulcolaboradores).scalar()
 
-        # - 1ª Categoría con más usuarios interesados
+        # Lista de categorias
+        # TODO: idiomas para los nombres de categorias aqui
         f_categorias = list(filters3)
-        categorias = db.session.query(func.count(UserInterest.user), Category.name)\
+        categorias = db.session.query(func.count(UserInterest.user).label('users'), Category.id, Category.name)\
                         .join(Category).filter(*f_categorias).group_by(UserInterest.interest)\
                         .order_by(desc(func.count(UserInterest.user))).all()
-
-        if len(categorias) >= 1:
-            categoria1 = categorias[0][1]
-            # - usuarios en esta 1ª
-            users_categoria1 = categorias[0][0]
-        else:
-            categoria1 = None
-            users_categoria1 = 0
-
-        if len(categorias) >= 2:
-            # - 2ª Categoría con más usuarios interesados
-            categoria2 = categorias[1][1]
-            # - usuarios en esta 2ª
-            users_categoria2 = categorias[1][0]
-        else:
-            categoria2 = None
-            users_categoria2 = 0
 
         #Listado de usuarios que no cuentan para estadisticias (admin, convocatorias)
         admines = db.session.query(UserRole.user_id).filter(UserRole.role_id == 'superadmin').all()
@@ -388,12 +372,8 @@ class CommunityAPI(Resource):
             perc = float(number) / base * 100
             return round(perc, 2)
 
-        def format_categorias(t):
-            total = t[0]
-            name = t[1]
-            perc = float(total) / users * 100
-            perc = round(perc, 2)
-            return {name: {'interesados': total, 'porcentaje': perc}}
+        users_categoria1 = categorias[0].users if len(categorias) > 0 else None
+        users_categoria2 = categorias[1].users if len(categorias) > 1 else None
 
         res = { 'users': users,
                 'donors': cofinanciadores,
@@ -410,13 +390,14 @@ class CommunityAPI(Resource):
                 'average-collaborators': media_colab,
                 'creators-donors': impulcofinanciadores,
                 'creators-collaborators': impulcolaboradores,
-                'leading-category': categoria1,
+                'leading-category': categorias[0].id if len(categorias) > 0 else None,
                 'users-leading-category': users_categoria1,
                 'percentage-users-leading-category': percent(users_categoria1),
-                'second-category': categoria2,
+                'second-category': categorias[1].id if len(categorias) > 1 else None,
                 'users-second-category': users_categoria2,
                 'percentage-users-second-category': percent(users_categoria2),
-                'categories': map(lambda i: format_categorias(i), categorias),
+                'categories': map(lambda t: {t.id: {'users': t.users, 'id': t.id, 'name': t.name, 'percentage-users': percent(t.users)}}, categorias),
+                # 'categories': categorias,
                 'top10-donors': top10_donors,
                 'top10-multidonors': top10_multidonors,
                 'top10-collaborators': top10_collaborations}
