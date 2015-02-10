@@ -228,13 +228,14 @@ class MoneyAPI(Resource):
 
         # - Aporte medio por cofinanciador(micromecenas)
         # OJO: En reporting.php no calcula esto mismo
-        average_invest = self._average_invest(list(filters))
+        average_donation = self._average_donation(list(filters))
 
         # - Aporte medio por cofinanciador(micromecenas) mediante PayPal
         # OJO: En reporting.php no calcula esto mismo
-        average_invest_paypal = self._average_invest_paypal(list(filters))
+        average_donation_paypal = self._average_donation_paypal(list(filters))
 
         # - (Renombrar Coste mínimo medio por proyecto exitoso ] Presupuesto mínimo medio por proyecto exitoso
+        # TODO: ¿parametro location?
         # OJO: En reporting.php no calcula esto mismo
         average_mincost = self._average_mincost(list(filters2))
 
@@ -255,15 +256,25 @@ class MoneyAPI(Resource):
         comprometido_fail = self._comprometido_fail(list(filters))
 
         # No se pueden donar centimos no? Hacer enteros?
-        res = {'comprometido': comprometido, 'devuelto': devuelto,
-                'paypal-amount': paypal_amount, 'tpv-amount': tpv_amount, 'cash-amount': cash_amount,
-                'call-amount': call_amount, 'average-invest': average_invest,
-                'call-committed-amount': call_committed_amount,
-                'average-invest-paypal': average_invest_paypal, 'average-mincost': average_mincost,
-                'average-received': average_received, 'comprometido-success': comprometido_success,
-                'average-second-round': average_second_round, 'average-failed': average_failed,
-                'comprometido-fail': comprometido_fail, 'fee-amount': fee_amount}
+        res = {
+                'average-failed': average_failed,
+                'average-donation': average_donation,
+                'average-donation-paypal': average_donation_paypal,
+                'average-minimum': average_mincost,
+                'average-received': average_received,
+                'average-second-round': average_second_round,
+                'matchfund-amount': call_amount,
+                'matchfundpledge-amount': call_committed_amount,
+                'cash-amount': cash_amount,
+                'pledged': comprometido,
+                'pledged-failed': comprometido_fail,
+                'pledged-successful': comprometido_success,
+                'refunded': devuelto,
+                'fee-amount': fee_amount,
+                'paypal-amount': paypal_amount,
+                'creditcard-amount': tpv_amount,
                 #'projects': map(lambda i: [i[0], {'recaudado': i[1]}], comprometido),
+              }
 
         res['time-elapsed'] = time.time() - time_start
         res['filters'] = {}
@@ -336,7 +347,7 @@ class MoneyAPI(Resource):
             fee_amount = round(fee_amount, 2)
         return fee_amount
 
-    def _average_invest(self, f_average_invest=[]):
+    def _average_donation(self, f_average_invest=[]):
         f_average_invest.append(Project.status.in_([4, 5, 6]))
         f_average_invest.append(Invest.status > 0)
         sub1 = db.session.query(func.avg(Invest.amount).label('amount')).join(Project)\
@@ -345,15 +356,15 @@ class MoneyAPI(Resource):
         average_invest = 0 if average_invest is None else round(average_invest, 2)
         return average_invest
 
-    def _average_invest_paypal(self, f_average_invest_paypal=[]):
-        f_average_invest_paypal.append(Project.status.in_([4, 5, 6]))
-        f_average_invest_paypal.append(Invest.status > 0)
-        f_average_invest_paypal.append(Invest.method==Invest.METHOD_PAYPAL)
+    def _average_donation_paypal(self, f_average_donation_paypal=[]):
+        f_average_donation_paypal.append(Project.status.in_([4, 5, 6]))
+        f_average_donation_paypal.append(Invest.status > 0)
+        f_average_donation_paypal.append(Invest.method==Invest.METHOD_PAYPAL)
         sub1 = db.session.query(func.avg(Invest.amount).label('amount')).join(Project)\
-                                        .filter(*f_average_invest_paypal).group_by(Invest.user).subquery()
-        average_invest_paypal = db.session.query(func.avg(sub1.c.amount)).scalar()
-        average_invest_paypal = 0 if average_invest_paypal is None else round(average_invest_paypal, 2)
-        return average_invest_paypal
+                                        .filter(*f_average_donation_paypal).group_by(Invest.user).subquery()
+        average_donation_paypal = db.session.query(func.avg(sub1.c.amount)).scalar()
+        average_donation_paypal = 0 if average_donation_paypal is None else round(average_donation_paypal, 2)
+        return average_donation_paypal
 
     def _average_mincost(self, f_average_mincost=[]):
         f_average_mincost.append(Project.status.in_([4, 5]))
