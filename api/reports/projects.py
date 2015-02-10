@@ -186,18 +186,13 @@ class ProjectsAPI(Resource):
         f_succ_projects.append(Project.status > 0)
         succ_projects = db.session.query(func.count(Project.id)).filter(*f_succ_projects).scalar()
 
-        # % exito exitosos
+        # Publicados y cerrados
         f_pub_projects2 = list(filters)
         f_pub_projects2.append(Project.status > 0)
         and1 = and_(Project.date_passed != None, Project.date_passed != '0000-00-00')
         and2 = and_(Project.date_closed != None, Project.date_closed != '0000-00-00')
         f_pub_projects2.append(or_(and1, and2))
         pub_projects2 = db.session.query(func.count(Project.id)).filter(*f_pub_projects2).scalar()
-        if pub_projects2 == 0:
-            p_succ_projects = 0
-        else:
-            p_succ_projects = float(succ_projects) / pub_projects2 * 100
-            p_succ_projects = round(p_succ_projects, 2)
 
         # -(nuevo) proyectos exitosos con campaña finalizada
         f_succ_finished = list(filters)
@@ -209,42 +204,34 @@ class ProjectsAPI(Resource):
         f_fail_projects.append(Project.status == 6)
         fail_projects = db.session.query(func.count(Project.id)).filter(*f_fail_projects).scalar()
 
-        # _(nuevo)% éxito campañas finalizadas
-        if succ_finished == 0 and fail_projects == 0:
-            p_succ_finished = 0
-        else:
-            p_succ_finished = float(succ_finished) / (succ_finished + fail_projects)
-            p_succ_finished = round(p_succ_finished, 2)
-
-        # - Porcentaje media de recaudación conseguida por proyectos exitosos
-        # FIXME:   "average-success-percentage": 6784.22,
+        # - Media de recaudación conseguida por proyectos exitosos
         f_p_avg_success = list(filters)
         f_p_avg_success.append(Invest.status.in_([1, 3]))
         f_p_avg_success.append(Project.status.in_([4, 5]))
-        p_avg_success = db.session.query(func.sum(Invest.amount) / func.count(func.distinct(Project.id)))\
+        avg_success = db.session.query(func.sum(Invest.amount) / func.count(func.distinct(Project.id)))\
                                     .join(Project).filter(*f_p_avg_success).scalar()
-        p_avg_success = 0 if p_avg_success is None else round(p_avg_success, 2)
-
-        # - (NUEVOS)10 Campañas con más cofinanciadores
-        # FIXME: invest.status?
-        f_top10_investors = list(filters)
-        top10_investors = db.session.query(Project.id, func.count(Invest.id).label('total')).join(Invest)\
-                                    .filter(*f_top10_investors).group_by(Invest.project)\
-                                    .order_by(desc('total')).limit(10).all()
+        avg_success = 0 if avg_success is None else round(avg_success, 2)
 
         # - 10 Campañas con más colaboraciones
         f_top10_collaborations = list(filters)
-        top10_collaborations = db.session.query(Project.id, func.count(Message.id).label('total')).join(Message)\
+        top10_collaborations = db.session.query(Project.id.label('project'), func.count(Message.id).label('total')).join(Message)\
                             .filter(*f_top10_collaborations).group_by(Message.project)\
                             .order_by(desc('total')).limit(10).all()
+
+        # - 10 Campañas con más cofinanciadores
+        # FIXME: invest.status?
+        f_top10_donations = list(filters)
+        top10_donations = db.session.query(Project.id.label('project'), func.count(Invest.id).label('total')).join(Invest)\
+                                    .filter(*f_top10_donations).group_by(Invest.project)\
+                                    .order_by(desc('total')).limit(10).all()
 
         # - 10 Campañas que han recaudado más dinero
         f_top10_invests = list(filters)
         f_top10_invests.append(Project.status.in_([4, 5]))
         f_top10_invests.append(Invest.status.in_([0, 1, 3]))
-        top10_invests = db.session.query(Project.id, func.sum(Invest.amount).label('total')).join(Invest)\
+        top10_invests = db.session.query(Project.id.label('project'), func.sum(Invest.amount).label('amount')).join(Invest)\
                                     .filter(*f_top10_invests).group_by(Invest.project)\
-                                    .order_by(desc('total')).limit(10).all()
+                                    .order_by(desc('amount')).limit(10).all()
 
         # - Media de posts proyecto exitoso
         f_avg_succ_posts = list(filters)
@@ -260,13 +247,19 @@ class ProjectsAPI(Resource):
             avg_succ_posts = round(avg_succ_posts, 2)
 
 
-        res = {'received': rev_projects, 'published': pub_projects, 'failed': fail_projects,
-                'succesful': succ_projects, 'successful-percentage': p_succ_projects,
-                'top10-collaborations': top10_collaborations, 'top10-invests': top10_invests,
-                'top10-investors': top10_investors,
-                'successful-finished': succ_finished, 'successful-finished-perc': p_succ_finished,
-                'average-success-percentage': p_avg_success, 'average-successful-posts': avg_succ_posts
-                }
+        res = { 'received': rev_projects,
+                'published': pub_projects,
+                'failed': fail_projects,
+                'successful': succ_projects,
+                'percentage-successful': percent(succ_projects, pub_projects2),
+                'successful-complete': succ_finished,
+                'percentage-successful-complete': percent(succ_finished, succ_finished + fail_projects),
+                'top10-collaborations': top10_collaborations,
+                'top10-donations': top10_donations,
+                'top10-receipts': top10_invests,
+                'average-amount-successful': avg_success,
+                'average-posts-successful': avg_succ_posts
+              }
 
         res['time-elapsed'] = time.time() - time_start
         res['filters'] = {}
