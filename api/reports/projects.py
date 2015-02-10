@@ -196,18 +196,21 @@ class ProjectsAPI(Resource):
 
         # -(nuevo) proyectos exitosos con campaña finalizada
         f_succ_finished = list(filters)
-        f_succ_finished.append(Project.status.in_([4, 5]))
+        f_succ_finished.append(Project.status.in_([config.PROJECT_STATUS_FUNDED,
+                                                   config.PROJECT_STATUS_FULLFILED]))
         succ_finished = db.session.query(Project).filter(*f_succ_finished).count()
 
         # - Proyectos archivados Renombrar por Proyectos Fallidos
         f_fail_projects = list(filters)
-        f_fail_projects.append(Project.status == 6)
+        f_fail_projects.append(Project.status == config.PROJECT_STATUS_UNFUNDED)
         fail_projects = db.session.query(func.count(Project.id)).filter(*f_fail_projects).scalar()
 
         # - Media de recaudación conseguida por proyectos exitosos
         f_p_avg_success = list(filters)
-        f_p_avg_success.append(Invest.status.in_([1, 3]))
-        f_p_avg_success.append(Project.status.in_([4, 5]))
+        f_p_avg_success.append(Invest.status.in_([config.INVEST_STATUS_CHARGED,
+                                                  config.INVEST_STATUS_PAID]))
+        f_p_avg_success.append(Project.status.in_([config.PROJECT_STATUS_FUNDED,
+                                                   config.PROJECT_STATUS_FULLFILED]))
         avg_success = db.session.query(func.sum(Invest.amount) / func.count(func.distinct(Project.id)))\
                                     .join(Project).filter(*f_p_avg_success).scalar()
         avg_success = 0 if avg_success is None else round(avg_success, 2)
@@ -227,8 +230,11 @@ class ProjectsAPI(Resource):
 
         # - 10 Campañas que han recaudado más dinero
         f_top10_invests = list(filters)
-        f_top10_invests.append(Project.status.in_([4, 5]))
-        f_top10_invests.append(Invest.status.in_([0, 1, 3]))
+        f_top10_invests.append(Project.status.in_([config.PROJECT_STATUS_FUNDED,
+                                                   config.PROJECT_STATUS_FULLFILED]))
+        f_top10_invests.append(Invest.status.in_([config.INVEST_STATUS_PENDING,
+                                                  config.INVEST_STATUS_CHARGED,
+                                                  config.INVEST_STATUS_PAID]))
         top10_invests = db.session.query(Project.id.label('project'), func.sum(Invest.amount).label('amount')).join(Invest)\
                                     .filter(*f_top10_invests).group_by(Invest.project)\
                                     .order_by(desc('amount')).limit(10).all()
@@ -238,14 +244,11 @@ class ProjectsAPI(Resource):
         f_avg_succ_posts.append(Post.publish == 1)
         sq1 = db.session.query(func.count(Project.id).label('posts')).select_from(Post)\
                             .join(Blog, and_(Blog.id == Post.blog, Blog.type == 'project'))\
-                            .join(Project, and_(Project.id == Blog.owner, Project.status.in_([4, 5])))\
+                            .join(Project, and_(Project.id == Blog.owner, Project.status.in_([config.PROJECT_STATUS_FUNDED,
+                                                                                              config.PROJECT_STATUS_FULLFILED])))\
                             .filter(*f_avg_succ_posts).group_by(Post.blog).subquery()
         avg_succ_posts = db.session.query(func.avg(sq1.c.posts)).scalar()
-        if avg_succ_posts is None:
-            avg_succ_posts = 0
-        else:
-            avg_succ_posts = round(avg_succ_posts, 2)
-
+        avg_succ_posts = 0 if avg_succ_posts is None else round(avg_succ_posts, 2)
 
         res = { 'received': rev_projects,
                 'published': pub_projects,
