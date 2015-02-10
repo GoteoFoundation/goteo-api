@@ -191,12 +191,6 @@ class RewardsAPI(Resource):
         #
         cofinanciadores = db.session.query(func.count(func.distinct(Invest.user))).filter(*filters).scalar()
 
-        def perc_invest(number):
-            if cofinanciadores == 0:
-                return 0
-            perc = float(number) / cofinanciadores * 100  # %
-            return round(perc, 2)
-
         # - NÚMERO de cofinanciadores que renuncian a recompensa
         # FIXME: No incluir status=2?
         f_renuncias = list(filters)
@@ -206,10 +200,6 @@ class RewardsAPI(Resource):
                                               config.INVEST_STATUS_PAID,
                                               config.INVEST_STATUS_RETURNED]))
         renuncias = db.session.query(func.count(Invest.id)).filter(*f_renuncias).scalar()
-
-        # (seleccionados por cofinanciador)
-        # - Porcentaje de cofinanciadores que renuncian a recompensa
-        perc_renuncias = perc_invest(renuncias)
 
         #
         f_recomp_dinero = list(filters)
@@ -266,15 +256,15 @@ class RewardsAPI(Resource):
         # FIXME: Date: Project.published
         f_favorite_reward = list(filters2)
         f_favorite_reward.append(Reward.type == 'individual')
-        favorite_reward = db.session.query(Reward.icon, func.count(Reward.project).label('uses'))\
+        favorite_reward = db.session.query(Reward.icon, func.count(Reward.project).label('total'))\
                                 .join(Project, and_(Project.id == Reward.project, Project.status.in_([config.PROJECT_STATUS_IN_CAMPAIGN,
                                                                                                       config.PROJECT_STATUS_FUNDED,
                                                                                                       config.PROJECT_STATUS_FULLFILED])))\
-                                .filter(*f_favorite_reward).group_by(Reward.icon).order_by(desc('uses')).all()
+                                .filter(*f_favorite_reward).group_by(Reward.icon).order_by(desc('total')).all()
 
         res = {
                 'reward-refusal': renuncias,
-                'percentage-reward-refusal': perc_renuncias,
+                'percentage-reward-refusal': percent(renuncias, cofinanciadores),
                 'rewards-per-amount': {
                     'rewards-less-than-15': recomp_dinero15,
                     'rewards-between-15-30': recomp_dinero30,

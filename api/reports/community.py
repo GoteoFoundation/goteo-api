@@ -363,26 +363,17 @@ class CommunityAPI(Resource):
                             .filter(*f_top10_collaborations).group_by(Message.user)\
                             .order_by(desc('interactions')).limit(10).all()
 
-        def percent(number, base=None):
-            "Porcentaje en base a un total (por defecto users)"
-            if base is None:
-                base = users
-            if base == 0:
-                return 0
-            perc = float(number) / base * 100
-            return round(perc, 2)
-
         users_categoria1 = categorias[0].users if len(categorias) > 0 else None
         users_categoria2 = categorias[1].users if len(categorias) > 1 else None
 
         res = { 'users': users,
                 'donors': cofinanciadores,
-                'percentage-donors-users': percent(cofinanciadores),
-                'percentage-unsubscribed-users': percent(bajas),
+                'percentage-donors-users': percent(cofinanciadores, users),
+                'percentage-unsubscribed-users': percent(bajas, users),
                 'donors-collaborators': coficolaboradores,
                 'multidonors': multicofi,
                 'percentage-multidonor-donors': percent(multicofi, cofinanciadores),
-                'percentage-multidonor-users': percent(multicofi),
+                'percentage-multidonor-users': percent(multicofi, users),
                 'paypal-donors': paypal,
                 'paypal-multidonors': paypal_multicofi,
                 'collaborators': colaboradores,
@@ -392,11 +383,11 @@ class CommunityAPI(Resource):
                 'creators-collaborators': impulcolaboradores,
                 'leading-category': categorias[0].id if len(categorias) > 0 else None,
                 'users-leading-category': users_categoria1,
-                'percentage-users-leading-category': percent(users_categoria1),
+                'percentage-users-leading-category': percent(users_categoria1, users),
                 'second-category': categorias[1].id if len(categorias) > 1 else None,
                 'users-second-category': users_categoria2,
-                'percentage-users-second-category': percent(users_categoria2),
-                'categories': map(lambda t: {t.id: {'users': t.users, 'id': t.id, 'name': t.name, 'percentage-users': percent(t.users)}}, categorias),
+                'percentage-users-second-category': percent(users_categoria2, users),
+                'categories': map(lambda t: {t.id: {'users': t.users, 'id': t.id, 'name': t.name, 'percentage-users': percent(t.users, users)}}, categorias),
                 # 'categories': categorias,
                 'top10-donors': top10_donors,
                 'top10-multidonors': top10_multidonors,

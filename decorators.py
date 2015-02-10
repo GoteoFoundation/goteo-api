@@ -13,6 +13,16 @@ def bad_request(message):
      resp.status_code = 400
      return resp
 
+# Generic percentage
+def percent(number, base=None):
+    "Porcentaje en base a un total"
+    if base is None:
+        return 0
+    if base == 0:
+        return 0
+    perc = float(number) / base * 100
+    return round(perc, 2)
+
 #
 # REDIS RATE LIMITER
 # ==================
