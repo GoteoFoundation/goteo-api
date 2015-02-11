@@ -163,7 +163,7 @@ class MoneyAPI(Resource):
                 category_id = db.session.query(Category.id).filter(Category.name == args['category']).one()
                 category_id = category_id[0]
             except NoResultFound:
-                return {"error": "Invalid category"}, 400
+                return bad_request("Invalid category")
 
             filters.append(Invest.project == ProjectCategory.project)
             filters2.append(Invest.project == ProjectCategory.project)
@@ -173,21 +173,21 @@ class MoneyAPI(Resource):
         if args['location']:
             location = args['location'].split(",")
             if len(location) != 3:
-                return {"error": "Invalid parameter: location"}, 400
+                return bad_request("Invalid parameter: location")
 
             from geopy.distance import VincentyDistance
             latitude, longitude, radius = location
 
             radius = int(radius)
             if radius > 500 or radius < 0:
-                return {"error": "Radius must be a value between 0 and 500 Km"}, 400
+                return bad_request("Radius must be a value between 0 and 500 Km")
 
             locations = db.session.query(Location.id, Location.lat, Location.lon).all()
             locations = filter(lambda l: VincentyDistance((latitude, longitude), (l[1], l[2])).km <= radius, locations)
             locations_ids = map(lambda l: int(l[0]), locations)
 
             if locations_ids == []:
-                return {"error": "No locations in the specified range"}, 400
+                return bad_request("No locations in the specified range")
 
             filters.append(Invest.user == LocationItem.item)
             filters.append(LocationItem.type == 'user')
@@ -283,17 +283,19 @@ class MoneyAPI(Resource):
                 res['filters'][k] = v
 
         return jsonify(res)
-        #return {'invests': map(lambda i: {i.investid: marshal(i, invest_fields)}, invests)}
 
     def _comprometido(self, f_comprometido=[]):
-        f_comprometido.append(Invest.status.in_([0, 1, 3, 4]))
+        f_comprometido.append(Invest.status.in_([Invest.STATUS_PENDING,
+                                                 Invest.STATUS_CHARGED,
+                                                 Invest.STATUS_PAID,
+                                                 Invest.STATUS_RETURNED]))
         comprometido = db.session.query(func.sum(Invest.amount)).filter(*f_comprometido).scalar()
         if comprometido is None:
             comprometido = 0
         return comprometido
 
     def _devuelto(self, f_devuelto=[]):
-        f_devuelto.append(Invest.status==4)
+        f_devuelto.append(Invest.status==Invest.STATUS_RETURNED)
         devuelto = db.session.query(func.sum(Invest.amount)).filter(*f_devuelto).scalar()
         if devuelto is None:
             devuelto = 0
@@ -321,7 +323,7 @@ class MoneyAPI(Resource):
         return cash_amount
 
     def _call_committed_amount(self, f_call_committed_amount=[]):
-        f_call_committed_amount.append(Call.status > 2)
+        f_call_committed_amount.append(Call.status > Call.STATUS_REVIEWING)
         call_committed_amount = db.session.query(func.sum(Call.amount)).filter(*f_call_committed_amount).scalar()
         if call_committed_amount is None:
             call_committed_amount = 0
@@ -330,15 +332,15 @@ class MoneyAPI(Resource):
     def _call_amount(self, f_call_amount=[]):
         f_call_amount.append(Invest.method==Invest.METHOD_DROP)
         f_call_amount.append(Invest.call != None)
-        f_call_amount.append(Invest.status.in_([1, 3]))
+        f_call_amount.append(Invest.status.in_([Invest.STATUS_CHARGED, Invest.STATUS_PAID]))
         call_amount = db.session.query(func.sum(Invest.amount)).filter(*f_call_amount).scalar()
         if call_amount is None:
             call_amount = 0
         return call_amount
 
     def _fee_amount(self, f_fee_amount=[]):
-        f_fee_amount.append(Project.status.in_([4, 5]))
-        f_fee_amount.append(Invest.status.in_([1, 3]))
+        f_fee_amount.append(Project.status.in_([Project.STATUS_FUNDED, Project.STATUS_FULLFILED]))
+        f_fee_amount.append(Invest.status.in_([Invest.STATUS_CHARGED, Invest.STATUS_PAID]))
         fee_amount = db.session.query(func.sum(Invest.amount)).join(Project).filter(*f_fee_amount).scalar()
         if fee_amount is None:
             fee_amount = 0
@@ -348,8 +350,10 @@ class MoneyAPI(Resource):
         return fee_amount
 
     def _average_donation(self, f_average_invest=[]):
-        f_average_invest.append(Project.status.in_([4, 5, 6]))
-        f_average_invest.append(Invest.status > 0)
+        f_average_invest.append(Project.status.in_([Project.STATUS_FUNDED,
+                                                    Project.STATUS_FULLFILED,
+                                                    Project.STATUS_UNFUNDED]))
+        f_average_invest.append(Invest.status > Invest.STATUS_PENDING)
         sub1 = db.session.query(func.avg(Invest.amount).label('amount')).join(Project)\
                                 .filter(*f_average_invest).group_by(Invest.user).subquery()
         average_invest = db.session.query(func.avg(sub1.c.amount)).scalar()
@@ -357,8 +361,10 @@ class MoneyAPI(Resource):
         return average_invest
 
     def _average_donation_paypal(self, f_average_donation_paypal=[]):
-        f_average_donation_paypal.append(Project.status.in_([4, 5, 6]))
-        f_average_donation_paypal.append(Invest.status > 0)
+        f_average_donation_paypal.append(Project.status.in_([Project.STATUS_FUNDED,
+                                                             Project.STATUS_FULLFILED,
+                                                            Project.STATUS_UNFUNDED]))
+        f_average_donation_paypal.append(Invest.status > Invest.STATUS_PENDING)
         f_average_donation_paypal.append(Invest.method==Invest.METHOD_PAYPAL)
         sub1 = db.session.query(func.avg(Invest.amount).label('amount')).join(Project)\
                                         .filter(*f_average_donation_paypal).group_by(Invest.user).subquery()
@@ -367,14 +373,17 @@ class MoneyAPI(Resource):
         return average_donation_paypal
 
     def _average_mincost(self, f_average_mincost=[]):
-        f_average_mincost.append(Project.status.in_([4, 5]))
+        f_average_mincost.append(Project.status.in_([Project.STATUS_FUNDED,
+                                                     Project.STATUS_FULLFILED]))
         average_mincost = db.session.query(func.avg(Project.minimum)).filter(*f_average_mincost).scalar()
         average_mincost = 0 if average_mincost is None else round(average_mincost, 2)
         return average_mincost
 
     def _average_received(self, f_average_received=[]):
-        f_average_received.append(Invest.status.in_([1, 3]))
-        f_average_received.append(Project.status.in_([4, 5]))
+        f_average_received.append(Invest.status.in_([Invest.STATUS_CHARGED,
+                                                     Invest.STATUS_PAID]))
+        f_average_received.append(Project.status.in_([Project.STATUS_FUNDED,
+                                                      Project.STATUS_FULLFILED]))
         average_received = db.session.query(func.sum(Invest.amount) / func.count(func.distinct(Project.id)))\
                                     .join(Project).filter(*f_average_received).scalar()
         average_received = 0 if average_received is None else round(average_received, 2)
@@ -382,8 +391,10 @@ class MoneyAPI(Resource):
 
     def _comprometido_success(self, f_comprometido_success=[]):
         # FIXME: - 100
-        f_comprometido_success.append(Invest.status.in_([1, 3]))
-        f_comprometido_success.append(Project.status.in_([4, 5]))
+        f_comprometido_success.append(Invest.status.in_([Invest.STATUS_CHARGED,
+                                                         Invest.STATUS_PAID]))
+        f_comprometido_success.append(Project.status.in_([Project.STATUS_FUNDED,
+                                                          Project.STATUS_FULLFILED]))
         sub = db.session.query((func.sum(Invest.amount) / Project.minimum * 100 - 100).label('percent'))\
                             .select_from(Invest).join(Project)\
                             .filter(*f_comprometido_success).group_by(Invest.project).subquery()
@@ -400,16 +411,18 @@ class MoneyAPI(Resource):
         return average_second_round
 
     def _average_failed(self, f_average_failed=[]):
-        f_average_failed.append(Project.status == 6)
-        f_average_failed.append(Invest.status.in_([0, 4]))
+        f_average_failed.append(Project.status == Project.STATUS_UNFUNDED)
+        f_average_failed.append(Invest.status.in_([Invest.STATUS_PENDING,
+                                                   Invest.STATUS_RETURNED]))
         average_failed = db.session.query(func.sum(Invest.amount) / func.count(func.distinct(Project.id)))\
                                         .join(Project).filter(*f_average_failed).scalar()
         average_failed = 0 if average_failed is None else round(average_failed, 2)
         return average_failed
 
     def _comprometido_fail(self, f_comprometido_fail=[]):
-        f_comprometido_fail.append(Invest.status.in_([0, 4]))
-        f_comprometido_fail.append(Project.status == 6)
+        f_comprometido_fail.append(Invest.status.in_([Invest.STATUS_PENDING,
+                                                      Invest.STATUS_RETURNED]))
+        f_comprometido_fail.append(Project.status == Project.STATUS_UNFUNDED)
         sub = db.session.query((func.sum(Invest.amount) / Project.minimum * 100).label('percent'))\
                             .select_from(Invest).join(Project)\
                             .filter(*f_comprometido_fail).group_by(Invest.project).subquery()

@@ -195,10 +195,10 @@ class RewardsAPI(Resource):
         # FIXME: No incluir status=2?
         f_renuncias = list(filters)
         f_renuncias.append(Invest.resign == 1)
-        f_renuncias.append(Invest.status.in_([config.INVEST_STATUS_PENDING,
-                                              config.INVEST_STATUS_CHARGED,
-                                              config.INVEST_STATUS_PAID,
-                                              config.INVEST_STATUS_RETURNED]))
+        f_renuncias.append(Invest.status.in_([Invest.STATUS_PENDING,
+                                              Invest.STATUS_CHARGED,
+                                              Invest.STATUS_PAID,
+                                              Invest.STATUS_RETURNED]))
         renuncias = db.session.query(func.count(Invest.id)).filter(*f_renuncias).scalar()
 
         #
@@ -257,9 +257,10 @@ class RewardsAPI(Resource):
         f_favorite_reward = list(filters2)
         f_favorite_reward.append(Reward.type == 'individual')
         favorite_reward = db.session.query(Reward.icon, func.count(Reward.project).label('total'))\
-                                .join(Project, and_(Project.id == Reward.project, Project.status.in_([config.PROJECT_STATUS_IN_CAMPAIGN,
-                                                                                                      config.PROJECT_STATUS_FUNDED,
-                                                                                                      config.PROJECT_STATUS_FULLFILED])))\
+                                .join(Project, and_(Project.id == Reward.project, Project.status.in_([
+                                    Project.STATUS_IN_CAMPAIGN,
+                                    Project.STATUS_FUNDED,
+                                    Project.STATUS_FULLFILED])))\
                                 .filter(*f_favorite_reward).group_by(Reward.icon).order_by(desc('total')).all()
 
         res = {

@@ -57,9 +57,18 @@ class Invest(db.Model):
     __tablename__ = 'invest'
 
     METHOD_PAYPAL = 'paypal'
-    METHOD_TPV = 'tpv'
-    METHOD_CASH = 'cash'
-    METHOD_DROP = 'drop'
+    METHOD_TPV    = 'tpv'
+    METHOD_CASH   = 'cash'
+    METHOD_DROP   = 'drop'
+
+    #INVEST STATUS IDs
+    STATUS_PROCESSING = -1
+    STATUS_PENDING    = 0
+    STATUS_CHARGED    = 1
+    STATUS_CANCELED   = 2
+    STATUS_PAID       = 3
+    STATUS_RETURNED   = 4
+    STATUS_RELOCATED  = 5
 
     id = db.Column('id', Integer, primary_key=True)
     user = db.Column('user', String(50), db.ForeignKey('user.id'))
@@ -78,6 +87,15 @@ class Invest(db.Model):
 
 class Project(db.Model):
     __tablename__ = 'project'
+
+    #PROJECT STATUS IDs
+    STATUS_REJECTED    = 0
+    STATUS_EDITING     = 1
+    STATUS_REVIEWING   = 2
+    STATUS_IN_CAMPAIGN = 3
+    STATUS_FUNDED      = 4
+    STATUS_FULLFILED   = 5 # 'Caso de exito'
+    STATUS_UNFUNDED    = 6 # proyecto fallido
 
     id = db.Column('id', String(50), primary_key=True)
     owner = db.Column('owner', String(50), db.ForeignKey('user.id'))
@@ -116,6 +134,15 @@ class Node(db.Model):
 
 class Call(db.Model):
     __tablename__ = 'call'
+
+    #CALL STATUS IDs
+    STATUS_CANCELED   = 0
+    STATUS_EDITING    = 1
+    STATUS_REVIEWING  = 2
+    STATUS_APPLYING   = 3
+    STATUS_PUBLISHING = 4
+    STATUS_COMPLETED  = 5
+    STATUS_EXPIRED    = 6
 
     id = db.Column('id', String(50), primary_key=True)
     name = db.Column('name', Text)

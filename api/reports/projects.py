@@ -139,28 +139,28 @@ class ProjectsAPI(Resource):
                 category_id = db.session.query(Category.id).filter(Category.name == args['category']).one()
                 category_id = category_id[0]
             except NoResultFound:
-                return {"error": "Invalid category"}, 400
+                return bad_request("Invalid category")
 
             filters.append(Project.id == ProjectCategory.project)
             filters.append(ProjectCategory.category == category_id)
         if args['location']:
             location = args['location'].split(",")
             if len(location) != 3:
-                return {"error": "Invalid parameter: location"}, 400
+                return bad_request("Invalid parameter: location")
 
             from geopy.distance import VincentyDistance
             latitude, longitude, radius = location
 
             radius = int(radius)
             if radius > 500 or radius < 0:
-                return {"error": "Radius must be a value between 0 and 500 Km"}, 400
+                return bad_request("Radius must be a value between 0 and 500 Km")
 
             locations = db.session.query(Location.id, Location.lat, Location.lon).all()
             locations = filter(lambda l: VincentyDistance((latitude, longitude), (l[1], l[2])).km <= radius, locations)
             locations_ids = map(lambda l: int(l[0]), locations)
 
             if locations_ids == []:
-                return {"error": "No locations in the specified range"}, 400
+                return bad_request("No locations in the specified range")
 
             filters.append(Project.owner == LocationItem.item)
             filters.append(LocationItem.type == 'user')
@@ -176,19 +176,19 @@ class ProjectsAPI(Resource):
         f_pub_projects = list(filters)
         f_pub_projects.append(Project.date_published != None)
         f_pub_projects.append(Project.date_published != '0000-00-00')
-        f_pub_projects.append(Project.status > 0)
+        f_pub_projects.append(Project.status > Project.STATUS_REJECTED)
         pub_projects = db.session.query(func.count(Project.id)).filter(*f_pub_projects).scalar()
 
         # - Proyectos exitosos (llegan al mínimo pueden estar en campaña)
         f_succ_projects = list(filters)
         f_succ_projects.append(Project.date_passed != None)
         f_succ_projects.append(Project.date_passed != '0000-00-00')
-        f_succ_projects.append(Project.status > 0)
+        f_succ_projects.append(Project.status > Project.STATUS_REJECTED)
         succ_projects = db.session.query(func.count(Project.id)).filter(*f_succ_projects).scalar()
 
         # Publicados y cerrados
         f_pub_projects2 = list(filters)
-        f_pub_projects2.append(Project.status > 0)
+        f_pub_projects2.append(Project.status > Project.STATUS_REJECTED)
         and1 = and_(Project.date_passed != None, Project.date_passed != '0000-00-00')
         and2 = and_(Project.date_closed != None, Project.date_closed != '0000-00-00')
         f_pub_projects2.append(or_(and1, and2))
@@ -196,21 +196,21 @@ class ProjectsAPI(Resource):
 
         # -(nuevo) proyectos exitosos con campaña finalizada
         f_succ_finished = list(filters)
-        f_succ_finished.append(Project.status.in_([config.PROJECT_STATUS_FUNDED,
-                                                   config.PROJECT_STATUS_FULLFILED]))
+        f_succ_finished.append(Project.status.in_([Project.STATUS_FUNDED,
+                                                   Project.STATUS_FULLFILED]))
         succ_finished = db.session.query(Project).filter(*f_succ_finished).count()
 
         # - Proyectos archivados Renombrar por Proyectos Fallidos
         f_fail_projects = list(filters)
-        f_fail_projects.append(Project.status == config.PROJECT_STATUS_UNFUNDED)
+        f_fail_projects.append(Project.status == Project.STATUS_UNFUNDED)
         fail_projects = db.session.query(func.count(Project.id)).filter(*f_fail_projects).scalar()
 
         # - Media de recaudación conseguida por proyectos exitosos
         f_p_avg_success = list(filters)
-        f_p_avg_success.append(Invest.status.in_([config.INVEST_STATUS_CHARGED,
-                                                  config.INVEST_STATUS_PAID]))
-        f_p_avg_success.append(Project.status.in_([config.PROJECT_STATUS_FUNDED,
-                                                   config.PROJECT_STATUS_FULLFILED]))
+        f_p_avg_success.append(Invest.status.in_([Invest.STATUS_CHARGED,
+                                                  Invest.STATUS_PAID]))
+        f_p_avg_success.append(Project.status.in_([Project.STATUS_FUNDED,
+                                                   Project.STATUS_FULLFILED]))
         avg_success = db.session.query(func.sum(Invest.amount) / func.count(func.distinct(Project.id)))\
                                     .join(Project).filter(*f_p_avg_success).scalar()
         avg_success = 0 if avg_success is None else round(avg_success, 2)
@@ -230,11 +230,11 @@ class ProjectsAPI(Resource):
 
         # - 10 Campañas que han recaudado más dinero
         f_top10_invests = list(filters)
-        f_top10_invests.append(Project.status.in_([config.PROJECT_STATUS_FUNDED,
-                                                   config.PROJECT_STATUS_FULLFILED]))
-        f_top10_invests.append(Invest.status.in_([config.INVEST_STATUS_PENDING,
-                                                  config.INVEST_STATUS_CHARGED,
-                                                  config.INVEST_STATUS_PAID]))
+        f_top10_invests.append(Project.status.in_([Project.STATUS_FUNDED,
+                                                   Project.STATUS_FULLFILED]))
+        f_top10_invests.append(Invest.status.in_([Invest.STATUS_PENDING,
+                                                  Invest.STATUS_CHARGED,
+                                                  Invest.STATUS_PAID]))
         top10_invests = db.session.query(Project.id.label('project'), func.sum(Invest.amount).label('amount')).join(Invest)\
                                     .filter(*f_top10_invests).group_by(Invest.project)\
                                     .order_by(desc('amount')).limit(10).all()
@@ -244,8 +244,8 @@ class ProjectsAPI(Resource):
         f_avg_succ_posts.append(Post.publish == 1)
         sq1 = db.session.query(func.count(Project.id).label('posts')).select_from(Post)\
                             .join(Blog, and_(Blog.id == Post.blog, Blog.type == 'project'))\
-                            .join(Project, and_(Project.id == Blog.owner, Project.status.in_([config.PROJECT_STATUS_FUNDED,
-                                                                                              config.PROJECT_STATUS_FULLFILED])))\
+                            .join(Project, and_(Project.id == Blog.owner, Project.status.in_([Project.STATUS_FUNDED,
+                                                                                              Project.STATUS_FULLFILED])))\
                             .filter(*f_avg_succ_posts).group_by(Post.blog).subquery()
         avg_succ_posts = db.session.query(func.avg(sq1.c.posts)).scalar()
         avg_succ_posts = 0 if avg_succ_posts is None else round(avg_succ_posts, 2)
