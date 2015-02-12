@@ -1,30 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from flask import Flask
-from flask.ext.sqlalchemy import SQLAlchemy
 #from flask.ext.sqlalchemy import Pagination
 from sqlalchemy import Integer, String, Text, Date, DateTime, Float
 
-from config import config
-
-# DB class
-#app = Flask(__name__)
-app = Flask(__name__, static_url_path="")
-app.config['SQLALCHEMY_DATABASE_URI'] = config.DB_URI
-app.config['SQLALCHEMY_ECHO'] = True
-app.config['REDIS_URL'] = config.REDIS_URI
-#app.config['SQLALCHEMY_POOL_TIMEOUT'] = 5
-#app.config['SQLALCHEMY_POOL_SIZE'] = 30
-
-#
-# Read debug status from config
-if hasattr(config, 'debug'):
-    app.debug = bool(config.debug)
-    app.config['DEBUG'] = bool(config.debug)
-
-
-# app.config.from_pyfile(config)
-db = SQLAlchemy(app)
+from api import db
 
 
 # DB classes

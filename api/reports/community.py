@@ -2,7 +2,6 @@
 
 import time
 
-from flask import jsonify
 from flask.ext.restful import Resource, fields
 from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
@@ -11,8 +10,10 @@ from sqlalchemy import and_, desc
 
 from config import config
 
-from api.model import db, Invest, InvestNode, User, Category, Message, Project, UserInterest, UserRole, ProjectCategory, Call
-from api.model import Location, LocationItem
+from api import db
+
+from api.models import Invest, InvestNode, User, Category, Message, Project, UserInterest, UserRole, ProjectCategory, Call
+from api.models import Location, LocationItem
 from api.decorators import *
 
 from api.reports.base import Base, Response

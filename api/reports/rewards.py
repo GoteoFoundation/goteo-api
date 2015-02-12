@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
 import time
-from flask import jsonify
-from flask.ext.restful import Resource, fields
+
+from flask.ext.restful import fields
 from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import and_, or_, desc
 
 from config import config
-
-from api.model import db, Category, Invest, Reward, InvestReward, InvestNode, Project, ProjectCategory
-from api.model import Location, LocationItem
+from api import db
+from api.models import Category, Invest, Reward, InvestReward, InvestNode, Project, ProjectCategory
+from api.models import Location, LocationItem
 from api.decorators import *
 
 from api.reports.base import Base, Response
@@ -204,25 +204,3 @@ class RewardsAPI(Base):
         if res is None:
             res = []
         return res
-
-
-        res = {
-                'reward-refusal': renuncias,
-                'percentage-reward-refusal': percent(renuncias, cofinanciadores),
-                'rewards-per-amount': {
-                    'rewards-less-than-15': recomp_dinero15,
-                    'rewards-between-15-30': recomp_dinero30,
-                    'rewards-between-30-100': recomp_dinero100,
-                    'rewards-between-100-400': recomp_dinero400,
-                    'rewards-more-than-400': recomp_dinero400mas
-                },
-                'favorite-rewards': favorite_reward
-        }
-
-        res['time-elapsed'] = time.time() - time_start
-        res['filters'] = {}
-        for k, v in args.items():
-            if v is not None:
-                res['filters'][k] = v
-
-        return jsonify(res)

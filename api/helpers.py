@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import time
-from api.model import app
+from api import app
 from flask import jsonify
 
 

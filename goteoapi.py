@@ -3,21 +3,11 @@
 
 from flask import jsonify
 from flask_restful_swagger import swagger
-from flask.ext.restful import Api
 
 from config import config
-from api.model import app
+from api import app
+
 from api.decorators import *
-
-from api.reports.money import MoneyAPI
-from api.reports.rewards import RewardsAPI
-from api.reports.community import CommunityAPI
-from api.reports.projects import ProjectsAPI
-#from api.misc import ProjectListAPI, ProjectAPI
-
-
-api = swagger.docs(Api(app), apiVersion=config.version, description=config.description)
-#api = Api(app)
 
 @app.errorhandler(400)
 @app.errorhandler(401)
@@ -47,28 +37,10 @@ def index():
             func_list[rule.rule] = app.view_functions[rule.endpoint].__doc__
     return jsonify(version=config.version, message=config.description + ' v' + str(config.version), endpoints=func_list, links=config.links)
 
-# Reports home
-@app.route('/reports/')
-@app.route('/reports', endpoint='api_reports')
-@requires_auth
-@ratelimit()
-def reports():
-    """All available endpoints for Statistics"""
+#Add modules
+from api.reports_endpoint import api_reports
 
-    func_list = {}
-    for rule in app.url_map.iter_rules():
-        # Filter out rules non Goteo-api rules
-        if "GET" in rule.methods and rule.endpoint.startswith('api_reports_') and not rule.rule.endswith('/'):
-            func_list[rule.rule] = app.view_functions[rule.endpoint].__doc__
-    return jsonify(message='Collected Statistics of Goteo.org', endpoints=func_list)
-
-# ROUTE CLASSES
-#api.add_resource(ProjectListAPI, '/projects/', endpoint='projects1')
-#api.add_resource(ProjectAPI, '/projects/<string:project_id>', endpoint='project')
-api.add_resource(MoneyAPI, '/reports/money', '/reports/money/', endpoint='api_reports_money')
-api.add_resource(ProjectsAPI, '/reports/projects', '/reports/projects/', endpoint='api_reports_projects')
-api.add_resource(CommunityAPI, '/reports/community', '/reports/community/', endpoint='api_reports_community')
-api.add_resource(RewardsAPI, '/reports/rewards', '/reports/rewards/', endpoint='api_reports_rewards')
+app.register_blueprint(api_reports)
 
 
 #This part will not be executed under uWSGI module (nginx)

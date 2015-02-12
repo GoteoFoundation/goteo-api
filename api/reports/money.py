@@ -2,15 +2,15 @@
 
 import time
 
-from flask import jsonify
-from flask.ext.restful import Resource, fields
+from flask.ext.restful import fields
 from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
 from sqlalchemy.orm.exc import NoResultFound
 
-
 from config import config
-from api.model import db, Project, ProjectCategory, Category, Invest, Call, InvestNode, Location, LocationItem
+
+from api import db
+from api.models import Project, ProjectCategory, Category, Invest, Call, InvestNode, Location, LocationItem
 from api.decorators import *
 
 from api.reports.base import Base, Response

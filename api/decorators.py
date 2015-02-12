@@ -9,8 +9,10 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from config import config
 
-from api.model import app, db, UserApi
+from api.models import UserApi
 from api.helpers import *
+
+from api import app
 
 #
 # REDIS RATE LIMITER
