@@ -129,7 +129,7 @@ def requires_auth(f):
             elif(ok is not False):
                 msg = str(ok)
 
-        resp = jsonify(code=401, message=msg)
+        resp = jsonify(error=401, message=msg)
         resp.status_code = 401
         resp.headers.add('WWW-Authenticate', 'Basic realm="Goteo.org API"')
         return resp
