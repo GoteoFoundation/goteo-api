@@ -12,7 +12,7 @@ from config import config
 from api.models import UserApi
 from api.helpers import *
 
-from api import app
+from api import app, db
 
 #
 # REDIS RATE LIMITER
