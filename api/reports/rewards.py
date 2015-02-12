@@ -1,125 +1,66 @@
 # -*- coding: utf-8 -*-
-from model import app, db
-from model import Category, Invest, Reward, InvestReward, InvestNode, Project, ProjectCategory
-from model import Location, LocationItem
 
-from flask import abort, jsonify
-from flask.ext.restful import Resource, reqparse, fields, marshal
+import time
+from flask import jsonify
+from flask.ext.restful import Resource, fields
 from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import and_, or_, desc
 
-from decorators import *
 from config import config
 
-import time
+from api.model import db, Category, Invest, Reward, InvestReward, InvestNode, Project, ProjectCategory
+from api.model import Location, LocationItem
+from api.decorators import *
+
+from api.reports.base import Base, Response
 
 # DEBUG
 if config.debug:
     db.session.query = debug_time(db.session.query)
 
+func = sqlalchemy.func
 
 @swagger.model
 class RewardsPerAmount:
     resource_fields = {
-        "rewards-between-100-400": fields.Integer,
-        "rewards-between-15-30": fields.Integer,
-        "rewards-between-30-100": fields.Integer,
-        "rewards-less-than-15": fields.Integer,
-        "rewards-more-than-400": fields.Integer
+        "rewards-less-than-15"    : fields.Integer,
+        "rewards-between-15-30"   : fields.Integer,
+        "rewards-between-30-100"  : fields.Integer,
+        "rewards-between-100-400" : fields.Integer,
+        "rewards-more-than-400"   : fields.Integer
     }
     required = resource_fields.keys()
 
 @swagger.model
-@swagger.nested(
-    rewards_per_amount=RewardsPerAmount.__name__)
-    #rewards-per-amount=RewardsPerAmount.__name__)
-class RewardsResponse:
-
-    __name__ = "RewardsResponse"
+@swagger.nested(**{"rewards-per-amount" : RewardsPerAmount.__name__})
+class RewardsResponse(Response):
 
     resource_fields = {
-        "favorite-rewards": fields.List,
+        "reward-refusal"           : fields.Integer,
+        "favorite-rewards"         : fields.List,
         "percentage-reward-refusal": fields.Float,
-        "reward-refusal": fields.Integer,
-        "rewards_per_amount": fields.Nested(RewardsPerAmount.resource_fields)  # FIXME: parametros con guiones
+        "rewards-per-amount"       : fields.Nested(RewardsPerAmount.resource_fields)
     }
 
     required = resource_fields.keys()
 
 
 @swagger.model
-class RewardsAPI(Resource):
+class RewardsAPI(Base):
     """Get Rewards Statistics"""
 
     def __init__(self):
-        self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('from_date', type=str)
-        self.reqparse.add_argument('to_date', type=str)
-        self.reqparse.add_argument('node', type=str, action='append')
-        self.reqparse.add_argument('project', type=str, action='append')
-        self.reqparse.add_argument('category', type=str)
-        self.reqparse.add_argument('location', type=str)
         super(RewardsAPI, self).__init__()
 
-    invalid_input = {
-        "error": 400,
-        "message": "Invalid parameters"
-    }
-
     @swagger.operation(
-    summary='Rewards report',
-    notes='Rewards report',
-    responseClass='RewardsResponse',
-    nickname='rewards',
-    parameters=[
-        {
-            "paramType": "query",
-            "name": "project",
-            "description": "Filter by individual project(s) separated by commas",
-            "required": False,
-            "dataType": "string",
-            "allowMultiple": True
-        },
-        {
-            "paramType": "query",
-            "name": "from_date",
-            "description": 'Filter from date. Ex. "2013-01-01"',
-            "required": False,
-            "dataType": "string"
-        },
-        {
-            "paramType": "query",
-            "name": "to_date",
-            "description": 'Filter until date.. Ex. "2014-01-01"',
-            "required": False,
-            "dataType": "string"
-        },
-        {
-            "paramType": "query",
-            "name": "node",
-            "description": 'Filter by individual node(s) separated by commas',
-            "required": False,
-            "dataType": "string"
-        },
-        {
-            "paramType": "query",
-            "name": "category",
-            "description": 'Filter by project category',
-            "required": False,
-            "dataType": "string"
-        },
-        {
-            "paramType": "query",
-            "name": "location",
-            "description": 'Filter by user location related to the reward (Lat,lon,Km)',
-            "required": False,
-            "dataType": "string"
-        }
-
-    ],
-    responseMessages=[invalid_input])
+        notes='Rewards report',
+        responseClass=RewardsResponse.__name__,
+        nickname='rewards',
+        parameters=Base.INPUT_FILTERS,
+        responseMessages=Base.RESPONSE_MESSAGES
+    )
     @requires_auth
     @ratelimit()
     def get(self):
@@ -127,7 +68,6 @@ class RewardsAPI(Resource):
         <a href="http://developers.goteo.org/reports#rewards">developers.goteo.org/reports#rewards</a>
         """
         time_start = time.time()
-        func = sqlalchemy.func
         args = self.reqparse.parse_args()
 
         filters = []
@@ -188,80 +128,83 @@ class RewardsAPI(Resource):
             filters.append(LocationItem.type == 'user')
             filters.append(LocationItem.id.in_(locations_ids))
 
-        #
-        cofinanciadores = db.session.query(func.count(func.distinct(Invest.user))).filter(*filters).scalar()
+        cofinanciadores = self._cofinanciadores(list(filters));
+        renuncias = self._renuncias(list(filters));
+        res = RewardsResponse(
+            starttime = time_start,
+            attributes = {
+                'reward-refusal'            : renuncias,
+                'percentage-reward-refusal' : percent(renuncias, cofinanciadores),
+                'rewards-per-amount'        : {
+                    'rewards-less-than-15'    : self._recomp_dinero(list(filters), 0, 15),
+                    'rewards-between-15-30'   : self._recomp_dinero(list(filters), 15, 30),
+                    'rewards-between-30-100'  : self._recomp_dinero(list(filters), 30, 100),
+                    'rewards-between-100-400' : self._recomp_dinero(list(filters), 100, 400),
+                    'rewards-more-than-400'   : self._recomp_dinero(list(filters), 400),
+                },
+                'favorite-rewards': self._favorite_reward(list(filters2))
+            },
+            filters = args.items()
+        )
+        return res.response()
 
-        # - NÚMERO de cofinanciadores que renuncian a recompensa
-        # FIXME: No incluir status=2?
-        f_renuncias = list(filters)
+    #Numero de cofinanciadores
+    def _cofinanciadores(self, filters = []):
+        res = db.session.query(func.count(func.distinct(Invest.user))).filter(*filters).scalar()
+        if res is None:
+            res = 0
+        return res
+
+    # NÚMERO de cofinanciadores que renuncian a recompensa
+    # FIXME: No incluir status=STATUS_REVIEWING?
+    def _renuncias(self, f_renuncias = []):
         f_renuncias.append(Invest.resign == 1)
         f_renuncias.append(Invest.status.in_([Invest.STATUS_PENDING,
                                               Invest.STATUS_CHARGED,
                                               Invest.STATUS_PAID,
                                               Invest.STATUS_RETURNED]))
-        renuncias = db.session.query(func.count(Invest.id)).filter(*f_renuncias).scalar()
+        res = db.session.query(func.count(Invest.id)).filter(*f_renuncias).scalar()
+        if res is None:
+            res = 0
+        return res
 
-        #
-        f_recomp_dinero = list(filters)
+    # Recompensas elegindas para valores minimos y máximos
+    # OJO: Como en reporting.php, no filtra por proyectos publicados
+    def _recomp_dinero(self, f_recomp_dinero = [], minim = 0, maxim = 0):
         f_recomp_dinero.append(Reward.id != None)
         f_recomp_dinero.append(or_(Invest.resign == None, Invest.resign == 0))
 
-        # OJO: Como en reporting.php, no filtra por proyectos publicados
-        # - Recompensa elegida de menos de 15 euros
-        f_recomp_dinero15 = list(f_recomp_dinero)
-        f_recomp_dinero15.append(Reward.amount < 15)
-        _recomp_dinero = db.session.query(func.count(Invest.id).label("amourew")).join(InvestReward).join(Reward)\
-                            .filter(*f_recomp_dinero15).group_by(Reward.id).subquery()
-        recomp_dinero15 = db.session.query(func.sum(_recomp_dinero.c.amourew)).scalar()
-        if recomp_dinero15 is None:
-            recomp_dinero15 = 0
+        if minim == 0 and maxim > 0:
+            f_recomp_dinero.append(Reward.amount < maxim)
+        elif minim > 0 and maxim > 0:
+            f_recomp_dinero.append(Reward.amount.between(minim, maxim))
+        elif  minim > 0:
+            f_recomp_dinero.append(Reward.amount > minim)
+        else:
+            return 0
 
-        # - Recompensa elegida de 15 a 30 euros
-        f_recomp_dinero30 = list(f_recomp_dinero)
-        f_recomp_dinero30.append(Reward.amount.between(15, 30))
-        _recomp_dinero = db.session.query(func.count(Invest.id).label("amourew")).join(InvestReward).join(Reward)\
-                            .filter(*f_recomp_dinero30).group_by(Reward.id).subquery()
-        recomp_dinero30 = db.session.query(func.sum(_recomp_dinero.c.amourew)).scalar()
-        if recomp_dinero30 is None:
-            recomp_dinero30 = 0
+        recomp_dinero = db.session.query(func.count(Invest.id).label("amourew")).join(InvestReward).join(Reward)\
+                            .filter(*f_recomp_dinero).group_by(Reward.id).subquery()
+        res = db.session.query(func.sum(recomp_dinero.c.amourew)).scalar()
+        if res is None:
+            res = 0
+        return res
 
-        # - Recompensa elegida de 30 a 100 euros
-        f_recomp_dinero100 = list(f_recomp_dinero)
-        f_recomp_dinero100.append(Reward.amount.between(30, 100))
-        _recomp_dinero = db.session.query(func.count(Invest.id).label("amourew")).join(InvestReward).join(Reward)\
-                            .filter(*f_recomp_dinero100).group_by(Reward.id).subquery()
-        recomp_dinero100 = db.session.query(func.sum(_recomp_dinero.c.amourew)).scalar()
-        if recomp_dinero100 is None:
-            recomp_dinero100 = 0
 
-        # - Recompensa elegida de 100 a 400 euros
-        f_recomp_dinero400 = list(f_recomp_dinero)
-        f_recomp_dinero400.append(Reward.amount.between(100, 400))
-        _recomp_dinero = db.session.query(func.count(Invest.id).label("amourew")).join(InvestReward).join(Reward)\
-                            .filter(*f_recomp_dinero400).group_by(Reward.id).subquery()
-        recomp_dinero400 = db.session.query(func.sum(_recomp_dinero.c.amourew)).scalar()
-        if recomp_dinero400 is None:
-            recomp_dinero400 = 0
-
-        # - Recompensa elegida de más de 400 euros
-        f_recomp_dinero400mas = list(f_recomp_dinero)
-        f_recomp_dinero400mas.append(Reward.amount > 400)
-        _recomp_dinero = db.session.query(func.count(Invest.id).label("amourew")).join(InvestReward).join(Reward)\
-                            .filter(*f_recomp_dinero400).group_by(Reward.id).subquery()
-        recomp_dinero400mas = db.session.query(func.sum(_recomp_dinero.c.amourew)).scalar()
-        if recomp_dinero400mas is None:
-            recomp_dinero400mas = 0
-
-        # - Tipo de recompensa más utilizada en proyectos exitosos
-        # FIXME: Date: Project.published
-        f_favorite_reward = list(filters2)
+    # Tipo de recompensa más utilizada en proyectos exitosos
+    # FIXME: Date: Project.published
+    def _favorite_reward(self, f_favorite_reward = []):
         f_favorite_reward.append(Reward.type == 'individual')
-        favorite_reward = db.session.query(Reward.icon, func.count(Reward.project).label('total'))\
+        res = db.session.query(Reward.icon, func.count(Reward.project).label('total'))\
                                 .join(Project, and_(Project.id == Reward.project, Project.status.in_([
                                     Project.STATUS_IN_CAMPAIGN,
                                     Project.STATUS_FUNDED,
                                     Project.STATUS_FULLFILED])))\
                                 .filter(*f_favorite_reward).group_by(Reward.icon).order_by(desc('total')).all()
+        if res is None:
+            res = []
+        return res
+
 
         res = {
                 'reward-refusal': renuncias,

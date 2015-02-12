@@ -1,119 +1,85 @@
 # -*- coding: utf-8 -*-
-from model import app, db
-from model import Blog, Category, Invest, Message, Post, Project, ProjectCategory
-from model import Location, LocationItem
 
-from flask import abort, jsonify
-from flask.ext.restful import Resource, reqparse, fields, marshal
+import time
+from flask import jsonify
+from flask.ext.restful import Resource, fields
 from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import and_, or_, desc
 
-from decorators import *
 from config import config
 
-import time
+from api.model import db,Blog, Category, Invest, Message, Post, Project, ProjectCategory
+from api.model import Location, LocationItem
+from api.decorators import *
+
+from api.reports.base import Base, Response
 
 # DEBUG
 if config.debug:
     db.session.query = debug_time(db.session.query)
 
+func = sqlalchemy.func
 
 @swagger.model
-class ProjectsResponse:
+class ProjectContribution:
+    resource_fields = {
+        'name'  : fields.String,
+        'total' : fields.Integer
+    }
+    required = resource_fields.keys()
 
-    __name__ = "ProjectsResponse"
+@swagger.model
+class ProjectAmount:
+    resource_fields = {
+        'name'   : fields.String,
+        'amount' : fields.Float
+    }
+    required = resource_fields.keys()
+
+@swagger.model
+@swagger.nested(**{
+                'top10-collaborations' : ProjectContribution.__name__,
+                'top10-donations'      : ProjectContribution.__name__,
+                'top10-receipts'       : ProjectAmount.__name__
+                }
+            )
+class ProjectsResponse(Response):
 
     resource_fields = {
-        "failed": fields.Integer,
-        "published": fields.Integer,
-        "received": fields.Integer,
-        "succesful": fields.Integer,
-        "successful-percentage": fields.Float,
-        "successful-finished": fields.Integer,
-        "successful-finished-perc": fields.Float,
-        "average-success-percentage": fields.Float,
-        "top10-investors": fields.List,
-        "top10-collaborations": fields.List,
-        "top10-invests": fields.List,
-        "average-successful-posts": fields.Float,
+        "failed"                         : fields.Integer,
+        "published"                      : fields.Integer,
+        "received"                       : fields.Integer,
+        "successful"                     : fields.Integer,
+        "successful-complete"            : fields.Integer,
+        "percentage-successful"          : fields.Float,
+        "percentage-completed"           : fields.Float,
+        "percentage-successful-completed": fields.Float,
+        "average-amount-successful"      : fields.Float,
+        "top10-collaborations"           : fields.List(fields.Nested(ProjectContribution.resource_fields)),
+        "top10-donations"                : fields.List(fields.Nested(ProjectContribution.resource_fields)),
+        "top10-receipts"                 : fields.List(fields.Nested(ProjectAmount.resource_fields)),
+        "average-posts-successful"       : fields.Float
     }
 
     required = resource_fields.keys()
 
 
 @swagger.model
-class ProjectsAPI(Resource):
+class ProjectsAPI(Base):
     """Get Projects Statistics"""
 
     def __init__(self):
-        self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('from_date', type=str)
-        self.reqparse.add_argument('to_date', type=str)
-        self.reqparse.add_argument('node', type=str, action='append')
-        self.reqparse.add_argument('project', type=str, action='append')
-        self.reqparse.add_argument('category', type=str)
-        self.reqparse.add_argument('location', type=str)
         super(ProjectsAPI, self).__init__()
 
-    invalid_input = {
-        "code": 400,
-        "message": "Invalid parameters"
-    }
-
     @swagger.operation(
-    summary='Projects report',
-    notes='Projects report',
-    responseClass='ProjectsResponse',
-    nickname='projects',
-    parameters=[
-        {
-            "paramType": "query",
-            "name": "project",
-            "description": "Filter by individual project(s) separated by commas",
-            "required": False,
-            "dataType": "string",
-            "allowMultiple": True
-        },
-        {
-            "paramType": "query",
-            "name": "from_date",
-            "description": 'Filter from date. Ex. "2013-01-01"',
-            "required": False,
-            "dataType": "string"
-        },
-        {
-            "paramType": "query",
-            "name": "to_date",
-            "description": 'Filter until date.. Ex. "2014-01-01"',
-            "required": False,
-            "dataType": "string"
-        },
-        {
-            "paramType": "query",
-            "name": "node",
-            "description": 'Filter by individual node(s) separated by commas',
-            "required": False,
-            "dataType": "string"
-        },
-        {
-            "paramType": "query",
-            "name": "category",
-            "description": 'Filter by project category',
-            "required": False,
-            "dataType": "string"
-        },
-        {
-            "paramType": "query",
-            "name": "location",
-            "description": 'Filter by projects location of project owner (Lat,lon,Km)',
-            "required": False,
-            "dataType": "string"
-        }
-
-    ],
-    responseMessages=[invalid_input])
+        notes='Projects report',
+        responseClass=ProjectsResponse.__name__,
+        nickname='projects',
+        parameters=Base.INPUT_FILTERS,
+        responseMessages=Base.RESPONSE_MESSAGES
+    )
     @requires_auth
     @ratelimit()
     def get(self):
@@ -121,7 +87,6 @@ class ProjectsAPI(Resource):
         <a href="http://developers.goteo.org/reports#projects">developers.goteo.org/reports#projects</a>
         """
         time_start = time.time()
-        func = sqlalchemy.func
         args = self.reqparse.parse_args()
 
         filters = []
@@ -166,108 +131,139 @@ class ProjectsAPI(Resource):
             filters.append(LocationItem.type == 'user')
             filters.append(LocationItem.id.in_(locations_ids))
 
-        # - Proyectos enviados a revisión (renombrar Proyectos recibidos)
-        f_rev_projects = list(filters)
+        succ_projects = self._successful(list(filters))
+        succ_projects_closed = self._successful(list(filters), True)
+        fail_projects = self._failed(list(filters))
+        succ_finished = self._finished(list(filters))
+        res = ProjectsResponse(
+            starttime = time_start,
+            attributes = {
+                'received'                      : self._received(list(filters)),
+                'published'                     : self._published(list(filters)),
+                'successful'                    : succ_projects,
+                'failed'                        : fail_projects,
+                'successful-complete'           : succ_finished,
+                'percentage-successful'         : percent(succ_projects, succ_projects_closed),
+                'percentage-successful-complete': percent(succ_finished, succ_finished + fail_projects),
+                'average-amount-successful'     : self._avg_success(list(filters)),
+                'average-posts-successful'      : self._avg_posts_success(list(filters)),
+                'top10-collaborations'          : self._top10_collaborations(list(filters)),
+                'top10-donations'               : self._top10_donations(list(filters)),
+                'top10-receipts'                : self._top10_invests(list(filters)),
+            },
+            filters = args.items()
+        )
+        return res.response()
+
+    # Proyectos enviados a revisión (renombrar Proyectos recibidos)
+    def _received(self, f_rev_projects = []):
         f_rev_projects.append(Project.date_updated != None)
         f_rev_projects.append(Project.date_updated != '0000-00-00')
-        rev_projects = db.session.query(func.count(Project.id)).filter(*f_rev_projects).scalar()
+        res = db.session.query(func.count(Project.id)).filter(*f_rev_projects).scalar()
+        if res is None:
+            res = 0
+        return res
 
-        # - Proyectos publicados
-        f_pub_projects = list(filters)
+    # Proyectos publicados
+    def _published(self, f_pub_projects = []):
         f_pub_projects.append(Project.date_published != None)
         f_pub_projects.append(Project.date_published != '0000-00-00')
         f_pub_projects.append(Project.status > Project.STATUS_REJECTED)
-        pub_projects = db.session.query(func.count(Project.id)).filter(*f_pub_projects).scalar()
+        res = db.session.query(func.count(Project.id)).filter(*f_pub_projects).scalar()
+        if res is None:
+            res = 0
+        return res
 
-        # - Proyectos exitosos (llegan al mínimo pueden estar en campaña)
-        f_succ_projects = list(filters)
-        f_succ_projects.append(Project.date_passed != None)
-        f_succ_projects.append(Project.date_passed != '0000-00-00')
+    # Proyectos exitosos (llegan al mínimo pueden estar en campaña)
+    def _successful(self, f_succ_projects = [], closed = False):
         f_succ_projects.append(Project.status > Project.STATUS_REJECTED)
-        succ_projects = db.session.query(func.count(Project.id)).filter(*f_succ_projects).scalar()
+        if closed:
+            and1 = and_(Project.date_passed != None, Project.date_passed != '0000-00-00')
+            and2 = and_(Project.date_closed != None, Project.date_closed != '0000-00-00')
+            f_succ_projects.append(or_(and1, and2))
+        else :
+            f_succ_projects.append(Project.date_passed != None)
+            f_succ_projects.append(Project.date_passed != '0000-00-00')
 
-        # Publicados y cerrados
-        f_pub_projects2 = list(filters)
-        f_pub_projects2.append(Project.status > Project.STATUS_REJECTED)
-        and1 = and_(Project.date_passed != None, Project.date_passed != '0000-00-00')
-        and2 = and_(Project.date_closed != None, Project.date_closed != '0000-00-00')
-        f_pub_projects2.append(or_(and1, and2))
-        pub_projects2 = db.session.query(func.count(Project.id)).filter(*f_pub_projects2).scalar()
+        res = db.session.query(func.count(Project.id)).filter(*f_succ_projects).scalar()
+        if res is None:
+            res = 0
+        return res
 
-        # -(nuevo) proyectos exitosos con campaña finalizada
-        f_succ_finished = list(filters)
+
+    # -Proyectos exitosos con campaña finalizada
+    def _finished(self, f_succ_finished = []):
         f_succ_finished.append(Project.status.in_([Project.STATUS_FUNDED,
                                                    Project.STATUS_FULLFILED]))
-        succ_finished = db.session.query(Project).filter(*f_succ_finished).count()
+        print(f_succ_finished)
+        res = db.session.query(Project).filter(*f_succ_finished).count()
+        if res is None:
+            res = 0
+        return res
 
-        # - Proyectos archivados Renombrar por Proyectos Fallidos
-        f_fail_projects = list(filters)
+
+    # Proyectos archivado (Proyectos Fallidos)
+    def _failed(self, f_fail_projects = []):
         f_fail_projects.append(Project.status == Project.STATUS_UNFUNDED)
-        fail_projects = db.session.query(func.count(Project.id)).filter(*f_fail_projects).scalar()
+        res = db.session.query(func.count(Project.id)).filter(*f_fail_projects).scalar()
+        if res is None:
+            res = 0
+        return res
 
-        # - Media de recaudación conseguida por proyectos exitosos
-        f_p_avg_success = list(filters)
+    # Media de recaudación conseguida por proyectos exitosos
+    def _avg_success(self, f_p_avg_success = []):
         f_p_avg_success.append(Invest.status.in_([Invest.STATUS_CHARGED,
                                                   Invest.STATUS_PAID]))
         f_p_avg_success.append(Project.status.in_([Project.STATUS_FUNDED,
                                                    Project.STATUS_FULLFILED]))
-        avg_success = db.session.query(func.sum(Invest.amount) / func.count(func.distinct(Project.id)))\
+        res = db.session.query(func.sum(Invest.amount) / func.count(func.distinct(Project.id)))\
                                     .join(Project).filter(*f_p_avg_success).scalar()
-        avg_success = 0 if avg_success is None else round(avg_success, 2)
+        res = 0 if res is None else round(res, 2)
+        return res
 
-        # - 10 Campañas con más colaboraciones
-        f_top10_collaborations = list(filters)
-        top10_collaborations = db.session.query(Project.id.label('project'), func.count(Message.id).label('total')).join(Message)\
+    # 10 Campañas con más colaboraciones
+    def _top10_collaborations(self, f_top10_collaborations = []):
+        res = db.session.query(Project.id.label('project'), func.count(Message.id).label('total')).join(Message)\
                             .filter(*f_top10_collaborations).group_by(Message.project)\
                             .order_by(desc('total')).limit(10).all()
+        if res is None:
+            res = 0
+        return res
 
-        # - 10 Campañas con más cofinanciadores
+    # 10 Campañas con más cofinanciadores
+    def _top10_donations(self, f_top10_donations = []):
         # FIXME: invest.status?
-        f_top10_donations = list(filters)
-        top10_donations = db.session.query(Project.id.label('project'), func.count(Invest.id).label('total')).join(Invest)\
+        res = db.session.query(Project.id.label('project'), func.count(Invest.id).label('total')).join(Invest)\
                                     .filter(*f_top10_donations).group_by(Invest.project)\
                                     .order_by(desc('total')).limit(10).all()
+        if res is None:
+            res = 0
+        return res
 
-        # - 10 Campañas que han recaudado más dinero
-        f_top10_invests = list(filters)
+
+    # 10 Campañas que han recaudado más dinero
+    def _top10_invests(self, f_top10_invests = []):
         f_top10_invests.append(Project.status.in_([Project.STATUS_FUNDED,
                                                    Project.STATUS_FULLFILED]))
         f_top10_invests.append(Invest.status.in_([Invest.STATUS_PENDING,
                                                   Invest.STATUS_CHARGED,
                                                   Invest.STATUS_PAID]))
-        top10_invests = db.session.query(Project.id.label('project'), func.sum(Invest.amount).label('amount')).join(Invest)\
+        res = db.session.query(Project.id.label('project'), func.sum(Invest.amount).label('amount')).join(Invest)\
                                     .filter(*f_top10_invests).group_by(Invest.project)\
                                     .order_by(desc('amount')).limit(10).all()
+        if res is None:
+            res = 0
+        return res
 
-        # - Media de posts proyecto exitoso
-        f_avg_succ_posts = list(filters)
+    # Media de posts proyecto exitoso
+    def _avg_posts_success(self, f_avg_succ_posts = []):
         f_avg_succ_posts.append(Post.publish == 1)
         sq1 = db.session.query(func.count(Project.id).label('posts')).select_from(Post)\
                             .join(Blog, and_(Blog.id == Post.blog, Blog.type == 'project'))\
                             .join(Project, and_(Project.id == Blog.owner, Project.status.in_([Project.STATUS_FUNDED,
                                                                                               Project.STATUS_FULLFILED])))\
                             .filter(*f_avg_succ_posts).group_by(Post.blog).subquery()
-        avg_succ_posts = db.session.query(func.avg(sq1.c.posts)).scalar()
-        avg_succ_posts = 0 if avg_succ_posts is None else round(avg_succ_posts, 2)
+        res = db.session.query(func.avg(sq1.c.posts)).scalar()
+        res = 0 if res is None else round(res, 2)
+        return res
 
-        res = { 'received': rev_projects,
-                'published': pub_projects,
-                'failed': fail_projects,
-                'successful': succ_projects,
-                'percentage-successful': percent(succ_projects, pub_projects2),
-                'successful-complete': succ_finished,
-                'percentage-successful-complete': percent(succ_finished, succ_finished + fail_projects),
-                'top10-collaborations': top10_collaborations,
-                'top10-donations': top10_donations,
-                'top10-receipts': top10_invests,
-                'average-amount-successful': avg_success,
-                'average-posts-successful': avg_succ_posts
-              }
-
-        res['time-elapsed'] = time.time() - time_start
-        res['filters'] = {}
-        for k, v in args.items():
-            if v is not None:
-                res['filters'][k] = v
-
-        return jsonify(res)

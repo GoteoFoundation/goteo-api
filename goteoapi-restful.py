@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from config import config
-from model import app
-from decorators import *
 
 from flask import jsonify
+from flask_restful_swagger import swagger
+from flask.ext.restful import Api
+
+from config import config
+from api.model import app
+from api.decorators import *
 
 from api.reports.money import MoneyAPI
 from api.reports.rewards import RewardsAPI
 from api.reports.community import CommunityAPI
 from api.reports.projects import ProjectsAPI
 #from api.misc import ProjectListAPI, ProjectAPI
-
-from flask_restful_swagger import swagger
-from flask.ext.restful import Api
 
 
 api = swagger.docs(Api(app), apiVersion=config.version, description=config.description)

@@ -1,27 +1,16 @@
+# -*- coding: utf-8 -*-
 import time
-from functools import update_wrapper
-from flask import request, g, session, jsonify
-from model import app
-from sqlalchemy.orm.exc import NoResultFound
+from datetime import datetime
+from functools import wraps, update_wrapper
+from flask import request, g, jsonify
 from flask_redis import Redis
+from netaddr import IPSet, AddrFormatError
+from sqlalchemy.orm.exc import NoResultFound
 
 from config import config
 
-#Error handling
-def bad_request(message):
-     resp = jsonify(error=400, message=str(message))
-     resp.status_code = 400
-     return resp
-
-# Generic percentage
-def percent(number, base=None):
-    "Porcentaje en base a un total"
-    if base is None:
-        return 0
-    if base == 0:
-        return 0
-    perc = float(number) / base * 100
-    return round(perc, 2)
+from api.model import app, db, UserApi
+from api.helpers import *
 
 #
 # REDIS RATE LIMITER
@@ -52,8 +41,7 @@ def get_view_rate_limit():
     return getattr(g, '_view_rate_limit', None)
 
 def on_over_limit(limit):
-    resp = jsonify(code=400, message='Too many requests')
-    resp.status_code = 400
+    resp = bad_request('Too many requests', 400)
     return resp
 
 def ratelimit(limit=config.requests_limit, per=config.requests_time, over_limit=on_over_limit):
@@ -87,15 +75,11 @@ def inject_x_rate_headers(response):
     return response
 
 
+
 #
 # BASIC AUTH DECORATOR
 # ====================
 # Based on http://flask.pocoo.org/snippets/8/
-
-from functools import wraps
-from model import db, UserApi
-from netaddr import IPSet, AddrFormatError
-from datetime import datetime
 
 def check_auth(username, password):
     """Checks username & password authentication"""
@@ -151,12 +135,4 @@ def requires_auth(f):
     return decorated
 
 
-############################ debug ############################
-def debug_time(func):
-    def new_f(*args, **kwargs):
-        time_start = time.time()
-        res = func(*args, **kwargs)
-        total_time = time.time() - time_start
-        app.logger.debug('Time ' + func.__name__ + ': ' + str(total_time))
-        return res
-    return new_f
+
