@@ -195,7 +195,7 @@ class CommunityAPI(Base):
 
         users = self._users(list(filters2))
         bajas = self._bajas(list(filters2))
-        donors = self._bajas(list(filters))
+        donors = self._donors(list(filters))
         multidonors = self._multidonors(list(filters))
         categorias = self._categorias(list(filters3))
         users_categoria1 = categorias[0].users if len(categorias) > 0 else None
@@ -261,7 +261,7 @@ class CommunityAPI(Base):
         return res
 
     # Número de cofinanciadores
-    def _confinanciadores(self, f_cofinanciadores = []):
+    def _donors(self, f_cofinanciadores = []):
         res = db.session.query(func.count(func.distinct(Invest.user))).filter(*f_cofinanciadores).scalar()
         if res is None:
             res = 0
@@ -399,7 +399,7 @@ class CommunityAPI(Base):
         f_top10_multidonors.append(~Invest.user.in_(users_exclude))
         res = db.session.query(Invest.user, func.count(Invest.id).label('contributions'), func.sum(Invest.amount).label('amount'))\
                                     .filter(*f_top10_multidonors).group_by(Invest.user)\
-                                    .order_by(desc('contributions')).limit(10).all()
+                                    .order_by(desc('contributions'), desc('amount')).limit(10).all()
         if res is None:
             res = []
         return res
@@ -414,7 +414,7 @@ class CommunityAPI(Base):
         f_top10_donors.append(~Invest.user.in_(users_exclude))
         res = db.session.query(Invest.user, func.count(Invest.id).label('contributions'), func.sum(Invest.amount).label('amount'))\
                                     .filter(*f_top10_donors).group_by(Invest.user)\
-                                    .order_by(desc('amount')).limit(10).all()
+                                    .order_by(desc('amount'), desc('contributions')).limit(10).all()
         if res is None:
             res = []
         return res
