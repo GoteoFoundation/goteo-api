@@ -121,7 +121,7 @@ def requires_auth(f):
             return f(*args, **kwargs)
 
         auth = request.authorization
-        msg = 'You need a key in order to use our API. Please contact us and we will provide you one!'
+        msg = 'You need a key in order to use our API. Get one on www.goteo.org!'
         if auth:
             ok = check_auth(auth.username, auth.password)
             if(ok is True):

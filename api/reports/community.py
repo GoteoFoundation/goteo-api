@@ -2,7 +2,7 @@
 
 import time
 
-from flask.ext.restful import Resource, fields
+from flask.ext.restful import fields
 from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
 from sqlalchemy.orm.exc import NoResultFound
@@ -16,7 +16,7 @@ from api.models import Invest, InvestNode, User, Category, Message, Project, Use
 from api.models import Location, LocationItem
 from api.decorators import *
 
-from api.reports.base import Base, Response
+from api.base_endpoint import Base, Response
 
 # DEBUG
 if config.debug:
@@ -163,20 +163,7 @@ class CommunityAPI(Base):
             filters4.append(ProjectCategory.category == category_id)
         if args['location']:
             # Filtra por la localización del usuario
-            location = args['location'].split(",")
-            if len(location) != 3:
-                return bad_request("Invalid parameter: location")
-
-            from geopy.distance import VincentyDistance
-            latitude, longitude, radius = location
-
-            radius = int(radius)
-            if radius > 500 or radius < 0:
-                return bad_request("Radius must be a value between 0 and 500 Km")
-
-            locations = db.session.query(Location.id, Location.lat, Location.lon).all()
-            locations = filter(lambda l: VincentyDistance((latitude, longitude), (l[1], l[2])).km <= radius, locations)
-            locations_ids = map(lambda l: int(l[0]), locations)
+            locations_ids = self.location_ids(**args['location'])
 
             if locations_ids == []:
                 return bad_request("No locations in the specified range")

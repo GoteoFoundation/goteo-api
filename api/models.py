@@ -12,13 +12,14 @@ class User(db.Model):
 
     id = db.Column('id', String(50), primary_key=True)
     name = db.Column('name', String(100))
+    # email = db.Column('email', String(100))
     active = db.Column('active', Integer)
     hide = db.Column('hide', Integer)
     node = db.Column('node', String(50), db.ForeignKey('node.id'))
     # email = db.Column('email', String(255))
 
     def __repr__(self):
-        return '<User %s: %s>' % (self.name, self.email)
+        return '<User %s: %r>' % (self.id, self.name)
 
 
 class UserRole(db.Model):
@@ -266,8 +267,8 @@ class Location(db.Model):
     region = db.Column('region', String(255))
     country = db.Column('country', String(255))
     country_code = db.Column('country_code', String(2))
-    lon = db.Column('longitude', Float)
-    lat = db.Column('latitude', Float)
+    longitude = db.Column('longitude', Float)
+    latitude = db.Column('latitude', Float)
     valid = db.Column('valid', Integer)
     modified = db.Column('modified', DateTime)
 

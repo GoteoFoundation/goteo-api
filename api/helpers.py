@@ -7,7 +7,7 @@ from flask import jsonify
 #Error handling
 def bad_request(message, code = 400):
     "Error handling json response"
-    resp = jsonify(error=code, message=str(message))
+    resp = jsonify(message=str(message))
     resp.status_code = code
     return resp
 

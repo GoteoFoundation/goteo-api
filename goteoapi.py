@@ -14,6 +14,7 @@ from api.decorators import *
 @app.errorhandler(403)
 @app.errorhandler(404)
 @app.errorhandler(410)
+@app.errorhandler(500)
 def page_not_found(e):
      resp = jsonify(error=e.code, message=str(e), links=config.links)
      resp.status_code = e.code
@@ -39,8 +40,10 @@ def index():
 
 #Add modules
 from api.reports_endpoint import api_reports
+from api.users_endpoint import api_users
 
 app.register_blueprint(api_reports)
+app.register_blueprint(api_users)
 
 
 #This part will not be executed under uWSGI module (nginx)

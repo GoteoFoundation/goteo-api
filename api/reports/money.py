@@ -13,7 +13,7 @@ from api import db
 from api.models import Project, ProjectCategory, Category, Invest, Call, InvestNode, Location, LocationItem
 from api.decorators import *
 
-from api.reports.base import Base, Response
+from api.base_endpoint import Base, Response
 
 # DEBUG
 if config.debug:
@@ -90,6 +90,7 @@ class MoneyAPI(Base):
             filters2.append(InvestNode.invest_node.in_(args['node']))
             # FIXME: Call.node?
         if args['category']:
+            #TODO: category debe ser un string? en ingles? o el id de categoria?
             try:
                 category_id = db.session.query(Category.id).filter(Category.name == args['category']).one()
                 category_id = category_id[0]
@@ -102,20 +103,7 @@ class MoneyAPI(Base):
             filters2.append(ProjectCategory.category == category_id)
             # no afecta a filters3
         if args['location']:
-            location = args['location'].split(",")
-            if len(location) != 3:
-                return bad_request("Invalid parameter: location")
-
-            from geopy.distance import VincentyDistance
-            latitude, longitude, radius = location
-
-            radius = int(radius)
-            if radius > 500 or radius < 0:
-                return bad_request("Radius must be a value between 0 and 500 Km")
-
-            locations = db.session.query(Location.id, Location.lat, Location.lon).all()
-            locations = filter(lambda l: VincentyDistance((latitude, longitude), (l[1], l[2])).km <= radius, locations)
-            locations_ids = map(lambda l: int(l[0]), locations)
+            locations_ids = self.location_ids(**args['location'])
 
             if locations_ids == []:
                 return bad_request("No locations in the specified range")

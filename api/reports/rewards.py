@@ -14,7 +14,8 @@ from api.models import Category, Invest, Reward, InvestReward, InvestNode, Proje
 from api.models import Location, LocationItem
 from api.decorators import *
 
-from api.reports.base import Base, Response
+from api.base_endpoint import Base, Response
+
 
 # DEBUG
 if config.debug:
@@ -106,20 +107,7 @@ class RewardsAPI(Base):
             # Filtra por la localización del usuario que elige la recompensa
             # No hace falta filters2, ya que ese filtra por proyecto, no por usuario
 
-            location = args['location'].split(",")
-            if len(location) != 3:
-                return bad_request("Invalid parameter: location")
-
-            from geopy.distance import VincentyDistance
-            latitude, longitude, radius = location
-
-            radius = int(radius)
-            if radius > 500 or radius < 0:
-                return bad_request("Radius must be a value between 0 and 500 Km")
-
-            locations = db.session.query(Location.id, Location.lat, Location.lon).all()
-            locations = filter(lambda l: VincentyDistance((latitude, longitude), (l[1], l[2])).km <= radius, locations)
-            locations_ids = map(lambda l: int(l[0]), locations)
+            locations_ids = self.location_ids(**args['location'])
 
             if locations_ids == []:
                 return bad_request("No locations in the specified range")

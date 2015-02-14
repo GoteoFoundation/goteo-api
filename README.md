@@ -30,28 +30,29 @@ Para instalar el entorno local hay 2 opciones:
 
 Una vez instaladas las dependencias, hay que configurar los datos de conexión a la BD:
 ```bash
-cp config/config.py.example config/config.py
+cp config/settings.py.example config/settings.py
 ```
 
-Editar el archivo `config.py` con los datos correctos.
+Editar el archivo `settings.py` con los datos correctos.
 
 ### Ejecución
 
 1. Si se ha usado el método 1, entonces solo nos queda activar el virtualenvironment y ejecutar la API:
     ```bash
     workon goteoapi
-    ./goteoapi-restful.py
+    ./goteoapi.py
     ```
 
 2. En el caso del método 2 hay que ejectutar:
     ```bash
     source virtualenv/bin/activate
-    ./goteoapi-restful.py
+    ./goteoapi.py
     ```
 
 Esto por defecto pone a la escucha un servidor web en http://0.0.0.0:5000/
 
 ## Ejemplos de uso
+*NOTA:* POR REVISAR!
 
 Lista de proyectos:
 
@@ -85,7 +86,7 @@ Error:
 
     {
         "message": "Bad Request",
-        "status": 400
+        "error": 400
     }
 
 ## Notas

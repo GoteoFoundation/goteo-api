@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+    # -*- coding: utf-8 -*-
 
 import time
 from flask.ext.restful import fields
@@ -13,7 +13,8 @@ from api.models import Blog, Category, Invest, Message, Post, Project, ProjectCa
 from api.models import Location, LocationItem
 from api.decorators import *
 
-from api.reports.base import Base, Response
+from api.base_endpoint import Base, Response
+
 
 # DEBUG
 if config.debug:
@@ -107,20 +108,7 @@ class ProjectsAPI(Base):
             filters.append(Project.id == ProjectCategory.project)
             filters.append(ProjectCategory.category == category_id)
         if args['location']:
-            location = args['location'].split(",")
-            if len(location) != 3:
-                return bad_request("Invalid parameter: location")
-
-            from geopy.distance import VincentyDistance
-            latitude, longitude, radius = location
-
-            radius = int(radius)
-            if radius > 500 or radius < 0:
-                return bad_request("Radius must be a value between 0 and 500 Km")
-
-            locations = db.session.query(Location.id, Location.lat, Location.lon).all()
-            locations = filter(lambda l: VincentyDistance((latitude, longitude), (l[1], l[2])).km <= radius, locations)
-            locations_ids = map(lambda l: int(l[0]), locations)
+            locations_ids = self.location_ids(**args['location'])
 
             if locations_ids == []:
                 return bad_request("No locations in the specified range")
@@ -193,7 +181,7 @@ class ProjectsAPI(Base):
     def _finished(self, f_succ_finished = []):
         f_succ_finished.append(Project.status.in_([Project.STATUS_FUNDED,
                                                    Project.STATUS_FULLFILED]))
-        print(f_succ_finished)
+        # print(f_succ_finished)
         res = db.session.query(Project).filter(*f_succ_finished).count()
         if res is None:
             res = 0

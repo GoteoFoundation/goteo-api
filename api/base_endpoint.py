@@ -2,8 +2,27 @@
 #
 
 import time
+from dateutil.parser import *
 from flask import jsonify
 from flask.ext.restful import Resource, reqparse
+from helpers import *
+
+from api import db
+from api.models import Location
+
+def date_sanitizer(data):
+    d = parse(data)
+    return str(d.date())
+
+def location_sanitizer(data):
+    location = data.split(",")
+    if len(location) != 3:
+        raise Exception("Invalid parameter location. 3 parameters required: latitude,longitude,radius(km)")
+
+    radius = int(location[2])
+    if radius > 500 or radius < 0:
+        raise Exception("Radius must be a value between 0 and 500 Km")
+    return {'latitude':location[0], 'longitude':location[1], 'radius':radius}
 
 
 class Response():
@@ -18,10 +37,11 @@ class Response():
             if var in self.resource_fields:
                 self.ret[var] = value
 
-        self.ret['filters'] = {}
-        for k, v in filters:
-            if v is not None:
-                self.ret['filters'][k] = v
+        if filters:
+            self.ret['meta'] = {}
+            for k, v in filters:
+                if v is not None:
+                    self.ret['meta'][k] = v
 
         self.time_start = starttime
 
@@ -40,15 +60,31 @@ class Base(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('from_date', type=str)
-        self.reqparse.add_argument('to_date', type=str)
+        self.reqparse.add_argument('from_date', type=date_sanitizer)
+        self.reqparse.add_argument('to_date', type=date_sanitizer)
         self.reqparse.add_argument('node', type=str, action='append')
         self.reqparse.add_argument('project', type=str, action='append')
         self.reqparse.add_argument('category', type=str)
-        self.reqparse.add_argument('location', type=str)
+        self.reqparse.add_argument('location', type=location_sanitizer)
+
         super(Base, self).__init__()
 
-    # Swagger specification
+    #Get location ids
+    ## TODO:
+    #  Do a first "cut" before getting results from the mysql table
+    #  as described here:
+    #  http://www.movable-type.co.uk/scripts/latlong-db.html
+    #
+    def location_ids(self, latitude, longitude, radius):
+        from geopy.distance import VincentyDistance
+
+        locations = db.session.query(Location.id, Location.latitude, Location.longitude).all()
+        locations = filter(lambda l: VincentyDistance((latitude, longitude), (l[1], l[2])).km <= radius, locations)
+        location_ids = map(lambda l: int(l[0]), locations)
+
+        return location_ids
+
+    # For Swagger specification
     RESPONSE_MESSAGES = [
         {
             "code": 400,
@@ -96,7 +132,7 @@ class Base(Resource):
         {
             "paramType": "query",
             "name": "location",
-            "description": 'Filter by project location (Lat,lon,Radius in Km)',
+            "description": 'Filter by project location (Latitude,longitude,Radius in Km)',
             "required": False,
             "dataType": "string"
         }
