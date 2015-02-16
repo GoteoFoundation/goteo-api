@@ -3,6 +3,17 @@ import time
 from api import app
 from flask import jsonify
 
+def image_url(img, size='large'):
+    """
+    @size 'thumb', 'medium', 'large'
+    """
+    sizes = {'thumb' : '56x56c', 'medium' : '192x192c', 'large' : '512x512c'}
+
+    s = sizes[size] if size in sizes else sizes['thumb']
+
+    i = img if img is not None else 'la_gota.png'
+
+    return 'http://goteo.org/img/' + s + '/' + i
 
 #Error handling
 def bad_request(message, code = 400):

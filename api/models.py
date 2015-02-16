@@ -2,6 +2,9 @@
 
 #from flask.ext.sqlalchemy import Pagination
 from sqlalchemy import Integer, String, Text, Date, DateTime, Float
+from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
+from sqlalchemy.orm.exc import NoResultFound
+from api.helpers import image_url
 
 from api import db
 
@@ -12,14 +15,38 @@ class User(db.Model):
 
     id = db.Column('id', String(50), primary_key=True)
     name = db.Column('name', String(100))
+    avatar = db.Column('avatar', String(255))
     # email = db.Column('email', String(100))
     active = db.Column('active', Integer)
     hide = db.Column('hide', Integer)
     node = db.Column('node', String(50), db.ForeignKey('node.id'))
+    date_created = db.Column('created', Date)
+    date_updated = db.Column('modified', Date)
     # email = db.Column('email', String(255))
 
     def __repr__(self):
         return '<User %s: %r>' % (self.id, self.name)
+
+    @hybrid_property
+    def profile_image_url(self):
+        return image_url(self.avatar)
+
+    @hybrid_method
+    def get(self, id):
+        """Get a valid user form id"""
+        try:
+            return self.query.filter(User.id == id, User.hide == 0).one()
+        except NoResultFound:
+            return None
+
+    @hybrid_method
+    def list(self, page = 0, limit = 10):
+        """Get a list of valid users"""
+        #TODO pagination
+        try:
+            return self.query.filter(User.hide == 0).limit(limit)
+        except NoResultFound:
+            return []
 
 
 class UserRole(db.Model):

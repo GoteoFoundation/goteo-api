@@ -89,6 +89,10 @@ class Base(Resource):
         {
             "code": 400,
             "message": "Invalid parameters"
+        },
+        {
+            "code": 404,
+            "message": "Item not found"
         }
     ]
 
