@@ -36,7 +36,7 @@ def index():
     func_list = {}
     for rule in app.url_map.iter_rules():
         # Filter out rules non Goteo-api rules
-        if "GET" in rule.methods and rule.endpoint.startswith('api_') and not rule.rule.endswith('/') or rule.rule == '/':
+        if "GET" in rule.methods and rule.endpoint.startswith('api_'):
             func_list[rule.rule] = app.view_functions[rule.endpoint].__doc__
     return jsonify(version=config.version, message=config.description + ' v' + str(config.version), endpoints=func_list, links=config.links)
 

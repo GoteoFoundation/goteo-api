@@ -13,7 +13,7 @@ from api import db
 from api.models import Project, ProjectCategory, Category, Invest, Call, InvestNode, LocationItem
 from api.decorators import *
 
-from api.base_endpoint import BaseList as Base, Response
+from api.base_endpoint import BaseList, Response
 
 # DEBUG
 if config.debug:
@@ -48,15 +48,15 @@ class MoneyResponse(Response):
     required = resource_fields.keys()
 
 
-class MoneyAPI(Base):
+class MoneyAPI(BaseList):
     """Get Money Statistics"""
 
     @swagger.operation(
         notes='Money report',
         nickname='money',
         responseClass=MoneyResponse.__name__,
-        parameters=Base.INPUT_FILTERS,
-        responseMessages=Base.RESPONSE_MESSAGES
+        parameters=BaseList.INPUT_FILTERS,
+        responseMessages=BaseList.RESPONSE_MESSAGES
     )
     @requires_auth
     @ratelimit()
