@@ -2,11 +2,14 @@
 #
 
 import time
+from datetime import datetime
 from dateutil.parser import *
+
 from flask import jsonify
 from flask.ext.restful import Resource, reqparse
 from helpers import *
 
+from config import config
 from api import db
 from api.models import Location
 
@@ -24,12 +27,17 @@ def location_sanitizer(data):
         raise Exception("Radius must be a value between 0 and 500 Km")
     return {'latitude':location[0], 'longitude':location[1], 'radius':radius}
 
+def limit_sanitizer(limit):
+    l = int(limit)
+    if(l > 50):
+        l = 50
+    return l
 
 class Response():
     """Base response for Reports Endpoints"""
     resource_fields = {}
 
-    def __init__(self, attributes = {}, filters = {}, starttime = 0):
+    def __init__(self, attributes = {}, filters = {}, total = 0, starttime = 0):
         self.ret = {}
         for var in self.resource_fields.keys():
             self.ret[var] = None
@@ -37,14 +45,19 @@ class Response():
             if var in self.resource_fields:
                 self.ret[var] = value
 
+        meta = {}
         if filters:
-            self.ret['meta'] = {}
             for k, v in filters:
                 if v is not None:
-                    self.ret['meta'][k] = v
+                    meta[k] = v
+        if total:
+            meta['total'] = int(total)
+
+        if meta:
+            self.ret['meta'] = meta
 
         self.time_start = starttime
-
+        self.ret['date'] = utc_from_local( datetime.utcnow() )
 
     def set(self, var, value):
         self.ret[var] = value;
@@ -54,9 +67,24 @@ class Response():
             self.ret['time-elapsed'] = time.time() - self.time_start
         return jsonify(self.ret)
 
+class BaseItem(Resource):
+    """Base class for individual enpoint reports"""
 
-class Base(Resource):
-    """Base class for enpoint reports"""
+    def __init__(self):
+        super(BaseItem, self).__init__()
+
+    # For Swagger specification
+    RESPONSE_MESSAGES = [
+        {
+            "code": 404,
+            "message": "Item not found"
+        }
+    ]
+
+    INPUT_FILTERS = []
+
+class BaseList(Resource):
+    """Base class for list enpoint reports"""
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
@@ -66,8 +94,10 @@ class Base(Resource):
         self.reqparse.add_argument('project', type=str, action='append')
         self.reqparse.add_argument('category', type=str)
         self.reqparse.add_argument('location', type=location_sanitizer)
+        self.reqparse.add_argument('page', type=int, default=0)
+        self.reqparse.add_argument('limit', type=limit_sanitizer, default=10)
 
-        super(Base, self).__init__()
+        super(BaseList, self).__init__()
 
     #Get location ids
     ## TODO:
@@ -139,6 +169,20 @@ class Base(Resource):
             "description": 'Filter by project location (Latitude,longitude,Radius in Km)',
             "required": False,
             "dataType": "string"
-        }
+        },
+        {
+            "paramType": "query",
+            "name": "page",
+            "description": 'Page number (starting at 1) if the result can be paginated',
+            "required": False,
+            "dataType": "integer"
+        },
+        {
+            "paramType": "query",
+            "name": "limit",
+            "description": 'Page limit (maximum 50 results, defaults to 10) if the result can be paginated',
+            "required": False,
+            "dataType": "integer"
+        },
 
     ]

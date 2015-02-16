@@ -13,10 +13,10 @@ from config import config
 from api import db
 
 from api.models import Invest, InvestNode, User, Category, Message, Project, UserInterest, UserRole, ProjectCategory, Call
-from api.models import Location, LocationItem
+from api.models import LocationItem
 from api.decorators import *
 
-from api.base_endpoint import Base, Response
+from api.base_endpoint import BaseList as Base, Response
 
 # DEBUG
 if config.debug:

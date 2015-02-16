@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
 import time
-from api import app
+import pytz
+
 from flask import jsonify
+
+from config import config
+from api import app
 
 def image_url(img, size='large'):
     """
+    Goteo image urls
     @size 'thumb', 'medium', 'large'
     """
     sizes = {'thumb' : '56x56c', 'medium' : '192x192c', 'large' : '512x512c'}
@@ -15,16 +20,23 @@ def image_url(img, size='large'):
 
     return 'http://goteo.org/img/' + s + '/' + i
 
+def utc_from_local(date_time, local_tz=None):
+    assert date_time.__class__.__name__ == 'datetime'
+    if local_tz is None:
+        local_tz = pytz.timezone(config.timezone) # eg, "Europe/London"
+    local_time = local_tz.localize(date_time)
+    return local_time
+
 #Error handling
 def bad_request(message, code = 400):
-    "Error handling json response"
+    """Error handling json response"""
     resp = jsonify(message=str(message))
     resp.status_code = code
     return resp
 
 # Generic percentage
 def percent(number, base=None):
-    "Porcentaje en base a un total"
+    """Porcentaje en base a un total"""
     if base is None:
         return 0
     if base == 0:

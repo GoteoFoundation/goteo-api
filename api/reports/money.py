@@ -10,10 +10,10 @@ from sqlalchemy.orm.exc import NoResultFound
 from config import config
 
 from api import db
-from api.models import Project, ProjectCategory, Category, Invest, Call, InvestNode, Location, LocationItem
+from api.models import Project, ProjectCategory, Category, Invest, Call, InvestNode, LocationItem
 from api.decorators import *
 
-from api.base_endpoint import Base, Response
+from api.base_endpoint import BaseList as Base, Response
 
 # DEBUG
 if config.debug:

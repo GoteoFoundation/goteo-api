@@ -4,7 +4,6 @@ import time
 
 from flask.ext.restful import fields, marshal
 from flask_restful_swagger import swagger
-from sqlalchemy.orm.exc import NoResultFound
 
 from config import config
 
@@ -12,7 +11,7 @@ from api import db
 from api.models import User
 from api.decorators import *
 
-from api.base_endpoint import Base, Response
+from api.base_endpoint import BaseItem, BaseList, Response
 
 # DEBUG
 if config.debug:
@@ -26,7 +25,7 @@ class UserResponse(Response):
     resource_fields = {
         "id"         : fields.String,
         "name"         : fields.String,
-        "date_created"         : fields.DateTime(dt_format='rfc822'),
+        "date_created"         : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
         "profile_image_url"         : fields.String,
     }
 
@@ -63,7 +62,7 @@ class UsersListResponse(Response):
     required = resource_fields.keys()
 
 
-class UsersListAPI(Base):
+class UsersListAPI(BaseList):
     """Get User list"""
 
 
@@ -71,21 +70,23 @@ class UsersListAPI(Base):
         notes='Users list',
         nickname='money',
         responseClass=UsersListResponse.__name__,
-        parameters=Base.INPUT_FILTERS,
-        responseMessages=Base.RESPONSE_MESSAGES
+        parameters=BaseList.INPUT_FILTERS,
+        responseMessages=BaseList.RESPONSE_MESSAGES
     )
     @requires_auth
     @ratelimit()
     def get(self):
         time_start = time.time()
+        args = self.reqparse.parse_args()
         items = []
-        for u in User.list():
+        for u in User.list(args['page'], args['limit']):
             items.append( marshal(u, UserResponse.resource_fields) )
 
         res = UsersListResponse(
             starttime = time_start,
-            #TODO: limitation
-            attributes = {'items' : items}
+            attributes = {'items' : items},
+            filters = args.items(),
+            total = User.total()
         )
         if items == []:
             return bad_request('No users to list', 404)
@@ -95,7 +96,7 @@ class UsersListAPI(Base):
 
 
 
-class UserAPI(Base):
+class UserAPI(BaseItem):
     """Get User Details"""
 
 
@@ -103,8 +104,7 @@ class UserAPI(Base):
         notes='User profile',
         nickname='money',
         responseClass=UserResponse.__name__,
-        parameters=Base.INPUT_FILTERS,
-        responseMessages=Base.RESPONSE_MESSAGES
+        responseMessages=BaseItem.RESPONSE_MESSAGES
     )
     @requires_auth
     @ratelimit()

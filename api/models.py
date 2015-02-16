@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 #from flask.ext.sqlalchemy import Pagination
-from sqlalchemy import Integer, String, Text, Date, DateTime, Float
+from sqlalchemy import func, Integer, String, Text, Date, DateTime, Float
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
-from sqlalchemy.orm.exc import NoResultFound
-from api.helpers import image_url
-
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from api.helpers import image_url, utc_from_local
+from sqlalchemy import asc
 from api import db
 
 
@@ -20,8 +20,8 @@ class User(db.Model):
     active = db.Column('active', Integer)
     hide = db.Column('hide', Integer)
     node = db.Column('node', String(50), db.ForeignKey('node.id'))
-    date_created = db.Column('created', Date)
-    date_updated = db.Column('modified', Date)
+    created = db.Column('created', Date)
+    updated = db.Column('modified', Date)
     # email = db.Column('email', String(255))
 
     def __repr__(self):
@@ -31,22 +31,41 @@ class User(db.Model):
     def profile_image_url(self):
         return image_url(self.avatar)
 
+    @hybrid_property
+    def date_created(self):
+        return utc_from_local(self.created)
+
+    @hybrid_property
+    def date_updated(self):
+        return utc_from_local(self.updated)
+
     @hybrid_method
     def get(self, id):
         """Get a valid user form id"""
         try:
-            return self.query.filter(User.id == id, User.hide == 0).one()
+            return self.query.filter(User.id == id, User.hide == 0, User.active == 1).one()
         except NoResultFound:
             return None
 
     @hybrid_method
     def list(self, page = 0, limit = 10):
         """Get a list of valid users"""
-        #TODO pagination
         try:
-            return self.query.filter(User.hide == 0).limit(limit)
+            return self.query.filter(User.hide == 0, User.active == 1).order_by(asc(User.id)).offset(page * limit).limit(limit)
         except NoResultFound:
             return []
+
+    @hybrid_method
+    def total(self):
+        """Returns the total number of valid users"""
+        try:
+            # return self.query.filter(User.hide == 0, User.active == 1).count() #inneficient in MySQL
+            count = db.session.query(func.count('*')).filter(User.hide == 0, User.active == 1).scalar()
+            if count is None:
+                count = 0
+            return count
+        except MultipleResultsFound:
+            return 0
 
 
 class UserRole(db.Model):

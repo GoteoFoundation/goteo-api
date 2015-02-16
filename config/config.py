@@ -33,6 +33,13 @@ if hasattr(settings, 'description'):
 else:
 	description = 'Goteo.org Api'
 
+#Timezone used in Goteo database
+if hasattr(settings, 'timezone'):
+	timezone = settings.timezone
+else:
+	# timezone = 'US/Eastern'
+	timezone = 'Europe/Madrid'
+
 # Some usefull links
 if hasattr(settings, 'links'):
 	links = settings.links
