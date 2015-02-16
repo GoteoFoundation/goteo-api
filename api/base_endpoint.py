@@ -2,14 +2,12 @@
 #
 
 import time
-from datetime import datetime
 from dateutil.parser import *
 
 from flask import jsonify
 from flask.ext.restful import Resource, reqparse
 from helpers import *
 
-from config import config
 from api import db
 from api.models import Location
 
@@ -57,7 +55,8 @@ class Response():
             self.ret['meta'] = meta
 
         self.time_start = starttime
-        self.ret['date'] = utc_from_local( datetime.utcnow() )
+        # If debug?
+        # self.ret['date'] = utc_from_local( datetime.utcnow() )
 
     def set(self, var, value):
         self.ret[var] = value;

@@ -3,7 +3,7 @@
 
 from flask import jsonify
 from flask_restful_swagger import swagger
-
+from flask.ext.restful.utils import cors
 from config import config
 from api import app
 
@@ -15,6 +15,7 @@ from api.decorators import *
 @app.errorhandler(404)
 @app.errorhandler(410)
 @app.errorhandler(500)
+@cors.crossdomain(origin='*')
 def page_not_found(e):
      resp = jsonify(error=e.code, message=str(e), links=config.links)
      resp.status_code = e.code
@@ -28,6 +29,7 @@ def page_not_found(e):
 @app.route('/', endpoint='api_home')
 @requires_auth
 @ratelimit()
+@cors.crossdomain(origin='*')
 def index():
     """API Welcome. All the available endpoints of the API"""
 

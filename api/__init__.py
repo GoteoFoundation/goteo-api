@@ -3,6 +3,7 @@
 from flask import Flask
 from flask_restful_swagger import swagger
 from flask.ext.restful import Api
+from flask.ext.restful.utils import cors
 from flask.ext.sqlalchemy import SQLAlchemy
 
 from config import config
@@ -26,4 +27,9 @@ if hasattr(config, 'debug'):
 
 api = swagger.docs(Api(app), apiVersion=config.version, description=config.description)
 #api = Api(app)
+
+#Add CORS wide config
+api.decorators=[cors.crossdomain(origin='*')]
+
 db = SQLAlchemy(app)
+

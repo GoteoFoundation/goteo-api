@@ -76,6 +76,9 @@ class UsersListAPI(BaseList):
     @requires_auth
     @ratelimit()
     def get(self):
+        """Get the users list
+        <a href="http://developers.goteo.org/users#list">developers.goteo.org/users#list</a>
+        """
         time_start = time.time()
         args = self.reqparse.parse_args()
         items = []
@@ -109,6 +112,9 @@ class UserAPI(BaseItem):
     @requires_auth
     @ratelimit()
     def get(self, id):
+        """Get a user details
+        <a href="http://developers.goteo.org/users#user">developers.goteo.org/users#user</a>
+        """
         u = User.get(id)
         time_start = time.time()
         res = UserCompleteResponse(

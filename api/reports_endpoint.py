@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from flask import Blueprint, jsonify
+from flask.ext.restful.utils import cors
+
 from api.reports.money import MoneyAPI
 from api.reports.projects import ProjectsAPI
 from api.reports.community import CommunityAPI
@@ -16,6 +18,7 @@ api_reports = Blueprint('api_reports', __name__)
 @api_reports.route('/reports', endpoint='main')
 @requires_auth
 @ratelimit()
+@cors.crossdomain(origin='*')
 def reports():
     """All available endpoints for Statistics"""
     func_list = {}
