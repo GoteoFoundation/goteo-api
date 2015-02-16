@@ -1,13 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+import flask
 from flask import jsonify
 from flask_restful_swagger import swagger
-from flask.ext.restful.utils import cors
 from config import config
 from api import app
 
 from api.decorators import *
+
+@app.after_request
+def add_cors(resp):
+    """ Ensure all responses have the CORS headers. This ensures any failures are also accessible
+        by the client. """
+    resp.headers['Access-Control-Allow-Origin'] = flask.request.headers.get('Origin','*')
+    resp.headers['Access-Control-Allow-Credentials'] = 'true'
+    resp.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS, GET'
+    resp.headers['Access-Control-Allow-Headers'] = flask.request.headers.get(
+        'Access-Control-Request-Headers', 'Authorization' )
+    # set low for debugging
+    if app.debug:
+        resp.headers['Access-Control-Max-Age'] = '1'
+    return resp
 
 @app.errorhandler(400)
 @app.errorhandler(401)
@@ -15,7 +28,6 @@ from api.decorators import *
 @app.errorhandler(404)
 @app.errorhandler(410)
 @app.errorhandler(500)
-@cors.crossdomain(origin='*')
 def page_not_found(e):
      resp = jsonify(error=e.code, message=str(e), links=config.links)
      resp.status_code = e.code
@@ -26,10 +38,9 @@ def page_not_found(e):
 # =======
 
 # HOME
-@app.route('/', endpoint='api_home')
+@app.route('/', endpoint='api_home', methods=['GET', 'OPTIONS'])
 @requires_auth
 @ratelimit()
-@cors.crossdomain(origin='*')
 def index():
     """API Welcome. All the available endpoints of the API"""
 

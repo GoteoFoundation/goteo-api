@@ -3,7 +3,6 @@
 
 import time
 from dateutil.parser import *
-
 from flask import jsonify
 from flask.ext.restful import Resource, reqparse
 from helpers import *
@@ -71,6 +70,9 @@ class BaseItem(Resource):
 
     def __init__(self):
         super(BaseItem, self).__init__()
+
+    def option(self):
+        pass
 
     # For Swagger specification
     RESPONSE_MESSAGES = [

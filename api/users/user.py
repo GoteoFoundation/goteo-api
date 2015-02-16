@@ -10,7 +10,6 @@ from config import config
 from api import db
 from api.models import User
 from api.decorators import *
-
 from api.base_endpoint import BaseItem, BaseList, Response
 
 # DEBUG
@@ -68,7 +67,7 @@ class UsersListAPI(BaseList):
 
     @swagger.operation(
         notes='Users list',
-        nickname='money',
+        nickname='users',
         responseClass=UsersListResponse.__name__,
         parameters=BaseList.INPUT_FILTERS,
         responseMessages=BaseList.RESPONSE_MESSAGES
@@ -102,10 +101,9 @@ class UsersListAPI(BaseList):
 class UserAPI(BaseItem):
     """Get User Details"""
 
-
     @swagger.operation(
         notes='User profile',
-        nickname='money',
+        nickname='user',
         responseClass=UserResponse.__name__,
         responseMessages=BaseItem.RESPONSE_MESSAGES
     )
