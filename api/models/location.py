@@ -24,10 +24,26 @@ class Location(db.Model):
         return '<Location(%d) %s, %s (%s)>' % (self.id, self.city, self.region, self.country)
 
 
+    #Get location ids
+    ## TODO:
+    #  Do a first "cut" before getting results from the mysql table
+    #  as described here:
+    #  http://www.movable-type.co.uk/scripts/latlong-db.html
+    #
+    @hybrid_method
+    def location_ids(self, latitude, longitude, radius):
+        from geopy.distance import VincentyDistance
+
+        locations = db.session.query(Location.id, Location.latitude, Location.longitude).all()
+        locations = filter(lambda l: VincentyDistance((latitude, longitude), (l[1], l[2])).km <= radius, locations)
+        location_ids = map(lambda l: int(l[0]), locations)
+
+        return location_ids
+
 class LocationItem(db.Model):
     __tablename__ = 'location_item'
 
-    id = db.Column('location', Integer)
+    id = db.Column('location', Integer, db.ForeignKey('location.id'))
     item = db.Column('item', String(50), primary_key=True)
     type = db.Column('type', String(7), primary_key=True)
     method = db.Column('method', String(50))

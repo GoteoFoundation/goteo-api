@@ -9,9 +9,10 @@ from sqlalchemy import and_, or_, desc
 
 from config import config
 from api import db
-from api.models.models import Blog, Category, Message, Post, Project, ProjectCategory
+from api.models.models import Blog, Category, Post, Project, ProjectCategory
+from api.models.message import Message
 from api.models.invest import Invest
-from api.models.location import LocationItem
+from api.models.location import Location, LocationItem
 from api.decorators import *
 
 from api.base_endpoint import BaseList as Base, Response
@@ -111,7 +112,7 @@ class ProjectsAPI(Base):
             filters.append(Project.id == ProjectCategory.project)
             filters.append(ProjectCategory.category == category_id)
         if args['location']:
-            locations_ids = self.location_ids(**args['location'])
+            locations_ids = Location.location_ids(**args['location'])
 
             if locations_ids == []:
                 return bad_request("No locations in the specified range")

@@ -12,7 +12,7 @@ from config import config
 from api import db
 from api.models.models import Category, Reward, Project, ProjectCategory
 from api.models.invest import Invest, InvestReward, InvestNode
-from api.models.location import LocationItem
+from api.models.location import Location, LocationItem
 from api.decorators import *
 
 from api.base_endpoint import BaseList as Base, Response
@@ -110,7 +110,7 @@ class RewardsAPI(Base):
             # Filtra por la localización del usuario que elige la recompensa
             # No hace falta filters2, ya que ese filtra por proyecto, no por usuario
 
-            locations_ids = self.location_ids(**args['location'])
+            locations_ids = Location.location_ids(**args['location'])
 
             if locations_ids == []:
                 return bad_request("No locations in the specified range")

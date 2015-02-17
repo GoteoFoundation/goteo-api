@@ -4,7 +4,11 @@ from sqlalchemy import func, Integer, String, Date, DateTime
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from api.helpers import image_url, utc_from_local
-from sqlalchemy import asc
+from sqlalchemy import asc, or_, and_, distinct
+
+from api.models.invest import Invest
+from api.models.message import Message
+from api.models.location import Location, LocationItem
 from api import db
 
 # User stuff
@@ -44,15 +48,69 @@ class User(db.Model):
     def filters(self):
         return [User.hide == 0, User.active == 1]
 
-    #Filters for table user
+    #Joins for table user
+    @hybrid_property
+    def joins(self):
+        return []
+
+    #Left Joins for table user
+    @hybrid_property
+    def outerjoins(self):
+        return []
+
+    # Getting filters for this models
     @hybrid_method
     def get_filters(self, **kwargs):
         filters = self.filters
-        if 'node' in kwargs:
-            filters.append(User.node == kwargs['node'])
+        # Filters by goteo node
+        if 'node' in kwargs and kwargs['node'] is not None:
+            filters.append(User.node.in_(kwargs['node']))
+        # Filters by "from date"
+        # counting users created after this date
+        if 'from_date' in kwargs and kwargs['from_date'] is not None:
+            filters.append(User.created >= kwargs['from_date'])
+        # Filters by "to date"
+        # counting users created before this date
+        if 'to_date' in kwargs and kwargs['to_date'] is not None:
+            filters.append(User.created <= kwargs['to_date'])
+        # Filters by "project"
+        # counting attached (invested or collaborated) to some project(s)
+        if 'project' in kwargs and kwargs['project'] is not None:
+            #TODO: solo usuarios que cuyo pago ha si "exitoso"
+            # adding users "invested in"
+            sub_invest = db.session.query(Invest.user).filter(Invest.project.in_(kwargs['project']))
+            # adding users "collaborated in"
+            sub_message = db.session.query(Message.user).filter(Message.project.in_(kwargs['project']))
+            filters.append(or_(User.id.in_(sub_invest), User.id.in_(sub_message)))
+        # filter by user interests
+        if 'category' in kwargs and kwargs['category'] is not None:
+            sub_interest = db.session.query(UserInterest.user).filter(UserInterest.interest.in_(kwargs['category']))
+            filters.append(User.id.in_(sub_interest))
+        #Filter by location
+        if 'location' in kwargs and kwargs['location'] is not None:
+            #location ids where to search
+            locations_ids = Location.location_ids(**kwargs['location'])
+            filters.append(LocationItem.type == 'user')
+            filters.append(LocationItem.id.in_(locations_ids))
+            filters.append(LocationItem.item==User.id)
 
         return filters
 
+    # Getting joins for this models
+    @hybrid_method
+    def get_joins(self, **kwargs):
+        joins = self.joins
+        # if 'location' in kwargs and kwargs['location'] is not None:
+        #     joins.append((LocationItem, LocationItem.item==User.id))
+        return joins
+
+    # Getting joins for this models
+    @hybrid_method
+    def get_outerjoins(self, **kwargs):
+        joins = self.outerjoins
+        # if 'project' in kwargs and kwargs['project'] is not None:
+        #     joins.append(Message)
+        return joins
 
     @hybrid_method
     def get(self, id):
@@ -71,6 +129,9 @@ class User(db.Model):
             limit = kwargs['limit'] if 'limit' in kwargs else 10
             page = kwargs['page'] if 'page' in kwargs else 0
             filters = list(self.get_filters(**kwargs))
+            joins = list(self.get_joins(**kwargs))
+            outerjoins = list(self.get_outerjoins(**kwargs))
+            # return self.query.filter(*filters).join(*joins).outerjoin(*outerjoins).order_by(asc(User.id)).offset(page * limit).limit(limit)
             return self.query.filter(*filters).order_by(asc(User.id)).offset(page * limit).limit(limit)
         except NoResultFound:
             return []
@@ -80,7 +141,10 @@ class User(db.Model):
         """Returns the total number of valid users"""
         try:
             filters = list(self.get_filters(**kwargs))
-            count = db.session.query(func.count('*')).filter(*filters).scalar()
+            joins = list(self.get_joins(**kwargs))
+            outerjoins = list(self.get_outerjoins(**kwargs))
+            # count = db.session.query(func.count(distinct(User.id))).filter(*filters).join(*joins).outerjoin(*outerjoins).scalar()
+            count = db.session.query(func.count(distinct(User.id))).filter(*filters).scalar()
             if count is None:
                 count = 0
             return count
@@ -104,13 +168,14 @@ class UserRole(db.Model):
 class UserApi(db.Model):
     __tablename__ = 'user_api'
 
-    user = db.Column('user_id', String(50), primary_key=True)
+    user = db.Column('user_id', String(50), db.ForeignKey('user.id'), primary_key=True)
     key = db.Column('key', String(50))
     expiration_date = db.Column('expiration_date', DateTime)
 
     def __repr__(self):
         return '<UserApi: %s %s (%s)>' % (self.user, self.key, self.expiration_date)
 
+# User interest
 class UserInterest(db.Model):
     __tablename__ = 'user_interest'
 

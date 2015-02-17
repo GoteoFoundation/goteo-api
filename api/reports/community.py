@@ -12,10 +12,11 @@ from config import config
 
 from api import db
 
-from api.models.models import Category, Message, Project, ProjectCategory, Call
+from api.models.models import Category, Project, ProjectCategory, Call
 from api.models.invest import Invest, InvestNode
+from api.models.message import Message
 from api.models.user import User, UserInterest, UserRole
-from api.models.location import LocationItem
+from api.models.location import Location, LocationItem
 from api.decorators import *
 
 from api.base_endpoint import BaseList as Base, Response
@@ -167,7 +168,7 @@ class CommunityAPI(Base):
             filters4.append(ProjectCategory.category == category_id)
         if args['location']:
             # Filtra por la localización del usuario
-            locations_ids = self.location_ids(**args['location'])
+            locations_ids = Location.location_ids(**args['location'])
 
             if locations_ids == []:
                 return bad_request("No locations in the specified range")

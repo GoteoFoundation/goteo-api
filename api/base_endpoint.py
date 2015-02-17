@@ -100,21 +100,6 @@ class BaseList(Resource):
 
         super(BaseList, self).__init__()
 
-    #Get location ids
-    ## TODO:
-    #  Do a first "cut" before getting results from the mysql table
-    #  as described here:
-    #  http://www.movable-type.co.uk/scripts/latlong-db.html
-    #
-    def location_ids(self, latitude, longitude, radius):
-        from geopy.distance import VincentyDistance
-
-        locations = db.session.query(Location.id, Location.latitude, Location.longitude).all()
-        locations = filter(lambda l: VincentyDistance((latitude, longitude), (l[1], l[2])).km <= radius, locations)
-        location_ids = map(lambda l: int(l[0]), locations)
-
-        return location_ids
-
     # For Swagger specification
     RESPONSE_MESSAGES = [
         {
@@ -131,7 +116,7 @@ class BaseList(Resource):
         {
             "paramType": "query",
             "name": "project",
-            "description": "Filter by individual project(s) separated by commas",
+            "description": "Filter by individual project(s). Multiple projects can be specified",
             "required": False,
             "dataType": "string",
             "allowMultiple": True
@@ -153,16 +138,16 @@ class BaseList(Resource):
         {
             "paramType": "query",
             "name": "node",
-            "description": 'Filter by individual node(s) separated by commas',
+            "description": 'Filter by individual node(s). Multiple nodes can be specified',
             "required": False,
             "dataType": "string"
         },
         {
             "paramType": "query",
             "name": "category",
-            "description": 'Filter by project category',
+            "description": 'Filter by project category. Multiple categories can be specified',
             "required": False,
-            "dataType": "string"
+            "dataType": "integer"
         },
         {
             "paramType": "query",
