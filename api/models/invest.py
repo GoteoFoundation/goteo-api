@@ -5,6 +5,8 @@ from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from api.helpers import image_url, utc_from_local
 from sqlalchemy import asc
+from api.models.location import Location, LocationItem
+from api.models.project import ProjectCategory
 from api import db
 
 class Invest(db.Model):
@@ -37,6 +39,53 @@ class Invest(db.Model):
 
     def __repr__(self):
         return '<Invest %d: %s (%d EUR)>' % (self.id, self.project, self.amount)
+
+    #Filters for this table
+    @hybrid_property
+    def filters(self):
+        return []
+
+    # Getting filters for this model
+    @hybrid_method
+    def get_filters(self, **kwargs):
+        filters = self.filters
+        if 'from_date' in kwargs and kwargs['from_date'] is not None:
+            filters.append(Invest.date_invested >= kwargs['from_date'])
+        if 'to_date' in kwargs and kwargs['to_date'] is not None:
+            filters.append(Invest.date_invested <= kwargs['to_date'])
+        if 'project' in kwargs and kwargs['project'] is not None:
+            filters.append(Invest.project.in_(kwargs['project']))
+        if 'node' in kwargs and kwargs['node'] is not None:
+            filters.append(Invest.id == InvestNode.invest_id)
+            filters.append(InvestNode.invest_node.in_(kwargs['node']))
+        if 'category' in kwargs and kwargs['category'] is not None:
+            filters.append(Invest.project == ProjectCategory.project)
+            filters.append(ProjectCategory.category.in_(kwargs['category']))
+
+        if 'location' in kwargs and kwargs['location'] is not None:
+            locations_ids = Location.location_ids(**kwargs['location'])
+            filters.append(Invest.user == LocationItem.item)
+            filters.append(LocationItem.type == 'user')
+            filters.append(LocationItem.id.in_(locations_ids))
+            # filters.append(LocationItem.locable==1)
+
+        return filters
+
+    @hybrid_method
+    def pledged_total(self, **kwargs):
+        """Total amount of money (€) raised by Goteo"""
+        try:
+            filters = list(self.get_filters(**kwargs))
+            filters.append(Invest.status.in_([Invest.STATUS_PENDING,
+                                              Invest.STATUS_CHARGED,
+                                              Invest.STATUS_PAID,
+                                              Invest.STATUS_RETURNED]))
+            total = db.session.query(func.sum(Invest.amount)).filter(*filters).scalar()
+            if total is None:
+                total = 0
+            return total
+        except MultipleResultsFound:
+            return 0
 
 
 class InvestNode(db.Model):

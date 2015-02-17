@@ -12,7 +12,8 @@ from config import config
 
 from api import db
 
-from api.models.models import Category, Project, ProjectCategory, Call
+from api.models.models import Category, Call
+from api.models.project import Project, ProjectCategory
 from api.models.invest import Invest, InvestNode
 from api.models.message import Message
 from api.models.user import User, UserInterest, UserRole
@@ -155,17 +156,12 @@ class CommunityAPI(Base):
             filters4.append(Message.user == User.id)
             filters4.append(User.node.in_(args['node']))
         if args['category']:
-            try:
-                category_id = db.session.query(Category.id).filter(Category.name == args['category']).one()
-                category_id = category_id[0]
-            except NoResultFound:
-                return bad_request("Invalid category")
 
             filters.append(Invest.project == ProjectCategory.project)
-            filters.append(ProjectCategory.category == category_id)
+            filters.append(ProjectCategory.category.in_(args['category']))
             # filters2 y filters3 no hacen uso
             filters4.append(Message.project == ProjectCategory.project)
-            filters4.append(ProjectCategory.category == category_id)
+            filters4.append(ProjectCategory.category.in_(args['category']))
         if args['location']:
             # Filtra por la localización del usuario
             locations_ids = Location.location_ids(**args['location'])

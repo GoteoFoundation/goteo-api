@@ -58,7 +58,7 @@ class User(db.Model):
     def outerjoins(self):
         return []
 
-    # Getting filters for this models
+    # Getting filters for this model
     @hybrid_method
     def get_filters(self, **kwargs):
         filters = self.filters

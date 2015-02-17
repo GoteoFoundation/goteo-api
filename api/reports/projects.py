@@ -9,7 +9,8 @@ from sqlalchemy import and_, or_, desc
 
 from config import config
 from api import db
-from api.models.models import Blog, Category, Post, Project, ProjectCategory
+from api.models.models import Blog, Category, Post
+from api.models.project import Project, ProjectCategory
 from api.models.message import Message
 from api.models.invest import Invest
 from api.models.location import Location, LocationItem
@@ -103,14 +104,8 @@ class ProjectsAPI(Base):
         if args['node']:
             filters.append(Project.node.in_(args['node']))
         if args['category']:
-            try:
-                category_id = db.session.query(Category.id).filter(Category.name == args['category']).one()
-                category_id = category_id[0]
-            except NoResultFound:
-                return bad_request("Invalid category")
-
             filters.append(Project.id == ProjectCategory.project)
-            filters.append(ProjectCategory.category == category_id)
+            filters.append(ProjectCategory.category.in_(args['category']))
         if args['location']:
             locations_ids = Location.location_ids(**args['location'])
 

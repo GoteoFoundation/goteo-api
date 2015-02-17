@@ -93,7 +93,8 @@ class BaseList(Resource):
         self.reqparse.add_argument('to_date', type=date_sanitizer)
         self.reqparse.add_argument('node', type=str, action='append')
         self.reqparse.add_argument('project', type=str, action='append')
-        self.reqparse.add_argument('category', type=str)
+        # TODO: buscar por nombre de categoria dependiendo de idioma
+        self.reqparse.add_argument('category', type=int, action='append')
         self.reqparse.add_argument('location', type=location_sanitizer)
         self.reqparse.add_argument('page', type=int, default=0)
         self.reqparse.add_argument('limit', type=limit_sanitizer, default=10)

@@ -10,7 +10,8 @@ from sqlalchemy import and_, or_, desc
 
 from config import config
 from api import db
-from api.models.models import Category, Reward, Project, ProjectCategory
+from api.models.models import Category, Reward
+from api.models.project import Project, ProjectCategory
 from api.models.invest import Invest, InvestReward, InvestNode
 from api.models.location import Location, LocationItem
 from api.decorators import *
@@ -96,16 +97,10 @@ class RewardsAPI(Base):
             filters.append(InvestNode.project_node.in_(args['node']))
             filters2.append(InvestNode.project_node.in_(args['node']))
         if args['category']:
-            try:
-                category_id = db.session.query(Category.id).filter(Category.name == args['category']).one()
-                category_id = category_id[0]
-            except NoResultFound:
-                return bad_request("Invalid category")
-
             filters.append(Invest.project == ProjectCategory.project)
             filters2.append(Project.id == ProjectCategory.project)
-            filters.append(ProjectCategory.category == category_id)
-            filters2.append(ProjectCategory.category == category_id)
+            filters.append(ProjectCategory.category.in_(args['category']))
+            filters2.append(ProjectCategory.category.in_(args['category']))
         if args['location']:
             # Filtra por la localización del usuario que elige la recompensa
             # No hace falta filters2, ya que ese filtra por proyecto, no por usuario

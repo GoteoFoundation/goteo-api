@@ -10,7 +10,8 @@ from sqlalchemy.orm.exc import NoResultFound
 from config import config
 
 from api import db
-from api.models.models import Project, ProjectCategory, Category, Call
+from api.models.models import Category, Call
+from api.models.project import Project, ProjectCategory
 from api.models.invest import Invest, InvestNode
 from api.models.location import Location, LocationItem
 from api.decorators import *
@@ -74,39 +75,39 @@ class MoneyAPI(BaseList):
         args = self.reqparse.parse_args()
 
         filters = []
-        filters2 = []  # para average_mincost
-        filters3 = []  # para call_pledged_amount
+        filter_mincost = []  # para average_mincost
+        filter_call = []  # para call_pledged_amount
         if args['from_date']:
             filters.append(Invest.date_invested >= args['from_date'])
-            filters2.append(Invest.date_invested >= args['from_date'])
-            filters3.append(Call.date_published >= args['from_date'])
+            filter_mincost.append(Invest.date_invested >= args['from_date'])
+            filter_call.append(Call.date_published >= args['from_date'])
         if args['to_date']:
             filters.append(Invest.date_invested <= args['to_date'])
-            filters2.append(Invest.date_invested <= args['to_date'])
-            filters3.append(Call.date_published <= args['to_date'])
+            filter_mincost.append(Invest.date_invested <= args['to_date'])
+            filter_call.append(Call.date_published <= args['to_date'])
         if args['project']:
             filters.append(Invest.project.in_(args['project']))
-            filters2.append(Project.id.in_(args['project']))
-            # no afecta a filters3
+            filter_mincost.append(Project.id.in_(args['project']))
+            # no afecta a filter_call
         if args['node']:
             filters.append(Invest.id == InvestNode.invest_id)
-            filters2.append(Project.id == InvestNode.project_id)
+            filter_mincost.append(Project.id == InvestNode.project_id)
             filters.append(InvestNode.invest_node.in_(args['node']))
-            filters2.append(InvestNode.invest_node.in_(args['node']))
+            filter_mincost.append(InvestNode.invest_node.in_(args['node']))
             # FIXME: Call.node?
         if args['category']:
             #TODO: category debe ser un string? en ingles? o el id de categoria?
-            try:
-                category_id = db.session.query(Category.id).filter(Category.name == args['category']).one()
-                category_id = category_id[0]
-            except NoResultFound:
-                return bad_request("Invalid category")
+            # try:
+            #     category_id = db.session.query(Category.id).filter(Category.name.in_(args['category'])).one()
+            #     category_id = category_id[0]
+            # except NoResultFound:
+            #     return bad_request("Invalid category")
 
             filters.append(Invest.project == ProjectCategory.project)
-            filters2.append(Invest.project == ProjectCategory.project)
-            filters.append(ProjectCategory.category == category_id)
-            filters2.append(ProjectCategory.category == category_id)
-            # no afecta a filters3
+            filters.append(ProjectCategory.category.in_(args['category']))
+            filter_mincost.append(Invest.project == ProjectCategory.project)
+            filter_mincost.append(ProjectCategory.category.in_(args['category']))
+            # no afecta a filter_call
         if args['location']:
             locations_ids = Location.location_ids(**args['location'])
 
@@ -116,14 +117,14 @@ class MoneyAPI(BaseList):
             filters.append(Invest.user == LocationItem.item)
             filters.append(LocationItem.type == 'user')
             filters.append(LocationItem.id.in_(locations_ids))
-            # no afecta a filters2 ni filters3
+            # no afecta a filter_mincost ni filter_call
 
 
         res = MoneyResponse(
             starttime = time_start,
             attributes = {
                 # Dinero comprometido: Suma recaudada por la plataforma
-                "pledged"                 : self._pledged(list(filters)),
+                "pledged"                 : Invest.pledged_total(**args),
                 # Dinero devuelto (en proyectos archivados)
                 "refunded"                : self._refunded(list(filters)),
                 #- Recaudado mediante PayPal
@@ -139,7 +140,7 @@ class MoneyAPI(BaseList):
                 #FIXME: No quitamos los devueltos?
                 "matchfund-amount"        : self._call_amount(list(filters)),
                 # Capital Riego de Goteo (fondos captados de instituciones y empresas destinados a la bolsa de Capital Riego https://goteo.org/service/resources)
-                "matchfundpledge-amount"  : self._call_pledged_amount(list(filters3)),
+                "matchfundpledge-amount"  : self._call_pledged_amount(list(filter_call)),
                 # Total 8% recaudado por Goteo
                 "fee-amount"              : self._fee_amount(list(filters)),
                 # Aporte medio por cofinanciador(micromecenas)
@@ -151,7 +152,7 @@ class MoneyAPI(BaseList):
                 # Coste mínimo medio por proyecto exitoso: Presupuesto mínimo medio por proyecto exitoso
                 # TODO: ¿parametro location?
                 # OJO: En reporting.php no calcula esto mismo
-                "average-minimum"         : self._average_mincost(list(filters2)),
+                "average-minimum"         : self._average_mincost(list(filter_mincost)),
                 # Recaudación media por proyecto exitoso ( financiado )
                 "average-received"        : self._average_received(list(filters)),
                 # Perc. medio de recaudación sobre el mínimo (número del dato anterior)
@@ -169,17 +170,6 @@ class MoneyAPI(BaseList):
 
         return res.response()
 
-
-
-    def _pledged(self, f_pledged=[]):
-        f_pledged.append(Invest.status.in_([Invest.STATUS_PENDING,
-                                            Invest.STATUS_CHARGED,
-                                            Invest.STATUS_PAID,
-                                            Invest.STATUS_RETURNED]))
-        comprometido = db.session.query(func.sum(Invest.amount)).filter(*f_pledged).scalar()
-        if comprometido is None:
-            comprometido = 0
-        return comprometido
 
     def _refunded(self, f_refunded=[]):
         f_refunded.append(Invest.status==Invest.STATUS_RETURNED)
