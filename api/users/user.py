@@ -24,6 +24,7 @@ class UserResponse(Response):
     resource_fields = {
         "id"         : fields.String,
         "name"         : fields.String,
+        "node"         : fields.String,
         "date_created"         : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
         "profile_image_url"         : fields.String,
     }
@@ -40,7 +41,7 @@ class UserCompleteResponse(Response):
         "name"         : fields.String,
         "node"         : fields.String,
         "date_created"         : fields.DateTime(dt_format='rfc822'),
-        "date_updated"         : fields.DateTime(dt_format='rfc822'),
+        # "date_updated"         : fields.DateTime(dt_format='rfc822'),
         "profile_image_url"         : fields.String,
     }
 
