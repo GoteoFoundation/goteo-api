@@ -10,8 +10,9 @@ from sqlalchemy import and_, or_, desc
 
 from config import config
 from api import db
-from api.models import Category, Invest, Reward, InvestReward, InvestNode, Project, ProjectCategory
-from api.models import LocationItem
+from api.models.models import Category, Reward, Project, ProjectCategory
+from api.models.invest import Invest, InvestReward, InvestNode
+from api.models.location import LocationItem
 from api.decorators import *
 
 from api.base_endpoint import BaseList as Base, Response
@@ -69,6 +70,8 @@ class RewardsAPI(Base):
         <a href="http://developers.goteo.org/reports#rewards">developers.goteo.org/reports#rewards</a>
         """
         time_start = time.time()
+        self.reqparse.remove_argument('page')
+        self.reqparse.remove_argument('limit')
         args = self.reqparse.parse_args()
 
         filters = []

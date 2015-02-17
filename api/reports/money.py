@@ -10,7 +10,9 @@ from sqlalchemy.orm.exc import NoResultFound
 from config import config
 
 from api import db
-from api.models import Project, ProjectCategory, Category, Invest, Call, InvestNode, LocationItem
+from api.models.models import Project, ProjectCategory, Category, Call
+from api.models.invest import Invest, InvestNode
+from api.models.location import LocationItem
 from api.decorators import *
 
 from api.base_endpoint import BaseList, Response
@@ -66,6 +68,9 @@ class MoneyAPI(BaseList):
         """
         time_start = time.time()
 
+        #remove not used arguments
+        self.reqparse.remove_argument('page')
+        self.reqparse.remove_argument('limit')
         args = self.reqparse.parse_args()
 
         filters = []

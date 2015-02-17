@@ -8,7 +8,7 @@ from flask_restful_swagger import swagger
 from config import config
 
 from api import db
-from api.models import User
+from api.models.user import User
 from api.decorators import *
 from api.base_endpoint import BaseItem, BaseList, Response
 
@@ -81,14 +81,14 @@ class UsersListAPI(BaseList):
         time_start = time.time()
         args = self.reqparse.parse_args()
         items = []
-        for u in User.list(args['page'], args['limit']):
+        for u in User.list(**args):
             items.append( marshal(u, UserResponse.resource_fields) )
 
         res = UsersListResponse(
             starttime = time_start,
             attributes = {'items' : items},
             filters = args.items(),
-            total = User.total()
+            total = User.total(**args)
         )
         if items == []:
             return bad_request('No users to list', 404)

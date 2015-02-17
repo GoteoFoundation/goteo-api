@@ -38,7 +38,7 @@ def page_not_found(e):
 # =======
 
 # HOME
-@app.route('/', endpoint='api_home', methods=['GET', 'OPTIONS'])
+@app.route('/', endpoint='api_home')
 @requires_auth
 @ratelimit()
 def index():

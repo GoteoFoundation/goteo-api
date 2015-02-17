@@ -12,8 +12,10 @@ from config import config
 
 from api import db
 
-from api.models import Invest, InvestNode, User, Category, Message, Project, UserInterest, UserRole, ProjectCategory, Call
-from api.models import LocationItem
+from api.models.models import Category, Message, Project, ProjectCategory, Call
+from api.models.invest import Invest, InvestNode
+from api.models.user import User, UserInterest, UserRole
+from api.models.location import LocationItem
 from api.decorators import *
 
 from api.base_endpoint import BaseList as Base, Response
@@ -113,6 +115,8 @@ class CommunityAPI(Base):
         <a href="http://developers.goteo.org/reports#community">developers.goteo.org/reports#community</a>
         """
         time_start = time.time()
+        self.reqparse.remove_argument('page')
+        self.reqparse.remove_argument('limit')
         args = self.reqparse.parse_args()
 
         filters = []

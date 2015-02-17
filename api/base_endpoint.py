@@ -8,7 +8,7 @@ from flask.ext.restful import Resource, reqparse
 from helpers import *
 
 from api import db
-from api.models import Location
+from api.models.location import Location
 
 def date_sanitizer(data):
     d = parse(data)

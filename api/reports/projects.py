@@ -9,8 +9,9 @@ from sqlalchemy import and_, or_, desc
 
 from config import config
 from api import db
-from api.models import Blog, Category, Invest, Message, Post, Project, ProjectCategory
-from api.models import LocationItem
+from api.models.models import Blog, Category, Message, Post, Project, ProjectCategory
+from api.models.invest import Invest
+from api.models.location import LocationItem
 from api.decorators import *
 
 from api.base_endpoint import BaseList as Base, Response
@@ -86,6 +87,8 @@ class ProjectsAPI(Base):
         <a href="http://developers.goteo.org/reports#projects">developers.goteo.org/reports#projects</a>
         """
         time_start = time.time()
+        self.reqparse.remove_argument('page')
+        self.reqparse.remove_argument('limit')
         args = self.reqparse.parse_args()
 
         filters = []

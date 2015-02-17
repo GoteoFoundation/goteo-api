@@ -1,0 +1,121 @@
+# -*- coding: utf-8 -*-
+
+from sqlalchemy import func, Integer, String, Date, DateTime
+from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from api.helpers import image_url, utc_from_local
+from sqlalchemy import asc
+from api import db
+
+# User stuff
+class User(db.Model):
+    __tablename__ = 'user'
+
+    id = db.Column('id', String(50), primary_key=True)
+    name = db.Column('name', String(100))
+    avatar = db.Column('avatar', String(255))
+    # email = db.Column('email', String(100))
+    active = db.Column('active', Integer)
+    hide = db.Column('hide', Integer)
+    node = db.Column('node', String(50), db.ForeignKey('node.id'))
+    created = db.Column('created', Date)
+    updated = db.Column('modified', Date)
+    # email = db.Column('email', String(255))
+
+
+    def __repr__(self):
+        return '<User %s: %r>' % (self.id, self.name)
+
+
+    @hybrid_property
+    def profile_image_url(self):
+        return image_url(self.avatar)
+
+    @hybrid_property
+    def date_created(self):
+        return utc_from_local(self.created)
+
+    @hybrid_property
+    def date_updated(self):
+        return utc_from_local(self.updated)
+
+    #Filters for table user
+    @hybrid_property
+    def filters(self):
+        return [User.hide == 0, User.active == 1]
+
+    #Filters for table user
+    @hybrid_method
+    def get_filters(self, **kwargs):
+        filters = self.filters
+        if 'node' in kwargs:
+            filters.append(User.node == kwargs['node'])
+
+        return filters
+
+
+    @hybrid_method
+    def get(self, id):
+        """Get a valid user form id"""
+        try:
+            filters = list(self.filters)
+            filters.append(User.id == id)
+            return self.query.filter(*filters).one()
+        except NoResultFound:
+            return None
+
+    @hybrid_method
+    def list(self, **kwargs):
+        """Get a list of valid users"""
+        try:
+            limit = kwargs['limit'] if 'limit' in kwargs else 10
+            page = kwargs['page'] if 'page' in kwargs else 0
+            filters = list(self.get_filters(**kwargs))
+            return self.query.filter(*filters).order_by(asc(User.id)).offset(page * limit).limit(limit)
+        except NoResultFound:
+            return []
+
+    @hybrid_method
+    def total(self, **kwargs):
+        """Returns the total number of valid users"""
+        try:
+            filters = list(self.get_filters(**kwargs))
+            count = db.session.query(func.count('*')).filter(*filters).scalar()
+            if count is None:
+                count = 0
+            return count
+        except MultipleResultsFound:
+            return 0
+
+
+#User roles
+class UserRole(db.Model):
+    __tablename__ = 'user_role'
+
+    user_id = db.Column('user_id', String(50), db.ForeignKey('user.id'), primary_key=True)
+    role_id = db.Column('role_id', String(50), primary_key=True)
+    node_id = db.Column('node_id', String(50), db.ForeignKey('node.id'))
+
+    def __repr__(self):
+        return '<UserRole %s: %s>' % (self.user_id, self.role_id)
+
+
+#Api keys
+class UserApi(db.Model):
+    __tablename__ = 'user_api'
+
+    user = db.Column('user_id', String(50), primary_key=True)
+    key = db.Column('key', String(50))
+    expiration_date = db.Column('expiration_date', DateTime)
+
+    def __repr__(self):
+        return '<UserApi: %s %s (%s)>' % (self.user, self.key, self.expiration_date)
+
+class UserInterest(db.Model):
+    __tablename__ = 'user_interest'
+
+    user = db.Column('user', String(50), db.ForeignKey('user.id'), primary_key=True)
+    interest = db.Column('interest', Integer, db.ForeignKey('category.id'), primary_key=True)
+
+    def __repr__(self):
+        return '<UserInterest from %s to project %s>' % (self.user, self.project)
