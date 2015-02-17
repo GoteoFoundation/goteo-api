@@ -4,7 +4,7 @@ from sqlalchemy import func, Integer, String, Date, DateTime
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from api.helpers import image_url, utc_from_local
-from sqlalchemy import asc, or_, and_, distinct
+from sqlalchemy import asc, or_, distinct
 
 from api.models.invest import Invest
 from api.models.message import Message
@@ -93,7 +93,8 @@ class User(db.Model):
             filters.append(LocationItem.type == 'user')
             filters.append(LocationItem.id.in_(locations_ids))
             filters.append(LocationItem.item==User.id)
-
+            filters.append(LocationItem.locable==1)
+        #TODO: more filters, like creators, invested, etc
         return filters
 
     # Getting joins for this models
@@ -129,8 +130,8 @@ class User(db.Model):
             limit = kwargs['limit'] if 'limit' in kwargs else 10
             page = kwargs['page'] if 'page' in kwargs else 0
             filters = list(self.get_filters(**kwargs))
-            joins = list(self.get_joins(**kwargs))
-            outerjoins = list(self.get_outerjoins(**kwargs))
+            # joins = list(self.get_joins(**kwargs))
+            # outerjoins = list(self.get_outerjoins(**kwargs))
             # return self.query.filter(*filters).join(*joins).outerjoin(*outerjoins).order_by(asc(User.id)).offset(page * limit).limit(limit)
             return self.query.filter(*filters).order_by(asc(User.id)).offset(page * limit).limit(limit)
         except NoResultFound:
@@ -141,8 +142,8 @@ class User(db.Model):
         """Returns the total number of valid users"""
         try:
             filters = list(self.get_filters(**kwargs))
-            joins = list(self.get_joins(**kwargs))
-            outerjoins = list(self.get_outerjoins(**kwargs))
+            # joins = list(self.get_joins(**kwargs))
+            # outerjoins = list(self.get_outerjoins(**kwargs))
             # count = db.session.query(func.count(distinct(User.id))).filter(*filters).join(*joins).outerjoin(*outerjoins).scalar()
             count = db.session.query(func.count(distinct(User.id))).filter(*filters).scalar()
             if count is None:
