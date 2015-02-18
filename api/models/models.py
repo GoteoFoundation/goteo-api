@@ -43,17 +43,6 @@ class Call(db.Model):
     def __repr__(self):
         return '<Call %s: %s>' % (self.id, self.name)
 
-
-class Category(db.Model):
-    __tablename__ = 'category'
-
-    id = db.Column('id', Integer, primary_key=True)
-    name = db.Column('name', Text)
-
-    def __repr__(self):
-        return '<Category %s>' % (self.name)
-
-
 class Blog(db.Model):
     __tablename__ = 'blog'
 
@@ -78,20 +67,6 @@ class Post(db.Model):
 
     def __repr__(self):
         return '<Post(%d) %s: %s>' % (self.id, self.blog, self.title[:50])
-
-
-class Reward(db.Model):
-    __tablename__ = 'reward'
-
-    id = db.Column('id', Integer, primary_key=True)
-    project = db.Column('project', String(50), db.ForeignKey('project.id'))
-    reward = db.Column('reward', Text)
-    type = db.Column('type', String(50))
-    amount = db.Column('amount', Integer)
-    icon = db.Column('icon', String(50))
-
-    def __repr__(self):
-        return '<Reward(%d) %s: %s>' % (self.id, self.project[:10], self.title[:50])
 
 class Cost(db.Model):
     __tablename__ = 'cost'

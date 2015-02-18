@@ -12,7 +12,8 @@ from config import config
 
 from api import db
 
-from api.models.models import Category, Call
+from api.models.models import Call
+from api.models.category import Category
 from api.models.project import Project, ProjectCategory
 from api.models.invest import Invest, InvestNode
 from api.models.message import Message

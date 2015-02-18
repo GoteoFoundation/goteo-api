@@ -9,7 +9,8 @@ from sqlalchemy import and_, or_, desc
 
 from config import config
 from api import db
-from api.models.models import Blog, Category, Post
+from api.models.models import Blog, Post
+from api.models.category import Category
 from api.models.project import Project, ProjectCategory
 from api.models.message import Message
 from api.models.invest import Invest

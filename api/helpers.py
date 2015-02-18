@@ -20,6 +20,9 @@ def image_url(img, size='large'):
 
     return 'http://goteo.org/img/' + s + '/' + i
 
+def svg_image_url(img, type='licenses'):
+    return 'http://goteoassets.org/api/svg/' + type + '/' + img
+
 def utc_from_local(date_time, local_tz=None):
     assert date_time.__class__.__name__ == 'datetime'
     if local_tz is None:

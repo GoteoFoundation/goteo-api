@@ -10,7 +10,8 @@ from sqlalchemy import and_, or_, desc
 
 from config import config
 from api import db
-from api.models.models import Category, Reward
+from api.models.category import Category
+from api.models.reward import Reward
 from api.models.project import Project, ProjectCategory
 from api.models.invest import Invest, InvestReward, InvestNode
 from api.models.location import Location, LocationItem

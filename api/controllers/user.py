@@ -5,16 +5,9 @@ import time
 from flask.ext.restful import fields, marshal
 from flask_restful_swagger import swagger
 
-from config import config
-
-from api import db
 from api.models.user import User
 from api.decorators import *
 from api.base_endpoint import BaseItem, BaseList, Response
-
-# DEBUG
-if config.debug:
-    db.session.query = debug_time(db.session.query)
 
 
 @swagger.model
