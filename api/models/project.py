@@ -17,7 +17,7 @@ class Project(db.Model):
     STATUS_REVIEWING   = 2
     STATUS_IN_CAMPAIGN = 3
     STATUS_FUNDED      = 4
-    STATUS_FULLFILED   = 5 # 'Caso de exito'
+    STATUS_FULFILLED   = 5 # 'Caso de exito'
     STATUS_UNFUNDED    = 6 # proyecto fallido
 
     id = db.Column('id', String(50), primary_key=True)

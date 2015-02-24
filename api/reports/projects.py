@@ -4,13 +4,10 @@ import time
 from flask.ext.restful import fields
 from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
-from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import and_, or_, desc
 
-from config import config
 from api import db
 from api.models.models import Blog, Post
-from api.models.category import Category
 from api.models.project import Project, ProjectCategory
 from api.models.message import Message
 from api.models.invest import Invest
@@ -19,10 +16,6 @@ from api.decorators import *
 
 from api.base_endpoint import BaseList as Base, Response
 
-
-# DEBUG
-if config.debug:
-    db.session.query = debug_time(db.session.query)
 
 func = sqlalchemy.func
 
@@ -112,7 +105,7 @@ class ProjectsAPI(Base):
 
             if locations_ids == []:
                 return bad_request("No locations in the specified range")
-
+            #TODO: change to project type 'project'
             filters.append(Project.owner == LocationItem.item)
             filters.append(LocationItem.type == 'user')
             filters.append(LocationItem.id.in_(locations_ids))
@@ -180,7 +173,7 @@ class ProjectsAPI(Base):
     # -Proyectos exitosos con campaña finalizada
     def _finished(self, f_succ_finished = []):
         f_succ_finished.append(Project.status.in_([Project.STATUS_FUNDED,
-                                                   Project.STATUS_FULLFILED]))
+                                                   Project.STATUS_FULFILLED]))
         # print(f_succ_finished)
         res = db.session.query(Project).filter(*f_succ_finished).count()
         if res is None:
@@ -201,7 +194,7 @@ class ProjectsAPI(Base):
         f_p_avg_success.append(Invest.status.in_([Invest.STATUS_CHARGED,
                                                   Invest.STATUS_PAID]))
         f_p_avg_success.append(Project.status.in_([Project.STATUS_FUNDED,
-                                                   Project.STATUS_FULLFILED]))
+                                                   Project.STATUS_FULFILLED]))
         res = db.session.query(func.sum(Invest.amount) / func.count(func.distinct(Project.id)))\
                                     .join(Project).filter(*f_p_avg_success).scalar()
         res = 0 if res is None else round(res, 2)
@@ -230,7 +223,7 @@ class ProjectsAPI(Base):
     # 10 Campañas que han recaudado más dinero
     def _top10_invests(self, f_top10_invests = []):
         f_top10_invests.append(Project.status.in_([Project.STATUS_FUNDED,
-                                                   Project.STATUS_FULLFILED]))
+                                                   Project.STATUS_FULFILLED]))
         f_top10_invests.append(Invest.status.in_([Invest.STATUS_PENDING,
                                                   Invest.STATUS_CHARGED,
                                                   Invest.STATUS_PAID]))
@@ -247,7 +240,7 @@ class ProjectsAPI(Base):
         sq1 = db.session.query(func.count(Project.id).label('posts')).select_from(Post)\
                             .join(Blog, and_(Blog.id == Post.blog, Blog.type == 'project'))\
                             .join(Project, and_(Project.id == Blog.owner, Project.status.in_([Project.STATUS_FUNDED,
-                                                                                              Project.STATUS_FULLFILED])))\
+                                                                                              Project.STATUS_FULFILLED])))\
                             .filter(*f_avg_succ_posts).group_by(Post.blog).subquery()
         res = db.session.query(func.avg(sq1.c.posts)).scalar()
         res = 0 if res is None else round(res, 2)

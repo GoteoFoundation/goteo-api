@@ -7,7 +7,7 @@ from flask_restful_swagger import swagger
 
 from api.models.category import Category
 from api.decorators import *
-from api.base_endpoint import BaseItem, BaseList, Response
+from api.base_endpoint import BaseList, Response
 
 
 @swagger.model

@@ -19,11 +19,6 @@ from api.decorators import *
 
 from api.base_endpoint import BaseList as Base, Response
 
-
-# DEBUG
-if config.debug:
-    db.session.query = debug_time(db.session.query)
-
 func = sqlalchemy.func
 
 @swagger.model
@@ -186,7 +181,7 @@ class RewardsAPI(Base):
                                 .join(Project, and_(Project.id == Reward.project, Project.status.in_([
                                     Project.STATUS_IN_CAMPAIGN,
                                     Project.STATUS_FUNDED,
-                                    Project.STATUS_FULLFILED])))\
+                                    Project.STATUS_FULFILLED])))\
                                 .filter(*f_favorite_reward).group_by(Reward.icon).order_by(desc('total')).all()
         if res is None:
             res = []

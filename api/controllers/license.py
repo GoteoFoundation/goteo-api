@@ -6,6 +6,7 @@ from flask.ext.restful import fields, marshal
 from flask_restful_swagger import swagger
 
 from api.models.license import License
+from api.models.reward import Reward
 from api.decorators import *
 from api.base_endpoint import BaseItem, BaseList, Response
 
@@ -15,10 +16,12 @@ class LicenseResponse(Response):
     """LicenseResponse"""
 
     resource_fields = {
-        "id"         : fields.String,
-        "name"         : fields.String,
-        "description"         : fields.String,
-        "svg_url"         : fields.String,
+        "id"            : fields.String,
+        "name"          : fields.String,
+        "description"   : fields.String,
+        "url"           : fields.String,
+        "svg_url"       : fields.String,
+        "total-rewards" : fields.Integer,
     }
 
     required = resource_fields.keys()
@@ -57,10 +60,18 @@ class LicensesListAPI(BaseList):
         <a href="http://developers.goteo.org/licenses#list">developers.goteo.org/licenses#list</a>
         """
         time_start = time.time()
+        #removing not-needed standard filters
+        self.reqparse.remove_argument('page')
+        self.reqparse.remove_argument('limit')
         args = self.reqparse.parse_args()
         items = []
         for u in License.list(**args):
-            items.append( marshal(u, LicenseResponse.resource_fields) )
+            item = marshal(u, LicenseResponse.resource_fields)
+            reward_filter = args.copy()
+            # reward_filter['license_type'] = 'social'
+            reward_filter['license'] = item['id']
+            item['total-rewards'] = Reward.total(**reward_filter)
+            items.append( item )
 
         res = LicensesListResponse(
             starttime = time_start,

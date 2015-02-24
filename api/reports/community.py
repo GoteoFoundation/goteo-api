@@ -5,10 +5,7 @@ import time
 from flask.ext.restful import fields
 from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
-from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import and_, desc
-
-from config import config
 
 from api import db
 
@@ -22,10 +19,6 @@ from api.models.location import Location, LocationItem
 from api.decorators import *
 
 from api.base_endpoint import BaseList as Base, Response
-
-# DEBUG
-if config.debug:
-    db.session.query = debug_time(db.session.query)
 
 func = sqlalchemy.func
 
@@ -312,7 +305,7 @@ class CommunityAPI(Base):
     # Media de cofinanciadores por proyecto exitoso
     def _media_cofi(self, f_media_cofi = []):
         f_media_cofi.append(Project.status.in_([Project.STATUS_FUNDED,
-                                                Project.STATUS_FULLFILED]))
+                                                Project.STATUS_FULFILLED]))
         sq = db.session.query(func.count(func.distinct(Invest.user)).label("co"))\
                                     .join(Project, Invest.project == Project.id)\
                                     .filter(*f_media_cofi).group_by(Invest.project).subquery()
@@ -324,7 +317,7 @@ class CommunityAPI(Base):
     # Media de colaboradores por proyecto
     def _media_colab(self, f_media_colab = []):
         f_media_colab.append(Project.status.in_([Project.STATUS_FUNDED,
-                                                 Project.STATUS_FULLFILED]))
+                                                 Project.STATUS_FULFILLED]))
         sq = db.session.query(func.count(func.distinct(Message.user)).label("co"))\
                                     .join(Project, Message.project == Project.id)\
                                     .filter(*f_media_colab).group_by(Message.project).subquery()
@@ -342,7 +335,7 @@ class CommunityAPI(Base):
         res = db.session.query(func.count(func.distinct(Invest.user)))\
                                     .join(Project, and_(Project.owner == Invest.user, Project.status.in_([
                                         Project.STATUS_FUNDED,
-                                        Project.STATUS_FULLFILED,
+                                        Project.STATUS_FULFILLED,
                                         Project.STATUS_IN_CAMPAIGN,
                                         Project.STATUS_UNFUNDED
                                      ])))\
@@ -360,7 +353,7 @@ class CommunityAPI(Base):
         res = db.session.query(func.count(func.distinct(Message.user)))\
                                     .join(Project, and_(Project.owner == Message.user, Project.status.in_([
                                         Project.STATUS_FUNDED,
-                                        Project.STATUS_FULLFILED,
+                                        Project.STATUS_FULFILLED,
                                         Project.STATUS_IN_CAMPAIGN,
                                         Project.STATUS_UNFUNDED
                                     ])))\

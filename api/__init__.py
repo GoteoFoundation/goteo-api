@@ -7,7 +7,6 @@ from flask.ext.sqlalchemy import SQLAlchemy
 
 from config import config
 
-
 # DB class
 #app = Flask(__name__)
 app = Flask(__name__, static_url_path="")
@@ -28,4 +27,5 @@ api = swagger.docs(Api(app), apiVersion=config.version, description=config.descr
 #api = Api(app)
 
 db = SQLAlchemy(app)
+
 

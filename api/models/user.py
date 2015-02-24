@@ -6,17 +6,12 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from api.helpers import image_url, utc_from_local
 from sqlalchemy import asc, or_, distinct
 
-from api.helpers import debug_time
 from config import config
 from api import db
 
 from api.models.invest import Invest
 from api.models.message import Message
 from api.models.location import Location, LocationItem
-
-# DEBUG
-if config.debug:
-    db.session.query = debug_time(db.session.query)
 
 # User stuff
 class User(db.Model):

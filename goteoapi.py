@@ -7,6 +7,13 @@ from config import config
 from api import app
 
 from api.decorators import *
+from api.helpers import debug_time
+from api import db
+
+# DEBUG
+if config.debug:
+    db.session.query = debug_time(db.session.query)
+
 
 @app.after_request
 def add_cors(resp):

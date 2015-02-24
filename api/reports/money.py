@@ -19,9 +19,6 @@ from api.decorators import *
 
 from api.base_endpoint import BaseList, Response
 
-# DEBUG
-if config.debug:
-    db.session.query = debug_time(db.session.query)
 
 func = sqlalchemy.func
 
@@ -217,7 +214,7 @@ class MoneyAPI(BaseList):
         return call_amount
 
     def _fee_amount(self, f_fee_amount=[]):
-        f_fee_amount.append(Project.status.in_([Project.STATUS_FUNDED, Project.STATUS_FULLFILED]))
+        f_fee_amount.append(Project.status.in_([Project.STATUS_FUNDED, Project.STATUS_FULFILLED]))
         f_fee_amount.append(Invest.status.in_([Invest.STATUS_CHARGED, Invest.STATUS_PAID]))
         fee_amount = db.session.query(func.sum(Invest.amount)).join(Project).filter(*f_fee_amount).scalar()
         if fee_amount is None:
@@ -229,7 +226,7 @@ class MoneyAPI(BaseList):
 
     def _average_donation(self, f_average_invest=[]):
         f_average_invest.append(Project.status.in_([Project.STATUS_FUNDED,
-                                                    Project.STATUS_FULLFILED,
+                                                    Project.STATUS_FULFILLED,
                                                     Project.STATUS_UNFUNDED]))
         f_average_invest.append(Invest.status > Invest.STATUS_PENDING)
         sub1 = db.session.query(func.avg(Invest.amount).label('amount')).join(Project)\
@@ -240,7 +237,7 @@ class MoneyAPI(BaseList):
 
     def _average_donation_paypal(self, f_average_donation_paypal=[]):
         f_average_donation_paypal.append(Project.status.in_([Project.STATUS_FUNDED,
-                                                             Project.STATUS_FULLFILED,
+                                                             Project.STATUS_FULFILLED,
                                                             Project.STATUS_UNFUNDED]))
         f_average_donation_paypal.append(Invest.status > Invest.STATUS_PENDING)
         f_average_donation_paypal.append(Invest.method==Invest.METHOD_PAYPAL)
@@ -252,7 +249,7 @@ class MoneyAPI(BaseList):
 
     def _average_mincost(self, f_average_mincost=[]):
         f_average_mincost.append(Project.status.in_([Project.STATUS_FUNDED,
-                                                     Project.STATUS_FULLFILED]))
+                                                     Project.STATUS_FULFILLED]))
         average_mincost = db.session.query(func.avg(Project.minimum)).filter(*f_average_mincost).scalar()
         average_mincost = 0 if average_mincost is None else round(average_mincost, 2)
         return average_mincost
@@ -261,7 +258,7 @@ class MoneyAPI(BaseList):
         f_average_received.append(Invest.status.in_([Invest.STATUS_CHARGED,
                                                      Invest.STATUS_PAID]))
         f_average_received.append(Project.status.in_([Project.STATUS_FUNDED,
-                                                      Project.STATUS_FULLFILED]))
+                                                      Project.STATUS_FULFILLED]))
         average_received = db.session.query(func.sum(Invest.amount) / func.count(func.distinct(Project.id)))\
                                     .join(Project).filter(*f_average_received).scalar()
         average_received = 0 if average_received is None else round(average_received, 2)
@@ -272,7 +269,7 @@ class MoneyAPI(BaseList):
         f_pledged_success.append(Invest.status.in_([Invest.STATUS_CHARGED,
                                                          Invest.STATUS_PAID]))
         f_pledged_success.append(Project.status.in_([Project.STATUS_FUNDED,
-                                                          Project.STATUS_FULLFILED]))
+                                                          Project.STATUS_FULFILLED]))
         sub = db.session.query((func.sum(Invest.amount) / Project.minimum * 100 - 100).label('percent'))\
                             .select_from(Invest).join(Project)\
                             .filter(*f_pledged_success).group_by(Invest.project).subquery()

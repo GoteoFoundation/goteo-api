@@ -6,8 +6,6 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from api.helpers import image_url, utc_from_local
 from sqlalchemy import asc, or_, distinct
 
-from api.helpers import debug_time, svg_image_url
-from config import config
 from api import db
 
 from api.models.location import Location, LocationItem
