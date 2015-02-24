@@ -19,7 +19,7 @@ class License(db.Model):
     __tablename__ = 'license'
 
     id = db.Column('id', String(50), primary_key=True)
-    name = db.Column('name', String(100))
+    license = db.Column('name', String(100))
     description = db.Column('description', Text)
     url = db.Column('url', String(255))
     order = db.Column('order', Integer)

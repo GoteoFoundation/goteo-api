@@ -8,6 +8,7 @@ from sqlalchemy import asc, or_, distinct
 
 from api import db
 
+from api.models.project import Project
 from api.models.location import Location, LocationItem
 
 # Reward stuff
@@ -35,6 +36,14 @@ class Reward(db.Model):
     @hybrid_method
     def get_filters(self, **kwargs):
         filters = self.filters
+        filters = self.filters
+        # Join project table if filters
+        for i in ('node', 'from_date', 'to_date', 'category', 'location'):
+            if i in kwargs and kwargs[i] is not None:
+                filters.append(Project.id == Reward.project)
+                filters.append(Project.status.in_([Project.STATUS_IN_CAMPAIGN,
+                                                   Project.STATUS_FUNDED,
+                                                   Project.STATUS_FULFILLED]))
         if 'license_type' in kwargs and kwargs['license_type'] is not None:
             filters.append(Reward.type == kwargs['license_type'])
         if 'license' in kwargs and kwargs['license'] is not None:
@@ -50,9 +59,11 @@ class Reward(db.Model):
         if 'category' in kwargs and kwargs['category'] is not None:
             pass
         if 'location' in kwargs and kwargs['location'] is not None:
-            # locations_ids = Location.location_ids(**kwargs['location'])
-            pass
-            # filters.append(LocationItem.locable==1)
+            locations_ids = Location.location_ids(**kwargs['location'])
+            filters.append(LocationItem.type == 'project')
+            filters.append(LocationItem.item == Reward.project)
+            filters.append(LocationItem.locable == True)
+            filters.append(LocationItem.id.in_(locations_ids))
 
         return filters
     @hybrid_method

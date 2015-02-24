@@ -211,7 +211,7 @@ class ProjectsAPI(Base):
 
     # 10 Campañas con más cofinanciadores
     def _top10_donations(self, f_top10_donations = []):
-        # FIXME: invest.status?
+        # TODO: invest.status? project.satus?
         res = db.session.query(Project.id.label('project'), func.count(Invest.id).label('total')).join(Invest)\
                                     .filter(*f_top10_donations).group_by(Invest.project)\
                                     .order_by(desc('total')).limit(10).all()

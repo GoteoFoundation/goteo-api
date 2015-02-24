@@ -8,7 +8,7 @@ from flask_restful_swagger import swagger
 from api.models.license import License
 from api.models.reward import Reward
 from api.decorators import *
-from api.base_endpoint import BaseItem, BaseList, Response
+from api.base_endpoint import BaseList, Response
 
 
 @swagger.model
@@ -17,10 +17,10 @@ class LicenseResponse(Response):
 
     resource_fields = {
         "id"            : fields.String,
-        "name"          : fields.String,
+        "license"       : fields.String,
         "description"   : fields.String,
         "url"           : fields.String,
-        "svg_url"       : fields.String,
+        "svg-url"       : fields.String,
         "total-rewards" : fields.Integer,
     }
 
@@ -67,6 +67,7 @@ class LicensesListAPI(BaseList):
         items = []
         for u in License.list(**args):
             item = marshal(u, LicenseResponse.resource_fields)
+            item['svg-url'] = u.svg_url
             reward_filter = args.copy()
             # reward_filter['license_type'] = 'social'
             reward_filter['license'] = item['id']
