@@ -18,8 +18,8 @@ class UserResponse(Response):
         "id"         : fields.String,
         "name"         : fields.String,
         "node"         : fields.String,
-        "date_created"         : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
-        "profile_image_url"         : fields.String,
+        "date-created"         : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
+        "profile-image-url"         : fields.String,
     }
 
     required = resource_fields.keys()
@@ -33,9 +33,9 @@ class UserCompleteResponse(Response):
         "id"         : fields.String,
         "name"         : fields.String,
         "node"         : fields.String,
-        "date_created"         : fields.DateTime(dt_format='rfc822'),
+        "date-created"         : fields.DateTime(dt_format='rfc822'),
         # "date_updated"         : fields.DateTime(dt_format='rfc822'),
-        "profile_image_url"         : fields.String,
+        "profile-image-url"         : fields.String,
     }
 
     required = resource_fields.keys()
@@ -76,7 +76,10 @@ class UsersListAPI(BaseList):
         args = self.reqparse.parse_args()
         items = []
         for u in User.list(**args):
-            items.append( marshal(u, UserResponse.resource_fields) )
+            item = marshal(u, UserResponse.resource_fields)
+            item['date-created'] = u.date_created
+            item['profile-image-url'] = u.profile_image_url
+            items.append( item )
 
         res = UsersListResponse(
             starttime = time_start,
@@ -108,10 +111,13 @@ class UserAPI(BaseItem):
         <a href="http://developers.goteo.org/users#user">developers.goteo.org/users#user</a>
         """
         u = User.get(id)
+        item = marshal(u, UserCompleteResponse.resource_fields)
+        item['date-created'] = u.date_created
+        item['profile-image-url'] = u.profile_image_url
         time_start = time.time()
         res = UserCompleteResponse(
             starttime = time_start,
-            attributes = marshal(u, UserCompleteResponse.resource_fields)
+            attributes = item
         )
         if u is None:
             return bad_request('User not found', 404)
