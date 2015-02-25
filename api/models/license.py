@@ -9,11 +9,6 @@ from sqlalchemy import asc, or_, distinct
 from api.helpers import svg_image_url
 from api import db
 
-from api.models.location import Location, LocationItem
-from api.models.reward import Reward
-from api.models.project import Project,ProjectCategory
-
-
 # License stuff
 class License(db.Model):
     __tablename__ = 'license'
@@ -31,10 +26,6 @@ class License(db.Model):
     def svg_url(self):
     	return svg_image_url(self.id + '.svg')
 
-    @hybrid_property
-    def joins(self):
-        return []
-
     #Filters for table license
     @hybrid_property
     def filters(self):
@@ -43,16 +34,20 @@ class License(db.Model):
     # Getting filters for this model
     @hybrid_method
     def get_filters(self, **kwargs):
+        from .location import Location, LocationItem
+        from .reward import Reward
+        from .project import Project, ProjectCategory
+
         filters = self.filters
         # Join project table if filters
-        for i in ('node', 'from_date', 'to_date', 'category', 'location'):
+        for i in ('node', 'from_date', 'to_date', 'project', 'category', 'location'):
             if i in kwargs and kwargs[i] is not None:
-                filters.append(Project.status.in_([Project.STATUS_IN_CAMPAIGN,
-                                                   Project.STATUS_FUNDED,
-                                                   Project.STATUS_FULFILLED]))
+                filters.append(Reward.license == self.id)
+                filters.append(Project.id == Reward.project)
+                filters.append(Project.status.in_(Project.SUCCESSFUL_PROJECTS))
         # Filters by goteo node
         if 'node' in kwargs and kwargs['node'] is not None:
-            filters.append(Project.node == kwargs['node'])
+            filters.append(Project.node.in_(kwargs['node']))
         # Filters by "from date"
         # counting license created after this date
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
@@ -64,34 +59,21 @@ class License(db.Model):
         # Filters by "project"
         # counting attached (invested or collaborated) to some project(s)
         if 'project' in kwargs and kwargs['project'] is not None:
-            subquery = db.session.query(Reward.license).filter(Reward.project.in_(kwargs['project']))
-            filters.append(License.id.in_(subquery))
+            filters.append(Project.id.in_(kwargs['project']))
         # filter by license interests
         if 'category' in kwargs and kwargs['category'] is not None:
-            filters.append(ProjectCategory.category == kwargs['category'])
+            filters.append(ProjectCategory.project == Reward.project)
+            filters.append(ProjectCategory.category.in_(kwargs['category']))
         #Filter by location
         if 'location' in kwargs and kwargs['location'] is not None:
             locations_ids = Location.location_ids(**kwargs['location'])
             filters.append(LocationItem.type == 'project')
+            filters.append(LocationItem.item == Reward.project)
             filters.append(LocationItem.locable == True)
             filters.append(LocationItem.id.in_(locations_ids))
 
             pass
         return filters
-
-    # Getting joins for this models
-    @hybrid_method
-    def get_joins(self, **kwargs):
-        joins = self.joins
-        for i in ('node', 'from_date', 'to_date', 'category', 'location'):
-            if i in kwargs and kwargs[i] is not None:
-                joins.append((Reward, Reward.license==License.id))
-                joins.append((Project, Project.id==Reward.project))
-        if 'category' in kwargs and kwargs['category'] is not None:
-             joins.append((ProjectCategory, ProjectCategory.project==Reward.project))
-        if 'location' in kwargs and kwargs['location'] is not None:
-             joins.append((LocationItem, LocationItem.item==Reward.project))
-        return joins
 
     @hybrid_method
     def get(self, id):
@@ -108,9 +90,7 @@ class License(db.Model):
         """Get a list of valid license"""
         try:
             filters = list(self.get_filters(**kwargs))
-            joins = list(self.get_joins(**kwargs))
-            return self.query.filter(*filters).distinct().join(*joins).order_by(asc(License.order)).all()
-            # return self.query.filter(*filters).order_by(asc(License.order)).all()
+            return self.query.filter(*filters).order_by(asc(License.order)).all()
         except NoResultFound:
             return []
 
@@ -119,9 +99,7 @@ class License(db.Model):
         """Returns the total number of valid license"""
         try:
             filters = list(self.get_filters(**kwargs))
-            joins = list(self.get_joins(**kwargs))
-            # count = db.session.query(func.count(distinct(License.id))).filter(*filters).scalar()
-            count = db.session.query(func.count(distinct(License.id))).filter(*filters).join(*joins).scalar()
+            count = db.session.query(func.count(distinct(License.id))).filter(*filters).scalar()
             if count is None:
                 count = 0
             return count

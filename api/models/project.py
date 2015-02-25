@@ -5,7 +5,7 @@ from sqlalchemy import func, Integer, String, Text, Date, DateTime, Float
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from api.helpers import image_url, utc_from_local
-from sqlalchemy import asc
+from sqlalchemy import asc, distinct
 from api import db
 
 class Project(db.Model):
@@ -19,6 +19,8 @@ class Project(db.Model):
     STATUS_FUNDED      = 4
     STATUS_FULFILLED   = 5 # 'Caso de exito'
     STATUS_UNFUNDED    = 6 # proyecto fallido
+
+    SUCCESSFUL_PROJECTS = [STATUS_IN_CAMPAIGN, STATUS_FUNDED, STATUS_FULFILLED]
 
     id = db.Column('id', String(50), primary_key=True)
     owner = db.Column('owner', String(50), db.ForeignKey('user.id'))
@@ -42,6 +44,57 @@ class Project(db.Model):
 
     def __repr__(self):
         return '<Project %s: %s>' % (self.id, self.name)
+
+    #Filters for this table
+    @hybrid_property
+    def filters(self):
+        return [self.status.in_(self.SUCCESSFUL_PROJECTS)]
+
+    # Getting filters for this model
+    @hybrid_method
+    def get_filters(self, **kwargs):
+        from .reward import Reward
+        from .location import Location, LocationItem
+        filters = self.filters
+        # # Join project table if filters
+        for i in ('license', 'license_type'):
+            if i in kwargs and kwargs[i] is not None:
+                filters.append(self.id == Reward.project)
+        if 'license_type' in kwargs and kwargs['license_type'] is not None:
+            filters.append(Reward.type == kwargs['license_type'])
+        if 'license' in kwargs and kwargs['license'] is not None:
+            filters.append(Reward.license == kwargs['license'])
+        if 'from_date' in kwargs and kwargs['from_date'] is not None:
+            filters.append(self.date_published >= kwargs['from_date'])
+        if 'to_date' in kwargs and kwargs['to_date'] is not None:
+            filters.append(self.date_published <= kwargs['to_date'])
+        if 'project' in kwargs and kwargs['project'] is not None:
+            filters.append(self.id.in_(kwargs['project']))
+        if 'node' in kwargs and kwargs['node'] is not None:
+            filters.append(self.node.in_(kwargs['node']))
+        if 'category' in kwargs and kwargs['category'] is not None:
+            filters.append(self.id == ProjectCategory.project)
+            filters.append(ProjectCategory.category.in_(kwargs['category']))
+        if 'location' in kwargs and kwargs['location'] is not None:
+            locations_ids = Location.location_ids(**kwargs['location'])
+            filters.append(LocationItem.type == 'project')
+            filters.append(LocationItem.item == self.id)
+            filters.append(LocationItem.locable == True)
+            filters.append(LocationItem.id.in_(locations_ids))
+
+        return filters
+
+    @hybrid_method
+    def total(self, **kwargs):
+        """Total number of projects"""
+        try:
+            filters = list(self.get_filters(**kwargs))
+            total = db.session.query(func.count(distinct(Project.id))).filter(*filters).scalar()
+            if total is None:
+                total = 0
+            return total
+        except MultipleResultsFound:
+            return 0
 
 
 

@@ -8,9 +8,6 @@ from sqlalchemy import asc, or_, distinct
 
 from api import db
 
-from api.models.project import Project
-from api.models.location import Location, LocationItem
-
 # Reward stuff
 class Reward(db.Model):
     __tablename__ = 'reward'
@@ -35,43 +32,45 @@ class Reward(db.Model):
     # Getting filters for this model
     @hybrid_method
     def get_filters(self, **kwargs):
-        filters = self.filters
+        from .project import Project, ProjectCategory
+        from .location import Location, LocationItem
+
         filters = self.filters
         # Join project table if filters
-        for i in ('node', 'from_date', 'to_date', 'category', 'location'):
+        for i in ('node', 'from_date', 'to_date', 'project', 'category', 'location'):
             if i in kwargs and kwargs[i] is not None:
-                filters.append(Project.id == Reward.project)
-                filters.append(Project.status.in_([Project.STATUS_IN_CAMPAIGN,
-                                                   Project.STATUS_FUNDED,
-                                                   Project.STATUS_FULFILLED]))
+                filters.append(Project.id == self.project)
+                filters.append(Project.status.in_(Project.SUCCESSFUL_PROJECTS))
         if 'license_type' in kwargs and kwargs['license_type'] is not None:
-            filters.append(Reward.type == kwargs['license_type'])
+            filters.append(self.type == kwargs['license_type'])
         if 'license' in kwargs and kwargs['license'] is not None:
-            filters.append(Reward.license == kwargs['license'])
+            filters.append(self.license == kwargs['license'])
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
-            pass
+            filters.append(Project.date_published >= kwargs['from_date'])
         if 'to_date' in kwargs and kwargs['to_date'] is not None:
-            pass
+            filters.append(Project.date_published <= kwargs['to_date'])
         if 'project' in kwargs and kwargs['project'] is not None:
-            filters.append(Reward.project == kwargs['project'])
+            filters.append(self.project.in_(kwargs['project']))
         if 'node' in kwargs and kwargs['node'] is not None:
-            pass
+            filters.append(Project.node.in_(kwargs['node']))
         if 'category' in kwargs and kwargs['category'] is not None:
-            pass
+            filters.append(Project.id == ProjectCategory.project)
+            filters.append(ProjectCategory.category.in_(kwargs['category']))
         if 'location' in kwargs and kwargs['location'] is not None:
             locations_ids = Location.location_ids(**kwargs['location'])
             filters.append(LocationItem.type == 'project')
-            filters.append(LocationItem.item == Reward.project)
+            filters.append(LocationItem.item == self.project)
             filters.append(LocationItem.locable == True)
             filters.append(LocationItem.id.in_(locations_ids))
 
         return filters
+
     @hybrid_method
     def total(self, **kwargs):
         """Total number of rewards"""
         try:
             filters = list(self.get_filters(**kwargs))
-            total = db.session.query(func.count(Reward.id)).filter(*filters).scalar()
+            total = db.session.query(func.count(distinct(self.id))).filter(*filters).scalar()
             if total is None:
                 total = 0
             return total

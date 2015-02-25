@@ -83,8 +83,8 @@ class RewardsAPI(Base):
             filters2.append(Invest.date_invested <= args['to_date'])
             filters2.append(Invest.project == Project.id)
         if args['project']:
-            filters.append(Invest.project.in_(args['project'][0]))
-            filters2.append(Invest.project.in_(args['project'][0]))
+            filters.append(Invest.project.in_(args['project']))
+            filters2.append(Invest.project.in_(args['project']))
             filters2.append(Invest.project == Project.id)
         if args['node']:
             # FIXME: invest_node o project_node ?
@@ -178,10 +178,8 @@ class RewardsAPI(Base):
     def _favorite_reward(self, f_favorite_reward = []):
         f_favorite_reward.append(Reward.type == 'individual')
         res = db.session.query(Reward.icon, func.count(Reward.project).label('total'))\
-                                .join(Project, and_(Project.id == Reward.project, Project.status.in_([
-                                    Project.STATUS_IN_CAMPAIGN,
-                                    Project.STATUS_FUNDED,
-                                    Project.STATUS_FULFILLED])))\
+                                .join(Project, and_(Project.id == Reward.project, Project.status.in_(
+                                    Project.SUCCESSFUL_PROJECTS)))\
                                 .filter(*f_favorite_reward).group_by(Reward.icon).order_by(desc('total')).all()
         if res is None:
             res = []

@@ -6,7 +6,6 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from api.helpers import image_url, utc_from_local
 from sqlalchemy import asc, or_, distinct
 
-from config import config
 from api import db
 
 from api.models.invest import Invest

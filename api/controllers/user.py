@@ -34,7 +34,7 @@ class UserCompleteResponse(Response):
         "name"         : fields.String,
         "node"         : fields.String,
         "date-created"         : fields.DateTime(dt_format='rfc822'),
-        # "date_updated"         : fields.DateTime(dt_format='rfc822'),
+        # "date-updated"         : fields.DateTime(dt_format='rfc822'),
         "profile-image-url"         : fields.String,
     }
 
