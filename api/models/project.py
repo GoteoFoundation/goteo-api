@@ -76,11 +76,11 @@ class Project(db.Model):
             filters.append(self.id == ProjectCategory.project)
             filters.append(ProjectCategory.category.in_(kwargs['category']))
         if 'location' in kwargs and kwargs['location'] is not None:
-            locations_ids = Location.location_ids(**kwargs['location'])
+            subquery = Location.location_subquery(**kwargs['location'])
             filters.append(LocationItem.type == 'project')
             filters.append(LocationItem.item == self.id)
             filters.append(LocationItem.locable == True)
-            filters.append(LocationItem.id.in_(locations_ids))
+            filters.append(LocationItem.id.in_(subquery))
 
         return filters
 

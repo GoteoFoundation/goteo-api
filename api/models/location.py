@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import func, Integer, String, DateTime, Float
+from sqlalchemy import func, Integer, String, DateTime, Float, asc
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from api.helpers import image_url, utc_from_local
-from sqlalchemy import asc
-from api import db
+from sqlalchemy.sql import select, column
+from api import db, cache
 
 class Location(db.Model):
     __tablename__ = 'location'
@@ -23,20 +23,67 @@ class Location(db.Model):
     def __repr__(self):
         return '<Location(%d) %s, %s (%s)>' % (self.id, self.city, self.region, self.country)
 
-
-    #Get location ids
-    ## TODO:
-    #  Do a first "cut" before getting results from the mysql table
+    # Get location subquery using the spherical law of cosines
+    # faster than Vincenty and Haversine and done in the bbdd side
+    # http://jsperf.com/vincenty-vs-haversine-distance-calculations/2
+    #
+    #  Does a first "cut" before getting results from the mysql table
     #  as described here:
     #  http://www.movable-type.co.uk/scripts/latlong-db.html
     #
     @hybrid_method
+    def location_subquery(self, latitude, longitude, radius, fields=['id']):
+        from math import degrees, radians, cos
+        R = 6371 # earth's mean radius, km
+        latitude = float(latitude)
+        longitude = float(longitude)
+        radius = float(radius)
+        # first-cut bounding box (in degrees)
+        maxLat = latitude + degrees(radius/R);
+        minLat = latitude - degrees(radius/R);
+        # compensate for degrees longitude getting smaller with increasing latitude
+        maxLon = longitude + degrees(radius/R/cos(radians(latitude)));
+        minLon = longitude - degrees(radius/R/cos(radians(latitude)));
+        filters = [self.latitude.between(minLat, maxLat), (self.longitude.between(minLon, maxLon))]
+         # acos(sin(:lat)*sin(radians(Lat)) + cos(:lat)*cos(radians(Lat))*cos(radians(Lon)-:lon)) * :R
+        rlat = radians(latitude)
+        rlng = radians(longitude)
+        distance = (
+            func.acos(
+                  func.sin(rlat)
+                * func.sin(func.radians(column('latitude')))
+                + func.cos(rlat)
+                * func.cos(func.radians(column('latitude')))
+                * func.cos(func.radians(column('longitude')) - rlng)
+            ) * R
+        )
+        subquery = db.session.query(self.id,self.latitude,self.longitude,distance.label('distance')).filter(*filters).subquery('FirstCut')
+        # print "\n--\n" + subquery + "\n-->--\n"
+        sub = select(fields).select_from(subquery).where(distance <= radius)#
+        # print sub + "\n--<--\n"
+        return sub
+
+    # Vincenty Method, slightly better precision, high cost on querying database
+    @hybrid_method
+    @cache.cached(50)
     def location_ids(self, latitude, longitude, radius):
         from geopy.distance import VincentyDistance
+        from math import degrees, radians, cos
+        R = 6371 # earth's mean radius, km
+        latitude = float(latitude)
+        longitude = float(longitude)
+        radius = float(radius)
+        # first-cut bounding box (in degrees)
+        maxLat = latitude + degrees(radius/R);
+        minLat = longitude - degrees(radius/R);
+        # compensate for degrees longitude getting smaller with increasing latitude
+        maxLon = longitude + degrees(radius/R/cos(radians(latitude)));
+        minLon = longitude - degrees(radius/R/cos(radians(latitude)));
+        filters = [Location.latitude.between(minLat, maxLat), (Location.longitude.between(minLon, maxLon))]
+        locations = self.query.filter(*filters).all()
 
-        locations = db.session.query(Location.id, Location.latitude, Location.longitude).all()
-        locations = filter(lambda l: VincentyDistance((latitude, longitude), (l[1], l[2])).km <= radius, locations)
-        location_ids = map(lambda l: int(l[0]), locations)
+        locations = filter(lambda l: VincentyDistance((latitude, longitude), (l.latitude, l.longitude)).km <= radius, locations)
+        location_ids = map(lambda l: int(l.id), locations)
 
         return location_ids
 

@@ -90,11 +90,12 @@ class User(db.Model):
         #Filter by location
         if 'location' in kwargs and kwargs['location'] is not None:
             #location ids where to search
-            locations_ids = Location.location_ids(**kwargs['location'])
+            subquery = Location.location_subquery(**kwargs['location'])
+            # subquery = Location.location_ids(**kwargs['location'])
+            filters.append(LocationItem.id.in_(subquery))
             filters.append(LocationItem.type == 'user')
-            filters.append(LocationItem.id.in_(locations_ids))
-            filters.append(LocationItem.item==User.id)
-            filters.append(LocationItem.locable==1)
+            filters.append(LocationItem.item == User.id)
+            filters.append(LocationItem.locable == True)
         #TODO: more filters, like creators, invested, etc
         return filters
 

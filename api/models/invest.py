@@ -63,11 +63,12 @@ class Invest(db.Model):
             filters.append(ProjectCategory.category.in_(kwargs['category']))
 
         if 'location' in kwargs and kwargs['location'] is not None:
-            locations_ids = Location.location_ids(**kwargs['location'])
             filters.append(Invest.user == LocationItem.item)
             filters.append(LocationItem.type == 'user')
-            filters.append(LocationItem.id.in_(locations_ids))
+            subquery = Location.location_subquery(**kwargs['location'])
+            filters.append(LocationItem.id.in_(subquery))
             # filters.append(LocationItem.locable==1)
+            #
 
         return filters
 

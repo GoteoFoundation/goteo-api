@@ -107,14 +107,12 @@ class MoneyAPI(BaseList):
             filter_mincost.append(ProjectCategory.category.in_(args['category']))
             # no afecta a filter_call
         if args['location']:
-            locations_ids = Location.location_ids(**args['location'])
-
-            if locations_ids == []:
-                return bad_request("No locations in the specified range")
-
+            # subquery = Location.location_subquery(**args['location'])
+            # Using Vincenty on code's side to query only one time the DB
+            subquery = Location.location_ids(**args['location'])
+            filters.append(LocationItem.id.in_(subquery))
             filters.append(Invest.user == LocationItem.item)
             filters.append(LocationItem.type == 'user')
-            filters.append(LocationItem.id.in_(locations_ids))
             # no afecta a filter_mincost ni filter_call
 
 
