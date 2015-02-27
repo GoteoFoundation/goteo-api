@@ -62,7 +62,7 @@ class CategoriesListAPI(BaseList):
         self.reqparse.remove_argument('limit')
         args = self.reqparse.parse_args()
         # limit lang length
-        if 'lang' in args:
+        if 'lang' in args and args['lang'] is not None:
             args['lang'] = args['lang'][:2]
 
         items = []

@@ -60,7 +60,7 @@ class License(db.Model):
             if i in kwargs and kwargs[i] is not None:
                 filters.append(Reward.license == self.id)
                 filters.append(Project.id == Reward.project)
-                filters.append(Project.status.in_(Project.SUCCESSFUL_PROJECTS))
+                filters.append(Project.status.in_(Project.VISIBLE_PROJECTS))
         # Filters by goteo node
         if 'node' in kwargs and kwargs['node'] is not None:
             filters.append(Project.node.in_(kwargs['node']))
