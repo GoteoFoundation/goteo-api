@@ -5,6 +5,7 @@ from flask_restful_swagger import swagger
 from flask.ext.restful import Api
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.cache import Cache
+
 from config import config
 
 cache = Cache(config={'CACHE_TYPE': 'simple'})
@@ -19,7 +20,6 @@ app.config['REDIS_URL'] = config.REDIS_URI
 #app.config['SQLALCHEMY_POOL_TIMEOUT'] = 5
 #app.config['SQLALCHEMY_POOL_SIZE'] = 30
 
-#
 # Read debug status from config
 if hasattr(config, 'debug'):
     app.debug = bool(config.debug)
@@ -30,5 +30,3 @@ api = swagger.docs(Api(app), apiVersion=config.version, description=config.descr
 #api = Api(app)
 
 db = SQLAlchemy(app)
-
-

@@ -14,6 +14,12 @@ def date_sanitizer(data):
     d = parse(data)
     return str(d.date())
 
+def lang_sanitizer(data):
+    d = str(data)
+    if len(data) != 2:
+        raise Exception("Invalid parameter lang. 2 chars length required: (en, es, fr, pt, etc)")
+    return d
+
 def location_sanitizer(data):
     location = data.split(",")
     if len(location) != 3:
@@ -98,6 +104,7 @@ class BaseList(Resource):
         self.reqparse.add_argument('location', type=location_sanitizer)
         self.reqparse.add_argument('page', type=int, default=0)
         self.reqparse.add_argument('limit', type=limit_sanitizer, default=10)
+        self.reqparse.add_argument('lang', type=lang_sanitizer, action='append')
 
         super(BaseList, self).__init__()
 
@@ -149,6 +156,13 @@ class BaseList(Resource):
             "description": 'Filter by project category. Multiple categories can be specified',
             "required": False,
             "dataType": "integer"
+        },
+        {
+            "paramType": "query",
+            "name": "lang",
+            "description": 'Get results by specified lang. Multiple langs can be specified',
+            "required": False,
+            "dataType": "string"
         },
         {
             "paramType": "query",

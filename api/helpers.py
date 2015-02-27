@@ -7,6 +7,21 @@ from flask import jsonify
 from config import config
 from api import app
 
+
+def get_lang(object, field, langs=[]):
+    """Searchs langs alternatives on a object in the form of:
+    {
+        field:'original',
+        field_en:'english translation',
+        field_eu:'basque translation',
+        ...
+    }
+    """
+    for l in langs:
+        if object[field + '_' + l]:
+            return object[field + '_' + l]
+    return object[field]
+
 def image_url(img, size='large'):
     """
     Goteo image urls

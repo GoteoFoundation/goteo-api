@@ -1,13 +1,29 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import func, Integer, String, Text, Date, DateTime
+from sqlalchemy import func, Integer, String, Text, DateTime
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
-from api.helpers import image_url, utc_from_local
-from sqlalchemy import asc, or_, distinct
+from sqlalchemy.orm import aliased
+from api.helpers import image_url
+from sqlalchemy import asc, or_, and_, distinct
 
-from api.helpers import svg_image_url
+from api.helpers import svg_image_url, get_lang
+from config import config
 from api import db
+
+# License stuff
+class LicenseLang(db.Model):
+    __tablename__ = 'license_lang'
+
+    id = db.Column('id', String(50), db.ForeignKey('license.id'), primary_key=True)
+    lang = db.Column('lang', String(2), primary_key=True)
+    license_lang = db.Column('name', String(100))
+    description_lang = db.Column('description', Text)
+    url_lang = db.Column('url', String(255))
+    pending = db.Column('pending', Integer)
+
+    def __repr__(self):
+        return '<LicenseLang %s: %r>' % (self.id, self.license_lang)
 
 # License stuff
 class License(db.Model):
@@ -20,7 +36,7 @@ class License(db.Model):
     order = db.Column('order', Integer)
 
     def __repr__(self):
-        return '<License %s: %r>' % (self.id, self.name)
+        return '<License %s: %r>' % (self.id, self.license)
 
     @hybrid_property
     def svg_url(self):
@@ -72,7 +88,6 @@ class License(db.Model):
             subquery = Location.location_subquery(**kwargs['location'])
             filters.append(LocationItem.id.in_(subquery))
 
-            pass
         return filters
 
     @hybrid_method
@@ -90,7 +105,31 @@ class License(db.Model):
         """Get a list of valid license"""
         try:
             filters = list(self.get_filters(**kwargs))
-            return self.query.filter(*filters).order_by(asc(License.order)).all()
+
+            # In case of requiring languages, a LEFT JOIN must be generated
+            if 'lang' in kwargs and kwargs['lang'] is not None:
+                joins = []
+                langs = {}
+                cols = [self.id,self.license,self.url,self.description]
+                for l in kwargs['lang']:
+                    langs[l] = aliased(LicenseLang)
+                    cols.append(langs[l].license_lang.label('license_' + l))
+                    cols.append(langs[l].description_lang.label('description_' + l))
+                    cols.append(langs[l].url_lang.label('url_' + l))
+                    # cols.append(langs[l])
+                    joins.append((langs[l], and_(langs[l].id == self.id, langs[l].lang == l)))
+                ret = []
+                for u in db.session.query(*cols).outerjoin(*joins).filter(*filters).order_by(asc(self.order)):
+                    u = u._asdict()
+                    u['license'] = get_lang(u, 'license', kwargs['lang'])
+                    u['description'] = get_lang(u, 'description', kwargs['lang'])
+                    u['url'] = get_lang(u, 'url', kwargs['lang'])
+                    ret.append(u)
+                return ret
+
+            # No need for languages by default
+            return self.query.filter(*filters).order_by(asc(self.order))
+
         except NoResultFound:
             return []
 
@@ -99,7 +138,7 @@ class License(db.Model):
         """Returns the total number of valid license"""
         try:
             filters = list(self.get_filters(**kwargs))
-            count = db.session.query(func.count(distinct(License.id))).filter(*filters).scalar()
+            count = db.session.query(func.count(distinct(self.id))).filter(*filters).scalar()
             if count is None:
                 count = 0
             return count

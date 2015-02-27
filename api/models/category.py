@@ -1,31 +1,46 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import func, Integer, String, Text, Date, DateTime
+from sqlalchemy import func, Integer, String, Text, Date
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
-from api.helpers import image_url, utc_from_local
-from sqlalchemy import asc, or_, distinct
+from api.helpers import image_url
+from sqlalchemy import asc, and_, or_, distinct
+from sqlalchemy.orm import aliased
 
 from api import db
+from api.helpers import get_lang
 
 from api.models.location import Location, LocationItem
 
+# Category stuff
+
+class CategoryLang(db.Model):
+    __tablename__ = 'category_lang'
+
+    id = db.Column('id', String(50), db.ForeignKey('category.id'), primary_key=True)
+    lang = db.Column('lang', String(2), primary_key=True)
+    category_lang = db.Column('name', Text)
+    description_lang = db.Column('description', Text)
+    pending = db.Column('pending', Integer)
+
+    def __repr__(self):
+        return '<CategoryLang %s: %r>' % (self.id, self.category_lang)
 
 class Category(db.Model):
     __tablename__ = 'category'
 
     id = db.Column('id', Integer, primary_key=True)
-    name = db.Column('name', Text)
+    category = db.Column('name', Text)
     description = db.Column('description', Text)
     order = db.Column('order', Integer)
 
     def __repr__(self):
-        return '<Category %s>' % (self.name)
+        return '<Category %s: %r>' % (self.id, self.category)
 
     #Filters for table category
     @hybrid_property
     def filters(self):
-        return [Category.name != '']
+        return [self.category != '']
 
     # Getting filters for this model
     @hybrid_method
@@ -73,7 +88,25 @@ class Category(db.Model):
         """Get a list of valid category"""
         try:
             filters = list(self.get_filters(**kwargs))
-            return self.query.filter(*filters).order_by(asc(Category.order)).all()
+            # In case of requiring languages, a LEFT JOIN must be generated
+            if 'lang' in kwargs and kwargs['lang'] is not None:
+                joins = []
+                langs = {}
+                cols = [self.id,self.category,self.description]
+                for l in kwargs['lang']:
+                    langs[l] = aliased(CategoryLang)
+                    cols.append(langs[l].category_lang.label('category_' + l))
+                    cols.append(langs[l].description_lang.label('description_' + l))
+                    joins.append((langs[l], and_(langs[l].id == self.id, langs[l].lang == l)))
+                ret = []
+                for u in db.session.query(*cols).outerjoin(*joins).filter(*filters).order_by(asc(self.order)):
+                    u = u._asdict()
+                    u['category'] = get_lang(u, 'category', kwargs['lang'])
+                    u['description'] = get_lang(u, 'description', kwargs['lang'])
+                    ret.append(u)
+                return ret
+
+            return self.query.filter(*filters).order_by(asc(self.order)).all()
         except NoResultFound:
             return []
 
@@ -82,7 +115,7 @@ class Category(db.Model):
         """Returns the total number of valid category"""
         try:
             filters = list(self.get_filters(**kwargs))
-            count = db.session.query(func.count(distinct(Category.id))).filter(*filters).scalar()
+            count = db.session.query(func.count(distinct(self.id))).filter(*filters).scalar()
             if count is None:
                 count = 0
             return count

@@ -6,6 +6,7 @@ from flask.ext.restful import fields, marshal
 from flask_restful_swagger import swagger
 
 from api.models.category import Category
+from api.models.project import Project
 from api.decorators import *
 from api.base_endpoint import BaseList, Response
 
@@ -16,7 +17,7 @@ class CategoryResponse(Response):
 
     resource_fields = {
         "id"         : fields.String,
-        "name"         : fields.String,
+        "category"         : fields.String,
         "description"         : fields.String,
     }
 
@@ -56,10 +57,21 @@ class CategoriesListAPI(BaseList):
         <a href="http://developers.goteo.org/categories#list">developers.goteo.org/categories#list</a>
         """
         time_start = time.time()
+        #removing not-needed standard filters
+        self.reqparse.remove_argument('page')
+        self.reqparse.remove_argument('limit')
         args = self.reqparse.parse_args()
+        # limit lang length
+        if 'lang' in args:
+            args['lang'] = args['lang'][:2]
+
         items = []
         for u in Category.list(**args):
-            items.append( marshal(u, CategoryResponse.resource_fields) )
+            item = marshal(u, CategoryResponse.resource_fields)
+            project_filter = args.copy()
+            project_filter['category'] = item['id']
+            item['total-projects'] = Project.total(**project_filter)
+            items.append( item )
 
         res = CategoriesListResponse(
             starttime = time_start,

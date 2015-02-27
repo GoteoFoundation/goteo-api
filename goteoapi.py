@@ -6,14 +6,12 @@ from flask_restful_swagger import swagger
 from config import config
 from api import app
 
-from api.decorators import *
-from api.helpers import debug_time
-from api import db
+# from api.decorators import *
+# from api.helpers import debug_time
 
 # DEBUG
-if config.debug:
-    db.session.query = debug_time(db.session.query)
-
+# if config.debug:
+#     db.session.query = debug_time(db.session.query)
 
 @app.after_request
 def add_cors(resp):
@@ -45,8 +43,8 @@ def page_not_found(e):
 
 # HOME
 @app.route('/', endpoint='api_home')
-@requires_auth
-@ratelimit()
+# @requires_auth
+# @ratelimit()
 def index():
     """API Welcome. All the available endpoints of the API"""
 

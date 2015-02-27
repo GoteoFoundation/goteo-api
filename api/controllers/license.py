@@ -11,7 +11,6 @@ from api.models.project import Project
 from api.decorators import *
 from api.base_endpoint import BaseList, Response
 
-
 @swagger.model
 class LicenseResponse(Response):
     """LicenseResponse"""
@@ -66,12 +65,18 @@ class LicensesListAPI(BaseList):
         self.reqparse.remove_argument('page')
         self.reqparse.remove_argument('limit')
         args = self.reqparse.parse_args()
+        # limit lang length
+        if 'lang' in args:
+            args['lang'] = args['lang'][:2]
+
+
         items = []
         for u in License.list(**args):
             item = marshal(u, LicenseResponse.resource_fields)
-            item['svg-url'] = u.svg_url
+            item['svg-url'] = svg_image_url(item['id'] + '.svg')
             reward_filter = args.copy()
-            # reward_filter['license_type'] = 'social'
+            reward_filter['license_type'] = 'social'
+            # print item
             reward_filter['license'] = item['id']
             item['total-rewards'] = Reward.total(**reward_filter)
             item['total-projects'] = Project.total(**reward_filter)

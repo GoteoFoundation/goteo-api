@@ -73,6 +73,8 @@ class UsersListAPI(BaseList):
         <a href="http://developers.goteo.org/users#list">developers.goteo.org/users#list</a>
         """
         time_start = time.time()
+        # For privacy, removing location filter ?
+        # self.reqparse.remove_argument('location')
         args = self.reqparse.parse_args()
         items = []
         for u in User.list(**args):
