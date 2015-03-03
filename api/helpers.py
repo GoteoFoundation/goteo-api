@@ -35,9 +35,10 @@ def get_lang(object, field, langs=[]):
         ...
     }
     """
-    for l in langs:
-        if object[field + '_' + l]:
-            return object[field + '_' + l]
+    if langs:
+        for l in langs:
+            if object[field + '_' + l]:
+                return object[field + '_' + l]
     return object[field]
 
 def image_url(img, size='large'):

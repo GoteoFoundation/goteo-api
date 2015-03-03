@@ -7,9 +7,6 @@ from flask import jsonify
 from flask.ext.restful import Resource, reqparse
 from helpers import *
 
-from api import db
-from api.models.location import Location
-
 def date_sanitizer(data):
     d = parse(data)
     return str(d.date())

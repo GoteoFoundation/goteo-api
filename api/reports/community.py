@@ -6,18 +6,19 @@ from flask.ext.restful import fields
 from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
 from sqlalchemy import and_, desc
+from sqlalchemy.orm import aliased
 
 from api import db
 
 from api.models.models import Call
-from api.models.category import Category
+from api.models.category import Category, CategoryLang
 from api.models.project import Project, ProjectCategory
 from api.models.invest import Invest, InvestNode
 from api.models.message import Message
 from api.models.user import User, UserInterest, UserRole
 from api.models.location import Location, LocationItem
 from api.decorators import *
-
+from api.helpers import get_lang
 from api.base_endpoint import BaseList as Base, Response
 
 func = sqlalchemy.func
@@ -180,7 +181,7 @@ class CommunityAPI(Base):
         bajas = self._bajas(list(filters2))
         donors = self._donors(list(filters))
         multidonors = self._multidonors(list(filters))
-        categorias = self._categorias(list(filters3))
+        categorias = self._categorias(list(filters3), args['lang'])
         users_categoria1 = categorias[0].users if len(categorias) > 0 else None
         users_categoria2 = categorias[1].users if len(categorias) > 1 else None
 
@@ -364,13 +365,29 @@ class CommunityAPI(Base):
 
     # Lista de categorias
     # TODO: idiomas para los nombres de categorias aqui
-    def _categorias(self, f_categorias = []):
-        res = db.session.query(func.count(UserInterest.user).label('users'), Category.id, Category.name)\
-                        .join(Category).filter(*f_categorias).group_by(UserInterest.interest)\
-                        .order_by(desc(func.count(UserInterest.user))).all()
-        if res is None:
-            res = []
-        return res
+    def _categorias(self, f_categorias = [], langs = []):
+        # In case of requiring languages, a LEFT JOIN must be generated
+        cols = [func.count(UserInterest.user).label('users'), Category.id, Category.name]
+        if langs:
+            joins = []
+            _langs = {}
+            for l in langs:
+                _langs[l] = aliased(CategoryLang)
+                cols.append(_langs[l].name_lang.label('name_' + l))
+                joins.append((_langs[l], and_(_langs[l].id == Category.id, _langs[l].lang == l)))
+            query = db.session.query(*cols).join(Category, Category.id == UserInterest.interest).outerjoin(*joins)
+        else:
+            query = db.session.query(*cols).join(Category, Category.id == UserInterest.interest)
+        ret = []
+
+        for u in query.filter(*f_categorias).group_by(UserInterest.interest)\
+                      .order_by(desc(func.count(UserInterest.user))):
+            # u = u._asdict()
+            u.name = get_lang(u._asdict(), 'name', langs)
+            ret.append(u)
+        if ret is None:
+            ret = []
+        return ret
 
 
     # Top 10 Cofinanciadores (con mayor numero de contribuciones, excepto usuarios convocadores o superadmins)
