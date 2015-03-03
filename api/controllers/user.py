@@ -8,6 +8,7 @@ from flask_restful_swagger import swagger
 from api.models.user import User
 from api.decorators import *
 from api.base_endpoint import BaseItem, BaseList, Response
+from api.helpers import parse_args
 
 
 @swagger.model
@@ -74,8 +75,9 @@ class UsersListAPI(BaseList):
         """
         time_start = time.time()
         # For privacy, removing location filter ?
-        # self.reqparse.remove_argument('location')
-        args = self.reqparse.parse_args()
+        self.reqparse.remove_argument('location')
+        args = parse_args(self.reqparse)
+
         items = []
         for u in User.list(**args):
             item = marshal(u, UserResponse.resource_fields)

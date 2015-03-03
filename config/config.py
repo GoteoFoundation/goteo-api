@@ -40,6 +40,17 @@ else:
 	# timezone = 'US/Eastern'
 	timezone = 'Europe/Madrid'
 
+# Default language used in Goteo
+if hasattr(settings, 'default_lang'):
+	default_lang = settings.default_lang
+else:
+	default_lang = 'es'
+# Default db language used in Goteo
+if hasattr(settings, 'default_db_lang'):
+	default_db_lang = settings.default_db_lang
+else:
+	default_db_lang = 'es'
+
 # Some usefull links
 if hasattr(settings, 'links'):
 	links = settings.links

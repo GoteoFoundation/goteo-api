@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import func, Integer, String, Text, DateTime
+from sqlalchemy import func, Integer, String, Text
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.orm import aliased
-from api.helpers import image_url
-from sqlalchemy import asc, or_, and_, distinct
+from sqlalchemy import asc, and_, distinct
 
 from api.helpers import svg_image_url, get_lang
-from config import config
 from api import db
 
 # License stuff
@@ -17,26 +15,26 @@ class LicenseLang(db.Model):
 
     id = db.Column('id', String(50), db.ForeignKey('license.id'), primary_key=True)
     lang = db.Column('lang', String(2), primary_key=True)
-    license_lang = db.Column('name', String(100))
+    name_lang = db.Column('name', String(100))
     description_lang = db.Column('description', Text)
     url_lang = db.Column('url', String(255))
     pending = db.Column('pending', Integer)
 
     def __repr__(self):
-        return '<LicenseLang %s: %r>' % (self.id, self.license_lang)
+        return '<LicenseLang %s: %r>' % (self.id, self.name_lang)
 
 # License stuff
 class License(db.Model):
     __tablename__ = 'license'
 
     id = db.Column('id', String(50), primary_key=True)
-    license = db.Column('name', String(100))
+    name = db.Column('name', String(100))
     description = db.Column('description', Text)
     url = db.Column('url', String(255))
     order = db.Column('order', Integer)
 
     def __repr__(self):
-        return '<License %s: %r>' % (self.id, self.license)
+        return '<License %s: %r>' % (self.id, self.name)
 
     @hybrid_property
     def svg_url(self):
@@ -110,25 +108,25 @@ class License(db.Model):
             if 'lang' in kwargs and kwargs['lang'] is not None:
                 joins = []
                 langs = {}
-                cols = [self.id,self.license,self.url,self.description]
+                cols = [self.id,self.name,self.url,self.description]
                 for l in kwargs['lang']:
                     langs[l] = aliased(LicenseLang)
-                    cols.append(langs[l].license_lang.label('license_' + l))
+                    cols.append(langs[l].name_lang.label('name_' + l))
                     cols.append(langs[l].description_lang.label('description_' + l))
                     cols.append(langs[l].url_lang.label('url_' + l))
                     # cols.append(langs[l])
                     joins.append((langs[l], and_(langs[l].id == self.id, langs[l].lang == l)))
                 ret = []
-                for u in db.session.query(*cols).outerjoin(*joins).filter(*filters).order_by(asc(self.order)):
+                for u in db.session.query(*cols).distinct().outerjoin(*joins).filter(*filters).order_by(asc(self.order)):
                     u = u._asdict()
-                    u['license'] = get_lang(u, 'license', kwargs['lang'])
+                    u['name'] = get_lang(u, 'name', kwargs['lang'])
                     u['description'] = get_lang(u, 'description', kwargs['lang'])
                     u['url'] = get_lang(u, 'url', kwargs['lang'])
                     ret.append(u)
                 return ret
 
             # No need for languages by default
-            return self.query.filter(*filters).order_by(asc(self.order))
+            return self.query.distinct().filter(*filters).order_by(asc(self.order))
 
         except NoResultFound:
             return []

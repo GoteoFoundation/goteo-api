@@ -20,28 +20,28 @@ class CategoryLang(db.Model):
 
     id = db.Column('id', String(50), db.ForeignKey('category.id'), primary_key=True)
     lang = db.Column('lang', String(2), primary_key=True)
-    category_lang = db.Column('name', Text)
+    name_lang = db.Column('name', Text)
     description_lang = db.Column('description', Text)
     pending = db.Column('pending', Integer)
 
     def __repr__(self):
-        return '<CategoryLang %s: %r>' % (self.id, self.category_lang)
+        return '<CategoryLang %s: %r>' % (self.id, self.name_lang)
 
 class Category(db.Model):
     __tablename__ = 'category'
 
     id = db.Column('id', Integer, primary_key=True)
-    category = db.Column('name', Text)
+    name = db.Column('name', Text)
     description = db.Column('description', Text)
     order = db.Column('order', Integer)
 
     def __repr__(self):
-        return '<Category %s: %r>' % (self.id, self.category)
+        return '<Category %s: %r>' % (self.id, self.name)
 
     #Filters for table category
     @hybrid_property
     def filters(self):
-        return [self.category != '']
+        return [self.name != '']
 
     # Getting filters for this model
     @hybrid_method
@@ -100,16 +100,16 @@ class Category(db.Model):
             if 'lang' in kwargs and kwargs['lang'] is not None:
                 joins = []
                 langs = {}
-                cols = [self.id,self.category,self.description]
+                cols = [self.id,self.name,self.description]
                 for l in kwargs['lang']:
                     langs[l] = aliased(CategoryLang)
-                    cols.append(langs[l].category_lang.label('category_' + l))
+                    cols.append(langs[l].name_lang.label('name_' + l))
                     cols.append(langs[l].description_lang.label('description_' + l))
                     joins.append((langs[l], and_(langs[l].id == self.id, langs[l].lang == l)))
                 ret = []
                 for u in db.session.query(*cols).distinct().outerjoin(*joins).filter(*filters).order_by(asc(self.order)):
                     u = u._asdict()
-                    u['category'] = get_lang(u, 'category', kwargs['lang'])
+                    u['name'] = get_lang(u, 'name', kwargs['lang'])
                     u['description'] = get_lang(u, 'description', kwargs['lang'])
                     ret.append(u)
                 return ret

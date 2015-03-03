@@ -49,16 +49,6 @@ class User(db.Model):
     def filters(self):
         return [User.hide == 0, User.active == 1]
 
-    #Joins for table user
-    @hybrid_property
-    def joins(self):
-        return []
-
-    #Left Joins for table user
-    @hybrid_property
-    def outerjoins(self):
-        return []
-
     # Getting filters for this model
     @hybrid_method
     def get_filters(self, **kwargs):
@@ -99,22 +89,6 @@ class User(db.Model):
         #TODO: more filters, like creators, invested, etc
         return filters
 
-    # Getting joins for this models
-    @hybrid_method
-    def get_joins(self, **kwargs):
-        joins = self.joins
-        # if 'location' in kwargs and kwargs['location'] is not None:
-        #     joins.append((LocationItem, LocationItem.item==User.id))
-        return joins
-
-    # Getting joins for this models
-    @hybrid_method
-    def get_outerjoins(self, **kwargs):
-        joins = self.outerjoins
-        # if 'project' in kwargs and kwargs['project'] is not None:
-        #     joins.append(Message)
-        return joins
-
     @hybrid_method
     def get(self, id):
         """Get a valid user form id"""
@@ -132,10 +106,7 @@ class User(db.Model):
             limit = kwargs['limit'] if 'limit' in kwargs else 10
             page = kwargs['page'] if 'page' in kwargs else 0
             filters = list(self.get_filters(**kwargs))
-            # joins = list(self.get_joins(**kwargs))
-            # outerjoins = list(self.get_outerjoins(**kwargs))
-            # return self.query.filter(*filters).join(*joins).outerjoin(*outerjoins).order_by(asc(User.id)).offset(page * limit).limit(limit)
-            return self.query.filter(*filters).order_by(asc(User.id)).offset(page * limit).limit(limit)
+            return self.query.distinct().filter(*filters).order_by(asc(User.id)).offset(page * limit).limit(limit)
         except NoResultFound:
             return []
 
@@ -144,9 +115,6 @@ class User(db.Model):
         """Returns the total number of valid users"""
         try:
             filters = list(self.get_filters(**kwargs))
-            # joins = list(self.get_joins(**kwargs))
-            # outerjoins = list(self.get_outerjoins(**kwargs))
-            # count = db.session.query(func.count(distinct(User.id))).filter(*filters).join(*joins).outerjoin(*outerjoins).scalar()
             count = db.session.query(func.count(distinct(User.id))).filter(*filters).scalar()
             if count is None:
                 count = 0

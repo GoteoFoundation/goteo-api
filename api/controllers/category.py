@@ -9,7 +9,7 @@ from api.models.category import Category
 from api.models.project import Project
 from api.decorators import *
 from api.base_endpoint import BaseList, Response
-
+from api.helpers import parse_args
 
 @swagger.model
 class CategoryResponse(Response):
@@ -17,7 +17,7 @@ class CategoryResponse(Response):
 
     resource_fields = {
         "id"             : fields.String,
-        "category"       : fields.String,
+        "name"       : fields.String,
         "description"    : fields.String,
         "total-projects" : fields.Integer,
     }
@@ -61,10 +61,7 @@ class CategoriesListAPI(BaseList):
         #removing not-needed standard filters
         self.reqparse.remove_argument('page')
         self.reqparse.remove_argument('limit')
-        args = self.reqparse.parse_args()
-        # limit lang length
-        if 'lang' in args and args['lang'] is not None:
-            args['lang'] = args['lang'][:2]
+        args = parse_args(self.reqparse)
 
         items = []
         for u in Category.list(**args):

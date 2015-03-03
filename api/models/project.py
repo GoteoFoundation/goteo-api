@@ -26,7 +26,6 @@ class Project(db.Model):
     id = db.Column('id', String(50), primary_key=True)
     owner = db.Column('owner', String(50), db.ForeignKey('user.id'))
     name = db.Column('name', Text)
-    category = db.Column('category', String(50), db.ForeignKey('category.id'))
     minimum = db.Column('mincost', Integer)
     optimum = db.Column('maxcost', Integer)
     #subtitle = db.Column('subtitle', String(255))
