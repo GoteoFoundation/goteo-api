@@ -19,7 +19,6 @@ from api.decorators import *
 
 from api.base_endpoint import BaseList, Response
 
-
 func = sqlalchemy.func
 
 
@@ -63,37 +62,35 @@ class MoneyAPI(BaseList):
     @ratelimit()
     def get(self):
         """Get the Money Report
-        <a href="http://developers.goteo.org/reports#money">developers.goteo.org/reports#money</a>
+        <a href="http://developers.goteo.org/doc/reports#money">developers.goteo.org/doc/reports#money</a>
         """
         time_start = time.time()
 
         #remove not used arguments
-        self.reqparse.remove_argument('page')
-        self.reqparse.remove_argument('limit')
-        args = self.reqparse.parse_args()
+        args = self.parse_args(remove=('page','limit'))
 
         filters = []
         filter_mincost = []  # para average_mincost
         filter_call = []  # para call_pledged_amount
-        if args['from_date']:
+        if 'from_date' in args and args['from_date'] is not None:
             filters.append(Invest.date_invested >= args['from_date'])
             filter_mincost.append(Invest.date_invested >= args['from_date'])
             filter_call.append(Call.date_published >= args['from_date'])
-        if args['to_date']:
+        if 'to_date' in args and args['to_date'] is not None:
             filters.append(Invest.date_invested <= args['to_date'])
             filter_mincost.append(Invest.date_invested <= args['to_date'])
             filter_call.append(Call.date_published <= args['to_date'])
-        if args['project']:
+        if 'project' in args and args['project'] is not None:
             filters.append(Invest.project.in_(args['project']))
             filter_mincost.append(Project.id.in_(args['project']))
             # no afecta a filter_call
-        if args['node']:
+        if 'node' in args and args['node'] is not None:
             filters.append(Invest.id == InvestNode.invest_id)
             filter_mincost.append(Project.id == InvestNode.project_id)
             filters.append(InvestNode.invest_node.in_(args['node']))
             filter_mincost.append(InvestNode.invest_node.in_(args['node']))
             # FIXME: Call.node?
-        if args['category']:
+        if 'category' in args and args['category'] is not None:
             #TODO: category debe ser un string? en ingles? o el id de categoria?
             # try:
             #     category_id = db.session.query(Category.id).filter(Category.name.in_(args['category'])).one()
@@ -106,7 +103,7 @@ class MoneyAPI(BaseList):
             filter_mincost.append(Invest.project == ProjectCategory.project)
             filter_mincost.append(ProjectCategory.category.in_(args['category']))
             # no afecta a filter_call
-        if args['location']:
+        if 'location' in args and args['location'] is not None:
             # subquery = Location.location_subquery(**args['location'])
             # Using Vincenty on code's side to query only one time the DB
             subquery = Location.location_ids(**args['location'])
@@ -152,7 +149,7 @@ class MoneyAPI(BaseList):
                 # Recaudación media por proyecto exitoso ( financiado )
                 "average-received"        : self._average_received(list(filters)),
                 # Perc. medio de recaudación sobre el mínimo (número del dato anterior)
-                "pledged-successful"     : self._pledged_success(list(filters)),
+                "pledged-successful"      : self._pledged_success(list(filters)),
                 # (Nuevo) Dinero medio solo obtenido en 2a ronda
                 "average-second-round"    : self._average_second_round(list(filters)),
                 # - [Renombrar Dinero compr. medio en proyectos archivados] Dinero recaudado de media en campañas fallidas
@@ -164,7 +161,7 @@ class MoneyAPI(BaseList):
             filters = args.items()
         )
 
-        return res.response()
+        return res.response(self.json)
 
 
     def _refunded(self, f_refunded=[]):
@@ -212,6 +209,7 @@ class MoneyAPI(BaseList):
         return call_amount
 
     def _fee_amount(self, f_fee_amount=[]):
+        #TODO: corregir para sumar valores project_account.fee
         f_fee_amount.append(Project.status.in_([Project.STATUS_FUNDED, Project.STATUS_FULFILLED]))
         f_fee_amount.append(Invest.status.in_([Invest.STATUS_CHARGED, Invest.STATUS_PAID]))
         fee_amount = db.session.query(func.sum(Invest.amount)).join(Project).filter(*f_fee_amount).scalar()
@@ -253,24 +251,19 @@ class MoneyAPI(BaseList):
         return average_mincost
 
     def _average_received(self, f_average_received=[]):
-        f_average_received.append(Invest.status.in_([Invest.STATUS_CHARGED,
-                                                     Invest.STATUS_PAID]))
         f_average_received.append(Project.status.in_([Project.STATUS_FUNDED,
                                                       Project.STATUS_FULFILLED]))
-        average_received = db.session.query(func.sum(Invest.amount) / func.count(func.distinct(Project.id)))\
-                                    .join(Project).filter(*f_average_received).scalar()
+        average_received = db.session.query(func.avg(Project.amount))\
+                                     .filter(*f_average_received).scalar()
         average_received = 0 if average_received is None else round(average_received, 2)
         return average_received
 
     def _pledged_success(self, f_pledged_success=[]):
         # FIXME: - 100
-        f_pledged_success.append(Invest.status.in_([Invest.STATUS_CHARGED,
-                                                         Invest.STATUS_PAID]))
         f_pledged_success.append(Project.status.in_([Project.STATUS_FUNDED,
-                                                          Project.STATUS_FULFILLED]))
-        sub = db.session.query((func.sum(Invest.amount) / Project.minimum * 100 - 100).label('percent'))\
-                            .select_from(Invest).join(Project)\
-                            .filter(*f_pledged_success).group_by(Invest.project).subquery()
+                                                     Project.STATUS_FULFILLED]))
+        sub = db.session.query((Project.amount / Project.minimum * 100 - 100).label('percent'))\
+                            .filter(*f_pledged_success).subquery()
         comprometido_success = db.session.query(func.avg(sub.c.percent)).scalar()
         comprometido_success = 0 if comprometido_success is None else round(comprometido_success, 2)
         return comprometido_success
@@ -285,20 +278,15 @@ class MoneyAPI(BaseList):
 
     def _average_failed(self, f_average_failed=[]):
         f_average_failed.append(Project.status == Project.STATUS_UNFUNDED)
-        f_average_failed.append(Invest.status.in_([Invest.STATUS_PENDING,
-                                                   Invest.STATUS_RETURNED]))
-        average_failed = db.session.query(func.sum(Invest.amount) / func.count(func.distinct(Project.id)))\
-                                        .join(Project).filter(*f_average_failed).scalar()
+        average_failed = db.session.query(func.avg(Project.amount) )\
+                                        .filter(*f_average_failed).scalar()
         average_failed = 0 if average_failed is None else round(average_failed, 2)
         return average_failed
 
     def _pledged_fail(self, f_pledged_fail=[]):
-        f_pledged_fail.append(Invest.status.in_([Invest.STATUS_PENDING,
-                                                      Invest.STATUS_RETURNED]))
         f_pledged_fail.append(Project.status == Project.STATUS_UNFUNDED)
-        sub = db.session.query((func.sum(Invest.amount) / Project.minimum * 100).label('percent'))\
-                            .select_from(Invest).join(Project)\
-                            .filter(*f_pledged_fail).group_by(Invest.project).subquery()
+        sub = db.session.query((Project.amount / Project.minimum * 100).label('percent'))\
+                            .filter(*f_pledged_fail).subquery()
         comprometido_fail = db.session.query(func.avg(sub.c.percent)).scalar()
         comprometido_fail = 0 if comprometido_fail is None else round(comprometido_fail, 2)
         return comprometido_fail
