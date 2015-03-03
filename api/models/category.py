@@ -52,7 +52,7 @@ class Category(db.Model):
             if i in kwargs and kwargs[i] is not None:
                 filters.append(self.id == ProjectCategory.category)
                 filters.append(Project.id == ProjectCategory.project)
-                filters.append(Project.status.in_(Project.VISIBLE_PROJECTS))
+                filters.append(Project.status.in_(Project.PUBLISHED_PROJECTS))
 
         # Filters by goteo node
         if 'node' in kwargs and kwargs['node'] is not None:

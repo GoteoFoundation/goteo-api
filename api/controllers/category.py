@@ -7,6 +7,7 @@ from flask_restful_swagger import swagger
 
 from api.models.category import Category
 from api.models.project import Project
+from api.models.user import User
 from api.decorators import *
 from api.base_endpoint import BaseList, Response
 from api.helpers import parse_args
@@ -17,9 +18,10 @@ class CategoryResponse(Response):
 
     resource_fields = {
         "id"             : fields.String,
-        "name"       : fields.String,
+        "name"           : fields.String,
         "description"    : fields.String,
         "total-projects" : fields.Integer,
+        "total-users"    : fields.Integer,
     }
 
     required = resource_fields.keys()
@@ -69,6 +71,7 @@ class CategoriesListAPI(BaseList):
             project_filter = args.copy()
             project_filter['category'] = [item['id']]
             item['total-projects'] = Project.total(**project_filter)
+            item['total-users'] = User.total(**project_filter)
             items.append( item )
 
         res = CategoriesListResponse(

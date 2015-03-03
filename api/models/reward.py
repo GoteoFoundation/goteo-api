@@ -40,7 +40,7 @@ class Reward(db.Model):
         for i in ('node', 'from_date', 'to_date', 'project', 'category', 'location'):
             if i in kwargs and kwargs[i] is not None:
                 filters.append(Project.id == self.project)
-                filters.append(Project.status.in_(Project.VISIBLE_PROJECTS))
+                filters.append(Project.status.in_(Project.PUBLISHED_PROJECTS))
         if 'license_type' in kwargs and kwargs['license_type'] is not None:
             filters.append(self.type == kwargs['license_type'])
         if 'license' in kwargs and kwargs['license'] is not None:

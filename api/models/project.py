@@ -20,7 +20,7 @@ class Project(db.Model):
     STATUS_FULFILLED   = 5 # 'Caso de exito'
     STATUS_UNFUNDED    = 6 # proyecto fallido
 
-    VISIBLE_PROJECTS = [STATUS_IN_CAMPAIGN, STATUS_FUNDED, STATUS_FULFILLED, STATUS_UNFUNDED]
+    PUBLISHED_PROJECTS = [STATUS_IN_CAMPAIGN, STATUS_FUNDED, STATUS_FULFILLED, STATUS_UNFUNDED]
     SUCCESSFUL_PROJECTS = [STATUS_IN_CAMPAIGN, STATUS_FUNDED, STATUS_FULFILLED]
 
     id = db.Column('id', String(50), primary_key=True)
@@ -48,7 +48,7 @@ class Project(db.Model):
     #Filters for this table
     @hybrid_property
     def filters(self):
-        return [self.status.in_(self.VISIBLE_PROJECTS)]
+        return [self.status.in_(self.PUBLISHED_PROJECTS)]
 
     # Getting filters for this model
     @hybrid_method
