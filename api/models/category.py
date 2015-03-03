@@ -10,6 +10,7 @@ from sqlalchemy.orm import aliased
 from api import db
 from api.helpers import get_lang
 
+from api.models.project import Project, ProjectCategory
 from api.models.location import Location, LocationItem
 
 # Category stuff
@@ -46,31 +47,38 @@ class Category(db.Model):
     @hybrid_method
     def get_filters(self, **kwargs):
         filters = self.filters
+        # Join project table if filters
+        for i in ('node', 'from_date', 'to_date', 'project', 'location'):
+            if i in kwargs and kwargs[i] is not None:
+                filters.append(self.id == ProjectCategory.category)
+                filters.append(Project.id == ProjectCategory.project)
+                filters.append(Project.status.in_(Project.VISIBLE_PROJECTS))
+
         # Filters by goteo node
         if 'node' in kwargs and kwargs['node'] is not None:
-            # filters.append(Category.node.in_(kwargs['node']))
-            pass
+            filters.append(Project.node.in_(kwargs['node']))
         # Filters by "from date"
         # counting category created after this date
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
-            # filters.append(Category.created >= kwargs['from_date'])
-            pass
+            filters.append(Project.date_published >= kwargs['from_date'])
         # Filters by "to date"
         # counting category created before this date
         if 'to_date' in kwargs and kwargs['to_date'] is not None:
-            # filters.append(Category.created <= kwargs['to_date'])
-            pass
+            filters.append(Project.date_published <= kwargs['to_date'])
         # Filters by "project"
         # counting attached (invested or collaborated) to some project(s)
         if 'project' in kwargs and kwargs['project'] is not None:
-        	pass
+        	filters.append(Project.id.in_(kwargs['project']))
         # filter by category interests
         if 'category' in kwargs and kwargs['category'] is not None:
-            pass
+            filters.append(Category.id.in_(kwargs['category']))
         #Filter by location
         if 'location' in kwargs and kwargs['location'] is not None:
-            pass
-        #TODO: more filters, like creators, invested, etc
+            filters.append(LocationItem.type == 'project')
+            filters.append(LocationItem.item == ProjectCategory.project)
+            filters.append(LocationItem.locable == True)
+            subquery = Location.location_subquery(**kwargs['location'])
+            filters.append(LocationItem.id.in_(subquery))
         return filters
 
     @hybrid_method
@@ -99,14 +107,14 @@ class Category(db.Model):
                     cols.append(langs[l].description_lang.label('description_' + l))
                     joins.append((langs[l], and_(langs[l].id == self.id, langs[l].lang == l)))
                 ret = []
-                for u in db.session.query(*cols).outerjoin(*joins).filter(*filters).order_by(asc(self.order)):
+                for u in db.session.query(*cols).distinct().outerjoin(*joins).filter(*filters).order_by(asc(self.order)):
                     u = u._asdict()
                     u['category'] = get_lang(u, 'category', kwargs['lang'])
                     u['description'] = get_lang(u, 'description', kwargs['lang'])
                     ret.append(u)
                 return ret
 
-            return self.query.filter(*filters).order_by(asc(self.order)).all()
+            return self.query.distinct().filter(*filters).order_by(asc(self.order)).all()
         except NoResultFound:
             return []
 

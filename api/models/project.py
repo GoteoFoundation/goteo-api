@@ -64,7 +64,7 @@ class Project(db.Model):
         if 'license_type' in kwargs and kwargs['license_type'] is not None:
             filters.append(Reward.type == kwargs['license_type'])
         if 'license' in kwargs and kwargs['license'] is not None:
-            filters.append(Reward.license == kwargs['license'])
+            filters.append(Reward.license.in_(kwargs['license']))
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
             filters.append(self.date_published >= kwargs['from_date'])
         if 'to_date' in kwargs and kwargs['to_date'] is not None:

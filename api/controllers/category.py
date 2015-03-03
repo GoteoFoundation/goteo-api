@@ -16,9 +16,10 @@ class CategoryResponse(Response):
     """CategoryResponse"""
 
     resource_fields = {
-        "id"         : fields.String,
-        "category"         : fields.String,
-        "description"         : fields.String,
+        "id"             : fields.String,
+        "category"       : fields.String,
+        "description"    : fields.String,
+        "total-projects" : fields.Integer,
     }
 
     required = resource_fields.keys()
@@ -69,7 +70,7 @@ class CategoriesListAPI(BaseList):
         for u in Category.list(**args):
             item = marshal(u, CategoryResponse.resource_fields)
             project_filter = args.copy()
-            project_filter['category'] = item['id']
+            project_filter['category'] = [item['id']]
             item['total-projects'] = Project.total(**project_filter)
             items.append( item )
 

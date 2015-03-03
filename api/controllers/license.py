@@ -76,7 +76,7 @@ class LicensesListAPI(BaseList):
             reward_filter = args.copy()
             reward_filter['license_type'] = 'social'
             # print item
-            reward_filter['license'] = item['id']
+            reward_filter['license'] = [item['id']]
             item['total-rewards'] = Reward.total(**reward_filter)
             item['total-projects'] = Project.total(**reward_filter)
             items.append( item )
