@@ -27,6 +27,13 @@ auth_enabled = True
 # debug (False by default)
 debug = True
 
+# Use cache type (null by default)
+# View http://pythonhosted.org/Flask-Cache/#configuring-flask-cache
+# for types and configuration options
+cache = { 'CACHE_TYPE' : 'simple' }
+
+
+
 # Opcional description for general messages
 description = 'Goteo.org API'
 
