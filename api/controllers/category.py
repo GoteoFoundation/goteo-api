@@ -57,7 +57,7 @@ class CategoriesListAPI(BaseList):
     @ratelimit()
     def get(self):
         """Get the categories list
-        <a href="http://developers.goteo.org/categories#list">developers.goteo.org/categories#list</a>
+        <a href="http://developers.goteo.org/doc/categories">developers.goteo.org/doc/categories</a>
         """
         time_start = time.time()
         #removing not-needed standard filters
@@ -83,4 +83,4 @@ class CategoriesListAPI(BaseList):
         if items == []:
             return bad_request('No categories to list', 404)
 
-        return res.response()
+        return res.response(self.json)

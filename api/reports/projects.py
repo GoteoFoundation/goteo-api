@@ -80,7 +80,7 @@ class ProjectsAPI(Base):
     @ratelimit()
     def get(self):
         """Get the Projects Report
-        <a href="http://developers.goteo.org/reports#projects">developers.goteo.org/reports#projects</a>
+        <a href="http://developers.goteo.org/doc/reports#projects">developers.goteo.org/doc/reports#projects</a>
         """
         time_start = time.time()
         self.reqparse.remove_argument('page')
@@ -132,7 +132,7 @@ class ProjectsAPI(Base):
             },
             filters = args.items()
         )
-        return res.response()
+        return res.response(self.json)
 
     # Proyectos enviados a revisión (renombrar Proyectos recibidos)
     def _received(self, f_rev_projects = []):

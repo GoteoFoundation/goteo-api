@@ -57,12 +57,13 @@ def index():
 
 #Add modules
 from api.reports_endpoint import api_reports
-from api.controllers_endpoint import api_users, api_licenses, api_categories
+from api.controllers_endpoint import api_users, api_licenses, api_categories, api_digests
 
 app.register_blueprint(api_reports)
 app.register_blueprint(api_users)
 app.register_blueprint(api_licenses)
 app.register_blueprint(api_categories)
+app.register_blueprint(api_digests)
 
 
 #This part will not be executed under uWSGI module (nginx)

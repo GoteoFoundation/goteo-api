@@ -2,7 +2,7 @@
 #
 
 import time
-from dateutil.parser import *
+from dateutil.parser import parse
 from flask import jsonify
 from flask.ext.restful import Resource, reqparse
 from helpers import *
@@ -63,10 +63,12 @@ class Response():
     def set(self, var, value):
         self.ret[var] = value;
 
-    def response(self):
+    def response(self, as_json = True):
         if self.time_start != 0:
             self.ret['time-elapsed'] = time.time() - self.time_start
-        return jsonify(self.ret)
+        if as_json:
+            return jsonify(self.ret)
+        return self.ret
 
 class BaseItem(Resource):
     """Base class for individual enpoint reports"""
@@ -91,6 +93,7 @@ class BaseList(Resource):
     """Base class for list enpoint reports"""
 
     def __init__(self):
+        self.json = True # returns result with jsonify
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('from_date', type=date_sanitizer)
         self.reqparse.add_argument('to_date', type=date_sanitizer)
@@ -104,6 +107,32 @@ class BaseList(Resource):
         self.reqparse.add_argument('lang', type=lang_sanitizer, action='append')
 
         super(BaseList, self).__init__()
+
+    def parse_args(self, remove=()):
+        """Standard args parser santizizer
+           returns a dict of arguments and values
+        """
+        if remove:
+            for r in remove:
+                self.reqparse.remove_argument(r)
+
+        args = self.reqparse.parse_args()
+        # limit lang length
+        if 'lang' in args and args['lang'] is not None:
+            langs = []
+            for l in args['lang']:
+                if config.default_db_lang != l:
+                    langs.append(l)
+
+            args['lang'] = langs
+            if langs is []:
+                del args['lang']
+            else:
+                # 2 elements allowed only
+                args['lang'] = args['lang'][:2]
+
+        return args
+
 
     # For Swagger specification
     RESPONSE_MESSAGES = [

@@ -71,7 +71,7 @@ class UsersListAPI(BaseList):
     @ratelimit()
     def get(self):
         """Get the users list
-        <a href="http://developers.goteo.org/users#list">developers.goteo.org/users#list</a>
+        <a href="http://developers.goteo.org/doc/users">developers.goteo.org/doc/users</a>
         """
         time_start = time.time()
         # For privacy, removing location filter ?
@@ -126,5 +126,5 @@ class UserAPI(BaseItem):
         if u is None:
             return bad_request('User not found', 404)
 
-        return res.response()
+        return res.response(self.json)
 

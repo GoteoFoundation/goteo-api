@@ -4,6 +4,7 @@ from flask import Blueprint
 from api.controllers.user import UserAPI, UsersListAPI
 from api.controllers.license import LicensesListAPI
 from api.controllers.category import CategoriesListAPI
+from api.controllers.digest import DigestsListAPI
 
 from api import api
 from api.decorators import *
@@ -24,3 +25,8 @@ api_categories = Blueprint('api_categories', __name__)
 
 # All resources for categories
 api.add_resource(CategoriesListAPI, '/categories/', endpoint='api_categories.categories_list')
+
+api_digests = Blueprint('api_digests', __name__)
+
+# All resources for digests
+api.add_resource(DigestsListAPI, '/digests/<path:endpoint>', endpoint='api_digests.money')

@@ -109,7 +109,7 @@ class CommunityAPI(Base):
     @ratelimit()
     def get(self):
         """Get the community reports
-        <a href="http://developers.goteo.org/reports#community">developers.goteo.org/reports#community</a>
+        <a href="http://developers.goteo.org/doc/reports#community">developers.goteo.org/doc/reports#community</a>
         """
         time_start = time.time()
         self.reqparse.remove_argument('page')
@@ -225,7 +225,7 @@ class CommunityAPI(Base):
             },
             filters = args.items()
         )
-        return res.response()
+        return res.response(self.json)
 
     # Número total de usuarios
     def _users(self, f_users = []):

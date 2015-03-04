@@ -88,6 +88,34 @@ class Invest(db.Model):
         except MultipleResultsFound:
             return 0
 
+    @hybrid_method
+    def pledged_successful(self, **kwargs):
+        """Total amount of money (€) raised by Goteo only on successful projects"""
+        try:
+            filters = list(self.get_filters(**kwargs))
+            filters.append(Invest.status.in_([Invest.STATUS_CHARGED,
+                                              Invest.STATUS_PAID]))
+            total = db.session.query(func.sum(Invest.amount)).filter(*filters).scalar()
+            if total is None:
+                total = 0
+            return total
+        except MultipleResultsFound:
+            return 0
+
+    @hybrid_method
+    def pledged_failed(self, **kwargs):
+        """Total amount of money (€) raised by Goteo and returned due project failure"""
+        try:
+            filters = list(self.get_filters(**kwargs))
+            filters.append(Invest.status.in_([Invest.STATUS_PENDING,
+                                              Invest.STATUS_RETURNED]))
+            total = db.session.query(func.sum(Invest.amount)).filter(*filters).scalar()
+            if total is None:
+                total = 0
+            return total
+        except MultipleResultsFound:
+            return 0
+
 
 class InvestNode(db.Model):
     __tablename__ = 'invest_node'

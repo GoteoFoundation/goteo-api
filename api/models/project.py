@@ -28,6 +28,7 @@ class Project(db.Model):
     name = db.Column('name', Text)
     minimum = db.Column('mincost', Integer)
     optimum = db.Column('maxcost', Integer)
+    amount = db.Column('amount', Integer)
     #subtitle = db.Column('subtitle', String(255))
     status = db.Column('status', Integer)
     #created = db.Column('created', Date)

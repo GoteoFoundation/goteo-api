@@ -73,15 +73,21 @@ class MoneyAPI(BaseList):
         filter_mincost = []  # para average_mincost
         filter_call = []  # para call_pledged_amount
         if 'from_date' in args and args['from_date'] is not None:
+            filters.append(Invest.project == Project.id)
             filters.append(Invest.date_invested >= args['from_date'])
             filter_mincost.append(Invest.date_invested >= args['from_date'])
+            filter_mincost.append(Invest.project == Project.id)
+            filter_mincost.append(InvestNode.invest_id == Invest.id)
             filter_call.append(Call.date_published >= args['from_date'])
         if 'to_date' in args and args['to_date'] is not None:
+            filters.append(Invest.project == Project.id)
             filters.append(Invest.date_invested <= args['to_date'])
             filter_mincost.append(Invest.date_invested <= args['to_date'])
+            filter_mincost.append(Invest.project == Project.id)
+            filter_mincost.append(InvestNode.invest_id == Invest.id)
             filter_call.append(Call.date_published <= args['to_date'])
         if 'project' in args and args['project'] is not None:
-            filters.append(Invest.project.in_(args['project']))
+            filters.append(Project.id.in_(args['project']))
             filter_mincost.append(Project.id.in_(args['project']))
             # no afecta a filter_call
         if 'node' in args and args['node'] is not None:

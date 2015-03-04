@@ -59,7 +59,7 @@ class LicensesListAPI(BaseList):
     @ratelimit()
     def get(self):
         """Get the licenses list
-        <a href="http://developers.goteo.org/licenses#list">developers.goteo.org/licenses#list</a>
+        <a href="http://developers.goteo.org/doc/licenses">developers.goteo.org/doc/licenses</a>
         """
         time_start = time.time()
         #removing not-needed standard filters
@@ -88,4 +88,4 @@ class LicensesListAPI(BaseList):
         if items == []:
             return bad_request('No licenses to list', 404)
 
-        return res.response()
+        return res.response(self.json)

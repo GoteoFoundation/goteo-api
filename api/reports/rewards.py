@@ -64,7 +64,7 @@ class RewardsAPI(Base):
     @ratelimit()
     def get(self):
         """Get the Rewards Report
-        <a href="http://developers.goteo.org/reports#rewards">developers.goteo.org/reports#rewards</a>
+        <a href="http://developers.goteo.org/doc/reports#rewards">developers.goteo.org/doc/reports#rewards</a>
         """
         time_start = time.time()
         self.reqparse.remove_argument('page')
@@ -128,7 +128,7 @@ class RewardsAPI(Base):
             },
             filters = args.items()
         )
-        return res.response()
+        return res.response(self.json)
 
     #Numero de cofinanciadores
     def _cofinanciadores(self, filters = []):
