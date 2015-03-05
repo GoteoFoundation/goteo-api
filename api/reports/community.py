@@ -10,7 +10,7 @@ from sqlalchemy.orm import aliased
 
 from api import db
 
-from api.models.models import Call
+from api.models.call import Call
 from api.models.category import Category, CategoryLang
 from api.models.project import Project, ProjectCategory
 from api.models.invest import Invest, InvestNode

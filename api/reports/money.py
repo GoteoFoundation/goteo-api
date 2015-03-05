@@ -5,13 +5,9 @@ import time
 from flask.ext.restful import fields
 from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
-from sqlalchemy.orm.exc import NoResultFound
-
-from config import config
 
 from api import db
-from api.models.models import Call
-from api.models.category import Category
+from api.models.call import Call
 from api.models.project import Project, ProjectCategory
 from api.models.invest import Invest, InvestNode
 from api.models.location import Location, LocationItem
@@ -124,175 +120,52 @@ class MoneyAPI(BaseList):
             attributes = {
                 # Dinero comprometido: Suma recaudada por la plataforma
                 "pledged"                 : Invest.pledged_total(**args),
-                # # Dinero devuelto (en proyectos archivados)
-                # "refunded"                : self._refunded(list(filters)),
-                # #- Recaudado mediante PayPal
-                # #FIXME: No quitamos los devueltos?
-                # "paypal-amount"           : self._paypal_amount(list(filters)),
-                # #- Recaudado mediante TPV
-                # #FIXME: No quitamos los devueltos?
-                # "creditcard-amount"       : self._tpv_amount(list(filters)),
+                # "pledged"                 : Project.pledged_total(**args),
+                # Perc. medio de recaudación sobre el mínimo recaudado
+                "pledged-successful"      : Invest.percent_pledged_successful(**args),
+                # "pledged-successful"      : Project.percent_pledged_successful(**args),
+                # Perc. dinero compr. medio sobre mínimo',
+                "pledged-failed"          : Invest.percent_pledged_failed(**args),
+                # "pledged-failed"          : Project.percent_pledged_failed(**args),
+                # Dinero devuelto (en proyectos archivados)
+                "refunded"                : Invest.refunded_total(**args),
+                # "refunded"                : Project.refunded_total(**args),
+                # Recaudado mediante PayPal
+                # TODO: confirmar si hay que quitar devueltos
+                "paypal-amount"           : Invest.pledged_total(method=Invest.METHOD_PAYPAL, **args),
+                # Recaudado mediante TPV
+                "creditcard-amount"       : Invest.pledged_total(method=Invest.METHOD_TPV, **args),
                 # # Aportes manuales: recaudado mediante transferencia bancaria directa
-                # #FIXME: No quitamos los devueltos?
-                # "cash-amount"             : self._cash_amount(list(filters)),
-                # # - [NEW] Suma recaudada en Convocatorias (Capital riego distribuido + crowd)
-                # #FIXME: No quitamos los devueltos?
-                # "matchfund-amount"        : self._call_amount(list(filters)),
-                # # Capital Riego de Goteo (fondos captados de instituciones y empresas destinados a la bolsa de Capital Riego https://goteo.org/service/resources)
-                # "matchfundpledge-amount"  : self._call_pledged_amount(list(filter_call)),
-                # # Total 8% recaudado por Goteo
-                # "fee-amount"              : self._fee_amount(list(filters)),
-                # # Aporte medio por cofinanciador(micromecenas)
-                # # OJO: En reporting.php no calcula esto mismo
-                # "average-donation"        : self._average_donation(list(filters)),
-                # # Aporte medio por cofinanciador(micromecenas) mediante PayPal
-                # # OJO: En reporting.php no calcula esto mismo
-                # "average-donation-paypal" : self._average_donation_paypal(list(filters)),
-                # # Coste mínimo medio por proyecto exitoso: Presupuesto mínimo medio por proyecto exitoso
-                # # TODO: ¿parametro location?
-                # # OJO: En reporting.php no calcula esto mismo
-                # "average-minimum"         : self._average_mincost(list(filter_mincost)),
-                # # Recaudación media por proyecto exitoso ( financiado )
-                # "average-received"        : self._average_received(list(filters)),
-                # # Perc. medio de recaudación sobre el mínimo (número del dato anterior)
-                # "pledged-successful"      : self._pledged_success(list(filters)),
-                # # (Nuevo) Dinero medio solo obtenido en 2a ronda
-                # "average-second-round"    : self._average_second_round(list(filters)),
-                # # - [Renombrar Dinero compr. medio en proyectos archivados] Dinero recaudado de media en campañas fallidas
-                # "average-failed"          : self._average_failed(list(filters)),
-                # # - [Renombrar]Perc. dinero compr. medio (dinero recaudado de media) sobre mínimo (número del dato anterior)
-                # # Perc. dinero compr. medio sobre mínimo',
-                # "pledged-failed"          : self._pledged_fail(list(filters))
+                "cash-amount"             : Invest.pledged_total(method=Invest.METHOD_CASH, **args),
+                #  Suma recaudada en Convocatorias (Capital riego distribuido + crowd)
+                # SOLO CONVOCATORIA:
+                # "matchfund-amount"        : Invest.pledged_total(method=Invest.METHOD_DROP, **args),
+                # CONVOCATORIA y aportes individuales
+                "matchfund-amount"        : Invest.pledged_total(is_call=True, **args),
+                # Capital Riego de Goteo (fondos captados de instituciones y empresas destinados a la bolsa de Capital Riego https://goteo.org/service/resources)
+                "matchfundpledge-amount"  : Call.pledged_total(**args),
+                # Total 8% recaudado por Goteo
+                "fee-amount"              : Invest.fee_total(**args),
+                # Aporte medio por cofinanciador(micromecenas)
+                # OJO: En reporting.php no calcula esto mismo
+                "average-donation"        : Invest.average_donation(**args),
+                # Aporte medio por cofinanciador(micromecenas) mediante PayPal
+                # OJO: En reporting.php no calcula esto mismo
+                "average-donation-paypal" : Invest.average_donation(method=Invest.METHOD_PAYPAL, **args),
+                # Coste mínimo medio por proyecto exitoso: Presupuesto mínimo medio por proyecto exitoso
+                # TODO: ¿parametro location?
+                # OJO: En reporting.php no calcula esto mismo
+                "average-minimum"         : Project.average_minimum(**args),
+                # Recaudación media por proyecto exitoso ( financiado )
+                "average-received"        : Project.average_total(status=[Project.STATUS_FUNDED, Project.STATUS_FULFILLED], **args),
+                # (Nuevo) Dinero medio solo obtenido en 2a ronda
+                "average-second-round"    : Invest.average_second_round(**args),
+                # - [Renombrar Dinero compr. medio en proyectos archivados] Dinero recaudado de media en campañas fallidas
+                "average-failed"          : Project.average_total(status=[Project.STATUS_UNFUNDED], **args),
+                # - [Renombrar]Perc. dinero compr. medio (dinero recaudado de media) sobre mínimo (número del dato anterior)
             },
             filters = args.items()
         )
 
         return res.response(self.json)
 
-
-    def _refunded(self, f_refunded=[]):
-        f_refunded.append(Invest.status==Invest.STATUS_RETURNED)
-        devuelto = db.session.query(func.sum(Invest.amount)).filter(*f_refunded).scalar()
-        if devuelto is None:
-            devuelto = 0
-        return devuelto
-
-    def _paypal_amount(self, f_paypal_amount=[]):
-        f_paypal_amount.append(Invest.method==Invest.METHOD_PAYPAL)
-        paypal_amount = db.session.query(func.sum(Invest.amount)).filter(*f_paypal_amount).scalar()
-        if paypal_amount is None:
-            paypal_amount = 0
-        return paypal_amount
-
-    def _tpv_amount(self, f_tpv_amount=[]):
-        f_tpv_amount.append(Invest.method==Invest.METHOD_TPV)
-        tpv_amount = db.session.query(func.sum(Invest.amount)).filter(*f_tpv_amount).scalar()
-        if tpv_amount is None:
-            tpv_amount = 0
-        return tpv_amount
-
-    def _cash_amount(self, f_cash_amount=[]):
-        f_cash_amount.append(Invest.method==Invest.METHOD_CASH)
-        cash_amount = db.session.query(func.sum(Invest.amount)).filter(*f_cash_amount).scalar()
-        if cash_amount is None:
-            cash_amount = 0
-        return cash_amount
-
-    def _call_pledged_amount(self, f_call_pledged_amount=[]):
-        f_call_pledged_amount.append(Call.status > Call.STATUS_REVIEWING)
-        call_pledged_amount = db.session.query(func.sum(Call.amount)).filter(*f_call_pledged_amount).scalar()
-        if call_pledged_amount is None:
-            call_pledged_amount = 0
-        return call_pledged_amount
-
-    def _call_amount(self, f_call_amount=[]):
-        f_call_amount.append(Invest.method==Invest.METHOD_DROP)
-        f_call_amount.append(Invest.call != None)
-        f_call_amount.append(Invest.status.in_([Invest.STATUS_CHARGED, Invest.STATUS_PAID]))
-        call_amount = db.session.query(func.sum(Invest.amount)).filter(*f_call_amount).scalar()
-        if call_amount is None:
-            call_amount = 0
-        return call_amount
-
-    def _fee_amount(self, f_fee_amount=[]):
-        #TODO: corregir para sumar valores project_account.fee
-        f_fee_amount.append(Project.status.in_([Project.STATUS_FUNDED, Project.STATUS_FULFILLED]))
-        f_fee_amount.append(Invest.status.in_([Invest.STATUS_CHARGED, Invest.STATUS_PAID]))
-        fee_amount = db.session.query(func.sum(Invest.amount)).join(Project).filter(*f_fee_amount).scalar()
-        if fee_amount is None:
-            fee_amount = 0
-        else:
-            fee_amount = float(fee_amount) * 0.08
-            fee_amount = round(fee_amount, 2)
-        return fee_amount
-
-    def _average_donation(self, f_average_invest=[]):
-        f_average_invest.append(Project.status.in_([Project.STATUS_FUNDED,
-                                                    Project.STATUS_FULFILLED,
-                                                    Project.STATUS_UNFUNDED]))
-        f_average_invest.append(Invest.status > Invest.STATUS_PENDING)
-        sub1 = db.session.query(func.avg(Invest.amount).label('amount')).join(Project)\
-                                .filter(*f_average_invest).group_by(Invest.user).subquery()
-        average_invest = db.session.query(func.avg(sub1.c.amount)).scalar()
-        average_invest = 0 if average_invest is None else round(average_invest, 2)
-        return average_invest
-
-    def _average_donation_paypal(self, f_average_donation_paypal=[]):
-        f_average_donation_paypal.append(Project.status.in_([Project.STATUS_FUNDED,
-                                                             Project.STATUS_FULFILLED,
-                                                            Project.STATUS_UNFUNDED]))
-        f_average_donation_paypal.append(Invest.status > Invest.STATUS_PENDING)
-        f_average_donation_paypal.append(Invest.method==Invest.METHOD_PAYPAL)
-        sub1 = db.session.query(func.avg(Invest.amount).label('amount')).join(Project)\
-                                        .filter(*f_average_donation_paypal).group_by(Invest.user).subquery()
-        average_donation_paypal = db.session.query(func.avg(sub1.c.amount)).scalar()
-        average_donation_paypal = 0 if average_donation_paypal is None else round(average_donation_paypal, 2)
-        return average_donation_paypal
-
-    def _average_mincost(self, f_average_mincost=[]):
-        f_average_mincost.append(Project.status.in_([Project.STATUS_FUNDED,
-                                                     Project.STATUS_FULFILLED]))
-        average_mincost = db.session.query(func.avg(Project.minimum)).filter(*f_average_mincost).scalar()
-        average_mincost = 0 if average_mincost is None else round(average_mincost, 2)
-        return average_mincost
-
-    def _average_received(self, f_average_received=[]):
-        f_average_received.append(Project.status.in_([Project.STATUS_FUNDED,
-                                                      Project.STATUS_FULFILLED]))
-        average_received = db.session.query(func.avg(Project.amount))\
-                                     .filter(*f_average_received).scalar()
-        average_received = 0 if average_received is None else round(average_received, 2)
-        return average_received
-
-    def _pledged_success(self, f_pledged_success=[]):
-        # FIXME: - 100
-        f_pledged_success.append(Project.status.in_([Project.STATUS_FUNDED,
-                                                     Project.STATUS_FULFILLED]))
-        sub = db.session.query((Project.amount / Project.minimum * 100 - 100).label('percent'))\
-                            .filter(*f_pledged_success).subquery()
-        comprometido_success = db.session.query(func.avg(sub.c.percent)).scalar()
-        comprometido_success = 0 if comprometido_success is None else round(comprometido_success, 2)
-        return comprometido_success
-
-    def _average_second_round(self, f_average_second_round=[]):
-        f_average_second_round.append(Invest.date_invested >= Project.date_passed)
-        sub = db.session.query(func.sum(Invest.amount).label('amount')).join(Project)\
-                                            .filter(*f_average_second_round).group_by(Project.id).subquery()
-        average_second_round = db.session.query(func.avg(sub.c.amount)).scalar()
-        average_second_round = 0 if average_second_round is None else round(average_second_round, 2)
-        return average_second_round
-
-    def _average_failed(self, f_average_failed=[]):
-        f_average_failed.append(Project.status == Project.STATUS_UNFUNDED)
-        average_failed = db.session.query(func.avg(Project.amount) )\
-                                        .filter(*f_average_failed).scalar()
-        average_failed = 0 if average_failed is None else round(average_failed, 2)
-        return average_failed
-
-    def _pledged_fail(self, f_pledged_fail=[]):
-        f_pledged_fail.append(Project.status == Project.STATUS_UNFUNDED)
-        sub = db.session.query((Project.amount / Project.minimum * 100).label('percent'))\
-                            .filter(*f_pledged_fail).subquery()
-        comprometido_fail = db.session.query(func.avg(sub.c.percent)).scalar()
-        comprometido_fail = 0 if comprometido_fail is None else round(comprometido_fail, 2)
-        return comprometido_fail

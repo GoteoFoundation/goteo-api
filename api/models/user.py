@@ -6,6 +6,7 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from api.helpers import image_url, utc_from_local
 from sqlalchemy import asc, or_, distinct
 
+from api.decorators import cacher
 from api import db
 
 from api.models.invest import Invest
@@ -90,6 +91,7 @@ class User(db.Model):
         return filters
 
     @hybrid_method
+    @cacher
     def get(self, id):
         """Get a valid user form id"""
         try:
@@ -100,6 +102,7 @@ class User(db.Model):
             return None
 
     @hybrid_method
+    @cacher
     def list(self, **kwargs):
         """Get a list of valid users"""
         try:
@@ -111,6 +114,7 @@ class User(db.Model):
             return []
 
     @hybrid_method
+    @cacher
     def total(self, **kwargs):
         """Returns the total number of valid users"""
         try:

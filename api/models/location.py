@@ -5,7 +5,8 @@ from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from api.helpers import image_url, utc_from_local
 from sqlalchemy.sql import select, column
-from api import db, cache
+from api import db
+from api.decorators import cacher
 
 class Location(db.Model):
     __tablename__ = 'location'
@@ -65,7 +66,7 @@ class Location(db.Model):
 
     # Vincenty Method, slightly better precision, high cost on querying database
     @hybrid_method
-    @cache.cached(50)
+    @cacher
     def location_ids(self, latitude, longitude, radius):
         from geopy.distance import VincentyDistance
         from math import degrees, radians, cos

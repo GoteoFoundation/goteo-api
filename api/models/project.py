@@ -6,6 +6,8 @@ from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from api.helpers import utc_from_local
 from sqlalchemy import asc, distinct
+
+from api.decorators import cacher
 from api import db
 
 class Project(db.Model):
@@ -65,6 +67,8 @@ class Project(db.Model):
             filters.append(Reward.type == kwargs['license_type'])
         if 'license' in kwargs and kwargs['license'] is not None:
             filters.append(Reward.license.in_(kwargs['license']))
+        if 'status' in kwargs and kwargs['status'] is not None:
+            filters.append(self.status.in_(kwargs['status']))
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
             filters.append(self.date_published >= kwargs['from_date'])
         if 'to_date' in kwargs and kwargs['to_date'] is not None:
@@ -86,18 +90,85 @@ class Project(db.Model):
         return filters
 
     @hybrid_method
+    @cacher
     def total(self, **kwargs):
         """Total number of projects"""
         try:
             filters = list(self.get_filters(**kwargs))
-            total = db.session.query(func.count(distinct(Project.id))).filter(*filters).scalar()
+            total = db.session.query(func.count(distinct(self.id))).filter(*filters).scalar()
             if total is None:
                 total = 0
             return total
         except MultipleResultsFound:
             return 0
 
+    @hybrid_method
+    @cacher
+    def pledged_total(self, **kwargs):
+        """Total amount of money (€) raised by Goteo"""
+        try:
+            filters = list(self.get_filters(**kwargs))
+            filters.append(self.status.in_(self.SUCCESSFUL_PROJECTS))
+            total = db.session.query(func.sum(distinct(self.amount))).filter(*filters).scalar()
+            if total is None:
+                total = 0
+            return total
+        except MultipleResultsFound:
+            return 0
 
+    @hybrid_method
+    @cacher
+    def refunded_total(self, **kwargs):
+        """Refunded money (€) on failed projects """
+        try:
+            filters = list(self.get_filters(**kwargs))
+            filters.append(self.status == self.STATUS_UNFUNDED)
+            total = db.session.query(func.sum(distinct(self.amount))).filter(*filters).scalar()
+            if total is None:
+                total = 0
+            return total
+        except MultipleResultsFound:
+            return 0
+
+    @hybrid_method
+    @cacher
+    def percent_pledged_successful(self, **kwargs):
+        """Percentage of money raised over the minimum on successful projects"""
+        filters = list(self.get_filters(**kwargs))
+        filters.append(self.status.in_([self.STATUS_FUNDED,
+                                           self.STATUS_FULFILLED]))
+        total = db.session.query(func.avg(self.amount / self.minimum * 100 - 100)).filter(*filters).scalar()
+        total = 0 if total is None else round(total, 2)
+        return total
+
+    @hybrid_method
+    @cacher
+    def percent_pledged_failed(self, **kwargs):
+        """Percentage of money raised over the minimum on failed projects """
+        filters = list(self.get_filters(**kwargs))
+        filters.append(self.status == self.STATUS_UNFUNDED)
+        total = db.session.query(func.avg(self.amount / self.minimum * 100)).filter(*filters).scalar()
+        total = 0 if total is None else round(total, 2)
+        return total
+
+    @hybrid_method
+    @cacher
+    def average_minimum(self, **kwargs):
+        """Average minimum cost (€) for successful projects (NOTE: this field is not affected by the location filter)"""
+        filters = list(self.get_filters(**kwargs))
+        filters.append(self.status.in_([self.STATUS_FUNDED, self.STATUS_FULFILLED]))
+        total = db.session.query(func.avg(self.minimum)).filter(*filters).scalar()
+        total = 0 if total is None else round(total, 2)
+        return total
+
+    @hybrid_method
+    @cacher
+    def average_total(self, **kwargs):
+        """Average money raised (€) for published projects"""
+        filters = list(self.get_filters(**kwargs))
+        total = db.session.query(func.avg(self.amount)).filter(*filters).scalar()
+        total = 0 if total is None else round(total, 2)
+        return total
 
 
 class ProjectCategory(db.Model):
@@ -107,5 +178,5 @@ class ProjectCategory(db.Model):
     category = db.Column('category', Integer, db.ForeignKey('category.id'), primary_key=True)
 
     def __repr__(self):
-        return '<Category %s>' % (self.name)
+        return '<Category %s>' % (self.project)
 

@@ -4,7 +4,6 @@ from flask import Flask
 from flask_restful_swagger import swagger
 from flask.ext.restful import Api
 from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.cache import Cache
 
 from config import config
 
@@ -30,7 +29,6 @@ if hasattr(config, 'cache'):
     for i in config.cache:
         if i.startswith('CACHE_'):
             app.config[i] = config.cache[i]
-cache = Cache(app)
 
 
 api = swagger.docs(Api(app), apiVersion=config.version, description=config.description)

@@ -6,6 +6,7 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from api.helpers import image_url, utc_from_local
 from sqlalchemy import asc, or_, distinct
 
+from api.decorators import cacher
 from api import db
 
 # Reward stuff
@@ -66,6 +67,7 @@ class Reward(db.Model):
         return filters
 
     @hybrid_method
+    @cacher
     def total(self, **kwargs):
         """Total number of rewards"""
         try:

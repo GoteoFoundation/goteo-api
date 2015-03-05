@@ -9,6 +9,7 @@ from sqlalchemy.orm import aliased
 
 from api import db
 from api.helpers import get_lang
+from api.decorators import cacher
 
 from api.models.project import Project, ProjectCategory
 from api.models.location import Location, LocationItem
@@ -82,6 +83,7 @@ class Category(db.Model):
         return filters
 
     @hybrid_method
+    @cacher
     def get(self, id):
         """Get a valid category form id"""
         try:
@@ -92,6 +94,7 @@ class Category(db.Model):
             return None
 
     @hybrid_method
+    @cacher
     def list(self, **kwargs):
         """Get a list of valid category"""
         try:
@@ -119,6 +122,7 @@ class Category(db.Model):
             return []
 
     @hybrid_method
+    @cacher
     def total(self, **kwargs):
         """Returns the total number of valid category"""
         try:

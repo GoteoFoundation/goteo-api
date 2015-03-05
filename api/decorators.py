@@ -2,9 +2,11 @@
 import time
 from datetime import datetime
 from dateutil.parser import parse
+
 from functools import wraps, update_wrapper
 from flask import request, g, jsonify
 from flask_redis import Redis
+from flask.ext.cache import Cache
 from netaddr import IPSet, AddrFormatError
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -12,7 +14,9 @@ from config import config
 
 from api.helpers import *
 
-from api import app, db, cache
+from api import app, db
+
+cache = Cache(app)
 
 #
 # CACHER BY ARGS FILTERS
@@ -21,17 +25,24 @@ from api import app, db, cache
 def cacher(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        key = f.__name__
+        key = f.__name__;
+        # if args:
+        #     key += '/' + json.dumps(args)
+        # if kwargs:
+        #     key += '/' + json.dumps(kwargs)
+        if args:
+            for arg in args:
+                key += "|{0}".format(arg)
         if kwargs:
             for k in kwargs:
-                key += "|%s=%s" % (k, kwargs[k])
+                key += "|{0}={1}".format(k, kwargs[k])
         #TODO: lower the cache time depending on the to_date parameter
                 # if present use that date as maxdate (else now)
                 # if maxdate is > now() - 2 months (configurable)
                     # timeout variable (the closer to now, the lesser the value)
         timeout = config.cache_min_timeout
         now = datetime.now()
-        if 'to_date' in kwargs:
+        if 'to_date' in kwargs and kwargs['to_date'] != None:
             datemax = parse(kwargs['to_date'])
         else:
             datemax = now
@@ -42,7 +53,7 @@ def cacher(f):
             timeout = int(delta.total_seconds())
 
         if app.debug:
-            app.logger.debug('CACHER FOR FUNCTION: {0} TIMEOUT: {1}s ARGS: {2}'.format(f.__name__, timeout, kwargs))
+            app.logger.debug('CACHER FOR FUNCTION: {0} TIMEOUT: {1}s KEY: {2}'.format(f.__name__, timeout, key))
 
         @cache.cached(timeout=timeout, key_prefix=key)
         def wrapper(*args, **kwargs):

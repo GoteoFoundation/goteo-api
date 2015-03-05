@@ -7,7 +7,9 @@ from sqlalchemy.orm import aliased
 from sqlalchemy import asc, and_, distinct
 
 from api.helpers import svg_image_url, get_lang
+from api.decorators import cacher
 from api import db
+
 
 # License stuff
 class LicenseLang(db.Model):
@@ -89,6 +91,7 @@ class License(db.Model):
         return filters
 
     @hybrid_method
+    @cacher
     def get(self, id):
         """Get a valid license form id"""
         try:
@@ -99,6 +102,7 @@ class License(db.Model):
             return None
 
     @hybrid_method
+    @cacher
     def list(self, **kwargs):
         """Get a list of valid license"""
         try:
@@ -132,6 +136,7 @@ class License(db.Model):
             return []
 
     @hybrid_method
+    @cacher
     def total(self, **kwargs):
         """Returns the total number of valid license"""
         try:

@@ -5,12 +5,9 @@ import time
 from flask.ext.restful import fields
 from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
-from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import and_, or_, desc
 
-from config import config
 from api import db
-from api.models.category import Category
 from api.models.reward import Reward
 from api.models.project import Project, ProjectCategory
 from api.models.invest import Invest, InvestReward, InvestNode

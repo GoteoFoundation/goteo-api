@@ -21,28 +21,6 @@ class Node(db.Model):
         return '<Node(%d): %s>' % (self.id, self.name)
 
 
-class Call(db.Model):
-    __tablename__ = 'call'
-
-    #CALL STATUS IDs
-    STATUS_CANCELED   = 0
-    STATUS_EDITING    = 1
-    STATUS_REVIEWING  = 2
-    STATUS_APPLYING   = 3
-    STATUS_PUBLISHING = 4
-    STATUS_COMPLETED  = 5
-    STATUS_EXPIRED    = 6
-
-    id = db.Column('id', String(50), primary_key=True)
-    name = db.Column('name', Text)
-    amount = db.Column('amount', Integer)
-    owner = db.Column('owner', String(50))
-    status = db.Column('status', Integer)
-    date_published = db.Column('published', Date)
-
-    def __repr__(self):
-        return '<Call %s: %s>' % (self.id, self.name)
-
 class Blog(db.Model):
     __tablename__ = 'blog'
 
