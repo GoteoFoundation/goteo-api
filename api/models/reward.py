@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import func, Integer, String, Text, Date, DateTime
+from sqlalchemy import func, Integer, String, Text, DateTime
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
-from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
-from api.helpers import image_url, utc_from_local
-from sqlalchemy import asc, or_, distinct
+from sqlalchemy.orm.exc import MultipleResultsFound
+from api.helpers import image_url
+from sqlalchemy import desc,and_, distinct
 
 from api.decorators import cacher
+from api.models.project import Project
 from api import db
 
 # Reward stuff
@@ -78,3 +79,17 @@ class Reward(db.Model):
             return total
         except MultipleResultsFound:
             return 0
+
+    @hybrid_method
+    @cacher
+    def favorite_reward(self, **kwargs):
+        """Reward type used in successful projects"""
+
+        filters = list(self.get_filters(**kwargs))
+        filters.append(self.type == 'individual')
+        res = db.session.query(self.icon, func.count(self.project).label('total'))\
+                                .join(Project, and_(Project.id == self.project, Project.status.in_(Project.SUCCESSFUL_PROJECTS)))\
+                                .filter(*filters).group_by(self.icon).order_by(desc('total')).all()
+        if res is None:
+            res = []
+        return res

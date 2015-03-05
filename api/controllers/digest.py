@@ -52,6 +52,9 @@ class DigestsListAPI(BaseList):
     """Get Digest list"""
     AVAILABLE_ENDPOINTS = {
         'reports/money' : 'reports.money.MoneyAPI',
+        'reports/community' : 'reports.community.CommunityAPI',
+        'reports/projects' : 'reports.projects.ProjectsAPI',
+        'reports/rewards' : 'reports.rewards.RewardsAPI',
         'categories' : 'controllers.category.CategoriesListAPI'
         }
 

@@ -6,11 +6,9 @@ from flask.ext.restful import fields
 from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
 
-from api import db
 from api.models.call import Call
-from api.models.project import Project, ProjectCategory
-from api.models.invest import Invest, InvestNode
-from api.models.location import Location, LocationItem
+from api.models.project import Project
+from api.models.invest import Invest
 from api.decorators import ratelimit, requires_auth
 
 from api.base_endpoint import BaseList, Response
@@ -64,56 +62,6 @@ class MoneyAPI(BaseList):
 
         #remove not used arguments
         args = self.parse_args(remove=('page','limit'))
-
-        filters = []
-        filter_mincost = []  # para average_mincost
-        filter_call = []  # para call_pledged_amount
-        if 'from_date' in args and args['from_date'] is not None:
-            filters.append(Invest.project == Project.id)
-            filters.append(Invest.date_invested >= args['from_date'])
-            filter_mincost.append(Invest.date_invested >= args['from_date'])
-            filter_mincost.append(Invest.project == Project.id)
-            filter_mincost.append(InvestNode.invest_id == Invest.id)
-            filter_call.append(Call.date_published >= args['from_date'])
-        if 'to_date' in args and args['to_date'] is not None:
-            filters.append(Invest.project == Project.id)
-            filters.append(Invest.date_invested <= args['to_date'])
-            filter_mincost.append(Invest.date_invested <= args['to_date'])
-            filter_mincost.append(Invest.project == Project.id)
-            filter_mincost.append(InvestNode.invest_id == Invest.id)
-            filter_call.append(Call.date_published <= args['to_date'])
-        if 'project' in args and args['project'] is not None:
-            filters.append(Project.id.in_(args['project']))
-            filter_mincost.append(Project.id.in_(args['project']))
-            # no afecta a filter_call
-        if 'node' in args and args['node'] is not None:
-            filters.append(Invest.id == InvestNode.invest_id)
-            filter_mincost.append(Project.id == InvestNode.project_id)
-            filters.append(InvestNode.invest_node.in_(args['node']))
-            filter_mincost.append(InvestNode.invest_node.in_(args['node']))
-            # FIXME: Call.node?
-        if 'category' in args and args['category'] is not None:
-            #TODO: category debe ser un string? en ingles? o el id de categoria?
-            # try:
-            #     category_id = db.session.query(Category.id).filter(Category.name.in_(args['category'])).one()
-            #     category_id = category_id[0]
-            # except NoResultFound:
-            #     return bad_request("Invalid category")
-
-            filters.append(Invest.project == ProjectCategory.project)
-            filters.append(ProjectCategory.category.in_(args['category']))
-            filter_mincost.append(Invest.project == ProjectCategory.project)
-            filter_mincost.append(ProjectCategory.category.in_(args['category']))
-            # no afecta a filter_call
-        if 'location' in args and args['location'] is not None:
-            # subquery = Location.location_subquery(**args['location'])
-            # Using Vincenty on code's side to query only one time the DB
-            subquery = Location.location_ids(**args['location'])
-            filters.append(LocationItem.id.in_(subquery))
-            filters.append(Invest.user == LocationItem.item)
-            filters.append(LocationItem.type == 'user')
-            # no afecta a filter_mincost ni filter_call
-
 
         res = MoneyResponse(
             starttime = time_start,

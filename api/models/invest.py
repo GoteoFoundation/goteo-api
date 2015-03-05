@@ -4,9 +4,10 @@ from sqlalchemy import func, Integer, String, DateTime, Float, Date
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from api.helpers import image_url, utc_from_local
-from sqlalchemy import asc
+from sqlalchemy import asc, or_, distinct
 from api.models.location import Location, LocationItem
 from api.models.project import Project, ProjectCategory
+from api.models.reward import Reward
 from api import db
 from api.decorators import cacher
 
@@ -50,6 +51,13 @@ class Invest(db.Model):
     @hybrid_method
     def get_filters(self, **kwargs):
         filters = self.filters
+        if 'is_refusal' in kwargs and kwargs['is_refusal'] is not None:
+            filters.append(self.resign == True)
+            # FIXME: No incluir status=STATUS_REVIEWING?
+            filters.append(self.status.in_([self.STATUS_PENDING,
+                                            self.STATUS_CHARGED,
+                                            self.STATUS_PAID,
+                                            self.STATUS_RETURNED]))
         if 'is_call' in kwargs and kwargs['is_call'] is not None:
             filters.append(self.call != None)
         if 'method' in kwargs and kwargs['method'] is not None:
@@ -76,6 +84,32 @@ class Invest(db.Model):
             #
 
         return filters
+
+    @hybrid_method
+    @cacher
+    def total(self, **kwargs):
+        """Total number of invests"""
+        try:
+            filters = list(self.get_filters(**kwargs))
+            total = db.session.query(func.count(distinct(self.id))).filter(*filters).scalar()
+            if total is None:
+                total = 0
+            return total
+        except MultipleResultsFound:
+            return 0
+
+    @hybrid_method
+    @cacher
+    def donors_total(self, **kwargs):
+        """Total number of diferent donors"""
+        try:
+            filters = list(self.get_filters(**kwargs))
+            total = db.session.query(func.count(distinct(self.user))).filter(*filters).scalar()
+            if total is None:
+                total = 0
+            return total
+        except MultipleResultsFound:
+            return 0
 
     @hybrid_method
     @cacher
@@ -131,6 +165,35 @@ class Invest(db.Model):
             return total
         except MultipleResultsFound:
             return 0
+
+
+    # OJO: Como en reporting.php, no filtra por proyectos publicados
+    # TODO: confirmar si hay que filtrar por Invest_node(ahora) o por project_node Se filtra
+    @hybrid_method
+    @cacher
+    def rewards_per_amount(self, minim = 0, maxim = 0, **kwargs):
+        """Num. of users choosing rewards from {minim} € to {maxim} € """
+        filters = list(self.get_filters(**kwargs))
+        # filters.append(Reward.id != None)
+        filters.append(InvestReward.invest == self.id)
+        filters.append(InvestReward.reward == Reward.id)
+        filters.append(or_(self.resign == None, self.resign == 0))
+
+        if minim == 0 and maxim > 0:
+            filters.append(Reward.amount < maxim)
+        elif minim > 0 and maxim > 0:
+            filters.append(Reward.amount.between(minim, maxim))
+        elif  minim > 0:
+            filters.append(Reward.amount > minim)
+        else:
+            return 0
+
+        recomp_dinero = db.session.query(func.count(self.id).label("amourew"))\
+                            .filter(*filters).group_by(Reward.id).subquery()
+        res = db.session.query(func.sum(recomp_dinero.c.amourew)).scalar()
+        if res is None:
+            res = 0
+        return res
 
     @hybrid_method
     @cacher
