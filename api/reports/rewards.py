@@ -64,9 +64,8 @@ class RewardsAPI(Base):
         <a href="http://developers.goteo.org/doc/reports#rewards">developers.goteo.org/doc/reports#rewards</a>
         """
         time_start = time.time()
-        self.reqparse.remove_argument('page')
-        self.reqparse.remove_argument('limit')
-        args = self.reqparse.parse_args()
+        # remove not used args
+        args = self.parse_args(remove=('page','limit'))
 
         cofinanciadores = Invest.donors_total(**args);
         renuncias = Invest.total(is_refusal=True, **args);

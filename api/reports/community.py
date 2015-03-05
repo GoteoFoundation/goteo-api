@@ -112,9 +112,9 @@ class CommunityAPI(Base):
         <a href="http://developers.goteo.org/doc/reports#community">developers.goteo.org/doc/reports#community</a>
         """
         time_start = time.time()
-        self.reqparse.remove_argument('page')
-        self.reqparse.remove_argument('limit')
-        args = self.reqparse.parse_args()
+        # remove not used args
+        args = self.parse_args(remove=('page','limit'))
+
 
         filters = []
         filters2 = []  # para num de usuarios y bajas

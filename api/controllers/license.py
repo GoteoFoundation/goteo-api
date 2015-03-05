@@ -63,9 +63,7 @@ class LicensesListAPI(BaseList):
         """
         time_start = time.time()
         #removing not-needed standard filters
-        self.reqparse.remove_argument('page')
-        self.reqparse.remove_argument('limit')
-        args = parse_args(self.reqparse)
+        args = self.parse_args(remove=('page','limit'))
 
         items = []
         for u in License.list(**args):

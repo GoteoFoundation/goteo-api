@@ -75,8 +75,7 @@ class UsersListAPI(BaseList):
         """
         time_start = time.time()
         # For privacy, removing location filter ?
-        self.reqparse.remove_argument('location')
-        args = parse_args(self.reqparse)
+        args = self.parse_args(remove=('location'))
 
         items = []
         for u in User.list(**args):

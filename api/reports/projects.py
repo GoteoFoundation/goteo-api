@@ -83,9 +83,9 @@ class ProjectsAPI(Base):
         <a href="http://developers.goteo.org/doc/reports#projects">developers.goteo.org/doc/reports#projects</a>
         """
         time_start = time.time()
-        self.reqparse.remove_argument('page')
-        self.reqparse.remove_argument('limit')
-        args = self.reqparse.parse_args()
+        # remove not used args
+        args = self.parse_args(remove=('page','limit'))
+
 
         filters = []
         # FIXME: Qué fechas coger depende del dato: creación, finalización...
