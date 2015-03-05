@@ -7,7 +7,9 @@ from api.helpers import image_url
 from sqlalchemy import desc,and_, distinct
 
 from api.decorators import cacher
-from api.models.project import Project
+from .project import Project, ProjectCategory
+from .location import Location, LocationItem
+
 from api import db
 
 # Reward stuff
@@ -34,8 +36,6 @@ class Reward(db.Model):
     # Getting filters for this model
     @hybrid_method
     def get_filters(self, **kwargs):
-        from .project import Project, ProjectCategory
-        from .location import Location, LocationItem
 
         filters = self.filters
         # Join project table if filters

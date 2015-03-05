@@ -31,8 +31,8 @@ debug = True
 # View http://pythonhosted.org/Flask-Cache/#configuring-flask-cache
 # for types and configuration options
 cache = { 'CACHE_TYPE' : 'simple' }
-
-
+# Minimun timeout for function caching
+cache_min_timeout = 30
 
 # Opcional description for general messages
 description = 'Goteo.org API'
