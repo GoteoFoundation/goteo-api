@@ -2,6 +2,7 @@
 #
 
 import time
+from datetime import datetime
 from dateutil.parser import parse
 from flask import jsonify
 from flask.ext.restful import Resource, reqparse
@@ -9,6 +10,8 @@ from helpers import *
 
 def date_sanitizer(data):
     d = parse(data)
+    if d > datetime.now():
+        d = datetime.now()
     return str(d.date())
 
 def lang_sanitizer(data):

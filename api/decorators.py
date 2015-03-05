@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import time
 from datetime import datetime
+from dateutil.parser import parse
 from functools import wraps, update_wrapper
 from flask import request, g, jsonify
 from flask_redis import Redis
@@ -9,10 +10,47 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from config import config
 
-from api.models.user import UserApi
 from api.helpers import *
 
-from api import app, db
+from api import app, db, cache
+
+#
+# CACHER BY ARGS FILTERS
+#
+# ======================
+def cacher(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        key = f.__name__
+        if kwargs:
+            for k in kwargs:
+                key += "|%s=%s" % (k, kwargs[k])
+        #TODO: lower the cache time depending on the to_date parameter
+                # if present use that date as maxdate (else now)
+                # if maxdate is > now() - 2 months (configurable)
+                    # timeout variable (the closer to now, the lesser the value)
+        timeout = config.cache_min_timeout
+        now = datetime.now()
+        if 'to_date' in kwargs:
+            datemax = parse(kwargs['to_date'])
+        else:
+            datemax = now
+        delta = now - datemax
+        if delta.days > 60:
+            timeout = None # infinite time caching
+        elif delta.total_seconds() > config.cache_min_timeout:
+            timeout = int(delta.total_seconds())
+
+        if app.debug:
+            app.logger.debug('CACHER FOR FUNCTION: {0} TIMEOUT: {1}s ARGS: {2}'.format(f.__name__, timeout, kwargs))
+
+        @cache.cached(timeout=timeout, key_prefix=key)
+        def wrapper(*args, **kwargs):
+            if app.debug:
+                app.logger.debug('--Not caching--')
+            return f(*args, **kwargs)
+        return wrapper(*args, **kwargs)
+    return decorated
 
 #
 # REDIS RATE LIMITER
@@ -103,6 +141,7 @@ def check_auth(username, password):
 
     #Try the key-password values in sql
     try:
+        from api.models.user import UserApi
         user = db.session.query(UserApi).filter(UserApi.user == username, UserApi.key == password).one()
         if user.expiration_date is not None and user.expiration_date <= datetime.today():
             # print user.expiration_date, '<=', datetime.today()

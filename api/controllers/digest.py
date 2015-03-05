@@ -2,22 +2,22 @@
 
 import time
 
-from flask import jsonify
-from flask.ext.restful import fields, marshal
+from flask.ext.restful import fields
 from flask_restful_swagger import swagger
 
 from dateutil.parser import parse
 import calendar
-from datetime import date
-from api.decorators import *
+from datetime import date, datetime
+from api.decorators import ratelimit, requires_auth
 from api.base_endpoint import BaseList, Response
-from api.helpers import parse_args
 #import current endpoints
 from api.reports.money import *
-from api import app
+from api.decorators import *
 
 def year_sanitizer(data):
     d = parse(data)
+    if d > datetime.now():
+        raise Exception("Invalid parameter year")
     return str(d.year)
 
 @swagger.model
@@ -93,7 +93,7 @@ class DigestsListAPI(BaseList):
         try:
             #arguments for the global response
             year = args['year']
-            [args['from_date'], args['to_date']] = self.max_min(year)
+            [args['from_date'], args['to_date']] = map(lambda d:d.isoformat(),self.max_min(year))
             del args['year']
             instance.parse_args = (lambda **a:self.dummy_parse_args(args, **a))
             # get year
@@ -104,8 +104,10 @@ class DigestsListAPI(BaseList):
             buckets = {}
             # All months in different buckets
             for month in range(1,13):
-                [args['from_date'], args['to_date']] = self.max_min(year, month)
-                buckets[format(month, '02')] = instance.get()
+                maxmin = self.max_min(year, month)
+                if maxmin[0] < maxmin[1]:
+                    [args['from_date'], args['to_date']] = map(lambda d:d.isoformat(),maxmin)
+                    buckets[format(month, '02')] = instance.get()
 
         except Exception as e:
             return bad_request('Unexpected error. [{0}]'.format(e), 400)
@@ -136,11 +138,10 @@ class DigestsListAPI(BaseList):
         if month is None:
             start_month=1
             month=12
-        month = int(month)
-        start_month = int(start_month)
-        year = int(year)
-        max_ = calendar.monthrange(year, month)[1]
-        return (
-                date(year,start_month,1).isoformat(),
-                date(year,month,max_).isoformat()
-                )
+
+        d_min = date(int(year), int(start_month), 1)
+        d_max = date(int(year), int(month), calendar.monthrange(int(year), int(month))[1])
+
+        d_min = date.today() if d_min > date.today() else d_min
+        d_max = date.today() if d_max > date.today() else d_max
+        return (d_min, d_max)

@@ -15,7 +15,7 @@ from api.models.category import Category
 from api.models.project import Project, ProjectCategory
 from api.models.invest import Invest, InvestNode
 from api.models.location import Location, LocationItem
-from api.decorators import *
+from api.decorators import ratelimit, requires_auth
 
 from api.base_endpoint import BaseList, Response
 
@@ -124,45 +124,45 @@ class MoneyAPI(BaseList):
             attributes = {
                 # Dinero comprometido: Suma recaudada por la plataforma
                 "pledged"                 : Invest.pledged_total(**args),
-                # Dinero devuelto (en proyectos archivados)
-                "refunded"                : self._refunded(list(filters)),
-                #- Recaudado mediante PayPal
-                #FIXME: No quitamos los devueltos?
-                "paypal-amount"           : self._paypal_amount(list(filters)),
-                #- Recaudado mediante TPV
-                #FIXME: No quitamos los devueltos?
-                "creditcard-amount"       : self._tpv_amount(list(filters)),
-                # Aportes manuales: recaudado mediante transferencia bancaria directa
-                #FIXME: No quitamos los devueltos?
-                "cash-amount"             : self._cash_amount(list(filters)),
-                # - [NEW] Suma recaudada en Convocatorias (Capital riego distribuido + crowd)
-                #FIXME: No quitamos los devueltos?
-                "matchfund-amount"        : self._call_amount(list(filters)),
-                # Capital Riego de Goteo (fondos captados de instituciones y empresas destinados a la bolsa de Capital Riego https://goteo.org/service/resources)
-                "matchfundpledge-amount"  : self._call_pledged_amount(list(filter_call)),
-                # Total 8% recaudado por Goteo
-                "fee-amount"              : self._fee_amount(list(filters)),
-                # Aporte medio por cofinanciador(micromecenas)
-                # OJO: En reporting.php no calcula esto mismo
-                "average-donation"        : self._average_donation(list(filters)),
-                # Aporte medio por cofinanciador(micromecenas) mediante PayPal
-                # OJO: En reporting.php no calcula esto mismo
-                "average-donation-paypal" : self._average_donation_paypal(list(filters)),
-                # Coste mínimo medio por proyecto exitoso: Presupuesto mínimo medio por proyecto exitoso
-                # TODO: ¿parametro location?
-                # OJO: En reporting.php no calcula esto mismo
-                "average-minimum"         : self._average_mincost(list(filter_mincost)),
-                # Recaudación media por proyecto exitoso ( financiado )
-                "average-received"        : self._average_received(list(filters)),
-                # Perc. medio de recaudación sobre el mínimo (número del dato anterior)
-                "pledged-successful"      : self._pledged_success(list(filters)),
-                # (Nuevo) Dinero medio solo obtenido en 2a ronda
-                "average-second-round"    : self._average_second_round(list(filters)),
-                # - [Renombrar Dinero compr. medio en proyectos archivados] Dinero recaudado de media en campañas fallidas
-                "average-failed"          : self._average_failed(list(filters)),
-                # - [Renombrar]Perc. dinero compr. medio (dinero recaudado de media) sobre mínimo (número del dato anterior)
-                # Perc. dinero compr. medio sobre mínimo',
-                "pledged-failed"          : self._pledged_fail(list(filters))
+                # # Dinero devuelto (en proyectos archivados)
+                # "refunded"                : self._refunded(list(filters)),
+                # #- Recaudado mediante PayPal
+                # #FIXME: No quitamos los devueltos?
+                # "paypal-amount"           : self._paypal_amount(list(filters)),
+                # #- Recaudado mediante TPV
+                # #FIXME: No quitamos los devueltos?
+                # "creditcard-amount"       : self._tpv_amount(list(filters)),
+                # # Aportes manuales: recaudado mediante transferencia bancaria directa
+                # #FIXME: No quitamos los devueltos?
+                # "cash-amount"             : self._cash_amount(list(filters)),
+                # # - [NEW] Suma recaudada en Convocatorias (Capital riego distribuido + crowd)
+                # #FIXME: No quitamos los devueltos?
+                # "matchfund-amount"        : self._call_amount(list(filters)),
+                # # Capital Riego de Goteo (fondos captados de instituciones y empresas destinados a la bolsa de Capital Riego https://goteo.org/service/resources)
+                # "matchfundpledge-amount"  : self._call_pledged_amount(list(filter_call)),
+                # # Total 8% recaudado por Goteo
+                # "fee-amount"              : self._fee_amount(list(filters)),
+                # # Aporte medio por cofinanciador(micromecenas)
+                # # OJO: En reporting.php no calcula esto mismo
+                # "average-donation"        : self._average_donation(list(filters)),
+                # # Aporte medio por cofinanciador(micromecenas) mediante PayPal
+                # # OJO: En reporting.php no calcula esto mismo
+                # "average-donation-paypal" : self._average_donation_paypal(list(filters)),
+                # # Coste mínimo medio por proyecto exitoso: Presupuesto mínimo medio por proyecto exitoso
+                # # TODO: ¿parametro location?
+                # # OJO: En reporting.php no calcula esto mismo
+                # "average-minimum"         : self._average_mincost(list(filter_mincost)),
+                # # Recaudación media por proyecto exitoso ( financiado )
+                # "average-received"        : self._average_received(list(filters)),
+                # # Perc. medio de recaudación sobre el mínimo (número del dato anterior)
+                # "pledged-successful"      : self._pledged_success(list(filters)),
+                # # (Nuevo) Dinero medio solo obtenido en 2a ronda
+                # "average-second-round"    : self._average_second_round(list(filters)),
+                # # - [Renombrar Dinero compr. medio en proyectos archivados] Dinero recaudado de media en campañas fallidas
+                # "average-failed"          : self._average_failed(list(filters)),
+                # # - [Renombrar]Perc. dinero compr. medio (dinero recaudado de media) sobre mínimo (número del dato anterior)
+                # # Perc. dinero compr. medio sobre mínimo',
+                # "pledged-failed"          : self._pledged_fail(list(filters))
             },
             filters = args.items()
         )

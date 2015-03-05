@@ -8,10 +8,14 @@ else:
 	requests_limit = 0
 	REDIS_URI = False
 
-if hasattr(settings, 'cache') and hasattr(settings, 'cache'):
-	cache = settings.cache
+if hasattr(settings, 'cache_min_timeout') and hasattr(settings, 'cache_min_timeout'):
+    cache_min_timeout = settings.cache_min_timeout
 else:
-	cache = {'CACHE_TYPE' : 'null'}
+    cache_min_timeout = 30
+if hasattr(settings, 'cache') and hasattr(settings, 'cache'):
+    cache = settings.cache
+else:
+    cache = {'CACHE_TYPE' : 'null'}
 
 # api requests rate limit
 # NEEDS REDIS_URL CONFIGURED

@@ -23,11 +23,14 @@ app.config['SQLALCHEMY_DATABASE_URI'] = config.DB_URI
 #app.config['SQLALCHEMY_POOL_SIZE'] = 30
 app.config['REDIS_URL'] = config.REDIS_URI
 if hasattr(config, 'cache'):
+    if 'CACHE_TYPE' in config.cache and config.cache['CACHE_TYPE'] == 'redis':
+        if 'CACHE_KEY_PREFIX' not in config.cache:
+            config.cache['CACHE_KEY_PREFIX'] = 'Cacher/'
+
     for i in config.cache:
         if i.startswith('CACHE_'):
             app.config[i] = config.cache[i]
 cache = Cache(app)
-
 
 
 api = swagger.docs(Api(app), apiVersion=config.version, description=config.description)

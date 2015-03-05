@@ -8,6 +8,7 @@ from sqlalchemy import asc
 from api.models.location import Location, LocationItem
 from api.models.project import ProjectCategory
 from api import db
+from api.decorators import cacher
 
 class Invest(db.Model):
     __tablename__ = 'invest'
@@ -73,6 +74,7 @@ class Invest(db.Model):
         return filters
 
     @hybrid_method
+    @cacher
     def pledged_total(self, **kwargs):
         """Total amount of money (€) raised by Goteo"""
         try:
