@@ -4,7 +4,7 @@
 from sqlalchemy import func, Integer, String, Text, Date, Float
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
-from api.helpers import utc_from_local
+from api.helpers import image_url, utc_from_local
 from sqlalchemy import asc, distinct
 
 from api.decorators import cacher
@@ -28,6 +28,10 @@ class Project(db.Model):
     id = db.Column('id', String(50), primary_key=True)
     owner = db.Column('owner', String(50), db.ForeignKey('user.id'))
     name = db.Column('name', Text)
+    subtitle = db.Column('subtitle', Text)
+    image = db.Column('image', String(255))
+    video = db.Column('video', String(255))
+    media = db.Column('media', String(255))
     minimum = db.Column('mincost', Integer)
     optimum = db.Column('maxcost', Integer)
     amount = db.Column('amount', Integer)
@@ -35,8 +39,9 @@ class Project(db.Model):
     status = db.Column('status', Integer)
     #created = db.Column('created', Date)
     date_passed = db.Column('passed', Date)
+    created = db.Column('created', Date)
     date_updated = db.Column('updated', Date)
-    date_published = db.Column('published', Date)
+    published = db.Column('published', Date)
     date_closed = db.Column('closed', Date)
     node = db.Column('node', String(50), db.ForeignKey('node.id'))
     # total_funding
@@ -47,6 +52,18 @@ class Project(db.Model):
 
     def __repr__(self):
         return '<Project %s: %s>' % (self.id, self.name)
+
+    @hybrid_property
+    def image_url(self):
+        return image_url(self.image, size="big", cut=False)
+
+    @hybrid_property
+    def date_created(self):
+        return utc_from_local(self.created)
+
+    @hybrid_property
+    def date_published(self):
+        return utc_from_local(self.published)
 
     #Filters for this table
     @hybrid_property
@@ -70,9 +87,9 @@ class Project(db.Model):
         if 'status' in kwargs and kwargs['status'] is not None:
             filters.append(self.status.in_(kwargs['status']))
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
-            filters.append(self.date_published >= kwargs['from_date'])
+            filters.append(self.published >= kwargs['from_date'])
         if 'to_date' in kwargs and kwargs['to_date'] is not None:
-            filters.append(self.date_published <= kwargs['to_date'])
+            filters.append(self.published <= kwargs['to_date'])
         if 'project' in kwargs and kwargs['project'] is not None:
             filters.append(self.id.in_(kwargs['project']))
         if 'node' in kwargs and kwargs['node'] is not None:

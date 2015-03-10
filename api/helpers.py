@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import time
+import datetime
 import pytz
 
 from flask import jsonify
@@ -41,27 +42,37 @@ def get_lang(object, field, langs=[]):
                 return object[field + '_' + l]
     return object[field]
 
-def image_url(img, size='large'):
+def image_url(img, size='large', cut=True):
     """
     Goteo image urls
     @size 'thumb', 'medium', 'large'
     """
-    sizes = {'thumb' : '56x56c', 'medium' : '192x192c', 'large' : '512x512c'}
+    sizes = {'thumb' : '56x56', 'medium' : '192x192', 'large' : '512x512', 'big' : '1024x1024'}
 
     s = sizes[size] if size in sizes else sizes['thumb']
-
+    if cut:
+        s += 'c'
     i = img if img is not None else 'la_gota.png'
 
     return 'http://goteo.org/img/' + s + '/' + i
+
+def project_url(project_id):
+    return 'http://goteo.org/project/' + project_id
 
 def svg_image_url(img, type='licenses'):
     return 'http://goteoassets.org/api/svg/' + type + '/' + img
 
 def utc_from_local(date_time, local_tz=None):
+    local_time = None
+    print '>>>>>' + date_time.__class__.__name__
+    if date_time.__class__.__name__ == 'date':
+        date_time = datetime.datetime(*(date_time.timetuple()[:6]))
+
     assert date_time.__class__.__name__ == 'datetime'
     if local_tz is None:
         local_tz = pytz.timezone(config.timezone) # eg, "Europe/London"
     local_time = local_tz.localize(date_time)
+
     return local_time
 
 #Error handling

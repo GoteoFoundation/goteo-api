@@ -67,11 +67,11 @@ class License(db.Model):
         # Filters by "from date"
         # counting license created after this date
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
-            filters.append(Project.date_published >= kwargs['from_date'])
+            filters.append(Project.published >= kwargs['from_date'])
         # Filters by "to date"
         # counting license created before this date
         if 'to_date' in kwargs and kwargs['to_date'] is not None:
-            filters.append(Project.date_published <= kwargs['to_date'])
+            filters.append(Project.published <= kwargs['to_date'])
         # Filters by "project"
         # counting attached (invested or collaborated) to some project(s)
         if 'project' in kwargs and kwargs['project'] is not None:

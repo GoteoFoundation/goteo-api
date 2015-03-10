@@ -6,6 +6,7 @@ from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
 from sqlalchemy import and_, or_, desc
 
+from api.helpers import utc_from_local, image_url, project_url
 from api import db
 from api.models.models import Blog, Post
 from api.models.project import Project, ProjectCategory
@@ -23,6 +24,10 @@ func = sqlalchemy.func
 class ProjectContribution:
     resource_fields = {
         'name'  : fields.String,
+        'url'  : fields.String,
+        'image-url'  : fields.String,
+        'video-url'  : fields.String,
+        'date-published'  : fields.DateTime(dt_format='rfc822'),
         'total' : fields.Integer
     }
     required = resource_fields.keys()
@@ -31,6 +36,10 @@ class ProjectContribution:
 class ProjectAmount:
     resource_fields = {
         'name'   : fields.String,
+        'url'   : fields.String,
+        'image-url'  : fields.String,
+        'video-url'  : fields.String,
+        'date-published'  : fields.DateTime(dt_format='rfc822'),
         'amount' : fields.Float
     }
     required = resource_fields.keys()
@@ -90,9 +99,9 @@ class ProjectsAPI(Base):
         filters = []
         # FIXME: Qué fechas coger depende del dato: creación, finalización...
         if args['from_date']:
-            filters.append(Project.date_published >= args['from_date'])
+            filters.append(Project.published >= args['from_date'])
         if args['to_date']:
-            filters.append(Project.date_published <= args['to_date'])
+            filters.append(Project.published <= args['to_date'])
         if args['project']:
             filters.append(Project.id.in_(args['project']))
         if args['node']:
@@ -126,9 +135,30 @@ class ProjectsAPI(Base):
                 'percentage-successful-completed' : percent(succ_finished, succ_finished + fail_projects),
                 'average-amount-successful'      : self._avg_success(list(filters)),
                 'average-posts-successful'       : self._avg_posts_success(list(filters)),
-                'top10-collaborations'           : self._top10_collaborations(list(filters)),
-                'top10-donations'                : self._top10_donations(list(filters)),
-                'top10-receipts'                 : self._top10_invests(list(filters)),
+                'top10-collaborations'           : map(lambda p: {'name': p.name,
+                                                                  'project': p.project,
+                                                                  'description-short' : p.subtitle,
+                                                                  'url' : project_url(p.project),
+                                                                  'image-url' : image_url(p.image, 'big', False),
+                                                                  'video-url': p.media,
+                                                                  'date-published': utc_from_local(p.published)},
+                                                            self._top10_collaborations(list(filters))),
+                'top10-donations'                : map(lambda p: {'name': p.name,
+                                                                  'project': p.project,
+                                                                  'description-short' : p.subtitle,
+                                                                  'url' : project_url(p.project),
+                                                                  'image-url' : image_url(p.image, 'big', False),
+                                                                  'video-url': p.media,
+                                                                  'date-published': utc_from_local(p.published)},
+                                                            self._top10_donations(list(filters))),
+                'top10-receipts'                 : map(lambda p: {'name': p.name,
+                                                                  'project': p.project,
+                                                                  'description-short' : p.subtitle,
+                                                                  'url' : project_url(p.project),
+                                                                  'image-url' : image_url(p.image, 'big', False),
+                                                                  'video-url': p.media,
+                                                                  'date-published': utc_from_local(p.published)},
+                                                            self._top10_invests(list(filters))),
             },
             filters = args.items()
         )
@@ -145,8 +175,8 @@ class ProjectsAPI(Base):
 
     # Proyectos publicados
     def _published(self, f_pub_projects = []):
-        f_pub_projects.append(Project.date_published != None)
-        f_pub_projects.append(Project.date_published != '0000-00-00')
+        f_pub_projects.append(Project.published != None)
+        f_pub_projects.append(Project.published != '0000-00-00')
         f_pub_projects.append(Project.status > Project.STATUS_REJECTED)
         res = db.session.query(func.count(Project.id)).filter(*f_pub_projects).scalar()
         if res is None:
@@ -202,7 +232,13 @@ class ProjectsAPI(Base):
 
     # 10 Campañas con más colaboraciones
     def _top10_collaborations(self, f_top10_collaborations = []):
-        res = db.session.query(Project.id.label('project'), func.count(Message.id).label('total')).join(Message)\
+        res = db.session.query(Project.id.label('project'),
+                               Project.name,
+                               Project.subtitle,
+                               Project.image,
+                               Project.media,
+                               Project.published,
+                               func.count(Message.id).label('total')).join(Message)\
                             .filter(*f_top10_collaborations).group_by(Message.project)\
                             .order_by(desc('total')).limit(10).all()
         if res is None:
@@ -212,7 +248,13 @@ class ProjectsAPI(Base):
     # 10 Campañas con más cofinanciadores
     def _top10_donations(self, f_top10_donations = []):
         # TODO: invest.status? project.satus?
-        res = db.session.query(Project.id.label('project'), func.count(Invest.id).label('total')).join(Invest)\
+        res = db.session.query(Project.id.label('project'),
+                               Project.name,
+                               Project.subtitle,
+                               Project.image,
+                               Project.media,
+                               Project.published,
+                               func.count(Invest.id).label('total')).join(Invest)\
                                     .filter(*f_top10_donations).group_by(Invest.project)\
                                     .order_by(desc('total')).limit(10).all()
         if res is None:
@@ -227,7 +269,13 @@ class ProjectsAPI(Base):
         f_top10_invests.append(Invest.status.in_([Invest.STATUS_PENDING,
                                                   Invest.STATUS_CHARGED,
                                                   Invest.STATUS_PAID]))
-        res = db.session.query(Project.id.label('project'), func.sum(Invest.amount).label('amount')).join(Invest)\
+        res = db.session.query(Project.id.label('project'),
+                               Project.name,
+                               Project.subtitle,
+                               Project.image,
+                               Project.media,
+                               Project.published,
+                               func.sum(Invest.amount).label('amount')).join(Invest)\
                                     .filter(*f_top10_invests).group_by(Invest.project)\
                                     .order_by(desc('amount')).limit(10).all()
         if res is None:
