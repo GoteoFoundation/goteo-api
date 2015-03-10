@@ -153,7 +153,7 @@ class Project(db.Model):
         """Percentage of money raised over the minimum on successful projects"""
         filters = list(self.get_filters(**kwargs))
         filters.append(self.status.in_([self.STATUS_FUNDED,
-                                           self.STATUS_FULFILLED]))
+                                        self.STATUS_FULFILLED]))
         total = db.session.query(func.avg(self.amount / self.minimum * 100 - 100)).filter(*filters).scalar()
         total = 0 if total is None else round(total, 2)
         return total

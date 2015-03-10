@@ -199,6 +199,7 @@ class Invest(db.Model):
     @cacher
     def percent_pledged_successful(self, **kwargs):
         """Percentage of money raised over the minimum on successful projects"""
+        print '>>>>'
         filters = list(self.get_filters(**kwargs))
         filters.append(self.project == Project.id)
         filters.append(self.status.in_([self.STATUS_CHARGED,
