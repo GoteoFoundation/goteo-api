@@ -2,6 +2,8 @@ TODO
 
 Location refactor
 
+no repetir autentificacion en digest->get()
+
 2. Endpoint de iconos?
 
 

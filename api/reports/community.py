@@ -37,6 +37,8 @@ class CategoryUsers:
 class UserDonation:
     resource_fields = {
         'user'         : fields.String,
+        'name'              : fields.String,
+        'profile-image-url' : fields.String,
         'amount'       : fields.Float,
         'contributions': fields.Integer
     }
@@ -45,8 +47,10 @@ class UserDonation:
 @swagger.model
 class UserCollaboration:
     resource_fields = {
-        'user'        : fields.String,
-        'interactions': fields.Integer
+        'user'              : fields.String,
+        'name'              : fields.String,
+        'profile-image-url' : fields.String,
+        'interactions'      : fields.Integer
     }
     required = resource_fields.keys()
 
@@ -396,8 +400,9 @@ class CommunityAPI(Base):
                                                  Invest.STATUS_CHARGED,
                                                  Invest.STATUS_PAID,
                                                  Invest.STATUS_RETURNED]))
+        f_top10_multidonors.append(Invest.user == User.id)
         f_top10_multidonors.append(~Invest.user.in_(users_exclude))
-        res = db.session.query(Invest.user, func.count(Invest.id).label('contributions'), func.sum(Invest.amount).label('amount'))\
+        res = db.session.query(Invest.user, User.name, User.profile_image_url.label('profile-image-url'), func.count(Invest.id).label('contributions'), func.sum(Invest.amount).label('amount'))\
                                     .filter(*f_top10_multidonors).group_by(Invest.user)\
                                     .order_by(desc('contributions'), desc('amount')).limit(10).all()
         if res is None:
@@ -411,8 +416,9 @@ class CommunityAPI(Base):
                                                       Invest.STATUS_CHARGED,
                                                       Invest.STATUS_PAID,
                                                       Invest.STATUS_RETURNED]))
+        f_top10_donors.append(Invest.user == User.id)
         f_top10_donors.append(~Invest.user.in_(users_exclude))
-        res = db.session.query(Invest.user, func.count(Invest.id).label('contributions'), func.sum(Invest.amount).label('amount'))\
+        res = db.session.query(Invest.user, User.name, User.profile_image_url.label('profile-image-url'), func.count(Invest.id).label('contributions'), func.sum(Invest.amount).label('amount'))\
                                     .filter(*f_top10_donors).group_by(Invest.user)\
                                     .order_by(desc('amount'), desc('contributions')).limit(10).all()
         if res is None:
@@ -421,7 +427,8 @@ class CommunityAPI(Base):
 
     # Top 10 colaboradores
     def _top10_collaborations(self, f_top10_collaborations = []):
-        res = db.session.query(Message.user, func.count(Message.id).label('interactions'))\
+        f_top10_collaborations.append(Message.user == User.id)
+        res = db.session.query(Message.user, User.name, User.profile_image_url.label('profile-image-url'), func.count(Message.id).label('interactions'))\
                             .filter(*f_top10_collaborations).group_by(Message.user)\
                             .order_by(desc('interactions')).limit(10).all()
         if res is None:

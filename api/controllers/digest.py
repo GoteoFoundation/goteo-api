@@ -75,7 +75,6 @@ class DigestsListAPI(BaseList):
         self.reqparse.add_argument('year', type=year_sanitizer, default=datetime.today().year)
         #removing not-needed standard filters
         args = self.parse_args(('from_date', 'to_date'))
-        print args
         # get the class
         if endpoint[-1] == '/':
             endpoint = endpoint[:-1]
