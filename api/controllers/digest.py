@@ -7,7 +7,7 @@ from flask_restful_swagger import swagger
 
 from dateutil.parser import parse
 import calendar
-from datetime import date, datetime
+from datetime import date as dtdate, datetime as dtdatetime
 from api.decorators import ratelimit, requires_auth
 from api.base_endpoint import BaseList, Response
 #import current endpoints
@@ -16,7 +16,7 @@ from api.decorators import *
 
 def year_sanitizer(data):
     d = parse(data)
-    if d > datetime.now():
+    if d > dtdatetime.now():
         raise Exception("Invalid parameter year")
     return str(d.year)
 
@@ -72,7 +72,7 @@ class DigestsListAPI(BaseList):
         <a href="http://developers.goteo.org/doc/digests">developers.goteo.org/doc/digests</a>
         """
         time_start = time.time()
-        self.reqparse.add_argument('year', type=year_sanitizer, default=datetime.today().year)
+        self.reqparse.add_argument('year', type=year_sanitizer, default=dtdatetime.today().year)
         #removing not-needed standard filters
         args = self.parse_args(('from_date', 'to_date'))
         # get the class
@@ -141,9 +141,9 @@ class DigestsListAPI(BaseList):
             start_month=1
             month=12
 
-        d_min = date(int(year), int(start_month), 1)
-        d_max = date(int(year), int(month), calendar.monthrange(int(year), int(month))[1])
+        d_min = dtdate(int(year), int(start_month), 1)
+        d_max = dtdate(int(year), int(month), calendar.monthrange(int(year), int(month))[1])
 
-        d_min = date.today() if d_min > date.today() else d_min
-        d_max = date.today() if d_max > date.today() else d_max
+        d_min = dtdate.today() if d_min > dtdate.today() else d_min
+        d_max = dtdate.today() if d_max > dtdate.today() else d_max
         return (d_min, d_max)

@@ -2,7 +2,7 @@
 #
 
 import time
-from datetime import datetime
+from datetime import datetime as dtdatetime
 from dateutil.parser import parse
 from flask import jsonify
 from flask.ext.restful import Resource, reqparse
@@ -10,8 +10,8 @@ from helpers import *
 
 def date_sanitizer(data):
     d = parse(data)
-    if d > datetime.now():
-        d = datetime.now()
+    if d > dtdatetime.now():
+        d = dtdatetime.now()
     return str(d.date())
 
 def lang_sanitizer(data):
@@ -61,7 +61,7 @@ class Response():
 
         self.time_start = starttime
         # If debug?
-        # self.ret['date'] = utc_from_local( datetime.utcnow() )
+        # self.ret['date'] = utc_from_local( dtdatetime.utcnow() )
 
     def set(self, var, value):
         self.ret[var] = value;
