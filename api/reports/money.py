@@ -73,8 +73,8 @@ class MoneyAPI(BaseList):
                 # "pledged-successful"      : Invest.percent_pledged_successful(**args), # <- este metodo filtra por fecha de invest, da numeros negativos
                 "pledged-successful"      : Project.percent_pledged_successful(**args), # <- filtra por fecha de proyecto
                 # Perc. dinero compr. medio sobre mínimo',
-                "pledged-failed"          : Invest.percent_pledged_failed(**args),
-                # "pledged-failed"          : Project.percent_pledged_failed(**args),
+                # "pledged-failed"          : Invest.percent_pledged_failed(**args),
+                "pledged-failed"          : Project.percent_pledged_failed(**args),
                 # Dinero devuelto (en proyectos archivados)
                 "refunded"                : Invest.refunded_total(**args),
                 # "refunded"                : Project.refunded_total(**args),
