@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import time
-from datetime import datetime
+from datetime import datetime as dtdatetime
 from dateutil.parser import parse
 
 from functools import wraps, update_wrapper
@@ -41,7 +41,7 @@ def cacher(f):
                 # if maxdate is > now() - 2 months (configurable)
                     # timeout variable (the closer to now, the lesser the value)
         timeout = config.cache_min_timeout
-        now = datetime.now()
+        now = dtdatetime.now()
         if 'to_date' in kwargs and kwargs['to_date'] != None:
             datemax = parse(kwargs['to_date'])
         else:
@@ -154,8 +154,8 @@ def check_auth(username, password):
     try:
         from api.models.user import UserApi
         user = db.session.query(UserApi).filter(UserApi.user == username, UserApi.key == password).one()
-        if user.expiration_date is not None and user.expiration_date <= datetime.today():
-            # print user.expiration_date, '<=', datetime.today()
+        if user.expiration_date is not None and user.expiration_date <= dtdatetime.today():
+            # print user.expiration_date, '<=', dtdatetime.today()
             return 'API Key expired. Please get new valid key! '
         return True
     except NoResultFound:
