@@ -2,7 +2,7 @@
 
 import time
 
-from flask.ext.restful import fields
+from flask.ext.restful import fields, marshal
 from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
 from sqlalchemy import and_, or_, desc
@@ -17,6 +17,17 @@ from api.decorators import *
 from api.base_endpoint import BaseList as Base, Response
 
 func = sqlalchemy.func
+
+@swagger.model
+class FavouriteRewards:
+    resource_fields = {
+        "icon"    : fields.String,
+        "name"    : fields.String,
+        "description"    : fields.String,
+        "svg-url"    : fields.String,
+        "total"   : fields.Integer,
+    }
+    required = resource_fields.keys()
 
 @swagger.model
 class RewardsPerAmount:
@@ -35,7 +46,7 @@ class RewardsResponse(Response):
 
     resource_fields = {
         "reward-refusal"           : fields.Integer,
-        "favorite-rewards"         : fields.List,
+        "favorite-rewards"         : fields.List(fields.Nested(FavouriteRewards.resource_fields)),
         "percentage-reward-refusal": fields.Float,
         "rewards-per-amount"       : fields.Nested(RewardsPerAmount.resource_fields)
     }
@@ -69,6 +80,11 @@ class RewardsAPI(Base):
 
         cofinanciadores = Invest.donors_total(**args);
         renuncias = Invest.total(is_refusal=True, **args);
+        favorites = []
+        for u in Reward.favorite_reward(**args):
+            item = marshal(u, FavouriteRewards.resource_fields)
+            favorites.append(item)
+
         res = RewardsResponse(
             starttime = time_start,
             attributes = {
@@ -81,7 +97,7 @@ class RewardsAPI(Base):
                     'rewards-between-100-400' : Invest.rewards_per_amount(100, 400, **args),
                     'rewards-more-than-400'   : Invest.rewards_per_amount(400,  **args),
                 },
-                'favorite-rewards': Reward.favorite_reward(**args)
+                'favorite-rewards': favorites
             },
             filters = args.items()
         )

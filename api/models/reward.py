@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import func, Integer, String, Text, DateTime
+from sqlalchemy import func, Integer, String, Text
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import MultipleResultsFound
-from api.helpers import image_url
+from sqlalchemy.orm import aliased
+from api.helpers import svg_image_url, get_lang
 from sqlalchemy import desc,and_, distinct
 
 from api.decorators import cacher
+from .icon import Icon, IconLang
 from .project import Project, ProjectCategory
 from .location import Location, LocationItem
 
@@ -26,7 +28,6 @@ class Reward(db.Model):
 
     def __repr__(self):
         return '<Reward(%d) %s: %s>' % (self.id, self.project[:10], self.title[:50])
-
 
     #Filters for this table
     @hybrid_property
@@ -86,10 +87,30 @@ class Reward(db.Model):
         """Reward type used in successful projects"""
 
         filters = list(self.get_filters(**kwargs))
-        filters.append(self.type == 'individual')
-        res = db.session.query(self.icon, func.count(self.project).label('total'))\
-                                .join(Project, and_(Project.id == self.project, Project.status.in_(Project.SUCCESSFUL_PROJECTS)))\
-                                .filter(*filters).group_by(self.icon).order_by(desc('total')).all()
-        if res is None:
-            res = []
-        return res
+
+        cols = [self.icon, Icon.svg_url.label('svg-url'), Icon.name, Icon.description, func.count(self.project).label('total')]
+        injoins = [(Project, and_(Project.id == self.project, Project.status.in_(Project.SUCCESSFUL_PROJECTS))),
+                   (Icon, Icon.id == self.icon)]
+
+        if 'lang' in kwargs and kwargs['lang'] is not None:
+            # In case of requiring languages, a LEFT JOIN must be generated
+            joins = []
+            _langs = {}
+            for l in kwargs['lang']:
+                _langs[l] = aliased(IconLang)
+                cols.append(_langs[l].name_lang.label('name_' + l))
+                cols.append(_langs[l].description_lang.label('description_' + l))
+                joins.append((_langs[l], and_(_langs[l].id == Icon.id, _langs[l].lang == l)))
+            query = db.session.query(*cols).join(*injoins).outerjoin(*joins)
+        else:
+            query = db.session.query(*cols).join(*injoins)
+
+        ret = []
+        for u in query.filter(*filters).group_by(self.icon).order_by(desc('total')):
+            u = u._asdict()
+            u['name'] = get_lang(u, 'name', kwargs['lang'])
+            u['description'] = get_lang(u, 'description', kwargs['lang'])
+            ret.append(u)
+        if ret is None:
+            ret = []
+        return ret

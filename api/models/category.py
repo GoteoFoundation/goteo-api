@@ -19,7 +19,7 @@ from api.models.location import Location, LocationItem
 class CategoryLang(db.Model):
     __tablename__ = 'category_lang'
 
-    id = db.Column('id', String(50), db.ForeignKey('category.id'), primary_key=True)
+    id = db.Column('id', Integer, db.ForeignKey('category.id'), primary_key=True)
     lang = db.Column('lang', String(2), primary_key=True)
     name_lang = db.Column('name', Text)
     description_lang = db.Column('description', Text)
