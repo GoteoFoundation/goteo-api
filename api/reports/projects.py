@@ -24,7 +24,7 @@ func = sqlalchemy.func
 class ProjectContribution:
     resource_fields = {
         'name'  : fields.String,
-        'url'  : fields.String,
+        'project-url'  : fields.String,
         'image-url'  : fields.String,
         'video-url'  : fields.String,
         'date-published'  : fields.DateTime(dt_format='rfc822'),
@@ -36,7 +36,7 @@ class ProjectContribution:
 class ProjectAmount:
     resource_fields = {
         'name'   : fields.String,
-        'url'   : fields.String,
+        'project-url'   : fields.String,
         'image-url'  : fields.String,
         'video-url'  : fields.String,
         'date-published'  : fields.DateTime(dt_format='rfc822'),
@@ -138,7 +138,7 @@ class ProjectsAPI(Base):
                 'top10-collaborations'           : map(lambda p: {'name': p.name,
                                                                   'project': p.project,
                                                                   'description-short' : p.subtitle,
-                                                                  'url' : project_url(p.project),
+                                                                  'project-url' : project_url(p.project),
                                                                   'image-url' : image_url(p.image, 'big', False),
                                                                   'video-url': p.media,
                                                                   'date-published': utc_from_local(p.published)},
@@ -146,7 +146,7 @@ class ProjectsAPI(Base):
                 'top10-donations'                : map(lambda p: {'name': p.name,
                                                                   'project': p.project,
                                                                   'description-short' : p.subtitle,
-                                                                  'url' : project_url(p.project),
+                                                                  'project-url' : project_url(p.project),
                                                                   'image-url' : image_url(p.image, 'big', False),
                                                                   'video-url': p.media,
                                                                   'date-published': utc_from_local(p.published)},
@@ -154,7 +154,7 @@ class ProjectsAPI(Base):
                 'top10-receipts'                 : map(lambda p: {'name': p.name,
                                                                   'project': p.project,
                                                                   'description-short' : p.subtitle,
-                                                                  'url' : project_url(p.project),
+                                                                  'project-url' : project_url(p.project),
                                                                   'image-url' : image_url(p.image, 'big', False),
                                                                   'video-url': p.media,
                                                                   'date-published': utc_from_local(p.published)},
