@@ -55,7 +55,7 @@ class Project(db.Model):
 
     @hybrid_property
     def image_url(self):
-        return image_url(self.image, size="big", cut=False)
+        return image_url(self.image, size="big")
 
     @hybrid_property
     def date_created(self):

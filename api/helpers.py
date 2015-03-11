@@ -42,17 +42,17 @@ def get_lang(object, field, langs=[]):
                 return object[field + '_' + l]
     return object[field]
 
-def image_url(img, size='large', cut=True):
+def image_url(img, size='medium', cut=False, default='la_gota.png'):
     """
     Goteo image urls
     @size 'thumb', 'medium', 'large'
     """
-    sizes = {'thumb' : '56x56', 'medium' : '192x192', 'large' : '512x512', 'big' : '1024x1024'}
+    sizes = ('icon', 'thumb', 'medium', 'large', 'big')
 
-    s = sizes[size] if size in sizes else sizes['thumb']
+    s = size if size in sizes else 'medium'
     if cut:
         s += 'c'
-    i = img if img is not None else 'la_gota.png'
+    i = img if img is not None else default
 
     return 'http://goteo.org/img/' + s + '/' + i
 
@@ -64,7 +64,6 @@ def svg_image_url(img, type='licenses'):
 
 def utc_from_local(date_time, local_tz=None):
     local_time = None
-    print '>>>>>' + date_time.__class__.__name__
     if date_time.__class__.__name__ == 'date':
         date_time = datetime.datetime(*(date_time.timetuple()[:6]))
 
