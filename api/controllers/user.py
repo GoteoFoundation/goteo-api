@@ -36,6 +36,7 @@ class UserCompleteResponse(Response):
         "node"         : fields.String,
         "date-created"         : fields.DateTime(dt_format='rfc822'),
         # "date-updated"         : fields.DateTime(dt_format='rfc822'),
+        "profile-url"         : fields.String,
         "profile-image-url"         : fields.String,
     }
 
@@ -81,6 +82,7 @@ class UsersListAPI(BaseList):
         for u in User.list(**args):
             item = marshal(u, UserResponse.resource_fields)
             item['date-created'] = u.date_created
+            item['profile-url'] = u.profile_url
             item['profile-image-url'] = u.profile_image_url
             items.append( item )
 

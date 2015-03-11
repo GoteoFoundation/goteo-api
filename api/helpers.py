@@ -59,6 +59,9 @@ def image_url(img, size='medium', cut=False, default='la_gota.png'):
 def project_url(project_id):
     return 'http://goteo.org/project/' + project_id
 
+def user_url(user_id):
+    return 'http://goteo.org/user/profile/' + user_id
+
 def svg_image_url(img, type='licenses'):
     return 'http://goteoassets.org/api/svg/' + type + '/' + img
 

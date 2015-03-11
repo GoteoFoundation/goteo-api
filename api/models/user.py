@@ -3,7 +3,7 @@
 from sqlalchemy import func, Integer, String, Date, DateTime
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
-from api.helpers import image_url, utc_from_local
+from api.helpers import image_url, utc_from_local, user_url
 from sqlalchemy import asc, or_, distinct
 
 from api.decorators import cacher
@@ -36,6 +36,10 @@ class User(db.Model):
     @hybrid_property
     def profile_image_url(self):
         return image_url(self.avatar)
+
+    @hybrid_property
+    def profile_url(self):
+        return user_url(self.id)
 
     @hybrid_property
     def date_created(self):

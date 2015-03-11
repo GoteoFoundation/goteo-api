@@ -18,7 +18,7 @@ from api.models.message import Message
 from api.models.user import User, UserInterest, UserRole
 from api.models.location import Location, LocationItem
 from api.decorators import *
-from api.helpers import get_lang, image_url
+from api.helpers import get_lang, image_url, user_url
 from api.base_endpoint import BaseList as Base, Response
 
 func = sqlalchemy.func
@@ -39,6 +39,7 @@ class UserDonation:
         'user'         : fields.String,
         'name'              : fields.String,
         'profile-image-url' : fields.String,
+        'profile-url' : fields.String,
         'amount'       : fields.Float,
         'contributions': fields.Integer
     }
@@ -50,6 +51,7 @@ class UserCollaboration:
         'user'              : fields.String,
         'name'              : fields.String,
         'profile-image-url' : fields.String,
+        'profile-url' : fields.String,
         'interactions'      : fields.Integer
     }
     required = resource_fields.keys()
@@ -202,6 +204,7 @@ class CommunityAPI(Base):
             u = u._asdict()
             item = marshal(u, UserDonation.resource_fields)
             item['profile-image-url'] = image_url(u['avatar'])
+            item['profile-url'] = user_url(u['id'])
             top10_multidonors.append(item)
 
         top10_donors = []
@@ -209,6 +212,7 @@ class CommunityAPI(Base):
             u = u._asdict()
             item = marshal(u, UserDonation.resource_fields)
             item['profile-image-url'] = image_url(u['avatar'])
+            item['profile-url'] = user_url(u['id'])
             top10_donors.append(item)
 
         top10_collaborations = []
@@ -216,6 +220,7 @@ class CommunityAPI(Base):
             u = u._asdict()
             item = marshal(u, UserDonation.resource_fields)
             item['profile-image-url'] = image_url(u['avatar'])
+            item['profile-url'] = user_url(u['id'])
             top10_collaborations.append(item)
 
         res = CommunityResponse(
@@ -422,7 +427,7 @@ class CommunityAPI(Base):
                                                  Invest.STATUS_RETURNED]))
         f_top10_multidonors.append(Invest.user == User.id)
         f_top10_multidonors.append(~Invest.user.in_(users_exclude))
-        res = db.session.query(Invest.user, User.name, User.avatar, func.count(Invest.id).label('contributions'), func.sum(Invest.amount).label('amount'))\
+        res = db.session.query(Invest.user, User.name, User.id, User.avatar, func.count(Invest.id).label('contributions'), func.sum(Invest.amount).label('amount'))\
                                     .filter(*f_top10_multidonors).group_by(Invest.user)\
                                     .order_by(desc('contributions'), desc('amount')).limit(10).all()
         if res is None:
@@ -438,7 +443,7 @@ class CommunityAPI(Base):
                                                       Invest.STATUS_RETURNED]))
         f_top10_donors.append(Invest.user == User.id)
         f_top10_donors.append(~Invest.user.in_(users_exclude))
-        res = db.session.query(Invest.user, User.name, User.avatar, func.count(Invest.id).label('contributions'), func.sum(Invest.amount).label('amount'))\
+        res = db.session.query(Invest.user, User.name, User.id, User.avatar, func.count(Invest.id).label('contributions'), func.sum(Invest.amount).label('amount'))\
                                     .filter(*f_top10_donors).group_by(Invest.user)\
                                     .order_by(desc('amount'), desc('contributions')).limit(10).all()
         if res is None:
@@ -448,7 +453,7 @@ class CommunityAPI(Base):
     # Top 10 colaboradores
     def _top10_collaborations(self, f_top10_collaborations = []):
         f_top10_collaborations.append(Message.user == User.id)
-        res = db.session.query(Message.user, User.name, User.avatar, func.count(Message.id).label('interactions'))\
+        res = db.session.query(Message.user, User.name, User.id, User.avatar, func.count(Message.id).label('interactions'))\
                             .filter(*f_top10_collaborations).group_by(Message.user)\
                             .order_by(desc('interactions')).limit(10).all()
         if res is None:
