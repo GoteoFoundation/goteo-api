@@ -8,25 +8,6 @@ from flask import jsonify
 from config import config
 from api import app
 
-def parse_args(parser):
-    """Standard args parser santizizer"""
-    args = parser.parse_args()
-    # limit lang length
-    if 'lang' in args and args['lang'] is not None:
-        langs = []
-        for l in args['lang']:
-            if config.default_db_lang != l:
-                langs.append(l)
-
-        args['lang'] = langs
-        if langs is []:
-            del args['lang']
-        else:
-            # 2 elements allowed only
-            args['lang'] = args['lang'][:2]
-
-    return args
-
 def get_lang(object, field, langs=[]):
     """Searchs langs alternatives on a object in the form of:
     {

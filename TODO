@@ -8,7 +8,14 @@ pledged-successful  => percentage-pledged-successful
 
 proyectos recibidos filtro por creado
 
-reports/community/ (users) => usuarios que han aportado en esas fechas
+reports/community/ (users) => usuarios que han aportado en esas fechas?
+entonces es lo mismo que donors!
+
+reports/money => average failed
+para proyectos fallidos deberia mirar fecha archivado
+para proyectos financiados mirar fecha
+añadir donantes via credit-card y cash
+eliminar multidonantes via paypal
 -----
 
 

@@ -35,16 +35,14 @@ class Project(db.Model):
     minimum = db.Column('mincost', Integer)
     optimum = db.Column('maxcost', Integer)
     amount = db.Column('amount', Integer)
-    #subtitle = db.Column('subtitle', String(255))
     status = db.Column('status', Integer)
-    #created = db.Column('created', Date)
     date_passed = db.Column('passed', Date)
     created = db.Column('created', Date)
     date_updated = db.Column('updated', Date)
     # deberia haber un campo como el updated solo hasta que se publica el proyecto,
     # luego coincidiria con el publicado
     published = db.Column('published', Date)
-    date_closed = db.Column('closed', Date)
+    date_closed = db.Column('closed', Date) #
     node = db.Column('node', String(50), db.ForeignKey('node.id'))
     # total_funding
     # active_date

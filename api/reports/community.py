@@ -77,7 +77,8 @@ class CommunityResponse(Response):
         "percentage-multidonor-donors"     : fields.Float,
         "percentage-multidonor-users"      : fields.Float,
         "paypal-donors"                    : fields.Integer,
-        "paypal-multidonors"               : fields.Integer,
+        "creditcard-donors"                : fields.Integer,
+        "cash-donors"                      : fields.Integer,
         "collaborators"                    : fields.Integer,
         'average-donors'                   : fields.Integer,
         'average-collaborators'            : fields.Integer,
@@ -117,6 +118,11 @@ class CommunityAPI(Base):
         """Get the community reports
         <a href="http://developers.goteo.org/doc/reports#community">developers.goteo.org/doc/reports#community</a>
         """
+        ret = self._get()
+        return ret.response()
+
+    def _get(self):
+        """Get()'s method dirty work"""
         time_start = time.time()
         # remove not used args
         args = self.parse_args(remove=('page','limit'))
@@ -172,11 +178,16 @@ class CommunityAPI(Base):
             filters_collaborators.append(LocationItem.id.in_(locations_ids))
 
         users = User.total(**args)
-        un_args = args.copy();
-        un_args['unsubscribed'] = 1;
-        bajas = User.total(**un_args)
+        nargs = args.copy();
+        nargs['unsubscribed'] = 1;
+        bajas = User.total(**nargs)
         donors = Invest.donors_total(**args)
-        multidonors = self._multidonors(list(filters))
+        multidonors = Invest.multidonors_total(**args)
+
+        paypal_donors = Invest.donors_total(**dict(args, **{'method' : Invest.METHOD_PAYPAL}))
+        creditcard_donors = Invest.donors_total(**dict(args, **{'method' : Invest.METHOD_TPV}))
+        cash_donors = Invest.donors_total(**dict(args, **{'method' : Invest.METHOD_CASH}))
+        # paypal_multidonors = Invest.multidonors_total(**nargs)
         categorias = self._categorias(list(filters_categories), args['lang'])
         users_categoria1 = categorias[0].users if len(categorias) > 0 else None
         users_categoria2 = categorias[1].users if len(categorias) > 1 else None
@@ -223,9 +234,10 @@ class CommunityAPI(Base):
                 'percentage-unsubscribed-users'     : percent(bajas, users),
                 'percentage-multidonor-donors'      : percent(multidonors, donors),
                 'percentage-multidonor-users'       : percent(multidonors, users),
-                'collaborators'                     : self._colaboradores(list(filters_collaborators)),
-                'paypal-donors'                     : self._paypal(list(filters)),
-                'paypal-multidonors'                : self._paypal_multidonors(list(filters)),
+                'collaborators'                     : Message.collaborators_total(**args),
+                'paypal-donors'                     : paypal_donors,
+                'creditcard-donors'                 : creditcard_donors,
+                'cash-donors'                       : cash_donors,
                 'donors-collaborators'              : self._coficolaboradores(list(filters)),
                 'average-donors'                    : self._media_cofi(list(filters)),
                 'average-collaborators'             : self._media_colab(list(filters_collaborators)),
@@ -244,36 +256,8 @@ class CommunityAPI(Base):
             },
             filters = args.items()
         )
-        return res.response(self.json)
-
-    # Multi-Cofinanciadores (a más de 1 proyecto)
-    def _multidonors(self, f_multidonors = []):
-        f_multidonors.append(Invest.status.in_([Invest.STATUS_PENDING,
-                                              Invest.STATUS_CHARGED,
-                                              Invest.STATUS_PAID,
-                                              Invest.STATUS_RETURNED]))
-        _multidonors = db.session.query(Invest.user).filter(*f_multidonors).group_by(Invest.user).\
-                                                    having(func.count(Invest.user) > 1).\
-                                                    having(func.count(Invest.project) > 1)
-        res = _multidonors.count()
-        if res is None:
-            res = 0
         return res
 
-    # Cofinanciadores usando PayPal
-    def _paypal(self, f_paypal = []):
-        f_paypal.append(Invest.method == Invest.METHOD_PAYPAL)
-        res = db.session.query(func.count(Invest.id)).filter(*f_paypal).scalar()
-
-
-        if res is None:
-            res = 0
-        return res
-
-    # Multi-Cofinanciadores usando PayPal
-    def _paypal_multidonors(self, f_paypal = []):
-        f_paypal.append(Invest.method==Invest.METHOD_PAYPAL)
-        return self._multidonors(f_paypal)
 
     # Número de colaboradores
     def _colaboradores(self, f_colaboradores = []):

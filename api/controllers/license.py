@@ -10,7 +10,6 @@ from api.models.reward import Reward
 from api.models.project import Project
 from api.decorators import *
 from api.base_endpoint import BaseList, Response
-from api.helpers import parse_args
 
 @swagger.model
 class LicenseResponse(Response):
@@ -61,6 +60,16 @@ class LicensesListAPI(BaseList):
         """Get the licenses list
         <a href="http://developers.goteo.org/doc/licenses">developers.goteo.org/doc/licenses</a>
         """
+        res = self._get()
+
+        if res.ret['items'] == []:
+            return bad_request('No licenses to list', 404)
+
+        return res.response()
+
+    def _get(self):
+        """Dirty work for the get() method"""
+
         time_start = time.time()
         #removing not-needed standard filters
         args = self.parse_args(remove=('page','limit'))
@@ -83,7 +92,5 @@ class LicensesListAPI(BaseList):
             filters = args.items(),
             total = License.total(**args)
         )
-        if items == []:
-            return bad_request('No licenses to list', 404)
 
-        return res.response(self.json)
+        return res

@@ -21,22 +21,22 @@ class MoneyResponse(Response):
     """MoneyResponse"""
 
     resource_fields = {
-        "average-failed"         : fields.Float,
-        "average-donation"       : fields.Float,
-        "average-donation-paypal": fields.Float,
-        "average-minimum"        : fields.Float,
-        "average-received"       : fields.Float,
-        "average-second-round"   : fields.Float,
-        "matchfund-amount"       : fields.Integer,
-        "matchfundpledge-amount" : fields.Integer,
-        "cash-amount"            : fields.Integer,
-        "pledged"                : fields.Integer,
-        "pledged-failed"         : fields.Float,
-        "pledged-successful"     : fields.Float,
-        "refunded"               : fields.Integer,
-        "fee-amount"             : fields.Float,
-        "paypal-amount"          : fields.Integer,
-        "creditcard-amount"      : fields.Integer
+        "average-failed"                : fields.Float,
+        "average-donation"              : fields.Float,
+        "average-donation-paypal"       : fields.Float,
+        "average-minimum"               : fields.Float,
+        "average-received"              : fields.Float,
+        "average-second-round"          : fields.Float,
+        "matchfund-amount"              : fields.Integer,
+        "matchfundpledge-amount"        : fields.Integer,
+        "cash-amount"                   : fields.Integer,
+        "pledged"                       : fields.Integer,
+        "percentage-pledged-failed"     : fields.Float,
+        "percentage-pledged-successful" : fields.Float,
+        "refunded"                      : fields.Integer,
+        "fee-amount"                    : fields.Float,
+        "paypal-amount"                 : fields.Integer,
+        "creditcard-amount"             : fields.Integer
     }
 
     required = resource_fields.keys()
@@ -58,6 +58,11 @@ class MoneyAPI(BaseList):
         """Get the Money Report
         <a href="http://developers.goteo.org/doc/reports#money">developers.goteo.org/doc/reports#money</a>
         """
+        ret = self._get()
+        return ret.response()
+
+    def _get(self):
+        """Get()'s method dirty work"""
         time_start = time.time()
 
         #remove not used arguments
@@ -70,11 +75,11 @@ class MoneyAPI(BaseList):
                 "pledged"                 : Invest.pledged_total(**args),
                 # "pledged"                 : Project.pledged_total(**args),
                 # Perc. medio de recaudación sobre el mínimo recaudado
-                # "pledged-successful"      : Invest.percent_pledged_successful(**args), # <- este metodo filtra por fecha de invest, da numeros negativos
-                "pledged-successful"      : Project.percent_pledged_successful(**args), # <- filtra por fecha de proyecto
+                # "percentage-pledged-successful"      : Invest.percent_pledged_successful(**args), # <- este metodo filtra por fecha de invest, da numeros negativos
+                "percentage-pledged-successful"      : Project.percent_pledged_successful(**args), # <- filtra por fecha de proyecto
                 # Perc. dinero compr. medio sobre mínimo',
-                # "pledged-failed"          : Invest.percent_pledged_failed(**args),
-                "pledged-failed"          : Project.percent_pledged_failed(**args),
+                # "percentage-pledged-failed"          : Invest.percent_pledged_failed(**args),
+                "percentage-pledged-failed"          : Project.percent_pledged_failed(**args),
                 # Dinero devuelto (en proyectos archivados)
                 "refunded"                : Invest.refunded_total(**args),
                 # "refunded"                : Project.refunded_total(**args),
@@ -115,5 +120,5 @@ class MoneyAPI(BaseList):
             filters = args.items()
         )
 
-        return res.response(self.json)
+        return res
 

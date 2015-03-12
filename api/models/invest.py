@@ -113,6 +113,23 @@ class Invest(db.Model):
 
     @hybrid_method
     @cacher
+    def multidonors_total(self, **kwargs):
+        """Total number of donors who donates to more than 1 project"""
+        filters = list(self.get_filters(**kwargs))
+        filters.append(Invest.status.in_([Invest.STATUS_PENDING,
+                                          Invest.STATUS_CHARGED,
+                                          Invest.STATUS_PAID,
+                                          Invest.STATUS_RETURNED]))
+        total = db.session.query(Invest.user).filter(*filters).group_by(Invest.user).\
+                                                    having(func.count(Invest.user) > 1).\
+                                                    having(func.count(Invest.project) > 1)
+        res = total.count()
+        if res is None:
+            res = 0
+        return res
+
+    @hybrid_method
+    @cacher
     def pledged_total(self, **kwargs):
         """Total amount of money (€) raised by Goteo"""
         try:

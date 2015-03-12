@@ -8,19 +8,17 @@ from flask_restful_swagger import swagger
 from api.models.user import User
 from api.decorators import *
 from api.base_endpoint import BaseItem, BaseList, Response
-from api.helpers import parse_args
-
 
 @swagger.model
 class UserResponse(Response):
     """UserResponse"""
 
     resource_fields = {
-        "id"         : fields.String,
-        "name"         : fields.String,
-        "node"         : fields.String,
-        "date-created"         : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
-        "profile-image-url"         : fields.String,
+        "id"                : fields.String,
+        "name"              : fields.String,
+        "node"              : fields.String,
+        "date-created"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
+        "profile-image-url" : fields.String,
     }
 
     required = resource_fields.keys()
@@ -31,13 +29,13 @@ class UserCompleteResponse(Response):
     """UserCompleteResponse"""
 
     resource_fields = {
-        "id"         : fields.String,
-        "name"         : fields.String,
-        "node"         : fields.String,
-        "date-created"         : fields.DateTime(dt_format='rfc822'),
-        # "date-updated"         : fields.DateTime(dt_format='rfc822'),
-        "profile-url"         : fields.String,
-        "profile-image-url"         : fields.String,
+        "id"                : fields.String,
+        "name"              : fields.String,
+        "node"              : fields.String,
+        "date-created"      : fields.DateTime(dt_format='rfc822'),
+        # "date-updated"    : fields.DateTime(dt_format='rfc822'),
+        "profile-url"       : fields.String,
+        "profile-image-url" : fields.String,
     }
 
     required = resource_fields.keys()
@@ -74,6 +72,16 @@ class UsersListAPI(BaseList):
         """Get the users list
         <a href="http://developers.goteo.org/doc/users">developers.goteo.org/doc/users</a>
         """
+        res = self._get()
+
+        if res.ret['items'] == []:
+            return bad_request('No users to list', 404)
+
+        return res.response()
+
+    def _get(self):
+        """Get()'s method dirty work"""
+
         time_start = time.time()
         # For privacy, removing location filter ?
         args = self.parse_args(remove=('location'))
@@ -92,11 +100,8 @@ class UsersListAPI(BaseList):
             filters = args.items(),
             total = User.total(**args)
         )
-        if items == []:
-            return bad_request('No users to list', 404)
 
-        return res.response()
-
+        return res
 
 
 
@@ -111,21 +116,30 @@ class UserAPI(BaseItem):
     )
     @requires_auth
     @ratelimit()
-    def get(self, id):
+    def get(self, user_id):
         """Get a user details
         <a href="http://developers.goteo.org/users#user">developers.goteo.org/users#user</a>
         """
-        u = User.get(id)
-        item = marshal(u, UserCompleteResponse.resource_fields)
-        item['date-created'] = u.date_created
-        item['profile-image-url'] = u.profile_image_url
+        res = self._get(user_id)
+
+        if res.ret['id'] == None:
+            return bad_request('User not found', 404)
+
+        return res.response()
+
+    def _get(self, user_id):
+        """Get()'s method dirty work"""
         time_start = time.time()
+        u = User.get(user_id)
+        item = marshal(u, UserCompleteResponse.resource_fields)
+        if u != None:
+            item['date-created'] = u.date_created
+            item['profile-image-url'] = u.profile_image_url
+
         res = UserCompleteResponse(
             starttime = time_start,
             attributes = item
         )
-        if u is None:
-            return bad_request('User not found', 404)
 
-        return res.response(self.json)
+        return res
 

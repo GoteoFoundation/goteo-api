@@ -10,7 +10,6 @@ from api.models.project import Project
 from api.models.user import User
 from api.decorators import *
 from api.base_endpoint import BaseList, Response
-from api.helpers import parse_args
 
 @swagger.model
 class CategoryResponse(Response):
@@ -59,10 +58,18 @@ class CategoriesListAPI(BaseList):
         """Get the categories list
         <a href="http://developers.goteo.org/doc/categories">developers.goteo.org/doc/categories</a>
         """
+        res = self._get()
+
+        if res.ret['items'] == []:
+            return bad_request('No categories to list', 404)
+
+        return res.response()
+
+    def _get(self):
+        """Dirty work for the get() method"""
         time_start = time.time()
         #removing not-needed standard filters
         args = self.parse_args(remove=('page','limit'))
-
 
         items = []
         for u in Category.list(**args):
@@ -79,7 +86,5 @@ class CategoriesListAPI(BaseList):
             filters = args.items(),
             total = Category.total(**args)
         )
-        if items == []:
-            return bad_request('No categories to list', 404)
 
-        return res.response(self.json)
+        return res

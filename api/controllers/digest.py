@@ -55,7 +55,8 @@ class DigestsListAPI(BaseList):
         'reports/community' : 'reports.community.CommunityAPI',
         'reports/projects' : 'reports.projects.ProjectsAPI',
         'reports/rewards' : 'reports.rewards.RewardsAPI',
-        'categories' : 'controllers.category.CategoriesListAPI'
+        'categories' : 'controllers.category.CategoriesListAPI',
+        'licenses' : 'controllers.license.LicensesListAPI'
         }
 
     @swagger.operation(
@@ -88,7 +89,6 @@ class DigestsListAPI(BaseList):
         try:
             # global data, construct from_date >> to_date
             instance = mod()
-            instance.json = False # we don't want jsonify the response
         except Exception:
             return bad_request('Endpoint error. Try some allowed endpoint to digest.', 404)
 
@@ -100,7 +100,7 @@ class DigestsListAPI(BaseList):
             instance.parse_args = (lambda **a:self.dummy_parse_args(args, **a))
             # get year
 
-            global_ = instance.get()
+            global_ = instance._get().response(False)
             # cleaning response
             # del global_['time-elapsed']
             buckets = {}
@@ -109,7 +109,7 @@ class DigestsListAPI(BaseList):
                 maxmin = self.max_min(year, month)
                 if maxmin[0] < maxmin[1]:
                     [args['from_date'], args['to_date']] = map(lambda d:d.isoformat(),maxmin)
-                    buckets[format(month, '02')] = instance.get()
+                    buckets[format(month, '02')] = instance._get().response(False)
 
         except Exception as e:
             return bad_request('Unexpected error. [{0}]'.format(e), 400)
@@ -123,7 +123,7 @@ class DigestsListAPI(BaseList):
             filters = args.items()
         )
 
-        return res.response(self.json)
+        return res.response()
 
     def dummy_parse_args(self, old_args, remove=()):
         new_args = {}

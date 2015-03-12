@@ -96,7 +96,6 @@ class BaseList(Resource):
     """Base class for list enpoint reports"""
 
     def __init__(self):
-        self.json = True # returns result with jsonify
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('from_date', type=date_sanitizer)
         self.reqparse.add_argument('to_date', type=date_sanitizer)

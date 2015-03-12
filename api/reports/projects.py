@@ -91,6 +91,11 @@ class ProjectsAPI(Base):
         """Get the Projects Report
         <a href="http://developers.goteo.org/doc/reports#projects">developers.goteo.org/doc/reports#projects</a>
         """
+        ret = self._get()
+        return ret.response()
+
+    def _get(self):
+        """Get()'s method dirty work"""
         time_start = time.time()
         # remove not used args
         args = self.parse_args(remove=('page','limit'))
@@ -162,7 +167,7 @@ class ProjectsAPI(Base):
             },
             filters = args.items()
         )
-        return res.response(self.json)
+        return res
 
     # Proyectos enviados a revisión (renombrar Proyectos recibidos)
     # TODO: la fechas a revisar tiene que ser el created (published no está para proyectos en revision)

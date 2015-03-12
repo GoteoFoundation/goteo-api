@@ -74,6 +74,11 @@ class RewardsAPI(Base):
         """Get the Rewards Report
         <a href="http://developers.goteo.org/doc/reports#rewards">developers.goteo.org/doc/reports#rewards</a>
         """
+        res = self._get()
+        return res.response()
+
+    def _get(self):
+        """Dirty work for the get() method"""
         time_start = time.time()
         # remove not used args
         args = self.parse_args(remove=('page','limit'))
@@ -101,4 +106,4 @@ class RewardsAPI(Base):
             },
             filters = args.items()
         )
-        return res.response(self.json)
+        return res
