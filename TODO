@@ -1,5 +1,17 @@
 TODO
 
+IMPORTANTE
+corregir matchfund-amount para SOLO poner los aporte
+
+pledged-failed cambia a percentage-pledged-failed
+pledged-successful  => percentage-pledged-successful
+
+proyectos recibidos filtro por creado
+
+reports/community/ (users) => usuarios que han aportado en esas fechas
+-----
+
+
 Location refactor
 
 no repetir autentificacion en digest->get()
@@ -7,6 +19,13 @@ no repetir autentificacion en digest->get()
 2. Endpoint de iconos?
 
 reports de money con filtros de fecha, filtrar invest o proyecto?
+
+
+error cache list users
+
+
+
+
 
 aportaciones anonimas
 

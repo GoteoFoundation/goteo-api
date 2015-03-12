@@ -165,6 +165,7 @@ class ProjectsAPI(Base):
         return res.response(self.json)
 
     # Proyectos enviados a revisión (renombrar Proyectos recibidos)
+    # TODO: la fechas a revisar tiene que ser el created (published no está para proyectos en revision)
     def _received(self, f_rev_projects = []):
         f_rev_projects.append(Project.date_updated != None)
         f_rev_projects.append(Project.date_updated != '0000-00-00')

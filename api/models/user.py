@@ -49,15 +49,13 @@ class User(db.Model):
     def date_updated(self):
         return utc_from_local(self.updated)
 
-    #Filters for table user
-    @hybrid_property
-    def filters(self):
-        return [User.hide == 0, User.active == 1]
-
     # Getting filters for this model
     @hybrid_method
     def get_filters(self, **kwargs):
-        filters = self.filters
+        if 'unsubscribed' in kwargs and kwargs['unsubscribed'] is not None:
+            filters = [or_(User.hide == 1, User.active == 0)]
+        else:
+            filters = [User.hide == 0, User.active == 1]
         # Filters by goteo node
         if 'node' in kwargs and kwargs['node'] is not None:
             filters.append(User.node.in_(kwargs['node']))

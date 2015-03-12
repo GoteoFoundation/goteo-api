@@ -36,6 +36,7 @@ def cacher(f):
         if kwargs:
             for k in kwargs:
                 key += "|{0}={1}".format(k, kwargs[k])
+        print '>>>>>' + key
         #TODO: lower the cache time depending on the to_date parameter
                 # if present use that date as maxdate (else now)
                 # if maxdate is > now() - 2 months (configurable)

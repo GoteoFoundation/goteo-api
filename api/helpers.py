@@ -70,6 +70,8 @@ def utc_from_local(date_time, local_tz=None):
     if date_time.__class__.__name__ == 'date':
         date_time = datetime.datetime(*(date_time.timetuple()[:6]))
 
+    # assert date_time.__class__.__name__ == 'datetime'
+
     if date_time.__class__.__name__ != 'datetime':
         return date_time
     if local_tz is None:

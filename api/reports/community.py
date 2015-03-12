@@ -123,46 +123,37 @@ class CommunityAPI(Base):
 
 
         filters = []
-        filters2 = []  # para num de usuarios y bajas
-        filters3 = [Category.name != '']  # para categorias
-        filters4 = []  # para las relacionadas con Colaboradores
+        filters_categories = [Category.name != '']  # para categorias
+        filters_collaborators = []  # para las relacionadas con Colaboradores
         if args['from_date']:
             filters.append(Invest.date_invested >= args['from_date'])
-            filters2.append(Invest.date_invested >= args['from_date'])
-            filters2.append(Invest.user == User.id)
-            filters3.append(Invest.date_invested >= args['from_date'])
-            filters3.append(Invest.user == UserInterest.user)
-            filters4.append(Message.date >= args['from_date'])
+            filters_categories.append(Invest.date_invested >= args['from_date'])
+            filters_categories.append(Invest.user == UserInterest.user)
+            filters_collaborators.append(Message.date >= args['from_date'])
         if args['to_date']:
             filters.append(Invest.date_invested <= args['to_date'])
-            filters2.append(Invest.date_invested <= args['to_date'])
-            filters2.append(Invest.user == User.id)
-            filters3.append(Invest.date_invested <= args['to_date'])
-            filters3.append(Invest.user == UserInterest.user)
-            filters4.append(Message.date <= args['to_date'])
+            filters_categories.append(Invest.date_invested <= args['to_date'])
+            filters_categories.append(Invest.user == UserInterest.user)
+            filters_collaborators.append(Message.date <= args['to_date'])
         if args['project']:
             filters.append(Invest.project.in_(args['project']))
-            filters2.append(Invest.project.in_(args['project']))
-            filters2.append(User.id == Invest.user)
-            filters3.append(Invest.project.in_(args['project']))
-            filters3.append(UserInterest.user == Invest.user)
-            filters4.append(Message.project.in_(args['project']))
+            filters_categories.append(Invest.project.in_(args['project']))
+            filters_categories.append(UserInterest.user == Invest.user)
+            filters_collaborators.append(Message.project.in_(args['project']))
         if args['node']:
             #TODO: project_node o invest_node?
             filters.append(Invest.id == InvestNode.invest_id)
             filters.append(InvestNode.invest_node.in_(args['node']))
-            filters2.append(User.node.in_(args['node']))
-            filters3.append(UserInterest.user == User.id)
-            filters3.append(User.node.in_(args['node']))
-            filters4.append(Message.user == User.id)
-            filters4.append(User.node.in_(args['node']))
+            filters_categories.append(UserInterest.user == User.id)
+            filters_categories.append(User.node.in_(args['node']))
+            filters_collaborators.append(Message.user == User.id)
+            filters_collaborators.append(User.node.in_(args['node']))
         if args['category']:
 
             filters.append(Invest.project == ProjectCategory.project)
             filters.append(ProjectCategory.category.in_(args['category']))
-            # filters2 y filters3 no hacen uso
-            filters4.append(Message.project == ProjectCategory.project)
-            filters4.append(ProjectCategory.category.in_(args['category']))
+            filters_collaborators.append(Message.project == ProjectCategory.project)
+            filters_collaborators.append(ProjectCategory.category.in_(args['category']))
         if args['location']:
             # Filtra por la localización del usuario
             locations_ids = Location.location_ids(**args['location'])
@@ -173,21 +164,20 @@ class CommunityAPI(Base):
             filters.append(Invest.user == LocationItem.item)
             filters.append(LocationItem.type == 'user')
             filters.append(LocationItem.id.in_(locations_ids))
-            filters2.append(User.id == LocationItem.item)
-            filters2.append(LocationItem.type == 'user')
-            filters2.append(LocationItem.id.in_(locations_ids))
-            filters3.append(UserInterest.user == LocationItem.item)
-            filters3.append(LocationItem.type == 'user')
-            filters3.append(LocationItem.id.in_(locations_ids))
-            filters4.append(Message.user == LocationItem.item)
-            filters4.append(LocationItem.type == 'user')
-            filters4.append(LocationItem.id.in_(locations_ids))
+            filters_categories.append(UserInterest.user == LocationItem.item)
+            filters_categories.append(LocationItem.type == 'user')
+            filters_categories.append(LocationItem.id.in_(locations_ids))
+            filters_collaborators.append(Message.user == LocationItem.item)
+            filters_collaborators.append(LocationItem.type == 'user')
+            filters_collaborators.append(LocationItem.id.in_(locations_ids))
 
-        users = self._users(list(filters2))
-        bajas = self._bajas(list(filters2))
-        donors = self._donors(list(filters))
+        users = User.total(**args)
+        un_args = args.copy();
+        un_args['unsubscribed'] = 1;
+        bajas = User.total(**un_args)
+        donors = Invest.donors_total(**args)
         multidonors = self._multidonors(list(filters))
-        categorias = self._categorias(list(filters3), args['lang'])
+        categorias = self._categorias(list(filters_categories), args['lang'])
         users_categoria1 = categorias[0].users if len(categorias) > 0 else None
         users_categoria2 = categorias[1].users if len(categorias) > 1 else None
 
@@ -216,7 +206,7 @@ class CommunityAPI(Base):
             top10_donors.append(item)
 
         top10_collaborations = []
-        for u in self._top10_collaborations(list(filters4)):
+        for u in self._top10_collaborations(list(filters_collaborators)):
             u = u._asdict()
             item = marshal(u, UserDonation.resource_fields)
             item['profile-image-url'] = image_url(u['avatar'])
@@ -233,14 +223,14 @@ class CommunityAPI(Base):
                 'percentage-unsubscribed-users'     : percent(bajas, users),
                 'percentage-multidonor-donors'      : percent(multidonors, donors),
                 'percentage-multidonor-users'       : percent(multidonors, users),
-                'collaborators'                     : self._colaboradores(list(filters4)),
+                'collaborators'                     : self._colaboradores(list(filters_collaborators)),
                 'paypal-donors'                     : self._paypal(list(filters)),
                 'paypal-multidonors'                : self._paypal_multidonors(list(filters)),
                 'donors-collaborators'              : self._coficolaboradores(list(filters)),
                 'average-donors'                    : self._media_cofi(list(filters)),
-                'average-collaborators'             : self._media_colab(list(filters4)),
+                'average-collaborators'             : self._media_colab(list(filters_collaborators)),
                 'creators-donors'                   : self._impulcofinanciadores(list(filters)),
-                'creators-collaborators'            : self._impulcolaboradores(list(filters4)),
+                'creators-collaborators'            : self._impulcolaboradores(list(filters_collaborators)),
                 'categories'                        : map(lambda t: {t.id: {'users': t.users, 'id': t.id, 'name': t.name, 'percentage-users': percent(t.users, users)}}, categorias),
                 'leading-category'                  : categorias[0].id if len(categorias) > 0 else None,
                 'users-leading-category'            : users_categoria1,
@@ -255,30 +245,6 @@ class CommunityAPI(Base):
             filters = args.items()
         )
         return res.response(self.json)
-
-    # Número total de usuarios
-    def _users(self, f_users = []):
-        res = db.session.query(func.count(User.id)).filter(*f_users).scalar()
-        if res is None:
-            res = 0
-        return res
-
-    # Porcentaje (antes numero) de usuarios que se han dado de baja
-    # Nota: faltarían además de los que se han dado de baja, los que han pedido que borremos datos por LOPD (que son muy pocos)
-    def _bajas(self, f_bajas = []):
-        f_bajas.append(User.active == 0)
-        f_bajas.append(User.hide == 1)
-        res = db.session.query(func.count(User.id)).filter(*f_bajas).scalar()
-        if res is None:
-            res = 0
-        return res
-
-    # Número de cofinanciadores
-    def _donors(self, f_cofinanciadores = []):
-        res = db.session.query(func.count(func.distinct(Invest.user))).filter(*f_cofinanciadores).scalar()
-        if res is None:
-            res = 0
-        return res
 
     # Multi-Cofinanciadores (a más de 1 proyecto)
     def _multidonors(self, f_multidonors = []):

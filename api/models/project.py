@@ -15,8 +15,8 @@ class Project(db.Model):
 
     #PROJECT STATUS IDs
     STATUS_REJECTED    = 0
-    STATUS_EDITING     = 1
-    STATUS_REVIEWING   = 2
+    STATUS_EDITING     = 1 # en negociación
+    STATUS_REVIEWING   = 2 #
     STATUS_IN_CAMPAIGN = 3
     STATUS_FUNDED      = 4
     STATUS_FULFILLED   = 5 # 'Caso de exito'
@@ -41,6 +41,8 @@ class Project(db.Model):
     date_passed = db.Column('passed', Date)
     created = db.Column('created', Date)
     date_updated = db.Column('updated', Date)
+    # deberia haber un campo como el updated solo hasta que se publica el proyecto,
+    # luego coincidiria con el publicado
     published = db.Column('published', Date)
     date_closed = db.Column('closed', Date)
     node = db.Column('node', String(50), db.ForeignKey('node.id'))
