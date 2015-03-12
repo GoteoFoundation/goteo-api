@@ -98,11 +98,11 @@ class User(db.Model):
 
     @hybrid_method
     @cacher
-    def get(self, id):
+    def get(self, user_id):
         """Get a valid user form id"""
         try:
             filters = list(self.filters)
-            filters.append(User.id == id)
+            filters.append(User.id == user_id)
             return self.query.filter(*filters).one()
         except NoResultFound:
             return None
@@ -115,7 +115,7 @@ class User(db.Model):
             limit = kwargs['limit'] if 'limit' in kwargs else 10
             page = kwargs['page'] if 'page' in kwargs else 0
             filters = list(self.get_filters(**kwargs))
-            return self.query.distinct().filter(*filters).order_by(asc(User.id)).offset(page * limit).limit(limit)
+            return self.query.distinct().filter(*filters).order_by(asc(User.id)).offset(page * limit).limit(limit).all()
         except NoResultFound:
             return []
 

@@ -75,7 +75,7 @@ class DigestsListAPI(BaseList):
         time_start = time.time()
         self.reqparse.add_argument('year', type=year_sanitizer, default=dtdatetime.today().year)
         #removing not-needed standard filters
-        args = self.parse_args(('from_date', 'to_date'))
+        args = self.parse_args(remove=('from_date', 'to_date', 'limit', 'page'))
         # get the class
         if endpoint[-1] == '/':
             endpoint = endpoint[:-1]
@@ -110,6 +110,9 @@ class DigestsListAPI(BaseList):
                 if maxmin[0] < maxmin[1]:
                     [args['from_date'], args['to_date']] = map(lambda d:d.isoformat(),maxmin)
                     buckets[format(month, '02')] = instance._get().response(False)
+            #aditional cleaning
+            del args['from_date']
+            del args['to_date']
 
         except Exception as e:
             return bad_request('Unexpected error. [{0}]'.format(e), 400)

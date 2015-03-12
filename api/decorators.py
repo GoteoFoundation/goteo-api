@@ -23,6 +23,7 @@ cache = Cache(app)
 #
 # ======================
 def cacher(f):
+    """Caches methods for model classes"""
     @wraps(f)
     def decorated(*args, **kwargs):
         key = f.__name__;
@@ -36,7 +37,7 @@ def cacher(f):
         if kwargs:
             for k in kwargs:
                 key += "|{0}={1}".format(k, kwargs[k])
-        print '>>>>>' + key
+
         #TODO: lower the cache time depending on the to_date parameter
                 # if present use that date as maxdate (else now)
                 # if maxdate is > now() - 2 months (configurable)
@@ -56,12 +57,20 @@ def cacher(f):
         if app.debug:
             app.logger.debug('CACHER FOR FUNCTION: {0} TIMEOUT: {1}s KEY: {2}'.format(f.__name__, timeout, key))
 
-        @cache.cached(timeout=timeout, key_prefix=key)
-        def wrapper(*args, **kwargs):
+        cached = cache.get(key)
+        if cached:
             if app.debug:
-                app.logger.debug('--Not caching--')
-            return f(*args, **kwargs)
-        return wrapper(*args, **kwargs)
+                app.logger.debug('--Caching--')
+            return cached
+
+        if app.debug:
+            app.logger.debug('--Not caching--')
+
+        result = f(*args, **kwargs)
+        cache.set(key, result, timeout=timeout)
+
+        return result
+
     return decorated
 
 #

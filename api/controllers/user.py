@@ -88,6 +88,7 @@ class UsersListAPI(BaseList):
 
         items = []
         for u in User.list(**args):
+            print u
             item = marshal(u, UserResponse.resource_fields)
             item['date-created'] = u.date_created
             item['profile-url'] = u.profile_url
