@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import func, Integer, String, DateTime, Float, Date
+from sqlalchemy import func, desc, Integer, String, DateTime, Float, Date
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from api.helpers import image_url, utc_from_local
-from sqlalchemy import asc, or_, distinct
-from api.models.location import Location, LocationItem
-from api.models.project import Project, ProjectCategory
-from api.models.reward import Reward
+from sqlalchemy import asc, or_, and_, distinct
+
 from api import db
-from api.decorators import cacher
+from .location import Location, LocationItem
+from .project import Project, ProjectCategory
+
+from .reward import Reward
+from .message import Message
+from ..decorators import cacher
 
 class Invest(db.Model):
     __tablename__ = 'invest'
@@ -98,6 +101,67 @@ class Invest(db.Model):
         except MultipleResultsFound:
             return 0
 
+    # Top 10 Cofinanciadores con más caudal (más generosos) excluir usuarios convocadores Y ADMINES
+    @hybrid_method
+    @cacher
+    def donors_list(self, **kwargs):
+        """List of donors"""
+        from .user import User, UserRole
+        from .call import Call
+        limit = kwargs['limit'] if 'limit' in kwargs else 10
+        page = kwargs['page'] if 'page' in kwargs else 0
+        filters = list(self.get_filters(**kwargs))
+        filters.append(self.status.in_([self.STATUS_PENDING,
+                                        self.STATUS_CHARGED,
+                                        self.STATUS_PAID,
+                                        self.STATUS_RETURNED]))
+        filters.append(self.user == User.id)
+        #exclue convocadores, admines y owners
+        admins = db.session.query(UserRole.user_id).filter(UserRole.role_id == 'superadmin').subquery()
+        calls = db.session.query(Call.owner).filter(Call.status > Call.STATUS_REVIEWING).subquery()
+        owners = db.session.query(Project.owner).filter(Project.status.in_(Project.PUBLISHED_PROJECTS)).subquery()
+        filters.append(~self.user.in_(admins))
+        filters.append(~self.user.in_(calls))
+        filters.append(~self.user.in_(owners))
+        res = db.session.query(self.user, User.name, User.id, User.avatar, func.count(self.id).label('contributions'), func.sum(self.amount).label('amount'))\
+                                    .filter(*filters).group_by(self.user)\
+                                    .order_by(desc('amount'), desc('contributions')).offset(page * limit).limit(limit)
+        ret = []
+        for u in res:
+            u = u._asdict()
+            ret.append(u)
+        return ret
+
+    @hybrid_method
+    @cacher
+    def multidonors_list(self, **kwargs):
+        from .user import User, UserRole
+        from .call import Call
+        limit = kwargs['limit'] if 'limit' in kwargs else 10
+        page = kwargs['page'] if 'page' in kwargs else 0
+        filters = list(self.get_filters(**kwargs))
+
+        filters.append(Invest.status.in_([Invest.STATUS_PENDING,
+                                          Invest.STATUS_CHARGED,
+                                          Invest.STATUS_PAID,
+                                          Invest.STATUS_RETURNED]))
+        filters.append(Invest.user == User.id)
+        #exclue convocadores, admines y owners
+        admins = db.session.query(UserRole.user_id).filter(UserRole.role_id == 'superadmin').subquery()
+        calls = db.session.query(Call.owner).filter(Call.status > Call.STATUS_REVIEWING).subquery()
+        owners = db.session.query(Project.owner).filter(Project.status.in_(Project.PUBLISHED_PROJECTS)).subquery()
+        filters.append(~self.user.in_(admins))
+        filters.append(~self.user.in_(calls))
+        filters.append(~self.user.in_(owners))
+        res = db.session.query(Invest.user, User.name, User.id, User.avatar, func.count(Invest.id).label('contributions'), func.sum(Invest.amount).label('amount'))\
+                                    .filter(*filters).group_by(Invest.user)\
+                                    .order_by(desc('contributions'), desc('amount')).offset(page * limit).limit(limit)
+        ret = []
+        for u in res:
+            u = u._asdict()
+            ret.append(u)
+        return ret
+
     @hybrid_method
     @cacher
     def donors_total(self, **kwargs):
@@ -116,14 +180,49 @@ class Invest(db.Model):
     def multidonors_total(self, **kwargs):
         """Total number of donors who donates to more than 1 project"""
         filters = list(self.get_filters(**kwargs))
-        filters.append(Invest.status.in_([Invest.STATUS_PENDING,
-                                          Invest.STATUS_CHARGED,
-                                          Invest.STATUS_PAID,
-                                          Invest.STATUS_RETURNED]))
-        total = db.session.query(Invest.user).filter(*filters).group_by(Invest.user).\
-                                                    having(func.count(Invest.user) > 1).\
-                                                    having(func.count(Invest.project) > 1)
+        filters.append(self.status.in_([self.STATUS_PENDING,
+                                        self.STATUS_CHARGED,
+                                        self.STATUS_PAID,
+                                        self.STATUS_RETURNED]))
+        total = db.session.query(self.user).filter(*filters).group_by(self.user).\
+                                                    having(func.count(self.user) > 1).\
+                                                    having(func.count(self.project) > 1)
         res = total.count()
+        if res is None:
+            res = 0
+        return res
+
+    @hybrid_method
+    @cacher
+    def donors_collaborators_total(self, **kwargs):
+        """Total number of collaborators with investions"""
+        filters = list(self.get_filters(**kwargs))
+        sq_blocked = db.session.query(Message.id).filter(Message.blocked == 1).subquery()
+        filters.append(Message.thread > 0)
+        filters.append(Message.thread.in_(sq_blocked))
+        filters.append(self.status.in_([self.STATUS_PENDING,
+                                        self.STATUS_CHARGED,
+                                        self.STATUS_PAID,
+                                        self.STATUS_RETURNED]))
+        res = db.session.query(func.count(func.distinct(self.user)))\
+                                            .join(Message, Message.user == self.user)\
+                                            .filter(*filters).scalar()
+        if res is None:
+            res = 0
+        return res
+
+    @hybrid_method
+    @cacher
+    def donors_creators_total(self, **kwargs):
+        """Total number of donors who are also creators for some projects"""
+        filters = list(self.get_filters(**kwargs))
+        filters.append(self.status.in_([self.STATUS_PAID,
+                                          self.STATUS_RETURNED,
+                                          self.STATUS_RELOCATED]))
+        filters.append(self.project != Project.id)
+        res = db.session.query(func.count(func.distinct(self.user)))\
+                        .join(Project, and_(Project.owner == self.user, Project.status.in_(Project.PUBLISHED_PROJECTS)))\
+                        .filter(*filters).scalar()
         if res is None:
             res = 0
         return res
@@ -216,7 +315,6 @@ class Invest(db.Model):
     @cacher
     def percent_pledged_successful(self, **kwargs):
         """Percentage of money raised over the minimum on successful projects"""
-        print '>>>>'
         filters = list(self.get_filters(**kwargs))
         filters.append(self.project == Project.id)
         filters.append(self.status.in_([self.STATUS_CHARGED,
@@ -243,6 +341,21 @@ class Invest(db.Model):
         total = db.session.query(func.avg(sub.c.percent)).scalar()
         total = 0 if total is None else round(total, 2)
         return total
+
+    @hybrid_method
+    @cacher
+    def average_donors(self, **kwargs):
+        """Average number of donors"""
+        filters = list(self.get_filters(**kwargs))
+        filters.append(Project.status.in_([Project.STATUS_FUNDED,
+                                           Project.STATUS_FULFILLED]))
+        sq = db.session.query(func.count(func.distinct(Invest.user)).label("co"))\
+                                    .join(Project, Invest.project == Project.id)\
+                                    .filter(*filters).group_by(Invest.project).subquery()
+        res = db.session.query(func.avg(sq.c.co)).scalar()
+        if res is None:
+            res = 0
+        return res
 
     @hybrid_method
     @cacher

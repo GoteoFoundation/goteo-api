@@ -130,36 +130,28 @@ class CommunityAPI(Base):
 
         filters = []
         filters_categories = [Category.name != '']  # para categorias
-        filters_collaborators = []  # para las relacionadas con Colaboradores
         if args['from_date']:
             filters.append(Invest.date_invested >= args['from_date'])
             filters_categories.append(Invest.date_invested >= args['from_date'])
             filters_categories.append(Invest.user == UserInterest.user)
-            filters_collaborators.append(Message.date >= args['from_date'])
         if args['to_date']:
             filters.append(Invest.date_invested <= args['to_date'])
             filters_categories.append(Invest.date_invested <= args['to_date'])
             filters_categories.append(Invest.user == UserInterest.user)
-            filters_collaborators.append(Message.date <= args['to_date'])
         if args['project']:
             filters.append(Invest.project.in_(args['project']))
             filters_categories.append(Invest.project.in_(args['project']))
             filters_categories.append(UserInterest.user == Invest.user)
-            filters_collaborators.append(Message.project.in_(args['project']))
         if args['node']:
             #TODO: project_node o invest_node?
             filters.append(Invest.id == InvestNode.invest_id)
             filters.append(InvestNode.invest_node.in_(args['node']))
             filters_categories.append(UserInterest.user == User.id)
             filters_categories.append(User.node.in_(args['node']))
-            filters_collaborators.append(Message.user == User.id)
-            filters_collaborators.append(User.node.in_(args['node']))
         if args['category']:
 
             filters.append(Invest.project == ProjectCategory.project)
             filters.append(ProjectCategory.category.in_(args['category']))
-            filters_collaborators.append(Message.project == ProjectCategory.project)
-            filters_collaborators.append(ProjectCategory.category.in_(args['category']))
         if args['location']:
             # Filtra por la localización del usuario
             locations_ids = Location.location_ids(**args['location'])
@@ -173,9 +165,6 @@ class CommunityAPI(Base):
             filters_categories.append(UserInterest.user == LocationItem.item)
             filters_categories.append(LocationItem.type == 'user')
             filters_categories.append(LocationItem.id.in_(locations_ids))
-            filters_collaborators.append(Message.user == LocationItem.item)
-            filters_collaborators.append(LocationItem.type == 'user')
-            filters_collaborators.append(LocationItem.id.in_(locations_ids))
 
         users = User.total(**args)
         nargs = args.copy();
@@ -187,7 +176,8 @@ class CommunityAPI(Base):
         paypal_donors = Invest.donors_total(**dict(args, **{'method' : Invest.METHOD_PAYPAL}))
         creditcard_donors = Invest.donors_total(**dict(args, **{'method' : Invest.METHOD_TPV}))
         cash_donors = Invest.donors_total(**dict(args, **{'method' : Invest.METHOD_CASH}))
-        # paypal_multidonors = Invest.multidonors_total(**nargs)
+        # paypal_multidonors = Invest.multidonors_total(**dict(args, **{'method' : Invest.METHOD_PAYPAL}))
+
         categorias = self._categorias(list(filters_categories), args['lang'])
         users_categoria1 = categorias[0].users if len(categorias) > 0 else None
         users_categoria2 = categorias[1].users if len(categorias) > 1 else None
@@ -201,25 +191,22 @@ class CommunityAPI(Base):
         users_exclude = set(users_exclude)
 
         top10_multidonors = []
-        for u in self._top10_multidonors(list(filters), users_exclude):
-            u = u._asdict()
+        for u in Invest.multidonors_list(**args):
             item = marshal(u, UserDonation.resource_fields)
             item['profile-image-url'] = image_url(u['avatar'])
             item['profile-url'] = user_url(u['id'])
             top10_multidonors.append(item)
 
         top10_donors = []
-        for u in self._top10_donors(list(filters), users_exclude):
-            u = u._asdict()
+        for u in Invest.donors_list(**args):
             item = marshal(u, UserDonation.resource_fields)
             item['profile-image-url'] = image_url(u['avatar'])
             item['profile-url'] = user_url(u['id'])
             top10_donors.append(item)
 
         top10_collaborations = []
-        for u in self._top10_collaborations(list(filters_collaborators)):
-            u = u._asdict()
-            item = marshal(u, UserDonation.resource_fields)
+        for u in Message.collaborators_list(**args):
+            item = marshal(u, UserCollaboration.resource_fields)
             item['profile-image-url'] = image_url(u['avatar'])
             item['profile-url'] = user_url(u['id'])
             top10_collaborations.append(item)
@@ -238,12 +225,17 @@ class CommunityAPI(Base):
                 'paypal-donors'                     : paypal_donors,
                 'creditcard-donors'                 : creditcard_donors,
                 'cash-donors'                       : cash_donors,
-                'donors-collaborators'              : self._coficolaboradores(list(filters)),
-                'average-donors'                    : self._media_cofi(list(filters)),
-                'average-collaborators'             : self._media_colab(list(filters_collaborators)),
-                'creators-donors'                   : self._impulcofinanciadores(list(filters)),
-                'creators-collaborators'            : self._impulcolaboradores(list(filters_collaborators)),
-                'categories'                        : map(lambda t: {t.id: {'users': t.users, 'id': t.id, 'name': t.name, 'percentage-users': percent(t.users, users)}}, categorias),
+                'donors-collaborators'              : Invest.donors_collaborators_total(**args),
+                'average-donors'                    : Invest.average_donors(**args),
+                'average-collaborators'             : Message.average_collaborators(**args),
+                'creators-donors'                   : Invest.donors_creators_total(**args),
+                'creators-collaborators'            : Message.collaborators_creators_total(**args),
+                'categories'                        : map(lambda t: {t.id:
+                                                                        {'users': t.users,
+                                                                         'id': t.id,
+                                                                         'name': t.name,
+                                                                         'percentage-users': percent(t.users, users)}
+                                                                        }, categorias),
                 'leading-category'                  : categorias[0].id if len(categorias) > 0 else None,
                 'users-leading-category'            : users_categoria1,
                 'percentage-users-leading-category' : percent(users_categoria1, users),
@@ -256,90 +248,6 @@ class CommunityAPI(Base):
             },
             filters = args.items()
         )
-        return res
-
-
-    # Número de colaboradores
-    def _colaboradores(self, f_colaboradores = []):
-        res = db.session.query(func.count(func.distinct(Message.user))).filter(*f_colaboradores).scalar()
-        if res is None:
-            res = 0
-        return res
-
-    # Cofinanciadores que colaboran
-    def _coficolaboradores(self, f_coficolaboradores = []):
-        sq_blocked = db.session.query(Message.id).filter(Message.blocked == 1).subquery()
-        f_coficolaboradores.append(Message.thread > 0)
-        f_coficolaboradores.append(Message.thread.in_(sq_blocked))
-        f_coficolaboradores.append(Invest.status.in_([Invest.STATUS_PENDING,
-                                                      Invest.STATUS_CHARGED,
-                                                      Invest.STATUS_PAID,
-                                                      Invest.STATUS_RETURNED]))
-        res = db.session.query(func.count(func.distinct(Invest.user)))\
-                                            .join(Message, Message.user == Invest.user)\
-                                            .filter(*f_coficolaboradores).scalar()
-        if res is None:
-            res = 0
-        return res
-
-    # Media de cofinanciadores por proyecto exitoso
-    def _media_cofi(self, f_media_cofi = []):
-        f_media_cofi.append(Project.status.in_([Project.STATUS_FUNDED,
-                                                Project.STATUS_FULFILLED]))
-        sq = db.session.query(func.count(func.distinct(Invest.user)).label("co"))\
-                                    .join(Project, Invest.project == Project.id)\
-                                    .filter(*f_media_cofi).group_by(Invest.project).subquery()
-        res = db.session.query(func.avg(sq.c.co)).scalar()
-        if res is None:
-            res = 0
-        return res
-
-    # Media de colaboradores por proyecto
-    def _media_colab(self, f_media_colab = []):
-        f_media_colab.append(Project.status.in_([Project.STATUS_FUNDED,
-                                                 Project.STATUS_FULFILLED]))
-        sq = db.session.query(func.count(func.distinct(Message.user)).label("co"))\
-                                    .join(Project, Message.project == Project.id)\
-                                    .filter(*f_media_colab).group_by(Message.project).subquery()
-        res = db.session.query(func.avg(sq.c.co)).scalar()
-        if res is None:
-            res = 0
-        return res
-
-    # Núm. impulsores que cofinancian a otros
-    def _impulcofinanciadores(self, f_impulcofinanciadores = []):
-        f_impulcofinanciadores.append(Invest.status.in_([Invest.STATUS_PAID,
-                                                         Invest.STATUS_RETURNED,
-                                                         Invest.STATUS_RELOCATED]))
-        f_impulcofinanciadores.append(Invest.project != Project.id)
-        res = db.session.query(func.count(func.distinct(Invest.user)))\
-                                    .join(Project, and_(Project.owner == Invest.user, Project.status.in_([
-                                        Project.STATUS_FUNDED,
-                                        Project.STATUS_FULFILLED,
-                                        Project.STATUS_IN_CAMPAIGN,
-                                        Project.STATUS_UNFUNDED
-                                     ])))\
-                                    .filter(*f_impulcofinanciadores).scalar()
-        if res is None:
-            res = 0
-        return res
-
-    # Núm. impulsores que colaboran con otros
-    def _impulcolaboradores(self, f_impulcolaboradores = []):
-        sq_blocked = db.session.query(Message.id).filter(Message.blocked == 1).subquery()
-        f_impulcolaboradores.append(Message.thread > 0)
-        f_impulcolaboradores.append(Message.thread.in_(sq_blocked))
-        f_impulcolaboradores.append(Message.project != Project.id)
-        res = db.session.query(func.count(func.distinct(Message.user)))\
-                                    .join(Project, and_(Project.owner == Message.user, Project.status.in_([
-                                        Project.STATUS_FUNDED,
-                                        Project.STATUS_FULFILLED,
-                                        Project.STATUS_IN_CAMPAIGN,
-                                        Project.STATUS_UNFUNDED
-                                    ])))\
-                                    .filter(*f_impulcolaboradores).scalar()
-        if res is None:
-            res = 0
         return res
 
     # Lista de categorias
@@ -367,46 +275,3 @@ class CommunityAPI(Base):
         if ret is None:
             ret = []
         return ret
-
-
-    # Top 10 Cofinanciadores (con mayor numero de contribuciones, excepto usuarios convocadores o superadmins)
-    def _top10_multidonors(self, f_top10_multidonors = [], users_exclude = []):
-        f_top10_multidonors.append(Invest.status.in_([Invest.STATUS_PENDING,
-                                                 Invest.STATUS_CHARGED,
-                                                 Invest.STATUS_PAID,
-                                                 Invest.STATUS_RETURNED]))
-        f_top10_multidonors.append(Invest.user == User.id)
-        f_top10_multidonors.append(~Invest.user.in_(users_exclude))
-        res = db.session.query(Invest.user, User.name, User.id, User.avatar, func.count(Invest.id).label('contributions'), func.sum(Invest.amount).label('amount'))\
-                                    .filter(*f_top10_multidonors).group_by(Invest.user)\
-                                    .order_by(desc('contributions'), desc('amount')).limit(10).all()
-        if res is None:
-            res = []
-        return res
-
-
-    # Top 10 Cofinanciadores con más caudal (más generosos) excluir usuarios convocadores Y ADMINES
-    def _top10_donors(self, f_top10_donors = [], users_exclude = []):
-        f_top10_donors.append(Invest.status.in_([Invest.STATUS_PENDING,
-                                                      Invest.STATUS_CHARGED,
-                                                      Invest.STATUS_PAID,
-                                                      Invest.STATUS_RETURNED]))
-        f_top10_donors.append(Invest.user == User.id)
-        f_top10_donors.append(~Invest.user.in_(users_exclude))
-        res = db.session.query(Invest.user, User.name, User.id, User.avatar, func.count(Invest.id).label('contributions'), func.sum(Invest.amount).label('amount'))\
-                                    .filter(*f_top10_donors).group_by(Invest.user)\
-                                    .order_by(desc('amount'), desc('contributions')).limit(10).all()
-        if res is None:
-            res = []
-        return res
-
-    # Top 10 colaboradores
-    def _top10_collaborations(self, f_top10_collaborations = []):
-        f_top10_collaborations.append(Message.user == User.id)
-        res = db.session.query(Message.user, User.name, User.id, User.avatar, func.count(Message.id).label('interactions'))\
-                            .filter(*f_top10_collaborations).group_by(Message.user)\
-                            .order_by(desc('interactions')).limit(10).all()
-        if res is None:
-            res = []
-        return res
-
