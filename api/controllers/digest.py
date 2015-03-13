@@ -115,7 +115,8 @@ class DigestsListAPI(BaseList):
             del args['to_date']
 
         except Exception as e:
-            return bad_request('Unexpected error. [{0}]'.format(e), 400)
+            pass
+            # return bad_request('Unexpected error. [{0}]'.format(e), 400)
 
         if global_ == []:
             return bad_request('No digests to list.', 404)

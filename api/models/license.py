@@ -130,7 +130,7 @@ class License(db.Model):
                 return ret
 
             # No need for languages by default
-            return self.query.distinct().filter(*filters).order_by(asc(self.order))
+            return self.query.distinct().filter(*filters).order_by(asc(self.order)).all()
 
         except NoResultFound:
             return []
