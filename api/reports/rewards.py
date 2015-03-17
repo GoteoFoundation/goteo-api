@@ -5,16 +5,16 @@ import time
 from flask.ext.restful import fields, marshal
 from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
-from sqlalchemy import and_, or_, desc
+from sqlalchemy import or_, desc
 
-from api import db
-from api.models.reward import Reward
-from api.models.project import Project, ProjectCategory
-from api.models.invest import Invest, InvestReward, InvestNode
-from api.models.location import Location, LocationItem
-from api.decorators import *
+from .. import db
+from ..models.reward import Reward
+from ..models.project import Project, ProjectCategory
+from ..models.invest import Invest, InvestReward, InvestNode
+from ..models.location import Location, LocationItem
+from ..decorators import *
 
-from api.base_endpoint import BaseList as Base, Response
+from ..base_endpoint import BaseList as Base, Response
 
 func = sqlalchemy.func
 

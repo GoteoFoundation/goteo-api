@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 
 #from flask.ext.sqlalchemy import Pagination
-from sqlalchemy import func, Integer, String, Text, Date, Float
+from sqlalchemy import func, Integer, String, Text, Date
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
-from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
-from api.helpers import image_url, utc_from_local
-from sqlalchemy import asc, distinct
+from sqlalchemy.orm.exc import MultipleResultsFound
+from sqlalchemy import or_, desc, and_, distinct
 
-from api.decorators import cacher
-from api import db
+from ..helpers import image_url, utc_from_local
+from ..decorators import cacher
+from .post import Post, Blog
+from .. import db
 
 class Project(db.Model):
     __tablename__ = 'project'
@@ -76,6 +77,21 @@ class Project(db.Model):
         from .reward import Reward
         from .location import Location, LocationItem
         filters = self.filters
+        if 'received' in kwargs and kwargs['received'] is not None:
+            filters = [self.date_updated != None, self.date_updated != '0000-00-00']
+        if 'successful' in kwargs and kwargs['successful'] is not None:
+            filters = [self.date_passed != None, self.date_passed != '0000-00-00']
+            filters.append(self.status.in_(self.PUBLISHED_PROJECTS))
+            # filters.append(self.status > self.STATUS_REJECTED)
+        if 'closed' in kwargs and kwargs['closed'] is not None:
+            and1 = and_(self.date_passed != None, self.date_passed != '0000-00-00')
+            and2 = and_(self.date_closed != None, self.date_closed != '0000-00-00')
+            filters.append(or_(and1, and2))
+        if 'finished' in kwargs and kwargs['finished'] is not None:
+            filters.append(self.status.in_([self.STATUS_FUNDED, self.STATUS_FULFILLED]))
+        if 'failed' in kwargs and kwargs['failed'] is not None:
+            filters.append(self.status == self.STATUS_UNFUNDED)
+
         # # Join project table if filters
         for i in ('license', 'license_type'):
             if i in kwargs and kwargs[i] is not None:
@@ -181,12 +197,104 @@ class Project(db.Model):
     @hybrid_method
     @cacher
     def average_total(self, **kwargs):
-        """Average money raised (€) for published projects"""
+        """Average money raised (€) for projects"""
         filters = list(self.get_filters(**kwargs))
         total = db.session.query(func.avg(self.amount)).filter(*filters).scalar()
         total = 0 if total is None else round(total, 2)
         return total
 
+    @hybrid_method
+    @cacher
+    def average_posts(self, **kwargs):
+        """Average number of posts by projects"""
+        filters = list(self.get_filters(**kwargs))
+        filters.append(Post.publish == 1)
+        sq1 = db.session.query(func.count(self.id).label('posts')).select_from(Post)\
+                            .join(Blog, and_(Blog.id == Post.blog, Blog.type == 'project'))\
+                            .join(self, self.id == Blog.owner)\
+                            .filter(*filters).group_by(Post.blog).subquery()
+        total = db.session.query(func.avg(sq1.c.posts)).scalar()
+        total = 0 if total is None else round(total, 2)
+        return total
+
+    @hybrid_method
+    @cacher
+    def collaborated_list(self, **kwargs):
+        """Get a list of projects with more collaborations"""
+        from .message import Message
+        limit = kwargs['limit'] if 'limit' in kwargs else 10
+        page = kwargs['page'] if 'page' in kwargs else 0
+        filters = list(self.get_filters(**kwargs))
+
+        res = db.session.query(self.id.label('project'),
+                               self.name,
+                               self.subtitle,
+                               self.image,
+                               self.media,
+                               self.published,
+                               func.count(Message.id).label('total')).join(Message)\
+                            .filter(*filters).group_by(Message.project)\
+                            .order_by(desc('total')).offset(page * limit).limit(limit)
+
+        ret = []
+        for u in res:
+            u = u._asdict()
+            ret.append(u)
+        return ret
+
+    @hybrid_method
+    @cacher
+    def donated_list(self, **kwargs):
+        """Get a list of projects with more donations (by individual contributions)"""
+        from .invest import Invest
+        limit = kwargs['limit'] if 'limit' in kwargs else 10
+        page = kwargs['page'] if 'page' in kwargs else 0
+        filters = list(self.get_filters(**kwargs))
+
+        res = db.session.query(self.id.label('project'),
+                       self.name,
+                       self.subtitle,
+                       self.image,
+                       self.media,
+                       self.published,
+                       func.count(Invest.id).label('total')).join(Invest)\
+                            .filter(*filters).group_by(Invest.project)\
+                            .order_by(desc('total')).offset(page * limit).limit(limit)
+
+        ret = []
+        for u in res:
+            u = u._asdict()
+            ret.append(u)
+        return ret
+
+    @hybrid_method
+    @cacher
+    def received_list(self, **kwargs):
+        """Get a list of projects with more donations (by amount)"""
+
+        from .invest import Invest
+
+        limit = kwargs['limit'] if 'limit' in kwargs else 10
+        page = kwargs['page'] if 'page' in kwargs else 0
+        filters = list(self.get_filters(**kwargs))
+
+        filters.append(Invest.status.in_([Invest.STATUS_PENDING,
+                                                  Invest.STATUS_CHARGED,
+                                                  Invest.STATUS_PAID]))
+        res = db.session.query(Project.id.label('project'),
+                               Project.name,
+                               Project.subtitle,
+                               Project.image,
+                               Project.media,
+                               Project.published,
+                               func.sum(Invest.amount).label('amount')).join(Invest)\
+                                    .filter(*filters).group_by(Invest.project)\
+                                    .order_by(desc('amount')).offset(page * limit).limit(limit)
+        ret = []
+        for u in res:
+            u = u._asdict()
+            ret.append(u)
+        return ret
 
 class ProjectCategory(db.Model):
     __tablename__ = 'project_category'

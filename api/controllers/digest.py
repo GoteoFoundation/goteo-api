@@ -8,11 +8,10 @@ from flask_restful_swagger import swagger
 from dateutil.parser import parse
 import calendar
 from datetime import date as dtdate, datetime as dtdatetime
-from api.decorators import ratelimit, requires_auth
-from api.base_endpoint import BaseList, Response
+from ..decorators import ratelimit, requires_auth
+from ..base_endpoint import BaseList, Response
 #import current endpoints
-from api.reports.money import *
-from api.decorators import *
+from ..decorators import *
 
 def year_sanitizer(data):
     d = parse(data)
@@ -115,8 +114,8 @@ class DigestsListAPI(BaseList):
             del args['to_date']
 
         except Exception as e:
-            pass
             # return bad_request('Unexpected error. [{0}]'.format(e), 400)
+            pass
 
         if global_ == []:
             return bad_request('No digests to list.', 404)

@@ -2,13 +2,13 @@
 
 from flask import Blueprint, jsonify
 
-from api.reports.money import MoneyAPI
-from api.reports.projects import ProjectsAPI
-from api.reports.community import CommunityAPI
-from api.reports.rewards import RewardsAPI
+from .reports.money import MoneyAPI
+from .reports.projects import ProjectsAPI
+from .reports.community import CommunityAPI
+from .reports.rewards import RewardsAPI
 
-from api import app, api
-from api.decorators import *
+from . import app, api
+from .decorators import *
 
 api_reports = Blueprint('api_reports', __name__)
 

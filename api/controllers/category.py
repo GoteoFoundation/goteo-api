@@ -5,11 +5,11 @@ import time
 from flask.ext.restful import fields, marshal
 from flask_restful_swagger import swagger
 
-from api.models.category import Category
-from api.models.project import Project
-from api.models.user import User
-from api.decorators import *
-from api.base_endpoint import BaseList, Response
+from ..models.category import Category
+from ..models.project import Project
+from ..models.user import User
+from ..decorators import *
+from ..base_endpoint import BaseList, Response
 
 @swagger.model
 class CategoryResponse(Response):

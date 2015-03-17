@@ -5,21 +5,13 @@ import time
 from flask.ext.restful import fields, marshal
 from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
-from sqlalchemy import and_, desc
-from sqlalchemy.orm import aliased
 
-from api import db
-
-from api.models.call import Call
-from api.models.category import Category, CategoryLang
-from api.models.project import Project, ProjectCategory
-from api.models.invest import Invest, InvestNode
-from api.models.message import Message
-from api.models.user import User, UserInterest, UserRole
-from api.models.location import Location, LocationItem
-from api.decorators import *
-from api.helpers import get_lang, image_url, user_url
-from api.base_endpoint import BaseList as Base, Response
+from ..models.invest import Invest
+from ..models.message import Message
+from ..models.user import User, UserInterest
+from ..decorators import *
+from ..helpers import image_url, user_url
+from ..base_endpoint import BaseList as Base, Response
 
 func = sqlalchemy.func
 
@@ -127,45 +119,6 @@ class CommunityAPI(Base):
         # remove not used args
         args = self.parse_args(remove=('page','limit'))
 
-
-        filters = []
-        filters_categories = [Category.name != '']  # para categorias
-        if args['from_date']:
-            filters.append(Invest.date_invested >= args['from_date'])
-            filters_categories.append(Invest.date_invested >= args['from_date'])
-            filters_categories.append(Invest.user == UserInterest.user)
-        if args['to_date']:
-            filters.append(Invest.date_invested <= args['to_date'])
-            filters_categories.append(Invest.date_invested <= args['to_date'])
-            filters_categories.append(Invest.user == UserInterest.user)
-        if args['project']:
-            filters.append(Invest.project.in_(args['project']))
-            filters_categories.append(Invest.project.in_(args['project']))
-            filters_categories.append(UserInterest.user == Invest.user)
-        if args['node']:
-            #TODO: project_node o invest_node?
-            filters.append(Invest.id == InvestNode.invest_id)
-            filters.append(InvestNode.invest_node.in_(args['node']))
-            filters_categories.append(UserInterest.user == User.id)
-            filters_categories.append(User.node.in_(args['node']))
-        if args['category']:
-
-            filters.append(Invest.project == ProjectCategory.project)
-            filters.append(ProjectCategory.category.in_(args['category']))
-        if args['location']:
-            # Filtra por la localización del usuario
-            locations_ids = Location.location_ids(**args['location'])
-
-            if locations_ids == []:
-                return bad_request("No locations in the specified range")
-
-            filters.append(Invest.user == LocationItem.item)
-            filters.append(LocationItem.type == 'user')
-            filters.append(LocationItem.id.in_(locations_ids))
-            filters_categories.append(UserInterest.user == LocationItem.item)
-            filters_categories.append(LocationItem.type == 'user')
-            filters_categories.append(LocationItem.id.in_(locations_ids))
-
         users = User.total(**args)
         nargs = args.copy();
         nargs['unsubscribed'] = 1;
@@ -181,14 +134,6 @@ class CommunityAPI(Base):
         categorias = UserInterest.categories(**args)
         users_categoria1 = categorias[0].users if len(categorias) > 0 else 0
         users_categoria2 = categorias[1].users if len(categorias) > 1 else 0
-
-        # Listado de usuarios que no cuentan para estadisticias (admin, convocatorias)
-        admines = db.session.query(UserRole.user_id).filter(UserRole.role_id == 'superadmin').all()
-        convocadores = db.session.query(Call.owner).filter(Call.status > Call.STATUS_REVIEWING).all()
-        users_exclude = map(lambda c: c[0], admines)
-        users_exclude.extend(map(lambda c: c[0], convocadores))
-        # convertir en conjunto para evitar repeticiones
-        users_exclude = set(users_exclude)
 
         top10_multidonors = []
         for u in Invest.multidonors_list(**args):

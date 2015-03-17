@@ -5,9 +5,9 @@ import time
 from flask.ext.restful import fields, marshal
 from flask_restful_swagger import swagger
 
-from api.models.user import User
-from api.decorators import *
-from api.base_endpoint import BaseItem, BaseList, Response
+from ..models.user import User
+from ..decorators import *
+from ..base_endpoint import BaseItem, BaseList, Response
 
 @swagger.model
 class UserResponse(Response):

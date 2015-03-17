@@ -5,11 +5,11 @@ import time
 from flask.ext.restful import fields, marshal
 from flask_restful_swagger import swagger
 
-from api.models.license import License
-from api.models.reward import Reward
-from api.models.project import Project
-from api.decorators import *
-from api.base_endpoint import BaseList, Response
+from ..models.license import License
+from ..models.reward import Reward
+from ..models.project import Project
+from ..decorators import *
+from ..base_endpoint import BaseList, Response
 
 @swagger.model
 class LicenseResponse(Response):

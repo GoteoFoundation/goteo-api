@@ -6,12 +6,12 @@ from flask.ext.restful import fields
 from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
 
-from api.models.call import Call
-from api.models.project import Project
-from api.models.invest import Invest
-from api.decorators import ratelimit, requires_auth
+from ..models.call import Call
+from ..models.project import Project
+from ..models.invest import Invest
+from ..decorators import ratelimit, requires_auth
 
-from api.base_endpoint import BaseList, Response
+from ..base_endpoint import BaseList, Response
 
 func = sqlalchemy.func
 

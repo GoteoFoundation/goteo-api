@@ -6,7 +6,7 @@ import pytz
 from flask import jsonify
 
 from config import config
-from api import app
+from . import app
 
 def get_lang(object, field, langs=[]):
     """Searchs langs alternatives on a object in the form of:
