@@ -4,14 +4,17 @@ from sqlalchemy import func, Integer, String, Date, DateTime
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from api.helpers import image_url, utc_from_local, user_url
-from sqlalchemy import asc, or_, distinct
+from sqlalchemy import asc, desc, and_, or_, distinct
+from sqlalchemy.orm import aliased
 
 from api.decorators import cacher
 from api import db
 
+from .category import Category, CategoryLang
 from .invest import Invest
 from .message import Message
-from api.models.location import Location, LocationItem
+from .location import Location, LocationItem
+from ..helpers import get_lang
 
 # User stuff
 class User(db.Model):
@@ -164,4 +167,61 @@ class UserInterest(db.Model):
     interest = db.Column('interest', Integer, db.ForeignKey('category.id'), primary_key=True)
 
     def __repr__(self):
-        return '<UserInterest from %s to project %s>' % (self.user, self.project)
+        return '<UserInterest from %s to category %s>' % (self.user, self.interest)
+
+    # Getting filters for this model
+    @hybrid_method
+    def get_filters(self, **kwargs):
+        filters = [Category.name != '']  # para categorias
+        if 'from_date' in kwargs and kwargs['from_date'] is not None:
+            filters.append(Invest.date_invested >= kwargs['from_date'])
+            filters.append(Invest.user == self.user)
+        if 'to_date' in kwargs and kwargs['to_date'] is not None:
+            filters.append(Invest.date_invested <= kwargs['to_date'])
+            filters.append(Invest.user == self.user)
+        if 'project' in kwargs and kwargs['project'] is not None:
+            filters.append(Invest.project.in_(kwargs['project']))
+            filters.append(Invest.user == self.user)
+        if 'node' in kwargs and kwargs['node'] is not None:
+            #TODO: project_node o invest_node?
+            filters.append(User.id == self.user)
+            filters.append(User.node.in_(kwargs['node']))
+        if 'category' in kwargs and kwargs['category'] is not None:
+            filters.append(self.interest.in_(kwargs['category']))
+        if 'location' in kwargs and kwargs['location'] is not None:
+            # Filtra por la localización del usuario
+            locations_ids = Location.location_ids(**kwargs['location'])
+            filters.append(self.user == LocationItem.item)
+            filters.append(LocationItem.type == 'user')
+            filters.append(LocationItem.id.in_(locations_ids))
+        return filters
+
+    # Lista de categorias
+    # TODO: idiomas para los nombres de categorias aqui
+    @hybrid_method
+    @cacher
+    def categories(self, **kwargs):
+        # In case of requiring languages, a LEFT JOIN must be generated
+        cols = [func.count(self.user).label('users'), Category.id, Category.name]
+        filters = list(self.get_filters(**kwargs))
+        # In case of requiring languages, a LEFT JOIN must be generated
+        if 'lang' in kwargs and kwargs['lang'] is not None:
+            joins = []
+            _langs = {}
+            for l in kwargs['lang']:
+                _langs[l] = aliased(CategoryLang)
+                cols.append(_langs[l].name_lang.label('name_' + l))
+                joins.append((_langs[l], and_(_langs[l].id == Category.id, _langs[l].lang == l)))
+            query = db.session.query(*cols).join(Category, Category.id == self.interest).outerjoin(*joins)
+        else:
+            query = db.session.query(*cols).join(Category, Category.id == self.interest)
+        ret = []
+
+        for u in query.filter(*filters).group_by(self.interest)\
+                      .order_by(desc(func.count(self.user))):
+            # u = u._asdict()
+            u.name = get_lang(u._asdict(), 'name', kwargs['lang'])
+            ret.append(u)
+        if ret is None:
+            ret = []
+        return ret

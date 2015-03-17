@@ -178,9 +178,9 @@ class CommunityAPI(Base):
         cash_donors = Invest.donors_total(**dict(args, **{'method' : Invest.METHOD_CASH}))
         # paypal_multidonors = Invest.multidonors_total(**dict(args, **{'method' : Invest.METHOD_PAYPAL}))
 
-        categorias = self._categorias(list(filters_categories), args['lang'])
-        users_categoria1 = categorias[0].users if len(categorias) > 0 else None
-        users_categoria2 = categorias[1].users if len(categorias) > 1 else None
+        categorias = UserInterest.categories(**args)
+        users_categoria1 = categorias[0].users if len(categorias) > 0 else 0
+        users_categoria2 = categorias[1].users if len(categorias) > 1 else 0
 
         # Listado de usuarios que no cuentan para estadisticias (admin, convocatorias)
         admines = db.session.query(UserRole.user_id).filter(UserRole.role_id == 'superadmin').all()
@@ -249,29 +249,3 @@ class CommunityAPI(Base):
             filters = args.items()
         )
         return res
-
-    # Lista de categorias
-    # TODO: idiomas para los nombres de categorias aqui
-    def _categorias(self, f_categorias = [], langs = []):
-        # In case of requiring languages, a LEFT JOIN must be generated
-        cols = [func.count(UserInterest.user).label('users'), Category.id, Category.name]
-        if langs:
-            joins = []
-            _langs = {}
-            for l in langs:
-                _langs[l] = aliased(CategoryLang)
-                cols.append(_langs[l].name_lang.label('name_' + l))
-                joins.append((_langs[l], and_(_langs[l].id == Category.id, _langs[l].lang == l)))
-            query = db.session.query(*cols).join(Category, Category.id == UserInterest.interest).outerjoin(*joins)
-        else:
-            query = db.session.query(*cols).join(Category, Category.id == UserInterest.interest)
-        ret = []
-
-        for u in query.filter(*f_categorias).group_by(UserInterest.interest)\
-                      .order_by(desc(func.count(UserInterest.user))):
-            # u = u._asdict()
-            u.name = get_lang(u._asdict(), 'name', langs)
-            ret.append(u)
-        if ret is None:
-            ret = []
-        return ret
