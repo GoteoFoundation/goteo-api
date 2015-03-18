@@ -12,6 +12,7 @@ from ..decorators import ratelimit, requires_auth
 from ..base_endpoint import BaseList, Response
 #import current endpoints
 from ..decorators import *
+from config import config
 
 def year_sanitizer(data):
     d = parse(data)
@@ -50,6 +51,7 @@ class DigestsListResponse(Response):
 class DigestsListAPI(BaseList):
     """Get Digest list"""
     AVAILABLE_ENDPOINTS = {
+        'reports/summary' : 'reports.summary.SummaryAPI',
         'reports/money' : 'reports.money.MoneyAPI',
         'reports/community' : 'reports.community.CommunityAPI',
         'reports/projects' : 'reports.projects.ProjectsAPI',
@@ -72,7 +74,7 @@ class DigestsListAPI(BaseList):
         <a href="http://developers.goteo.org/doc/digests">developers.goteo.org/doc/digests</a>
         """
         time_start = time.time()
-        self.reqparse.add_argument('year', type=year_sanitizer, default=dtdatetime.today().year)
+        self.reqparse.add_argument('year', type=year_sanitizer, default=None)
         #removing not-needed standard filters
         args = self.parse_args(remove=('from_date', 'to_date', 'limit', 'page'))
         # get the class
@@ -91,30 +93,43 @@ class DigestsListAPI(BaseList):
         except Exception:
             return bad_request('Endpoint error. Try some allowed endpoint to digest.', 404)
 
+        buckets = {}
         try:
             #arguments for the global response
             year = args['year']
-            [args['from_date'], args['to_date']] = map(lambda d:d.isoformat(),self.max_min(year))
-            del args['year']
-            instance.parse_args = (lambda **a:self.dummy_parse_args(args, **a))
-            # get year
+            if year is not None:
+                del args['year']
+                # digest by months in the specified year
+                # Assign date filters
+                [args['from_date'], args['to_date']] = map(lambda d:d.isoformat(),self.max_min(year))
+                for month in range(1,13):
+                    maxmin = self.max_min(year, month)
+                    if maxmin[0] < maxmin[1]:
+                        buckets[format(month, '02')] = map(lambda d:d.isoformat(),maxmin)
+            else:
+                # digest by years
+                for year in range(config.initial_year, dtdate.today().year + 1):
+                    buckets[year] = map(lambda d:d.isoformat(),self.max_min(year))
 
+            # parse the args in the instance
+            instance.parse_args = (lambda **a:self.dummy_parse_args(args, **a))
+            # # data for global dates
             global_ = instance._get().response(False)
             # cleaning response
             # del global_['time-elapsed']
-            buckets = {}
-            # All months in different buckets
-            for month in range(1,13):
-                maxmin = self.max_min(year, month)
-                if maxmin[0] < maxmin[1]:
-                    [args['from_date'], args['to_date']] = map(lambda d:d.isoformat(),maxmin)
-                    buckets[format(month, '02')] = instance._get().response(False)
+            # All months/years in different buckets
+            for part in buckets:
+                [args['from_date'], args['to_date']] = buckets[part]
+                buckets[part] = instance._get().response(False)
+
             #aditional cleaning
-            del args['from_date']
-            del args['to_date']
+            if 'from_date' in args:
+                del args['from_date']
+            if 'to_date' in args:
+                del args['to_date']
 
         except Exception as e:
-            # return bad_request('Unexpected error. [{0}]'.format(e), 400)
+            return bad_request('Unexpected error. [{0}]'.format(e), 400)
             pass
 
         if global_ == []:

@@ -1,13 +1,11 @@
     # -*- coding: utf-8 -*-
 
 import time
-from datetime import date as dtdate
 from flask.ext.restful import fields, marshal
 from flask_restful_swagger import swagger
 
 from ..helpers import utc_from_local, image_url, project_url, percent
 from ..decorators import *
-from config import config
 
 from ..base_endpoint import BaseList as Base, Response
 from ..models.project import Project
@@ -17,15 +15,6 @@ from ..models.reward import Reward
 from .projects import ProjectContribution
 from .community import CategoryUsers
 from .rewards import FavouriteRewards
-
-@swagger.model
-class YearResume:
-    resource_fields = {
-        'pledged'          : fields.Integer,
-        'matchfund-amount' : fields.Integer,
-        'average-donation' : fields.Float,
-    }
-    required = resource_fields.keys()
 
 @swagger.model
 @swagger.nested(**{
@@ -44,7 +33,6 @@ class SummaryResponse(Response):
         "projects-received"    : fields.Integer,
         "projects-published"   : fields.Integer,
         "projects-failed"      : fields.Integer,
-        "yearly"               : fields.List(fields.Nested(YearResume.resource_fields)),
         "categories"           : fields.List(fields.Nested(CategoryUsers.resource_fields)),
         "favorite-rewards"     : fields.List(fields.Nested(FavouriteRewards.resource_fields)),
         "top10-collaborations" : fields.List(fields.Nested(ProjectContribution.resource_fields)),
@@ -81,7 +69,7 @@ class SummaryAPI(Base):
         """Get()'s method dirty work"""
         time_start = time.time()
         # remove not used args
-        args = self.parse_args(remove=('page','limit','from_date','to_date'))
+        args = self.parse_args(remove=('page','limit'))
 
         top10_collaborations = []
         for u in Project.collaborated_list(**args):
@@ -111,37 +99,26 @@ class SummaryAPI(Base):
             item = marshal(u, FavouriteRewards.resource_fields)
             favorites.append(item)
 
-        years = {}
-        for year in range(config.initial_year, dtdate.today().year + 1):
-            d_min = '-'.join((str(year),'01','01'))
-            d_max = '-'.join((str(year),'12','31'))
-            years[year] = {}
-            nargs = {'from_date':d_min, 'to_date':d_max}
-            # pledged[year] = Project.pledged_total(**dict(nargs, **args))
-            years[year]['pledged'] = Invest.pledged_total(**dict(nargs, **args))
-            years[year]['matchfund-amount'] = Invest.pledged_total(method=Invest.METHOD_DROP, **dict(nargs, **args))
-            years[year]['average-donation'] = Invest.average_donation(**dict(nargs, **args))
 
         res = SummaryResponse(
             starttime = time_start,
             attributes = {
-                'pledged' : Invest.pledged_total(**args),
-                'matchfund-amount' : Invest.pledged_total(method=Invest.METHOD_DROP, **args),
-                'average-donation' : Invest.average_donation(**args),
-                'yearly'      : years,
-                'users'       : users,
-                'projects-received'     : Project.total(received=True, **args),
-                'projects-published'    : Project.total(**args),
-                'projects-failed'       : Project.total(failed=True, **args),
-                'categories'     : map(lambda t: {t.id:
+                'pledged'            : Invest.pledged_total(**args),
+                'matchfund-amount'   : Invest.pledged_total(method=Invest.METHOD_DROP, **args),
+                'average-donation'   : Invest.average_donation(**args),
+                'users'              : users,
+                'projects-received'  : Project.total(received=True, **args),
+                'projects-published' : Project.total(**args),
+                'projects-failed'    : Project.total(failed=True, **args),
+                'categories'         : map(lambda t: {t.id:
                                                     {'users': t.users,
                                                      'id': t.id,
                                                      'name': t.name,
                                                      'percentage-users': percent(t.users, users)}
                                                     }, categorias),
-                'top10-collaborations'           : top10_collaborations,
-                'top10-donations'                : top10_donations,
-                'favorite-rewards'        : favorites
+                'top10-collaborations' : top10_collaborations,
+                'top10-donations'      : top10_donations,
+                'favorite-rewards'     : favorites
             },
             filters = args.items()
         )
