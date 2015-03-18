@@ -2,6 +2,20 @@ TODO
 
 IMPORTANTE
 
+ENDPOINT RESUMEN:
+
+1. OK - Todo lo recaudado vizualizado por año
+2. OK el Matchfund-amount (cantidad total y vizualizado por año)
+3. OK money.sections.average-donation.title
+4. OK projects.sections.top10-donations.title
+5. OK projects.sections.top10-collaborations.title
+6. OK community.sections.categories.title
+8. OK rewards.sections.favorite-rewards.title
+7. top 10 licencias
+
+
+Call.pledged_total filtrar por fechas
+
 quitar propietario proyecto de listas de colaboraciones y donaciones
 
 proyectos recibidos filtro por creado

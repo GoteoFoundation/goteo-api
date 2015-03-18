@@ -3,7 +3,6 @@
 import time
 
 from flask.ext.restful import fields, marshal
-from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
 
 from ..models.invest import Invest
@@ -12,8 +11,6 @@ from ..models.user import User, UserInterest
 from ..decorators import *
 from ..helpers import image_url, user_url
 from ..base_endpoint import BaseList as Base, Response
-
-func = sqlalchemy.func
 
 @swagger.model
 class CategoryUsers:
@@ -50,10 +47,10 @@ class UserCollaboration:
 
 @swagger.model
 @swagger.nested(**{
-                'categories'         :CategoryUsers.__name__,
-                'top10-donors'       :UserDonation.__name__,
-                'top10-multidonors'  :UserDonation.__name__,
-                'top10-collaborators':UserCollaboration.__name__
+                'categories'         : CategoryUsers.__name__,
+                'top10-donors'       : UserDonation.__name__,
+                'top10-multidonors'  : UserDonation.__name__,
+                'top10-collaborators': UserCollaboration.__name__
                 }
             )
 class CommunityResponse(Response):
@@ -82,10 +79,10 @@ class CommunityResponse(Response):
         'users-second-category'            : fields.Integer,
         'percentage-users-leading-category': fields.Float,
         'percentage-users-second-category' : fields.Float,
-        'categories'                       : fields.List(fields.Nested(CategoryUsers.__name__)),
-        "top10-donors"                     : fields.List(fields.Nested(UserDonation.__name__)),
-        "top10-multidonors"                : fields.List(fields.Nested(UserDonation.__name__)),
-        "top10-collaborators"              : fields.List(fields.Nested(UserCollaboration.__name__))
+        'categories'                       : fields.List(fields.Nested(CategoryUsers.resource_fields)),
+        "top10-donors"                     : fields.List(fields.Nested(UserDonation.resource_fields)),
+        "top10-multidonors"                : fields.List(fields.Nested(UserDonation.resource_fields)),
+        "top10-collaborators"              : fields.List(fields.Nested(UserCollaboration.resource_fields))
     }
 
     required = resource_fields.keys()
@@ -126,9 +123,9 @@ class CommunityAPI(Base):
         donors = Invest.donors_total(**args)
         multidonors = Invest.multidonors_total(**args)
 
-        paypal_donors = Invest.donors_total(**dict(args, **{'method' : Invest.METHOD_PAYPAL}))
-        creditcard_donors = Invest.donors_total(**dict(args, **{'method' : Invest.METHOD_TPV}))
-        cash_donors = Invest.donors_total(**dict(args, **{'method' : Invest.METHOD_CASH}))
+        paypal_donors = Invest.donors_total(method=Invest.METHOD_PAYPAL, **args)
+        creditcard_donors = Invest.donors_total(method=Invest.METHOD_TPV, **args)
+        cash_donors = Invest.donors_total(method=Invest.METHOD_CASH, **args)
         # paypal_multidonors = Invest.multidonors_total(**dict(args, **{'method' : Invest.METHOD_PAYPAL}))
 
         categorias = UserInterest.categories(**args)

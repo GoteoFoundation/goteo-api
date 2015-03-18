@@ -3,7 +3,6 @@
 import time
 
 from flask.ext.restful import fields
-from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
 
 from ..models.call import Call
@@ -12,9 +11,6 @@ from ..models.invest import Invest
 from ..decorators import ratelimit, requires_auth
 
 from ..base_endpoint import BaseList, Response
-
-func = sqlalchemy.func
-
 
 @swagger.model
 class MoneyResponse(Response):

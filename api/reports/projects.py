@@ -5,19 +5,9 @@ from flask.ext.restful import fields, marshal
 from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
 
-from .. import db
-from ..helpers import utc_from_local, image_url, project_url
-from ..models.post import Blog, Post
-from ..models.project import Project, ProjectCategory
-from ..models.message import Message
-from ..models.invest import Invest
-from ..models.location import Location, LocationItem
 from ..decorators import *
 
 from ..base_endpoint import BaseList as Base, Response
-
-
-func = sqlalchemy.func
 
 @swagger.model
 class ProjectContribution:

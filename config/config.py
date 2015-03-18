@@ -32,9 +32,15 @@ else:
 
 #Debug
 if hasattr(settings, 'debug'):
-	debug = settings.debug
+    debug = settings.debug
 else:
-	debug = False
+    debug = False
+
+#Year when goteo started
+if hasattr(settings, 'initial_year'):
+	initial_year = settings.initial_year
+else:
+	initial_year = 2011
 
 #Api description
 if hasattr(settings, 'description'):

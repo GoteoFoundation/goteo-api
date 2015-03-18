@@ -6,6 +6,7 @@ from .reports.money import MoneyAPI
 from .reports.projects import ProjectsAPI
 from .reports.community import CommunityAPI
 from .reports.rewards import RewardsAPI
+from .reports.summary import SummaryAPI
 
 from . import app, api
 from .decorators import *
@@ -31,3 +32,4 @@ api.add_resource(MoneyAPI, '/reports/money/', endpoint='api_reports.money')
 api.add_resource(ProjectsAPI, '/reports/projects/', endpoint='api_reports.projects')
 api.add_resource(CommunityAPI, '/reports/community/', endpoint='api_reports.community')
 api.add_resource(RewardsAPI, '/reports/rewards/', endpoint='api_reports.rewards')
+api.add_resource(SummaryAPI, '/reports/summary/', endpoint='api_reports.summary')
