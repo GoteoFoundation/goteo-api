@@ -168,8 +168,6 @@ class Project(db.Model):
     def total(self, **kwargs):
         """Total number of projects"""
         try:
-            if 'received' in kwargs:
-                print '>>>>>>>>>>>>>>>>>>>>>>>>>>'
             filters = list(self.get_filters(**kwargs))
             total = db.session.query(func.count(distinct(self.id))).filter(*filters).scalar()
             if total is None:
