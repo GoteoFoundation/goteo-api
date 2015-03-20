@@ -32,6 +32,7 @@ class SummaryResponse(Response):
         "users"                : fields.Integer,
         "projects-received"    : fields.Integer,
         "projects-published"   : fields.Integer,
+        "projects-successful"  : fields.Integer,
         "projects-failed"      : fields.Integer,
         "categories"           : fields.List(fields.Nested(CategoryUsers.resource_fields)),
         "favorite-rewards"     : fields.List(fields.Nested(FavouriteRewards.resource_fields)),
@@ -109,6 +110,7 @@ class SummaryAPI(Base):
                 'users'              : users,
                 'projects-received'  : Project.total(received=True, **args),
                 'projects-published' : Project.total(**args),
+                'projects-successful': Project.total(successful=True, **args),
                 'projects-failed'    : Project.total(failed=True, **args),
                 'categories'         : map(lambda t: {t.id:
                                                     {'users': t.users,
