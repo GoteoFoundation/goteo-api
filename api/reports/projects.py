@@ -2,11 +2,10 @@
 
 import time
 from flask.ext.restful import fields, marshal
-from flask.ext.sqlalchemy import sqlalchemy
 from flask_restful_swagger import swagger
 
 from ..decorators import *
-
+from ..models.project import Project
 from ..base_endpoint import BaseList as Base, Response
 
 @swagger.model
