@@ -12,6 +12,7 @@ from ..models.project import Project
 from ..models.invest import Invest
 from ..models.user import User, UserInterest
 from ..models.reward import Reward
+from ..models.call import Call
 from .projects import ProjectContribution
 from .community import CategoryUsers
 from .rewards import FavouriteRewards
@@ -26,18 +27,19 @@ from .rewards import FavouriteRewards
 class SummaryResponse(Response):
 
     resource_fields = {
-        "pledged"              : fields.Integer,
-        "matchfund-amount"     : fields.Integer,
-        "average-donation"     : fields.Float,
-        "users"                : fields.Integer,
-        "projects-received"    : fields.Integer,
-        "projects-published"   : fields.Integer,
-        "projects-successful"  : fields.Integer,
-        "projects-failed"      : fields.Integer,
-        "categories"           : fields.List(fields.Nested(CategoryUsers.resource_fields)),
-        "favorite-rewards"     : fields.List(fields.Nested(FavouriteRewards.resource_fields)),
-        "top10-collaborations" : fields.List(fields.Nested(ProjectContribution.resource_fields)),
-        "top10-donations"      : fields.List(fields.Nested(ProjectContribution.resource_fields)),
+        "pledged"                : fields.Integer,
+        "matchfund-amount"       : fields.Integer,
+        "matchfundpledge-amount" : fields.Integer,
+        "average-donation"       : fields.Float,
+        "users"                  : fields.Integer,
+        "projects-received"      : fields.Integer,
+        "projects-published"     : fields.Integer,
+        "projects-successful"    : fields.Integer,
+        "projects-failed"        : fields.Integer,
+        "categories"             : fields.List(fields.Nested(CategoryUsers.resource_fields)),
+        "favorite-rewards"       : fields.List(fields.Nested(FavouriteRewards.resource_fields)),
+        "top10-collaborations"   : fields.List(fields.Nested(ProjectContribution.resource_fields)),
+        "top10-donations"        : fields.List(fields.Nested(ProjectContribution.resource_fields)),
     }
 
     required = resource_fields.keys()
@@ -104,23 +106,24 @@ class SummaryAPI(Base):
         res = SummaryResponse(
             starttime = time_start,
             attributes = {
-                'pledged'            : Invest.pledged_total(**args),
-                'matchfund-amount'   : Invest.pledged_total(method=Invest.METHOD_DROP, **args),
-                'average-donation'   : Invest.average_donation(**args),
-                'users'              : users,
-                'projects-received'  : Project.total(received=True, **args),
-                'projects-published' : Project.total(**args),
-                'projects-successful': Project.total(successful=True, **args),
-                'projects-failed'    : Project.total(failed=True, **args),
-                'categories'         : map(lambda t: {t.id:
+                'pledged'                 : Invest.pledged_total(**args),
+                'matchfund-amount'        : Invest.pledged_total(method=Invest.METHOD_DROP, **args),
+                'matchfundpledge-amount'  : Call.pledged_total(**args),
+                'average-donation'        : Invest.average_donation(**args),
+                'users'                   : users,
+                'projects-received'       : Project.total(received=True, **args),
+                'projects-published'      : Project.total(**args),
+                'projects-successful'     : Project.total(successful=True, **args),
+                'projects-failed'         : Project.total(failed=True, **args),
+                'categories'              : map(lambda t: {t.id:
                                                     {'users': t.users,
                                                      'id': t.id,
                                                      'name': t.name,
                                                      'percentage-users': percent(t.users, users)}
                                                     }, categorias),
-                'top10-collaborations' : top10_collaborations,
-                'top10-donations'      : top10_donations,
-                'favorite-rewards'     : favorites
+                'top10-collaborations'    : top10_collaborations,
+                'top10-donations'         : top10_donations,
+                'favorite-rewards'        : favorites
             },
             filters = args.items()
         )
