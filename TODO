@@ -4,15 +4,10 @@ IMPORTANTE
 
 ENDPOINT RESUMEN:
 
-1. OK - Todo lo recaudado vizualizado por año
-2. OK el Matchfund-amount (cantidad total y vizualizado por año)
-3. OK money.sections.average-donation.title
-4. OK projects.sections.top10-donations.title
-5. OK projects.sections.top10-collaborations.title
-6. OK community.sections.categories.title
-8. OK rewards.sections.favorite-rewards.title
-7. top 10 licencias
+CAMBIAR matchplege-amount POR matchfundpledge-amount (cambiar por los filtros por fechas)
+cambiar select por defecto a el año en curso - 1
 
+====
 
 Call.pledged_total filtrar por fechas
 
