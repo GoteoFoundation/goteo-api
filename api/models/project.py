@@ -36,14 +36,14 @@ class Project(db.Model):
     minimum = db.Column('mincost', Integer)
     optimum = db.Column('maxcost', Integer)
     amount = db.Column('amount', Integer)
-    status = db.Column('status', Integer)
-    passed = db.Column('passed', Date)
-    created = db.Column('created', Date)
-    updated = db.Column('updated', Date)
+    status = db.Column('status', Integer) # estado del proyecto
+    passed = db.Column('passed', Date) # fecha de paso de primera ronda
+    created = db.Column('created', Date) # fecha de creacion
+    updated = db.Column('updated', Date) # fecha de actualizacion de datos de formulario
     # deberia haber un campo como el updated solo hasta que se publica el proyecto,
     # luego coincidiria con el publicado
-    published = db.Column('published', Date)
-    closed = db.Column('closed', Date) #
+    published = db.Column('published', Date) # fecha de publicacion de proyecto
+    closed = db.Column('closed', Date) # fecha de cierre de proyecto
     node = db.Column('node', String(50), db.ForeignKey('node.id'))
     # total_funding
     # active_date
@@ -78,11 +78,6 @@ class Project(db.Model):
     def date_failed(self):
         return utc_from_local(self.failed)
 
-    #Filters for this table
-    @hybrid_property
-    def filters(self):
-        return [self.status.in_(self.PUBLISHED_PROJECTS)]
-
     # Getting filters for this model
     @hybrid_method
     def get_filters(self, **kwargs):
@@ -108,22 +103,28 @@ class Project(db.Model):
         """
         from .reward import Reward
         from .location import Location, LocationItem
-        filters = self.filters
+        filters = [self.status.in_(self.PUBLISHED_PROJECTS)]
+        # custom filters by project status
         if 'received' in kwargs and kwargs['received'] is not None:
             # Any project with a "updated" date set is a RECEIVED project
+            # overwrite the default published filters
             filters = [self.updated != None, self.updated != '0000-00-00']
-        if 'successful' in kwargs and kwargs['successful'] is not None:
-            filters = [self.passed != None, self.passed != '0000-00-00']
-            filters.append(self.status.in_(self.PUBLISHED_PROJECTS))
+        elif 'successful' in kwargs and kwargs['successful'] is not None:
+            filters.append(self.passed != None)
+            filters.append(self.passed != '0000-00-00')
             # filters.append(self.status > self.STATUS_REJECTED)
-        if 'closed' in kwargs and kwargs['closed'] is not None:
+        elif 'closed' in kwargs and kwargs['closed'] is not None:
+            # successful, and closed campaign projects
             and1 = and_(self.passed != None, self.passed != '0000-00-00')
             and2 = and_(self.closed != None, self.closed != '0000-00-00')
             filters.append(or_(and1, and2))
-        if 'finished' in kwargs and kwargs['finished'] is not None:
-            filters.append(self.status.in_([self.STATUS_FUNDED, self.STATUS_FULFILLED]))
-        if 'failed' in kwargs and kwargs['failed'] is not None:
-            filters.append(self.status == self.STATUS_UNFUNDED)
+        elif 'finished' in kwargs and kwargs['finished'] is not None:
+            # successful projects
+            #overwrite default status search
+            filters = [self.status.in_([self.STATUS_FUNDED, self.STATUS_FULFILLED])]
+        elif 'failed' in kwargs and kwargs['failed'] is not None:
+            #overwrite default status search
+            filters = [self.status == self.STATUS_UNFUNDED]
 
         # # Join project table if filters
         for i in ('license', 'license_type'):
@@ -136,15 +137,30 @@ class Project(db.Model):
         if 'status' in kwargs and kwargs['status'] is not None:
             filters.append(self.status.in_(kwargs['status']))
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
-            #Look at the published on PUBLISHED and FAILED projects
-            #Look at the updated on RECEIVED project
             if 'received' in kwargs:
+                #Look at the updated date on RECEIVED projects
                 filters.append(self.updated >= kwargs['from_date'])
+            elif 'successful' in kwargs:
+                #Look at the passed date on SUCCESFUL projects
+                filters.append(self.passed >= kwargs['from_date'])
+            elif 'closed' in kwargs:
+                #Look at the closed date on SUCCESFUL-closed projects
+                filters.append(self.closed >= kwargs['from_date'])
+            elif 'failed' in kwargs:
+                #Look at the closed date on FAILED projects
+                filters.append(self.closed >= kwargs['from_date'])
             else:
+                #Look at the published date on PUBLISHED projects
                 filters.append(self.published >= kwargs['from_date'])
         if 'to_date' in kwargs and kwargs['to_date'] is not None:
             if 'received' in kwargs:
                 filters.append(self.updated <= kwargs['to_date'])
+            elif 'successful' in kwargs:
+                filters.append(self.passed <= kwargs['to_date'])
+            elif 'closed' in kwargs:
+                filters.append(self.closed <= kwargs['to_date'])
+            elif 'failed' in kwargs:
+                filters.append(self.closed <= kwargs['to_date'])
             else:
                 filters.append(self.published <= kwargs['to_date'])
         if 'project' in kwargs and kwargs['project'] is not None:

@@ -49,6 +49,7 @@ class Message(db.Model):
 
         return filters
 
+    # excluir owners y admins
     @hybrid_method
     @cacher
     def collaborators_list(self, **kwargs):

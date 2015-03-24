@@ -7,9 +7,7 @@ ENDPOINT RESUMEN:
 comprobar cache
 tests unitarios
 
-quitar propietario proyecto de listas de colaboraciones y donaciones
-
-proyectos recibidos filtro por creado
+proyectos recibidos filtro por fecha creacion
 para proyectos fallidos deberia mirar fecha archivado
 para proyectos financiados completados mirar fecha cerrado
 para proyectos financiados en campaña mirar fecha primera ronda?
