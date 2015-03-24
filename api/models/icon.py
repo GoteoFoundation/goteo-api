@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import func, Integer, String, Text, Date
-from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
-from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
-from api.helpers import svg_image_url
-from sqlalchemy import asc, and_, or_, distinct
-from sqlalchemy.orm import aliased
+from sqlalchemy import Integer, String, Text, Date
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm.exc import MultipleResultsFound
+from sqlalchemy import asc, or_
 
-from api import db
-from api.helpers import get_lang
-from api.decorators import cacher
+from ..helpers import get_lang, svg_image_url
+from ..decorators import cacher
+
+from .. import db
+
 
 # Icon stuff
 

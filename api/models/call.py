@@ -5,9 +5,10 @@ from sqlalchemy import func, Integer, String, Text, Date
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import MultipleResultsFound
 
-from ..decorators import cacher
-from .. import db
 from ..helpers import utc_from_local
+from ..decorators import cacher
+
+from .. import db
 
 class Call(db.Model):
     __tablename__ = 'call'

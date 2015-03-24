@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from flask import Blueprint
-from api.controllers.user import UserAPI, UsersListAPI
-from api.controllers.license import LicensesListAPI
-from api.controllers.category import CategoriesListAPI
-from api.controllers.digest import DigestsListAPI
+from .controllers.user import UserAPI, UsersListAPI
+from .controllers.license import LicensesListAPI
+from .controllers.category import CategoriesListAPI
+from .controllers.digest import DigestsListAPI
 
-from api import api
-from api.decorators import *
+from . import api
+from .decorators import *
 
 api_users = Blueprint('api_users', __name__)
 

@@ -4,15 +4,15 @@ IMPORTANTE
 
 ENDPOINT RESUMEN:
 
+comprobar cache
+tests unitarios
 
 quitar propietario proyecto de listas de colaboraciones y donaciones
 
 proyectos recibidos filtro por creado
-
-reports/money => average failed
 para proyectos fallidos deberia mirar fecha archivado
-para proyectos financiados mirar fecha
-añadir donantes via credit-card y cash
+para proyectos financiados completados mirar fecha cerrado
+para proyectos financiados en campaña mirar fecha primera ronda?
 
 -----
 

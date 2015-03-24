@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
-import time
 import datetime
 import pytz
 
 from flask import jsonify
 
 from config import config
-from . import app
 
 def get_lang(object, field, langs=[]):
     """Searchs langs alternatives on a object in the form of:

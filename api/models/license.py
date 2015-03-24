@@ -6,9 +6,10 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.orm import aliased
 from sqlalchemy import asc, and_, distinct
 
-from api.helpers import svg_image_url, get_lang
-from api.decorators import cacher
-from api import db
+from ..helpers import svg_image_url, get_lang
+from ..decorators import cacher
+
+from .. import db
 
 
 # License stuff

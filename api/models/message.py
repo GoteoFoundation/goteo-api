@@ -3,10 +3,12 @@
 #from flask.ext.sqlalchemy import Pagination
 from sqlalchemy import and_, desc, func, Integer, String, DateTime
 from sqlalchemy.ext.hybrid import hybrid_method
-from api import db
+
 from .project import Project, ProjectCategory
 from .location import Location, LocationItem
 from ..decorators import cacher
+
+from .. import db
 
 class Message(db.Model):
     __tablename__ = 'message'

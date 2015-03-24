@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import func, Integer, String, Text, Date
+from sqlalchemy import func, Integer, String, Text
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
-from api.helpers import image_url
-from sqlalchemy import asc, and_, or_, distinct
+from sqlalchemy import asc, and_, distinct
 from sqlalchemy.orm import aliased
 
-from api import db
-from api.helpers import get_lang
-from api.decorators import cacher
+from ..helpers import image_url, get_lang
+from ..decorators import cacher
 
-from api.models.project import Project, ProjectCategory
-from api.models.location import Location, LocationItem
+from ..models.project import Project, ProjectCategory
+from ..models.location import Location, LocationItem
+
+from .. import db
 
 # Category stuff
 

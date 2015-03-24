@@ -3,18 +3,18 @@
 from sqlalchemy import func, Integer, String, Date, DateTime
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
-from api.helpers import image_url, utc_from_local, user_url
 from sqlalchemy import asc, desc, and_, or_, distinct
 from sqlalchemy.orm import aliased
 
-from api.decorators import cacher
-from api import db
+from ..decorators import cacher
+from ..helpers import image_url, utc_from_local, user_url, get_lang
 
 from .category import Category, CategoryLang
 from .invest import Invest
 from .message import Message
 from .location import Location, LocationItem
-from ..helpers import get_lang
+
+from .. import db
 
 # User stuff
 class User(db.Model):

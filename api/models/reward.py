@@ -4,15 +4,16 @@ from sqlalchemy import func, Integer, String, Text
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy.orm import aliased
-from api.helpers import svg_image_url, get_lang
 from sqlalchemy import desc,and_, distinct
 
-from api.decorators import cacher
+from ..helpers import svg_image_url, get_lang
+from ..decorators import cacher
+
 from .icon import Icon, IconLang
 from .project import Project, ProjectCategory
 from .location import Location, LocationItem
 
-from api import db
+from .. import db
 
 # Reward stuff
 class Reward(db.Model):

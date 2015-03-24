@@ -162,7 +162,7 @@ def check_auth(username, password):
 
     #Try the key-password values in sql
     try:
-        from api.models.user import UserApi
+        from .models.user import UserApi
         user = db.session.query(UserApi).filter(UserApi.user == username, UserApi.key == password).one()
         if user.expiration_date is not None and user.expiration_date <= dtdatetime.today():
             # print user.expiration_date, '<=', dtdatetime.today()
