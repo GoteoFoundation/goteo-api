@@ -15,7 +15,8 @@ app = Flask(__name__, static_url_path="")
 if hasattr(config, 'debug'):
     app.debug = bool(config.debug)
     app.config['DEBUG'] = bool(config.debug)
-    app.config['SQLALCHEMY_ECHO'] = True
+    if app.debug:
+        app.config['SQLALCHEMY_ECHO'] = True
 
 app.config['SQLALCHEMY_DATABASE_URI'] = config.DB_URI
 #app.config['SQLALCHEMY_POOL_TIMEOUT'] = 5
@@ -35,3 +36,8 @@ api = swagger.docs(Api(app), apiVersion=config.version, description=config.descr
 #api = Api(app)
 
 db = SQLAlchemy(app)
+
+# DEBUG
+if config.debug:
+    from .decorators import debug_time
+    db.session.query = debug_time(db.session.query)

@@ -6,13 +6,6 @@ from flask_restful_swagger import swagger
 from config import config
 from api import app
 
-# from api.decorators import *
-# from api.helpers import debug_time
-
-# DEBUG
-# if config.debug:
-#     db.session.query = debug_time(db.session.query)
-
 @app.after_request
 def add_cors(resp):
     """ Ensure all responses have the CORS headers. This ensures any failures are also accessible

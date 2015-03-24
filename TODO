@@ -4,12 +4,6 @@ IMPORTANTE
 
 ENDPOINT RESUMEN:
 
-CAMBIAR matchplege-amount POR matchfundpledge-amount (cambiar por los filtros por fechas)
-cambiar select por defecto a el año en curso - 1
-
-====
-
-Call.pledged_total filtrar por fechas
 
 quitar propietario proyecto de listas de colaboraciones y donaciones
 

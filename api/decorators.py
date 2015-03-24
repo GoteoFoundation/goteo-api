@@ -12,9 +12,9 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from config import config
 
-from api.helpers import *
+from .helpers import *
 
-from api import app, db
+from . import app, db
 
 cache = Cache(app)
 
@@ -197,4 +197,12 @@ def requires_auth(f):
     return decorated
 
 
-
+############################ debug ############################
+def debug_time(func):
+    def new_f(*args, **kwargs):
+        time_start = time.time()
+        res = func(*args, **kwargs)
+        total_time = time.time() - time_start
+        app.logger.debug('Time ' + func.__name__ + ': ' + str(total_time))
+        return res
+    return new_f

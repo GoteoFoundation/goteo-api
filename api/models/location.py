@@ -32,6 +32,8 @@ class Location(db.Model):
     #  as described here:
     #  http://www.movable-type.co.uk/scripts/latlong-db.html
     #
+    #  @Cacher cannot be applied here, this only returns a subquery to be executed
+    #  from the calling entity
     @hybrid_method
     def location_subquery(self, latitude, longitude, radius, fields=['id']):
         from math import degrees, radians, cos

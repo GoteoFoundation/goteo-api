@@ -78,13 +78,3 @@ def percent(number, base=None):
     perc = float(number) / base * 100
     return round(perc, 2)
 
-
-############################ debug ############################
-def debug_time(func):
-    def new_f(*args, **kwargs):
-        time_start = time.time()
-        res = func(*args, **kwargs)
-        total_time = time.time() - time_start
-        app.logger.debug('Time ' + func.__name__ + ': ' + str(total_time))
-        return res
-    return new_f
