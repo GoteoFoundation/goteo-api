@@ -35,16 +35,16 @@ def image_url(img, size='medium', cut=False, default='la_gota.png'):
         s += 'c'
     i = img if img is not None else default
 
-    return 'http://goteo.org/img/' + s + '/' + i
+    return 'https://goteo.org/img/' + s + '/' + i
 
 def project_url(project_id):
-    return 'http://goteo.org/project/' + project_id
+    return 'https://goteo.org/project/' + project_id
 
 def user_url(user_id):
-    return 'http://goteo.org/user/profile/' + user_id
+    return 'https://goteo.org/user/profile/' + user_id
 
 def svg_image_url(img, type='licenses'):
-    return 'http://goteoassets.org/api/svg/' + type + '/' + img
+    return 'https://goteoassets.org/api/svg/' + type + '/' + img
 
 def utc_from_local(date_time, local_tz=None):
     local_time = None
