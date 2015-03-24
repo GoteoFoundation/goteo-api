@@ -18,6 +18,7 @@ class UserResponse(Response):
         "name"              : fields.String,
         "node"              : fields.String,
         "date-created"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
+        "profile-url"       : fields.String,
         "profile-image-url" : fields.String,
     }
 
@@ -111,7 +112,7 @@ class UserAPI(BaseItem):
     @swagger.operation(
         notes='User profile',
         nickname='user',
-        responseClass=UserResponse.__name__,
+        responseClass=UserCompleteResponse.__name__,
         responseMessages=BaseItem.RESPONSE_MESSAGES
     )
     @requires_auth
@@ -134,6 +135,7 @@ class UserAPI(BaseItem):
         item = marshal(u, UserCompleteResponse.resource_fields)
         if u != None:
             item['date-created'] = u.date_created
+            item['profile-url'] = u.profile_url
             item['profile-image-url'] = u.profile_image_url
 
         res = UserCompleteResponse(
