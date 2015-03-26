@@ -140,7 +140,7 @@ class Project(db.Model):
             if 'received' in kwargs:
                 #Look at the updated date on RECEIVED projects
                 filters.append(self.updated >= kwargs['from_date'])
-            elif 'successful' in kwargs:
+            elif 'successful' in kwargs or 'finished' in kwargs:
                 #Look at the passed date on SUCCESFUL projects
                 filters.append(self.passed >= kwargs['from_date'])
             elif 'closed' in kwargs:
@@ -155,7 +155,7 @@ class Project(db.Model):
         if 'to_date' in kwargs and kwargs['to_date'] is not None:
             if 'received' in kwargs:
                 filters.append(self.updated <= kwargs['to_date'])
-            elif 'successful' in kwargs:
+            elif 'successful' in kwargs or 'finished' in kwargs:
                 filters.append(self.passed <= kwargs['to_date'])
             elif 'closed' in kwargs:
                 filters.append(self.closed <= kwargs['to_date'])

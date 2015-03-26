@@ -93,7 +93,7 @@ class ProjectsAPI(Base):
         args = self.parse_args(remove=('page','limit'))
 
         succ_projects = Project.total(successful=True, **args)
-        succ_projects_closed = Project.total(closed=True, **args)
+        # succ_projects_closed = Project.total(closed=True, **args)
         succ_finished = Project.total(finished=True, **args)
         fail_projects = Project.total(failed=True, **args)
 
