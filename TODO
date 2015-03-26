@@ -2,7 +2,7 @@ TODO
 
 IMPORTANTE
 
-comprobar cache
+comprobar cache (cron)
 tests unitarios
 
 -----
@@ -10,6 +10,8 @@ tests unitarios
 
 Location refactor
 
+Añadir info de usuario:
+https://goteo.org/user/profile/olivier/profile
 
 2. Endpoint de iconos?
 

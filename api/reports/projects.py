@@ -135,7 +135,7 @@ class ProjectsAPI(Base):
                 'failed'                         : fail_projects,
                 'successful'                     : succ_projects,
                 'successful-completed'           : succ_finished,
-                'percentage-successful'          : percent(succ_projects, succ_projects_closed),
+                'percentage-successful'          : percent(succ_projects, succ_projects + fail_projects),
                 'percentage-successful-completed': percent(succ_finished, succ_finished + fail_projects),
                 'average-amount-successful'      : Project.average_total(successful=True, **args),
                 'average-posts-successful'       : Project.average_posts(successful=True, **args),
