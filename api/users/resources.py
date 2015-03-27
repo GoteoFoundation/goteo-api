@@ -8,6 +8,8 @@ from flask_restful_swagger import swagger
 from ..decorators import *
 from ..base_resources import BaseItem, BaseList, Response
 
+from .models import User
+
 @swagger.model
 class UserResponse(Response):
     """UserResponse"""
@@ -81,7 +83,6 @@ class UsersListAPI(BaseList):
 
     def _get(self):
         """Get()'s method dirty work"""
-        from .models import User
 
         time_start = time.time()
         # For privacy, removing location filter ?

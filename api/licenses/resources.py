@@ -9,6 +9,8 @@ from ..decorators import *
 
 from ..base_resources import BaseList, Response
 
+from .models import License
+
 @swagger.model
 class LicenseResponse(Response):
     """LicenseResponse"""
@@ -68,7 +70,6 @@ class LicensesListAPI(BaseList):
     def _get(self):
         """Dirty work for the get() method"""
 
-        from .models import License
         from ..models.reward import Reward
         from ..models.project import Project
 

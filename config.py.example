@@ -1,5 +1,8 @@
 #
-# USE THIS FILE TO CONFIGURE THE GOTEO-API
+# USE THIS FILE AS REFERENCE TO CONFIGURE THE GOTEO-API
+# Create or rename this file to config.py
+# Override vars for custom needs
+# (check the full config specs in api/config.py)
 #
 
 # Mysql Goteo Database (mandatory)
@@ -8,37 +11,37 @@ dbhost = 'devgoteo.org'
 dbuser = 'goteo'
 dbpass = 'goteo1234'
 dbname = 'goteo'
-
+DB_URI = 'mysql://' + dbuser + ':' + dbpass + '@' + dbhost + '/' + dbname
 
 # Optional config:
 # ================
 
 # api requests rate limit
 # Users are allowed 300 requests in 15 minutes
-requests_limit = 300
-requests_time = 60 * 15
+REQUESTS_LIMIT = 300
+REQUESTS_TIME = 60 * 15
 
 # redis (mandatory if requests_limit activated)
-redis_uri = "redis://devgoteo.org:6379/0"
+REDIS_URI = "redis://devgoteo.org:6379/0"
 
 # Use Http Authentication
-auth_enabled = True
+AUTH_ENABLED = True
 
 # debug (False by default)
-debug = True
+DEBUG = True
 
 # Use cache type (null by default)
 # View http://pythonhosted.org/Flask-Cache/#configuring-flask-cache
 # for types and configuration options
-cache = { 'CACHE_TYPE' : 'simple' }
+CACHE = { 'CACHE_TYPE' : 'simple' }
 # Minimun timeout for function caching
-cache_min_timeout = 30
+CACHE_MIN_TIMEOUT = 30
 
 # Opcional description for general messages
-description = 'Goteo.org API'
+DESCRIPTION = 'Goteo.org API'
 
 # Usefull links for general messages
-links = {
+LINKS = {
 	'Developers Documentation' : 'http://developers.goteo.org',
 	'Swagger Interface' : '/api/spec.html'
 }
@@ -46,6 +49,6 @@ links = {
 # Built-in Users Authentication
 # Users can be bind to a ip or a ip range using a mask (eg: ip/mask)
 
-users = {
+USERS = {
 	'goteo' : {'password':'goteo', 'remotes' : ['127.0.0.0/16', '192.168.0.0/24']}
 }

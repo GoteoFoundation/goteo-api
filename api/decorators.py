@@ -10,8 +10,6 @@ from flask.ext.cache import Cache
 from netaddr import IPSet, AddrFormatError
 from sqlalchemy.orm.exc import NoResultFound
 
-from config import config
-
 from .helpers import *
 
 from . import app, db
@@ -42,7 +40,7 @@ def cacher(f):
                 # if present use that date as maxdate (else now)
                 # if maxdate is > now() - 2 months (configurable)
                     # timeout variable (the closer to now, the lesser the value)
-        timeout = config.cache_min_timeout
+        timeout = app.config['CACHE_MIN_TIMEOUT']
         now = dtdatetime.now()
         if 'to_date' in kwargs and kwargs['to_date'] != None:
             datemax = parse(kwargs['to_date'])
@@ -51,7 +49,7 @@ def cacher(f):
         delta = now - datemax
         if delta.days > 60:
             timeout = None # infinite time caching
-        elif delta.total_seconds() > config.cache_min_timeout:
+        elif delta.total_seconds() > app.config['CACHE_MIN_TIMEOUT']:
             timeout = int(delta.total_seconds())
 
         if app.debug:
@@ -77,10 +75,9 @@ def cacher(f):
 # REDIS RATE LIMITER
 # ==================
 
-if app.config['REDIS_URL'] is not False:
+redis = False
+if app.config['REDIS_URL']:
     redis = Redis(app)
-else:
-    redis = False
 
 class RateLimit(object):
     expiration_window = 10
@@ -105,13 +102,13 @@ def on_over_limit(limit):
     resp = bad_request('Too many requests', 400)
     return resp
 
-def ratelimit(limit=config.requests_limit, per=config.requests_time, over_limit=on_over_limit):
+def ratelimit(limit=app.config['REQUESTS_LIMIT'], per=app.config['REQUESTS_TIME'], over_limit=on_over_limit):
     def decorator(f):
         def rate_limited(*args, **kwargs):
-            if not config.requests_limit:
+            if not app.config['REQUESTS_LIMIT'] or not redis:
                 return f(*args, **kwargs)
 
-            if config.auth_enabled:
+            if app.config['AUTH_ENABLED']:
                 key = 'rate-limit/%s/' % request.authorization.username
             else:
                 remote_ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
@@ -146,8 +143,8 @@ def check_auth(username, password):
     """Checks username & password authentication"""
 
     #try some built-in auth first
-    if config.users and username in config.users and 'password' in config.users[username]:
-        user = config.users[username]
+    if app.config['USERS'] and username in app.config['USERS'] and 'password' in app.config['USERS'][username]:
+        user = app.config['USERS'][username]
         if user['password'] == password:
             if 'remotes' in user:
                 try:
@@ -162,7 +159,7 @@ def check_auth(username, password):
 
     #Try the key-password values in sql
     try:
-        from .models.user import UserApi
+        from .users.models import UserApi
         user = db.session.query(UserApi).filter(UserApi.user == username, UserApi.key == password).one()
         if user.expiration_date is not None and user.expiration_date <= dtdatetime.today():
             # print user.expiration_date, '<=', dtdatetime.today()
@@ -177,7 +174,7 @@ def check_auth(username, password):
 def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        if not config.auth_enabled:
+        if not app.config['AUTH_ENABLED']:
             return f(*args, **kwargs)
 
         auth = request.authorization

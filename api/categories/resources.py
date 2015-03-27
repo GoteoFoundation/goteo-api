@@ -8,6 +8,8 @@ from flask_restful_swagger import swagger
 from ..decorators import *
 from ..base_resources import BaseList, Response
 
+from .models import Category
+
 @swagger.model
 class CategoryResponse(Response):
     """CategoryResponse"""
@@ -65,7 +67,6 @@ class CategoriesListAPI(BaseList):
     def _get(self):
         """Dirty work for the get() method"""
 
-        from .models import Category
         from ..users.models import User
         from ..models.project import Project
 

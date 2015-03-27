@@ -1,5 +1,7 @@
 ## API de Goteo basada en flask/sqlalchemy/flask-restful
 
+TODO: revisar este archivo
+
 ### Instalación
 En Ubuntu 14.04, primero assegurase que se tienen todas las librerias:
 

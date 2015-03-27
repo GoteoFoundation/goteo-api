@@ -10,7 +10,6 @@ from flask_restful_swagger import swagger
 
 #import current endpoints
 from ..decorators import *
-from config import config
 
 from ..base_resources import BaseList, Response
 
@@ -108,7 +107,7 @@ class DigestsListAPI(BaseList):
                         buckets[format(month, '02')] = map(lambda d:d.isoformat(),maxmin)
             else:
                 # digest by years
-                for year in range(config.initial_year, dtdate.today().year + 1):
+                for year in range(app.config['INITIAL_YEAR'], dtdate.today().year + 1):
                     buckets[year] = map(lambda d:d.isoformat(),self.max_min(year))
 
             # parse the args in the instance

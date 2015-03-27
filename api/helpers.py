@@ -3,8 +3,7 @@ import datetime
 import pytz
 
 from flask import jsonify
-
-from config import config
+from . import app, db
 
 def get_lang(object, field, langs=[]):
     """Searchs langs alternatives on a object in the form of:
@@ -54,7 +53,7 @@ def utc_from_local(date_time, local_tz=None):
     if date_time.__class__.__name__ != 'datetime':
         return date_time
     if local_tz is None:
-        local_tz = pytz.timezone(config.timezone) # eg, "Europe/London"
+        local_tz = pytz.timezone(app.config['TIMEZONE']) # eg, "Europe/London"
     local_time = local_tz.localize(date_time)
 
     return local_time

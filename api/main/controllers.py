@@ -3,7 +3,6 @@
 import flask
 from flask import jsonify
 
-from config import config
 from .. import app
 
 @app.after_request
@@ -26,7 +25,7 @@ def add_cors(resp):
 @app.errorhandler(410)
 @app.errorhandler(500)
 def page_not_found(e):
-     resp = jsonify(error=e.code, message=str(e), links=config.links)
+     resp = jsonify(error=e.code, message=str(e), links=app.config['LINKS'])
      resp.status_code = e.code
      return resp
 
@@ -46,5 +45,5 @@ def index():
         # Filter out rules non Goteo-api rules
         if "GET" in rule.methods and rule.endpoint.startswith('api_'):
             func_list[rule.rule] = app.view_functions[rule.endpoint].__doc__
-    return jsonify(version=config.version, message=config.description + ' v' + str(config.version), endpoints=func_list, links=config.links)
+    return jsonify(version=app.config['VERSION'], message=app.config['DESCRIPTION'] + ' v' + str(app.config['VERSION']), endpoints=func_list, links=app.config['LINKS'])
 

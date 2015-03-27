@@ -5,13 +5,13 @@ from flask_restful_swagger import swagger
 from api import app
 
 # import sub-modules controllers
-from api.main import controllers
-from api.users import controllers
-from api.categories import controllers
-from api.licenses import controllers
-from api.digests import controllers
+import api.main.controllers
+import api.users.controllers
+import api.categories.controllers
+import api.licenses.controllers
+import api.digests.controllers
 # reports
-from api.reports import controllers
+import api.reports.controllers
 
 
 #This part will not be executed under uWSGI module (nginx)
