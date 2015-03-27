@@ -5,12 +5,9 @@ import time
 from flask.ext.restful import fields, marshal
 from flask_restful_swagger import swagger
 
-from ..models.reward import Reward
-from ..models.project import Project
-from ..models.invest import Invest
 from ..decorators import *
 
-from ..base_endpoint import BaseList as Base, Response
+from ..base_resources import BaseList as Base, Response
 
 @swagger.model
 class FavouriteRewards:
@@ -73,6 +70,10 @@ class RewardsAPI(Base):
 
     def _get(self):
         """Dirty work for the get() method"""
+        from ..models.reward import Reward
+        from ..models.project import Project
+        from ..models.invest import Invest
+
         time_start = time.time()
         # remove not used args
         args = self.parse_args(remove=('page','limit'))

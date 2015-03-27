@@ -5,8 +5,8 @@ from flask.ext.restful import fields, marshal
 from flask_restful_swagger import swagger
 
 from ..decorators import *
-from ..models.project import Project
-from ..base_endpoint import BaseList as Base, Response
+
+from ..base_resources import BaseList as Base, Response
 
 @swagger.model
 class ProjectContribution:
@@ -88,6 +88,8 @@ class ProjectsAPI(Base):
 
     def _get(self):
         """Get()'s method dirty work"""
+        from ..models.project import Project
+
         time_start = time.time()
         # remove not used args
         args = self.parse_args(remove=('page','limit'))

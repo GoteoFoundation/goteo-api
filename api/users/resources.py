@@ -5,9 +5,8 @@ import time
 from flask.ext.restful import fields, marshal
 from flask_restful_swagger import swagger
 
-from ..models.user import User
 from ..decorators import *
-from ..base_endpoint import BaseItem, BaseList, Response
+from ..base_resources import BaseItem, BaseList, Response
 
 @swagger.model
 class UserResponse(Response):
@@ -82,6 +81,7 @@ class UsersListAPI(BaseList):
 
     def _get(self):
         """Get()'s method dirty work"""
+        from .models import User
 
         time_start = time.time()
         # For privacy, removing location filter ?

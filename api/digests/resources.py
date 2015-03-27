@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
 import time
+from dateutil.parser import parse
+import calendar
+from datetime import date as dtdate, datetime as dtdatetime
 
 from flask.ext.restful import fields
 from flask_restful_swagger import swagger
 
-from dateutil.parser import parse
-import calendar
-from datetime import date as dtdate, datetime as dtdatetime
-from ..decorators import ratelimit, requires_auth
-from ..base_endpoint import BaseList, Response
 #import current endpoints
 from ..decorators import *
 from config import config
+
+from ..base_resources import BaseList, Response
 
 def year_sanitizer(data):
     d = parse(data)
@@ -56,8 +56,8 @@ class DigestsListAPI(BaseList):
         'reports/community' : 'reports.community.CommunityAPI',
         'reports/projects' : 'reports.projects.ProjectsAPI',
         'reports/rewards' : 'reports.rewards.RewardsAPI',
-        'categories' : 'controllers.category.CategoriesListAPI',
-        'licenses' : 'controllers.license.LicensesListAPI'
+        'categories' : 'categories.resources.CategoriesListAPI',
+        'licenses' : 'licenses.resources.LicensesListAPI'
         }
 
     @swagger.operation(

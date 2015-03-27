@@ -32,7 +32,6 @@ if hasattr(config, 'cache'):
             app.config[i] = config.cache[i]
 
 
-api = swagger.docs(Api(app), apiVersion=config.version, description=config.description)
 #api = Api(app)
 
 db = SQLAlchemy(app)
@@ -41,3 +40,6 @@ db = SQLAlchemy(app)
 if config.debug:
     from .decorators import debug_time
     db.session.query = debug_time(db.session.query)
+
+
+api = swagger.docs(Api(app), apiVersion=config.version, description=config.description)

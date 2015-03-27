@@ -5,12 +5,10 @@ import time
 from flask.ext.restful import fields, marshal
 from flask_restful_swagger import swagger
 
-from ..models.invest import Invest
-from ..models.message import Message
-from ..models.user import User, UserInterest
 from ..decorators import *
 from ..helpers import image_url, user_url
-from ..base_endpoint import BaseList as Base, Response
+
+from ..base_resources import BaseList as Base, Response
 
 @swagger.model
 class CategoryUsers:
@@ -112,6 +110,11 @@ class CommunityAPI(Base):
 
     def _get(self):
         """Get()'s method dirty work"""
+        from ..models.invest import Invest
+        from ..models.message import Message
+        from ..users.models import User, UserInterest
+
+
         time_start = time.time()
         # remove not used args
         args = self.parse_args(remove=('page','limit'))

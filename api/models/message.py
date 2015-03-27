@@ -27,6 +27,8 @@ class Message(db.Model):
     # Getting filters for this model
     @hybrid_method
     def get_filters(self, **kwargs):
+        from ..users.models import User
+
         filters = []
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
             filters.append(self.date >= kwargs['from_date'])
@@ -35,7 +37,6 @@ class Message(db.Model):
         if 'project' in kwargs and kwargs['project'] is not None:
             filters.append(self.project.in_(kwargs['project']))
         if 'node' in kwargs and kwargs['node'] is not None:
-            from .user import User
             filters.append(self.user == User.id)
             filters.append(User.node.in_(kwargs['node']))
         if 'category' in kwargs and kwargs['category'] is not None:
@@ -54,7 +55,8 @@ class Message(db.Model):
     @cacher
     def collaborators_list(self, **kwargs):
         """Get a list of of collaborators"""
-        from .user import User
+        from ..users.models import User
+
         limit = kwargs['limit'] if 'limit' in kwargs else 10
         page = kwargs['page'] if 'page' in kwargs else 0
         filters = list(self.get_filters(**kwargs))

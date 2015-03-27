@@ -107,8 +107,9 @@ class Invest(db.Model):
     @cacher
     def donors_list(self, **kwargs):
         """List of donors"""
-        from .user import User, UserRole
-        from .call import Call
+        from ..users.models import User, UserRole
+        from ..calls.models import Call
+
         limit = kwargs['limit'] if 'limit' in kwargs else 10
         page = kwargs['page'] if 'page' in kwargs else 0
         filters = list(self.get_filters(**kwargs))
@@ -136,8 +137,10 @@ class Invest(db.Model):
     @hybrid_method
     @cacher
     def multidonors_list(self, **kwargs):
-        from .user import User, UserRole
-        from .call import Call
+        """List of multidonors"""
+        from ..users.models import User, UserRole
+        from ..calls.models import Call
+
         limit = kwargs['limit'] if 'limit' in kwargs else 10
         page = kwargs['page'] if 'page' in kwargs else 0
         filters = list(self.get_filters(**kwargs))

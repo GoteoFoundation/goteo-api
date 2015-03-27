@@ -5,11 +5,9 @@ import time
 from flask.ext.restful import fields, marshal
 from flask_restful_swagger import swagger
 
-from ..models.license import License
-from ..models.reward import Reward
-from ..models.project import Project
 from ..decorators import *
-from ..base_endpoint import BaseList, Response
+
+from ..base_resources import BaseList, Response
 
 @swagger.model
 class LicenseResponse(Response):
@@ -69,6 +67,10 @@ class LicensesListAPI(BaseList):
 
     def _get(self):
         """Dirty work for the get() method"""
+
+        from .models import License
+        from ..models.reward import Reward
+        from ..models.project import Project
 
         time_start = time.time()
         #removing not-needed standard filters

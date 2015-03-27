@@ -5,12 +5,9 @@ import time
 from flask.ext.restful import fields
 from flask_restful_swagger import swagger
 
-from ..models.call import Call
-from ..models.project import Project
-from ..models.invest import Invest
 from ..decorators import ratelimit, requires_auth
 
-from ..base_endpoint import BaseList, Response
+from ..base_resources import BaseList, Response
 
 @swagger.model
 class MoneyResponse(Response):
@@ -59,6 +56,10 @@ class MoneyAPI(BaseList):
 
     def _get(self):
         """Get()'s method dirty work"""
+        from ..calls.models import Call
+        from ..models.project import Project
+        from ..models.invest import Invest
+
         time_start = time.time()
 
         #remove not used arguments

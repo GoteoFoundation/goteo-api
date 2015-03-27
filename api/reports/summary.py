@@ -7,12 +7,7 @@ from flask_restful_swagger import swagger
 from ..helpers import utc_from_local, image_url, project_url, percent
 from ..decorators import *
 
-from ..base_endpoint import BaseList as Base, Response
-from ..models.project import Project
-from ..models.invest import Invest
-from ..models.user import User, UserInterest
-from ..models.reward import Reward
-from ..models.call import Call
+from ..base_resources import BaseList as Base, Response
 from .projects import ProjectContribution
 from .community import CategoryUsers
 from .rewards import FavouriteRewards
@@ -70,6 +65,12 @@ class SummaryAPI(Base):
 
     def _get(self):
         """Get()'s method dirty work"""
+        from ..models.project import Project
+        from ..models.invest import Invest
+        from ..models.reward import Reward
+        from ..users.models import User, UserInterest
+        from ..calls.models import Call
+
         time_start = time.time()
         # remove not used args
         args = self.parse_args(remove=('page','limit'))

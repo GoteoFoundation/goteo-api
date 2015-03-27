@@ -5,11 +5,8 @@ import time
 from flask.ext.restful import fields, marshal
 from flask_restful_swagger import swagger
 
-from ..models.category import Category
-from ..models.project import Project
-from ..models.user import User
 from ..decorators import *
-from ..base_endpoint import BaseList, Response
+from ..base_resources import BaseList, Response
 
 @swagger.model
 class CategoryResponse(Response):
@@ -67,6 +64,11 @@ class CategoriesListAPI(BaseList):
 
     def _get(self):
         """Dirty work for the get() method"""
+
+        from .models import Category
+        from ..users.models import User
+        from ..models.project import Project
+
         time_start = time.time()
         #removing not-needed standard filters
         args = self.parse_args(remove=('page','limit'))

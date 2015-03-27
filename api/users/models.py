@@ -9,10 +9,10 @@ from sqlalchemy.orm import aliased
 from ..decorators import cacher
 from ..helpers import image_url, utc_from_local, user_url, get_lang
 
-from .category import Category, CategoryLang
-from .invest import Invest
-from .message import Message
-from .location import Location, LocationItem
+from ..categories.models import Category, CategoryLang
+from ..models.invest import Invest
+from ..models.message import Message
+from ..models.location import Location, LocationItem
 
 from .. import db
 

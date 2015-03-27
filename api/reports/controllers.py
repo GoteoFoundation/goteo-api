@@ -1,20 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from flask import Blueprint, jsonify
+from flask import jsonify
 
-from .reports.money import MoneyAPI
-from .reports.projects import ProjectsAPI
-from .reports.community import CommunityAPI
-from .reports.rewards import RewardsAPI
-from .reports.summary import SummaryAPI
+from .. import app, api
+from ..decorators import *
 
-from . import app, api
-from .decorators import *
-
-api_reports = Blueprint('api_reports', __name__)
+from .money import MoneyAPI
+from .projects import ProjectsAPI
+from .community import CommunityAPI
+from .rewards import RewardsAPI
+from .summary import SummaryAPI
 
 # Reports home
-@api_reports.route('/reports/', endpoint='main')
+@app.route('/reports/', endpoint='api_reports')
 @requires_auth
 @ratelimit()
 def reports():
