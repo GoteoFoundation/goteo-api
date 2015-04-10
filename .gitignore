@@ -3,4 +3,5 @@
 *~
 virtualenv
 config.py
+!goteoapi/config.py
 
