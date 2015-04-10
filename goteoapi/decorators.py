@@ -108,7 +108,7 @@ def ratelimit(limit=app.config['REQUESTS_LIMIT'], per=app.config['REQUESTS_TIME'
             if not app.config['REQUESTS_LIMIT'] or not redis:
                 return f(*args, **kwargs)
 
-            if app.config['AUTH_ENABLED']:
+            if app.config['AUTH_ENABLED'] and request.authorization:
                 key = 'rate-limit/%s/' % request.authorization.username
             else:
                 remote_ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
