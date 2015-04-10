@@ -31,10 +31,3 @@ api.add_resource(ProjectsAPI, '/reports/projects/', endpoint='api_reports.projec
 api.add_resource(CommunityAPI, '/reports/community/', endpoint='api_reports.community')
 api.add_resource(RewardsAPI, '/reports/rewards/', endpoint='api_reports.rewards')
 api.add_resource(SummaryAPI, '/reports/summary/', endpoint='api_reports.summary')
-
-
-# print app.url_rule_class
-for rule in app.url_map.iter_rules():
-    # print rule.endpoint
-    if "GET" in rule.methods and rule.endpoint.startswith('api_reports.'):
-        print repr(app.view_functions[rule.endpoint].__dict__)

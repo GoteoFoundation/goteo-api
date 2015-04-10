@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# Running extra packages for the api.goteo.org
+#
 from flask_restful_swagger import swagger
 
 from goteoapi import app
