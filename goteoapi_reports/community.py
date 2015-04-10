@@ -5,10 +5,10 @@ import time
 from flask.ext.restful import fields, marshal
 from flask_restful_swagger import swagger
 
-from ..decorators import *
-from ..helpers import image_url, user_url
+from goteoapi.decorators import *
+from goteoapi.helpers import image_url, user_url
 
-from ..base_resources import BaseList as Base, Response
+from goteoapi.base_resources import BaseList as Base, Response
 
 @swagger.model
 class CategoryUsers:
@@ -110,9 +110,9 @@ class CommunityAPI(Base):
 
     def _get(self):
         """Get()'s method dirty work"""
-        from ..models.invest import Invest
-        from ..models.message import Message
-        from ..users.models import User, UserInterest
+        from goteoapi.models.invest import Invest
+        from goteoapi.models.message import Message
+        from goteoapi.users.models import User, UserInterest
 
 
         time_start = time.time()

@@ -9,9 +9,9 @@ from flask.ext.restful import fields
 from flask_restful_swagger import swagger
 
 #import current endpoints
-from ..decorators import *
-
-from ..base_resources import BaseList, Response
+from goteoapi.decorators import *
+from goteoapi.base_resources import BaseList, Response
+from goteoapi import app
 
 def year_sanitizer(data):
     d = parse(data)
@@ -49,15 +49,16 @@ class DigestsListResponse(Response):
 
 class DigestsListAPI(BaseList):
     """Get Digest list"""
-    AVAILABLE_ENDPOINTS = {
-        'reports/summary' : 'reports.summary.SummaryAPI',
-        'reports/money' : 'reports.money.MoneyAPI',
-        'reports/community' : 'reports.community.CommunityAPI',
-        'reports/projects' : 'reports.projects.ProjectsAPI',
-        'reports/rewards' : 'reports.rewards.RewardsAPI',
-        'categories' : 'categories.resources.CategoriesListAPI',
-        'licenses' : 'licenses.resources.LicensesListAPI'
-        }
+    #TODO: configurable
+    AVAILABLE_ENDPOINTS = [
+        '/reports/summary/',
+        '/reports/money/',
+        '/reports/community/',
+        '/reports/projects/',
+        '/reports/rewards/',
+        '/categories/',
+        '/licenses/'
+        ]
 
     @swagger.operation(
         notes='Digests list',
@@ -77,19 +78,28 @@ class DigestsListAPI(BaseList):
         #removing not-needed standard filters
         args = self.parse_args(remove=('from_date', 'to_date', 'limit', 'page'))
         # get the class
-        if endpoint[-1] == '/':
-            endpoint = endpoint[:-1]
-        endpoint = '/'.join(endpoint.split('/')[:2])
-
-        if endpoint in self.AVAILABLE_ENDPOINTS:
-            mod = __import__('api')
-            parts =  self.AVAILABLE_ENDPOINTS[endpoint].split('.')
-            for att in parts:
-                mod = getattr(mod, att)
+        if endpoint[-1] != '/':
+            endpoint = endpoint + '/'
+        endpoint = '/' + endpoint
+        # endpoint = '/'.join(endpoint.split('/')[:2])
+        mod = None
         try:
+            for rule in app.url_map.iter_rules():
+                if rule.rule in self.AVAILABLE_ENDPOINTS and rule.rule == endpoint:
+                    # Find the Class
+                    pack = app.view_functions[rule.endpoint].__dict__['view_class'].__module__
+                    clas = app.view_functions[rule.endpoint].__dict__['view_class'].__name__
+                    parts = pack.split('.')
+                    parts.append(clas)
+                    mod = __import__(parts[0])
+                    for att in parts[1:]:
+                        mod = getattr(mod, att)
+
             # global data, construct from_date >> to_date
             instance = mod()
-        except Exception:
+        except Exception as e:
+            if app.debug:
+                return bad_request('Endpoint error. Try some allowed endpoint to digest. {0}'.format(str(e)), 404)
             return bad_request('Endpoint error. Try some allowed endpoint to digest.', 404)
 
         buckets = {}

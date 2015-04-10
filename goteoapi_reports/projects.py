@@ -4,9 +4,9 @@ import time
 from flask.ext.restful import fields, marshal
 from flask_restful_swagger import swagger
 
-from ..decorators import *
+from goteoapi.decorators import *
 
-from ..base_resources import BaseList as Base, Response
+from goteoapi.base_resources import BaseList as Base, Response
 
 @swagger.model
 class ProjectContribution:
@@ -88,7 +88,7 @@ class ProjectsAPI(Base):
 
     def _get(self):
         """Get()'s method dirty work"""
-        from ..models.project import Project
+        from goteoapi.models.project import Project
 
         time_start = time.time()
         # remove not used args

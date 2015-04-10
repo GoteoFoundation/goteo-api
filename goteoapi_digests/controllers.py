@@ -2,7 +2,7 @@
 #
 # User resources
 
-from .. import api
+from goteoapi import api
 
 from .resources import DigestsListAPI
 

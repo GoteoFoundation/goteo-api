@@ -5,9 +5,8 @@ import time
 from flask.ext.restful import fields
 from flask_restful_swagger import swagger
 
-from ..decorators import ratelimit, requires_auth
-
-from ..base_resources import BaseList, Response
+from goteoapi.decorators import ratelimit, requires_auth
+from goteoapi.base_resources import BaseList, Response
 
 @swagger.model
 class MoneyResponse(Response):
@@ -56,9 +55,9 @@ class MoneyAPI(BaseList):
 
     def _get(self):
         """Get()'s method dirty work"""
-        from ..calls.models import Call
-        from ..models.project import Project
-        from ..models.invest import Invest
+        from goteoapi.calls.models import Call
+        from goteoapi.models.project import Project
+        from goteoapi.models.invest import Invest
 
         time_start = time.time()
 

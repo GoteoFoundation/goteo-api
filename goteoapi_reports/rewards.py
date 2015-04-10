@@ -5,9 +5,9 @@ import time
 from flask.ext.restful import fields, marshal
 from flask_restful_swagger import swagger
 
-from ..decorators import *
+from goteoapi.decorators import *
 
-from ..base_resources import BaseList as Base, Response
+from goteoapi.base_resources import BaseList as Base, Response
 
 @swagger.model
 class FavouriteRewards:
@@ -70,9 +70,9 @@ class RewardsAPI(Base):
 
     def _get(self):
         """Dirty work for the get() method"""
-        from ..models.reward import Reward
-        from ..models.project import Project
-        from ..models.invest import Invest
+        from goteoapi.models.reward import Reward
+        from goteoapi.models.project import Project
+        from goteoapi.models.invest import Invest
 
         time_start = time.time()
         # remove not used args

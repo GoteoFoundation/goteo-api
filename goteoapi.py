@@ -2,16 +2,20 @@
 # -*- coding: utf-8 -*-
 from flask_restful_swagger import swagger
 
-from api import app
+from goteoapi import app
+# import sys
+# sys.path.append('extend')
 
 # import sub-modules controllers
-import api.main.controllers
-import api.users.controllers
-import api.categories.controllers
-import api.licenses.controllers
-import api.digests.controllers
-# reports
-import api.reports.controllers
+# Minimal endpoints:
+__import__('goteoapi.controllers')
+
+# Additional packages
+# reports endpoints
+__import__('goteoapi_reports.controllers')
+
+# digests endpoints
+__import__('goteoapi_digests.controllers')
 
 
 #This part will not be executed under uWSGI module (nginx)
