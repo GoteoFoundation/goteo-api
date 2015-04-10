@@ -99,8 +99,8 @@ class DigestsListAPI(BaseList):
             instance = mod()
         except Exception as e:
             if app.debug:
-                return bad_request('Endpoint error. Try some allowed endpoint to digest. {0}'.format(str(e)), 404)
-            return bad_request('Endpoint error. Try some allowed endpoint to digest.', 404)
+                return bad_request('Endpoint error. Try some allowed endpoint to digest. {0}'.format(str(e)))
+            return bad_request('Endpoint error. Try some allowed endpoint to digest.')
 
         buckets = {}
         try:

@@ -14,7 +14,7 @@ from .summary import SummaryAPI
 
 # Reports home
 @app.route('/reports/', endpoint='api_reports')
-@requires_auth
+# @requires_auth
 @ratelimit()
 def reports():
     """All available endpoints for Statistics"""
