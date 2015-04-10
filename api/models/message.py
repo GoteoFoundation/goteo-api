@@ -5,7 +5,6 @@ from sqlalchemy import and_, desc, func, Integer, String, DateTime
 from sqlalchemy.ext.hybrid import hybrid_method
 
 from .project import Project, ProjectCategory
-from .location import Location, LocationItem
 from ..decorators import cacher
 
 from .. import db
@@ -28,6 +27,7 @@ class Message(db.Model):
     @hybrid_method
     def get_filters(self, **kwargs):
         from ..users.models import User
+        from ..location.models import UserLocation
 
         filters = []
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
@@ -43,10 +43,9 @@ class Message(db.Model):
             filters.append(self.project == ProjectCategory.project)
             filters.append(ProjectCategory.category.in_(kwargs['category']))
         if 'location' in kwargs and kwargs['location'] is not None:
-            filters.append(self.user == LocationItem.item)
-            filters.append(LocationItem.type == 'user')
-            subquery = Location.location_subquery(**kwargs['location'])
-            filters.append(LocationItem.id.in_(subquery))
+            filters.append(self.user == UserLocation.id)
+            subquery = UserLocation.location_subquery(**kwargs['location'])
+            filters.append(UserLocation.id.in_(subquery))
 
         return filters
 

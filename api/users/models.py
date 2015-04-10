@@ -12,7 +12,7 @@ from ..helpers import image_url, utc_from_local, user_url, get_lang
 from ..categories.models import Category, CategoryLang
 from ..models.invest import Invest
 from ..models.message import Message
-from ..models.location import Location, LocationItem
+from ..location.models import UserLocation
 
 from .. import db
 
@@ -54,26 +54,26 @@ class User(db.Model):
 
     @hybrid_property
     def filters(self):
-        return [User.hide == 0, User.active == 1]
+        return [self.hide == 0, self.active == 1]
 
     # Getting filters for this model
     @hybrid_method
     def get_filters(self, **kwargs):
         filters = self.filters
         if 'unsubscribed' in kwargs and kwargs['unsubscribed'] is not None:
-            filters = [or_(User.hide == 1, User.active == 0)]
+            filters = [or_(self.hide == 1, self.active == 0)]
 
         # Filters by goteo node
         if 'node' in kwargs and kwargs['node'] is not None:
-            filters.append(User.node.in_(kwargs['node']))
+            filters.append(self.node.in_(kwargs['node']))
         # Filters by "from date"
         # counting users created after this date
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
-            filters.append(User.created >= kwargs['from_date'])
+            filters.append(self.created >= kwargs['from_date'])
         # Filters by "to date"
         # counting users created before this date
         if 'to_date' in kwargs and kwargs['to_date'] is not None:
-            filters.append(User.created <= kwargs['to_date'])
+            filters.append(self.created <= kwargs['to_date'])
         # Filters by "project"
         # counting attached (invested or collaborated) to some project(s)
         if 'project' in kwargs and kwargs['project'] is not None:
@@ -82,20 +82,18 @@ class User(db.Model):
             sub_invest = db.session.query(Invest.user).filter(Invest.project.in_(kwargs['project']))
             # adding users "collaborated in"
             sub_message = db.session.query(Message.user).filter(Message.project.in_(kwargs['project']))
-            filters.append(or_(User.id.in_(sub_invest), User.id.in_(sub_message)))
+            filters.append(or_(self.id.in_(sub_invest), self.id.in_(sub_message)))
         # filter by user interests
         if 'category' in kwargs and kwargs['category'] is not None:
             sub_interest = db.session.query(UserInterest.user).filter(UserInterest.interest.in_(kwargs['category']))
-            filters.append(User.id.in_(sub_interest))
+            filters.append(self.id.in_(sub_interest))
         #Filter by location
         if 'location' in kwargs and kwargs['location'] is not None:
             #location ids where to search
-            subquery = Location.location_subquery(**kwargs['location'])
-            # subquery = Location.location_ids(**kwargs['location'])
-            filters.append(LocationItem.id.in_(subquery))
-            filters.append(LocationItem.type == 'user')
-            filters.append(LocationItem.item == User.id)
-            filters.append(LocationItem.locable == True)
+            subquery = UserLocation.location_subquery(**kwargs['location'])
+            filters.append(UserLocation.id.in_(subquery))
+            filters.append(UserLocation.id == self.id)
+
         #TODO: more filters, like creators, invested, etc
         return filters
 
@@ -105,7 +103,7 @@ class User(db.Model):
         """Get a valid user form id"""
         try:
             filters = list(self.filters)
-            filters.append(User.id == user_id)
+            filters.append(self.id == user_id)
             return self.query.filter(*filters).one()
         except NoResultFound:
             return None
@@ -118,7 +116,7 @@ class User(db.Model):
             limit = kwargs['limit'] if 'limit' in kwargs else 10
             page = kwargs['page'] if 'page' in kwargs else 0
             filters = list(self.get_filters(**kwargs))
-            return self.query.distinct().filter(*filters).order_by(asc(User.id)).offset(page * limit).limit(limit).all()
+            return self.query.distinct().filter(*filters).order_by(asc(self.id)).offset(page * limit).limit(limit).all()
         except NoResultFound:
             return []
 
@@ -128,7 +126,7 @@ class User(db.Model):
         """Returns the total number of valid users"""
         try:
             filters = list(self.get_filters(**kwargs))
-            count = db.session.query(func.count(distinct(User.id))).filter(*filters).scalar()
+            count = db.session.query(func.count(distinct(self.id))).filter(*filters).scalar()
             if count is None:
                 count = 0
             return count
@@ -190,10 +188,9 @@ class UserInterest(db.Model):
             filters.append(self.interest.in_(kwargs['category']))
         if 'location' in kwargs and kwargs['location'] is not None:
             # Filtra por la localización del usuario
-            locations_ids = Location.location_ids(**kwargs['location'])
-            filters.append(self.user == LocationItem.item)
-            filters.append(LocationItem.type == 'user')
-            filters.append(LocationItem.id.in_(locations_ids))
+            subquery = UserLocation.location_subquery(**kwargs['location'])
+            filters.append(self.user == UserLocation.id)
+            filters.append(UserLocation.id.in_(subquery))
         return filters
 
     # Lista de categorias

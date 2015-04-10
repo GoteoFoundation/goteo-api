@@ -46,7 +46,7 @@ class Category(db.Model):
     def get_filters(self, **kwargs):
 
         from ..models.project import Project, ProjectCategory
-        from ..models.location import Location, LocationItem
+        from ..location.models import ProjectLocation
 
         filters = self.filters
         # Join project table if filters
@@ -73,23 +73,22 @@ class Category(db.Model):
         	filters.append(Project.id.in_(kwargs['project']))
         # filter by category interests
         if 'category' in kwargs and kwargs['category'] is not None:
-            filters.append(Category.id.in_(kwargs['category']))
+            filters.append(self.id.in_(kwargs['category']))
         #Filter by location
         if 'location' in kwargs and kwargs['location'] is not None:
-            filters.append(LocationItem.type == 'project')
-            filters.append(LocationItem.item == ProjectCategory.project)
-            filters.append(LocationItem.locable == True)
-            subquery = Location.location_subquery(**kwargs['location'])
-            filters.append(LocationItem.id.in_(subquery))
+            filters.append(ProjectLocation.id == ProjectCategory.project)
+            subquery = ProjectLocation.location_subquery(**kwargs['location'])
+            filters.append(ProjectLocation.id.in_(subquery))
+
         return filters
 
     @hybrid_method
     @cacher
     def get(self, id):
-        """Get a valid category form id"""
+        """Get a valid category from id"""
         try:
             filters = list(self.filters)
-            filters.append(Category.id == id)
+            filters.append(self.id == id)
             return self.query.filter(*filters).one()
         except NoResultFound:
             return None

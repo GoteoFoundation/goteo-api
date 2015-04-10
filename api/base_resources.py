@@ -6,7 +6,9 @@ from datetime import datetime as dtdatetime
 from dateutil.parser import parse
 from flask import jsonify
 from flask.ext.restful import Resource, reqparse
+
 from helpers import *
+from . import app
 
 def date_sanitizer(data):
     d = parse(data)
@@ -123,7 +125,7 @@ class BaseList(Resource):
         if 'lang' in args and args['lang'] is not None:
             langs = []
             for l in args['lang']:
-                if config.default_db_lang != l:
+                if app.config['DEFAULT_DB_LANG'] != l:
                     langs.append(l)
 
             args['lang'] = langs

@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import func, desc, Integer, String, Float, Date
+from sqlalchemy import func, desc, Integer, String, Date
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy import or_, and_, distinct
 
-from ..helpers import image_url, utc_from_local
 from ..decorators import cacher
 
-from .location import Location, LocationItem
 from .project import Project, ProjectCategory
 from .reward import Reward
 from .message import Message
@@ -54,6 +52,9 @@ class Invest(db.Model):
     # Getting filters for this model
     @hybrid_method
     def get_filters(self, **kwargs):
+
+        from ..location.models import UserLocation
+
         filters = self.filters
         if 'is_refusal' in kwargs and kwargs['is_refusal'] is not None:
             filters.append(self.resign == True)
@@ -80,12 +81,9 @@ class Invest(db.Model):
             filters.append(ProjectCategory.category.in_(kwargs['category']))
 
         if 'location' in kwargs and kwargs['location'] is not None:
-            filters.append(self.user == LocationItem.item)
-            filters.append(LocationItem.type == 'user')
-            subquery = Location.location_subquery(**kwargs['location'])
-            filters.append(LocationItem.id.in_(subquery))
-            # filters.append(LocationItem.locable==1)
-            #
+            filters.append(self.user == UserLocation.id)
+            subquery = UserLocation.location_subquery(**kwargs['location'])
+            filters.append(UserLocation.id.in_(subquery))
 
         return filters
 

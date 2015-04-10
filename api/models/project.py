@@ -102,7 +102,8 @@ class Project(db.Model):
 
         """
         from .reward import Reward
-        from .location import Location, LocationItem
+        from ..location.models import ProjectLocation
+
         filters = [self.status.in_(self.PUBLISHED_PROJECTS)]
         # custom filters by project status
         if 'received' in kwargs and kwargs['received'] is not None:
@@ -171,11 +172,9 @@ class Project(db.Model):
             filters.append(self.id == ProjectCategory.project)
             filters.append(ProjectCategory.category.in_(kwargs['category']))
         if 'location' in kwargs and kwargs['location'] is not None:
-            subquery = Location.location_subquery(**kwargs['location'])
-            filters.append(LocationItem.type == 'project')
-            filters.append(LocationItem.item == self.id)
-            filters.append(LocationItem.locable == True)
-            filters.append(LocationItem.id.in_(subquery))
+            subquery = ProjectLocation.location_subquery(**kwargs['location'])
+            filters.append(ProjectLocation.id == self.id)
+            filters.append(ProjectLocation.id.in_(subquery))
 
         return filters
 

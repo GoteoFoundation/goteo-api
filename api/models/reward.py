@@ -11,7 +11,6 @@ from ..decorators import cacher
 
 from .icon import Icon, IconLang
 from .project import Project, ProjectCategory
-from .location import Location, LocationItem
 
 from .. import db
 
@@ -38,6 +37,7 @@ class Reward(db.Model):
     # Getting filters for this model
     @hybrid_method
     def get_filters(self, **kwargs):
+        from ..location.models import ProjectLocation
 
         filters = self.filters
         # Join project table if filters
@@ -61,11 +61,9 @@ class Reward(db.Model):
             filters.append(Project.id == ProjectCategory.project)
             filters.append(ProjectCategory.category.in_(kwargs['category']))
         if 'location' in kwargs and kwargs['location'] is not None:
-            subquery = Location.location_subquery(**kwargs['location'])
-            filters.append(LocationItem.type == 'project')
-            filters.append(LocationItem.item == self.project)
-            filters.append(LocationItem.locable == True)
-            filters.append(LocationItem.id.in_(subquery))
+            subquery = ProjectLocation.location_subquery(**kwargs['location'])
+            filters.append(ProjectLocation.id == self.project)
+            filters.append(ProjectLocation.id.in_(subquery))
 
         return filters
 

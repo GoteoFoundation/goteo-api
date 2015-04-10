@@ -52,9 +52,9 @@ class License(db.Model):
     @hybrid_method
     def get_filters(self, **kwargs):
 
-        from ..models.location import Location, LocationItem
         from ..models.reward import Reward
         from ..models.project import Project, ProjectCategory
+        from ..location.models import ProjectLocation
 
         filters = self.filters
         # Join project table if filters
@@ -84,11 +84,9 @@ class License(db.Model):
             filters.append(ProjectCategory.category.in_(kwargs['category']))
         #Filter by location
         if 'location' in kwargs and kwargs['location'] is not None:
-            filters.append(LocationItem.type == 'project')
-            filters.append(LocationItem.item == Reward.project)
-            filters.append(LocationItem.locable == True)
-            subquery = Location.location_subquery(**kwargs['location'])
-            filters.append(LocationItem.id.in_(subquery))
+            filters.append(ProjectLocation.id == Reward.project)
+            subquery = ProjectLocation.location_subquery(**kwargs['location'])
+            filters.append(ProjectLocation.id.in_(subquery))
 
         return filters
 
