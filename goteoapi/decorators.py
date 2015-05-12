@@ -24,6 +24,7 @@ def cacher(f):
     """Caches methods for model classes"""
     @wraps(f)
     def decorated(*args, **kwargs):
+        INFINITE = 365 * 24 * 3600
         key = f.__name__;
         # if args:
         #     key += '/' + json.dumps(args)
@@ -34,7 +35,9 @@ def cacher(f):
                 key += "|{0}".format(arg)
         if kwargs:
             for k in kwargs:
-                key += "|{0}={1}".format(k, kwargs[k])
+                # TODO: pickle
+                val = kwargs[k]
+                key += "|{0}={1}".format(k, val)
 
         #TODO: lower the cache time depending on the to_date parameter
                 # if present use that date as maxdate (else now)
@@ -48,7 +51,7 @@ def cacher(f):
             datemax = now
         delta = now - datemax
         if delta.days > 60:
-            timeout = None # infinite time caching
+            timeout = INFINITE # 1 year time caching
         elif delta.total_seconds() > app.config['CACHE_MIN_TIMEOUT']:
             timeout = int(delta.total_seconds())
 
@@ -58,12 +61,18 @@ def cacher(f):
         cached = cache.get(key)
         if cached:
             if app.debug:
-                app.logger.debug('--Caching--')
+                app.logger.debug('--Cached result--')
             return cached
 
         if app.debug:
-            app.logger.debug('--Not caching--')
+            app.logger.debug('--Not cached result--')
 
+        # Save cache key to a listable set
+        keys = cache.get('KEY-LIST')
+        if not keys:
+            keys = []
+        keys.append(key)
+        cache.set('KEY-LIST', keys, timeout=INFINITE)
         result = f(*args, **kwargs)
         cache.set(key, result, timeout=timeout)
 
