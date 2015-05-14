@@ -5,7 +5,7 @@ from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy import or_, and_, distinct
 
-from ..decorators import cacher
+from ..cacher import cacher
 
 from .project import Project, ProjectCategory
 from .reward import Reward

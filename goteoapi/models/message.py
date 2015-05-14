@@ -5,7 +5,7 @@ from sqlalchemy import and_, desc, func, Integer, String, DateTime
 from sqlalchemy.ext.hybrid import hybrid_method
 
 from .project import Project, ProjectCategory
-from ..decorators import cacher
+from ..cacher import cacher
 
 from .. import db
 

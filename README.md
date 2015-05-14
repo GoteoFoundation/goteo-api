@@ -1,3 +1,18 @@
+## Flask command line order:
+
+Cache clearing:
+
+    ./manage clearcache
+
+Cache renewing:
+    ./manage renewcache
+
+Crontab install for automatic cache renew:
+    ./manage crontab -i
+
+Remove crontab install:
+    ./manage crontab -r
+
 ## API de Goteo basada en flask/sqlalchemy/flask-restful
 
 TODO: revisar este archivo

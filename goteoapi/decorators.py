@@ -1,84 +1,16 @@
 # -*- coding: utf-8 -*-
 import time
 from datetime import datetime as dtdatetime
-from dateutil.parser import parse
 
 from functools import wraps, update_wrapper
 from flask import request, g, jsonify
 from flask_redis import Redis
-from flask.ext.cache import Cache
 from netaddr import IPSet, AddrFormatError
 from sqlalchemy.orm.exc import NoResultFound
 
 from .helpers import *
 
 from . import app, db
-
-cache = Cache(app)
-
-#
-# CACHER BY ARGS FILTERS
-#
-# ======================
-def cacher(f):
-    """Caches methods for model classes"""
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        INFINITE = 365 * 24 * 3600
-        key = f.__name__;
-        # if args:
-        #     key += '/' + json.dumps(args)
-        # if kwargs:
-        #     key += '/' + json.dumps(kwargs)
-        if args:
-            for arg in args:
-                key += "|{0}".format(arg)
-        if kwargs:
-            for k in kwargs:
-                # TODO: pickle
-                val = kwargs[k]
-                key += "|{0}={1}".format(k, val)
-
-        #TODO: lower the cache time depending on the to_date parameter
-                # if present use that date as maxdate (else now)
-                # if maxdate is > now() - 2 months (configurable)
-                    # timeout variable (the closer to now, the lesser the value)
-        timeout = app.config['CACHE_MIN_TIMEOUT']
-        now = dtdatetime.now()
-        if 'to_date' in kwargs and kwargs['to_date'] != None:
-            datemax = parse(kwargs['to_date'])
-        else:
-            datemax = now
-        delta = now - datemax
-        if delta.days > 60:
-            timeout = INFINITE # 1 year time caching
-        elif delta.total_seconds() > app.config['CACHE_MIN_TIMEOUT']:
-            timeout = int(delta.total_seconds())
-
-        if app.debug:
-            app.logger.debug('CACHER FOR FUNCTION: {0} TIMEOUT: {1}s KEY: {2}'.format(f.__name__, timeout, key))
-
-        cached = cache.get(key)
-        if cached:
-            if app.debug:
-                app.logger.debug('--Cached result--')
-            return cached
-
-        if app.debug:
-            app.logger.debug('--Not cached result--')
-
-        # Save cache key to a listable set
-        keys = cache.get('KEY-LIST')
-        if not keys:
-            keys = []
-        keys.append(key)
-        cache.set('KEY-LIST', keys, timeout=INFINITE)
-        result = f(*args, **kwargs)
-        cache.set(key, result, timeout=timeout)
-
-        return result
-
-    return decorated
 
 #
 # REDIS RATE LIMITER

@@ -6,7 +6,7 @@ from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import MultipleResultsFound
 
 from ..helpers import utc_from_local
-from ..decorators import cacher
+from ..cacher import cacher
 
 from .. import db
 

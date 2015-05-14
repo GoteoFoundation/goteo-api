@@ -5,8 +5,8 @@ import time
 from flask.ext.restful import fields, marshal
 from flask_restful_swagger import swagger
 
-from goteoapi.decorators import *
-
+from goteoapi.decorators import ratelimit, requires_auth
+from goteoapi.helpers import percent
 from goteoapi.base_resources import BaseList as Base, Response
 
 @swagger.model
@@ -71,7 +71,6 @@ class RewardsAPI(Base):
     def _get(self):
         """Dirty work for the get() method"""
         from goteoapi.models.reward import Reward
-        from goteoapi.models.project import Project
         from goteoapi.models.invest import Invest
 
         time_start = time.time()

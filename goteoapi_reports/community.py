@@ -5,8 +5,8 @@ import time
 from flask.ext.restful import fields, marshal
 from flask_restful_swagger import swagger
 
-from goteoapi.decorators import *
-from goteoapi.helpers import image_url, user_url
+from goteoapi.decorators import ratelimit, requires_auth
+from goteoapi.helpers import image_url, user_url, percent
 
 from goteoapi.base_resources import BaseList as Base, Response
 
@@ -132,8 +132,8 @@ class CommunityAPI(Base):
         # paypal_multidonors = Invest.multidonors_total(**dict(args, **{'method' : Invest.METHOD_PAYPAL}))
 
         categorias = UserInterest.categories(**args)
-        users_categoria1 = categorias[0].users if len(categorias) > 0 else 0
-        users_categoria2 = categorias[1].users if len(categorias) > 1 else 0
+        users_categoria1 = categorias[0]['users'] if len(categorias) > 0 else 0
+        users_categoria2 = categorias[1]['users'] if len(categorias) > 1 else 0
 
         top10_multidonors = []
         for u in Invest.multidonors_list(**args):
@@ -175,16 +175,16 @@ class CommunityAPI(Base):
                 'average-collaborators'             : Message.average_collaborators(**args),
                 'creators-donors'                   : Invest.donors_creators_total(**args),
                 'creators-collaborators'            : Message.collaborators_creators_total(**args),
-                'categories'                        : map(lambda t: {t.id:
-                                                                        {'users': t.users,
-                                                                         'id': t.id,
-                                                                         'name': t.name,
-                                                                         'percentage-users': percent(t.users, users)}
+                'categories'                        : map(lambda t: {t['id']:
+                                                                        {'users': t['users'],
+                                                                         'id': t['id'],
+                                                                         'name': t['name'],
+                                                                         'percentage-users': percent(t['users'], users)}
                                                                         }, categorias),
-                'leading-category'                  : categorias[0].id if len(categorias) > 0 else None,
+                'leading-category'                  : categorias[0]['id'] if len(categorias) > 0 else None,
                 'users-leading-category'            : users_categoria1,
                 'percentage-users-leading-category' : percent(users_categoria1, users),
-                'second-category'                   : categorias[1].id if len(categorias) > 1 else None,
+                'second-category'                   : categorias[1]['id'] if len(categorias) > 1 else None,
                 'users-second-category'             : users_categoria2,
                 'percentage-users-second-category'  : percent(users_categoria2, users),
                 'top10-multidonors'                 : top10_multidonors,

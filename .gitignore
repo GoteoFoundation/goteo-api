@@ -1,5 +1,6 @@
 /ve
 *.pyc
+*.log
 *~
 virtualenv
 config.py

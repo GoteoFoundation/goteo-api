@@ -24,9 +24,13 @@ app.config['SQLALCHEMY_DATABASE_URI'] = app.config['DB_URI']
 if app.debug:
     app.config['SQLALCHEMY_ECHO'] = True
 
-if 'CACHE_TYPE' in app.config['CACHE'] and app.config['CACHE']['CACHE_TYPE'] == 'redis':
-    if 'CACHE_KEY_PREFIX' not in app.config['CACHE']:
-        app.config['CACHE']['CACHE_KEY_PREFIX'] = 'Cacher/'
+app.config['CACHING'] = False
+if 'CACHE_TYPE' in app.config['CACHE']:
+    if app.config['CACHE']['CACHE_TYPE'] != 'null':
+        app.config['CACHING'] = True
+    if app.config['CACHE']['CACHE_TYPE'] == 'redis':
+        if 'CACHE_KEY_PREFIX' not in app.config['CACHE']:
+            app.config['CACHE']['CACHE_KEY_PREFIX'] = 'Cacher/'
 
 for i in app.config['CACHE']:
     if i.startswith('CACHE_'):
@@ -42,3 +46,6 @@ if app.debug:
 
 #api = Api(app)
 api = swagger.docs(Api(app), apiVersion=app.config['VERSION'], description=app.config['DESCRIPTION'])
+
+
+

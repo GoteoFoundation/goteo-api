@@ -7,7 +7,7 @@ from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy import or_, desc, and_, distinct
 
 from ..helpers import image_url, utc_from_local
-from ..decorators import cacher
+from ..cacher import cacher
 from .post import Post, Blog
 from .. import db
 

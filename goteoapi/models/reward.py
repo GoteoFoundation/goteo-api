@@ -7,7 +7,7 @@ from sqlalchemy.orm import aliased
 from sqlalchemy import desc,and_, distinct
 
 from ..helpers import svg_image_url, get_lang
-from ..decorators import cacher
+from ..cacher import cacher
 
 from .icon import Icon, IconLang
 from .project import Project, ProjectCategory

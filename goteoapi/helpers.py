@@ -5,7 +5,7 @@ import pytz
 from flask import jsonify
 from . import app, db
 
-def get_lang(object, field, langs=[]):
+def get_lang(obj, field, langs=[]):
     """Searchs langs alternatives on a object in the form of:
     {
         field:'original',
@@ -14,11 +14,12 @@ def get_lang(object, field, langs=[]):
         ...
     }
     """
+    print obj[field]
     if langs:
         for l in langs:
-            if object[field + '_' + l]:
-                return object[field + '_' + l]
-    return object[field]
+            if obj[field + '_' + l]:
+                return obj[field + '_' + l]
+    return obj[field]
 
 def image_url(img, size='medium', cut=False, default='la_gota.png'):
     """

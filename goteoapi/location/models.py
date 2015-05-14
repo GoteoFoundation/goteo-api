@@ -5,7 +5,7 @@ from sqlalchemy.ext.hybrid import hybrid_method
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from sqlalchemy.sql import select, column
 
-from ..decorators import cacher
+from ..cacher import cacher
 
 from .. import db
 

@@ -1,4 +1,6 @@
 #!/bin/bash
 
-source virtualenv/bin/activate
-python run.py
+CURR=$(dirname $(readlink -f $0))
+
+source "$CURR/"virtualenv/bin/activate
+python "$CURR/"run.py

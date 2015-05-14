@@ -7,7 +7,7 @@ from sqlalchemy import asc, and_, distinct
 from sqlalchemy.orm import aliased
 
 from ..helpers import get_lang
-from ..decorators import cacher
+from ..cacher import cacher
 
 from .. import db
 

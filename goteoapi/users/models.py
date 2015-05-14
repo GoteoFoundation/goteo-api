@@ -6,7 +6,7 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy import asc, desc, and_, or_, distinct
 from sqlalchemy.orm import aliased
 
-from ..decorators import cacher
+from ..cacher import cacher
 from ..helpers import image_url, utc_from_local, user_url, get_lang
 
 from ..categories.models import Category, CategoryLang
@@ -193,8 +193,7 @@ class UserInterest(db.Model):
             filters.append(UserLocation.id.in_(subquery))
         return filters
 
-    # Lista de categorias
-    # TODO: idiomas para los nombres de categorias aqui
+    # Categories list
     @hybrid_method
     @cacher
     def categories(self, **kwargs):
@@ -216,8 +215,9 @@ class UserInterest(db.Model):
 
         for u in query.filter(*filters).group_by(self.interest)\
                       .order_by(desc(func.count(self.user))):
-            # u = u._asdict()
-            u.name = get_lang(u._asdict(), 'name', kwargs['lang'])
+            u = u._asdict()
+            if 'lang' in kwargs and kwargs['lang'] is not None:
+                u['name'] = get_lang(u, 'name', kwargs['lang'])
             ret.append(u)
         if ret is None:
             ret = []
