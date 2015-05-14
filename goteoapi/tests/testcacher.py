@@ -6,10 +6,16 @@ import time, random, datetime
 from nose.tools import *
 
 from . import app
-from goteoapi.cacher import cacher, get_key_functions
+from goteoapi.cacher import cacher, cache, get_key_functions
 
 app.config['CACHE_TYPE'] = 'simple'
 app.config['CACHE_TIMEOUT'] = 300
+keylist = cache.get('KEY-LIST')
+
+
+def teardown():
+    cache.set('KEY-LIST', keylist)
+
 
 @cacher
 def get_simple(num="0"):
@@ -70,3 +76,5 @@ def test_static_methods():
 #     assert len(key_list) == 1
 #     for f, args, kargs in key_list:
 #         assert "1" == f(*args, **kargs)
+
+

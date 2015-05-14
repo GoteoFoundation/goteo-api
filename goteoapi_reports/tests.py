@@ -78,3 +78,18 @@ def test_rewards():
     eq_(len(set(map(lambda x: str(x), resp.keys())) - set(fields.keys())) >= 0, True)
     eq_(rv.status_code, 200)
 
+def test_summary():
+    from .summary import SummaryResponse
+    rv = test_app.get('/reports/summary/')
+    check_content_type(rv.headers)
+    resp = json.loads(rv.data)
+
+    fields = SummaryResponse.resource_fields
+    if 'time-elapsed' in fields:
+        del fields['time-elapsed']
+    if 'time-elapsed' in resp:
+        del resp['time-elapsed']
+
+    eq_(len(set(map(lambda x: str(x), resp.keys())) - set(fields.keys())) >= 0, True)
+    eq_(rv.status_code, 200)
+
