@@ -2,16 +2,26 @@
 
 Cache clearing:
 
-    ./manage clearcache
+    ./console clearcache
 
 Cache renewing:
-    ./manage renewcache
+    ./console renewcache
 
 Crontab install for automatic cache renew:
-    ./manage crontab -i
+    ./console crontab -i
 
 Remove crontab install:
-    ./manage crontab -r
+    ./console crontab -r
+
+## Run tests:
+
+All tests at once (verbose):
+    /run-tests.sh -v
+
+Specific tests: (verbose):
+    /run-tests.sh goteoapi -v
+
+Tests uses [nosetests](https://nose.readthedocs.org). Same nosetests command arguments applies to run-tests.sh
 
 ## API de Goteo basada en flask/sqlalchemy/flask-restful
 

@@ -24,12 +24,12 @@ def cacher(f):
 
         INFINITE = 365 * 24 * 3600
         key = f.__name__;
-        # if args:
-        #     key += '/' + json.dumps(args)
-        # if kwargs:
-        #     key += '/' + json.dumps(kwargs)
         if args:
             for arg in args:
+                if inspect.isclass(arg):
+                    if not hasattr(arg, '__class__'):
+                        arg = "<class '{0}'>".format(arg)
+                    # print "ARG:", arg
                 key += "|{0}".format(arg)
         if kwargs:
             for k in kwargs:
@@ -87,23 +87,25 @@ def get_key_parts(key):
     # print key
     args = key.split('|')
     _func = args.pop(0)
-    _clas = args.pop(0)
+    _clas = args[0]
     _clas = re.search("\<class '([a-zA-Z0-9\.\_]+)'\>", _clas)
-    args = []
-    kargs = {}
+    if _clas and _clas.group(1):
+        _clas = _clas.group(1)
+        args.pop(0)
+    else:
+        _clas = None
+
+    _args = []
+    _kargs = {}
     if args:
         for i in args:
             if '=' in i:
                 (k, v) = i.split('=')
-                kargs[k] = v
+                _kargs[k] = v
             else:
-                args.append(v)
-    # print kargs
-    if _clas and _clas.group(1):
-        _clas = _clas.group(1)
-    else:
-        _clas = None
-    return (_func, _clas, args, kargs)
+                _args.append(i)
+    print _clas, _func, _args, _kargs
+    return (_clas, _func, _args, _kargs)
 
 def get_key_functions(keys):
     """Returns a list with functions and parameters (ready to execute) associated with the keys in cache"""
@@ -118,15 +120,23 @@ def get_key_functions(keys):
             continue
         if app.debug:
             app.logger.debug("PROCESSING Key '{0}' with timeout {1}  about to expire in {2} seconds".format(key, timeout, timeout - delta.total_seconds()))
-        (func, clas, args, kargs) = get_key_parts(key)
+        (clas, func, args, kargs) = get_key_parts(key)
         # Retrieving content from class
-        parts = clas.split('.')
+        if clas:
+            parts = clas.split('.')
+            mod = importlib.import_module('.'.join(parts[:-1]))
 
-        mod = importlib.import_module('.'.join(parts[:-1]))
-        if inspect.ismodule(mod):
-            mod = getattr(mod, parts[-1])
-            instance = getattr(mod, func)
-            funcs.append((instance, args, dict(kargs)))
-            # Execute function
-            # instance(*args, **dict(kargs))
+            if inspect.ismodule(mod):
+                mod = getattr(mod, parts[-1])
+                instance = getattr(mod, func)
+                funcs.append((instance, args, dict(kargs)))
+        else:
+
+            if func in locals():
+                funcs.append((locals()[func], args, dict(kargs)))
+            elif func in globals():
+                funcs.append((globals()[func], args, dict(kargs)))
+            else:
+                funcs.append((func, args, dict(kargs)))
+
     return funcs

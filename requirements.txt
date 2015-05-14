@@ -24,6 +24,3 @@ wsgiref
 netaddr
 flask-cache
 nose
-termcolor
-Flask-Script
-python-crontab

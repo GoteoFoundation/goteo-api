@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-    manage
+    goteoapi_cli
     ~~~~~~~~
-    Useful command line orders
+    goteoapi console extension application package
+
+    Adds some command line tools such as:
+
+    clearcache
+    renewcache
+    crontab install/remove
 """
 import os
 from flask.ext.script import Manager
@@ -26,8 +32,6 @@ def clearcache():
 def renewcache():
     """Renew cached keys by executing the functions with stored params"""
     app.config['BYPASS_CACHING'] = True
-    import datetime
-    # keys = {"categories|<class 'goteoapi.users.models.UserInterest'>":(50, datetime.datetime.now())}
     keys = cache.get('KEY-LIST')
     key_list = []
     if keys:
@@ -61,8 +65,4 @@ def crontab(install=False, remove=False):
 
     cron.write()
     print "{0}\n{1}".format(colored('CURRENT CRONTAB:', 'green'), cron)
-
-
-if __name__ == "__main__":
-    manager.run()
 
