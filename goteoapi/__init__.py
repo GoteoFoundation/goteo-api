@@ -45,8 +45,9 @@ if app.debug:
 else:
     # loggin errors to a file if not debugging
     import logging, os
-    logging.basicConfig(filename='error.log',level=logging.ERROR)
-    # handler = logging.FileHandler(os.path.dirname(os.path.realpath(__file__)) + '/errors.log')
+    f = os.path.dirname(os.path.realpath(__file__)) + '/errors.log'
+    logging.basicConfig(filename=f, level=logging.ERROR)
+    # handler = logging.FileHandler(f)
     # # handler.setLevel(logging.WARNING)
     # handler.setLevel(logging.ERROR)
     # app.logger.addHandler(handler)
