@@ -14,7 +14,6 @@ def get_lang(obj, field, langs=[]):
         ...
     }
     """
-    print obj[field]
     if langs:
         for l in langs:
             if obj[field + '_' + l]:
