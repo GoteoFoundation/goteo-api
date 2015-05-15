@@ -107,8 +107,9 @@ class Reward(db.Model):
         ret = []
         for u in query.filter(*filters).group_by(self.icon).order_by(desc('total')):
             u = u._asdict()
-            u['name'] = get_lang(u, 'name', kwargs['lang'])
-            u['description'] = get_lang(u, 'description', kwargs['lang'])
+            if 'lang' in kwargs and kwargs['lang'] is not None:
+                u['name'] = get_lang(u, 'name', kwargs['lang'])
+                u['description'] = get_lang(u, 'description', kwargs['lang'])
             ret.append(u)
         if ret is None:
             ret = []
