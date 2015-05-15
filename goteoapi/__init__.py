@@ -42,7 +42,14 @@ db = SQLAlchemy(app)
 if app.debug:
     from .decorators import debug_time
     db.session.query = debug_time(db.session.query)
-
+else:
+    # loggin errors to a file if not debugging
+    import logging, os
+    logging.basicConfig(filename='error.log',level=logging.ERROR)
+    # handler = logging.FileHandler(os.path.dirname(os.path.realpath(__file__)) + '/errors.log')
+    # # handler.setLevel(logging.WARNING)
+    # handler.setLevel(logging.ERROR)
+    # app.logger.addHandler(handler)
 
 #api = Api(app)
 api = swagger.docs(Api(app), apiVersion=app.config['VERSION'], description=app.config['DESCRIPTION'])
