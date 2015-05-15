@@ -6,6 +6,7 @@ from functools import wraps
 from flask.ext.cache import Cache
 import pickle
 from .helpers import *
+from .decorators import redis
 
 from . import app
 
@@ -21,29 +22,51 @@ INFINITE = 365 * 24 * 3600
 # ======================
 def get_key_list():
     """List all cached keys"""
-    keys = cache.get('KEY-LIST')
+    if redis:
+        try:
+            _keys = redis.keys(app.config['CACHE_KEY_PREFIX'] + 'KEY-ITEM/*')
+            keys = {}
+            for key in _keys:
+                keys[key[len(app.config['CACHE_KEY_PREFIX'] + 'KEY-ITEM/'):]] = pickle.loads(redis.get(key))
+                # print "KEY", len(app.config['CACHE_KEY_PREFIX'] + 'KEY-ITEM/'), key[len(app.config['CACHE_KEY_PREFIX'] + 'KEY-ITEM/'):]
+                # val = pickle.loads(redis.get(key))
+                # print "VAL", val[1]
+        except:
+            pass
+    else:
+        keys = cache.get('KEY-LIST')
+
     if not keys:
         return {}
     return keys
 
-def save_key_list(key_list):
-    """Saves a cached key list"""
-    if isinstance(key_list, dict):
-        return cache.set('KEY-LIST', key_list)
-    return False
 
 def add_key_list(key, timeout, time):
     """Save cache key to a listable set"""
+    val = (timeout, time)
+    if redis:
+        # A more efficient way to touch a single key instead of retrieving the full set
+        return redis.set(app.config['CACHE_KEY_PREFIX'] + 'KEY-ITEM/' + key, pickle.dumps(val))
+
     keys = get_key_list()
-    keys[key] = (timeout, time)
+    keys[key] = val
     return cache.set('KEY-LIST', keys, timeout=INFINITE)
 
 def renew_key_list(key):
-    keys = get_key_list()
-    if key in keys:
-        (timeout, time) = keys[key]
-        keys[key] = (timeout, dtdatetime.now())
-        return True
+    if redis:
+        # A more efficient way to touch a single key instead of retrieving the full set
+        try:
+            (timeout, time) = pickle.loads(redis.get(app.config['CACHE_KEY_PREFIX'] + 'KEY-ITEM/' + key))
+        except:
+            pass
+    else:
+        keys = get_key_list()
+        if key in keys:
+            (timeout, time) = keys[key]
+
+    if timeout and time:
+        return add_key_list(key, timeout, dtdatetime.now())
+
     return False
 
 def cacher(f):

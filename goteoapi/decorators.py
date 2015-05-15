@@ -93,7 +93,7 @@ def check_auth(username, password):
                     if remote_ip in IPSet(user['remotes']):
                         return True
                 except AddrFormatError:
-                    "continue"
+                    pass
 
             else:
                 return True
@@ -119,7 +119,7 @@ def requires_auth(f):
             return f(*args, **kwargs)
 
         auth = request.authorization
-        msg = 'You need a key in order to use our API. Get one on www.goteo.org!'
+        msg = 'You need a key in order to use this API. Get one on www.goteo.org!'
         if auth:
             ok = check_auth(auth.username, auth.password)
             if(ok is True):

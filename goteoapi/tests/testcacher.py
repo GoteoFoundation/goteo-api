@@ -2,19 +2,19 @@
 #
 # Minimal tests for main routes
 #
-import time, random, datetime
+import random, datetime
 from nose.tools import *
 
 from . import app
-from goteoapi.cacher import cacher, cache, get_key_functions, get_key_list, save_key_list
+from goteoapi.cacher import cacher, cache, get_key_functions, get_key_list
 
 app.config['CACHE_TYPE'] = 'simple'
 app.config['CACHE_TIMEOUT'] = 300
-keylist = get_key_list()
 
+cache.clear()
 
 def teardown():
-    save_key_list(keylist)
+    cache.clear()
     app.config['CACHING'] = False
 
 
