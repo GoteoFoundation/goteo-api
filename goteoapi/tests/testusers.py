@@ -26,7 +26,7 @@ FILTERS = [
 ]
 def test_users():
     for f in FILTERS:
-        rv = test_app.get('/users/?' + f)
+        rv = test_app.get('/users/' , query_string=f)
         check_content_type(rv.headers)
         resp = json.loads(rv.data)
         print resp
