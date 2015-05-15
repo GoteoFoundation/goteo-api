@@ -23,8 +23,6 @@ __import__('goteoapi_digests.controllers')
 
 #This part will not be executed under uWSGI module (nginx)
 if __name__ == '__main__':
-    app.debug = True
-
     if app.debug:
         import os
         module_path = os.path.dirname(swagger.__file__)

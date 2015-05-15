@@ -94,25 +94,21 @@ def cacher(f):
         elif delta.total_seconds() > app.config['CACHE_MIN_TIMEOUT']:
             timeout = int(delta.total_seconds())
 
-        if app.debug:
-            app.logger.debug('CACHER FOR FUNCTION: {0} TIMEOUT: {1}s KEY: {2}'.format(f.__name__, timeout, key))
+        app.logger.debug('CACHER FOR FUNCTION: {0} TIMEOUT: {1}s KEY: {2}'.format(f.__name__, timeout, key))
 
         cached = cache.get(key)
-        if cached:
+        if cached is not None:
             if 'BYPASS_CACHING' in app.config and app.config['BYPASS_CACHING'] and app.debug:
                 app.logger.debug('--Bypassing caching result---')
             else:
-                if app.debug:
-                    app.logger.debug('--Cached result--')
+                app.logger.debug('--Cached result--')
                 return cached
 
-        if app.debug:
-            app.logger.debug('--Real result (not cached)--')
+        app.logger.debug('--Real result (not cached)--')
 
         add_key_list(key, timeout, now)
         result = f(*args, **kwargs)
         cache.set(key, result, timeout=timeout)
-
         return result
 
     return decorated
@@ -130,8 +126,8 @@ def get_key_parts(key):
             func = getattr(clas, func)
         return (clas, func, args, kwargs)
     except Exception as e:
-        if app.debug:
-            app.logger.debug("ERROR DECODING Key '{0}' Exception {1}".format(key, str(e)))
+        app.logger.debug("ERROR DECODING Key '{0}' Exception {1}".format(key, str(e)))
+
     return False
 
 def get_key_functions(keys, force=False):
@@ -142,16 +138,15 @@ def get_key_functions(keys, force=False):
         # print key, timeout, time.isoformat(), delta.total_seconds(), timeout / delta.total_seconds(), delta.total_seconds() / timeout
         # if delta.total_seconds() / timeout < 0.75 and (timeout - delta.total_seconds()) > 60:
         if not force and (timeout - delta.total_seconds()) > 60:
-            if app.debug:
-                app.logger.debug("BYPASSING Key '{0}' with timeout {1} still have {2} seconds to expire".format(key, timeout, timeout - delta.total_seconds()))
+            app.logger.debug("BYPASSING Key '{0}' with timeout {1} still have {2} seconds to expire".format(key, timeout, timeout - delta.total_seconds()))
             continue
-        if app.debug:
-            app.logger.debug("PROCESSING Key '{0}' with timeout {1}  about to expire in {2} seconds".format(key, timeout, timeout - delta.total_seconds()))
+        app.logger.debug("PROCESSING Key '{0}' with timeout {1}  about to expire in {2} seconds".format(key, timeout, timeout - delta.total_seconds()))
+
         key_parts = get_key_parts(key)
         if key_parts is False:
-            if app.debug:
-                app.logger.debug("INVALID KEY '{0}' BYPASSING...".format(key))
+            app.logger.debug("INVALID KEY '{0}' BYPASSING...".format(key))
             continue
+
         (clas, func, args, kwargs) = key_parts
 
         if clas:

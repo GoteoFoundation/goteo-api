@@ -1,3 +1,4 @@
+import sys
 from .. import app
 from nose.tools import eq_
 
@@ -12,6 +13,9 @@ test_app = app.test_client()
 
 __import__('goteoapi.controllers')
 
+if '-v' in sys.argv:
+    app.debug = True
+    app.config['DEBUG'] = True
 
 def check_content_type(headers):
   eq_(headers['Content-Type'], 'application/json')

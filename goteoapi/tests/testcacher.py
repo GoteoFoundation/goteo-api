@@ -6,7 +6,7 @@ import random, datetime
 from nose.tools import *
 
 from . import app
-from goteoapi.cacher import cacher, cache, get_key_functions, get_key_list
+from goteoapi.cacher import cacher, cache, get_key_functions
 
 app.config['CACHE_TYPE'] = 'simple'
 app.config['CACHE_TIMEOUT'] = 300
@@ -19,6 +19,14 @@ def teardown():
 
 
 # Test Functions/Classes
+
+
+alt = 1
+@cacher
+def get_alt():
+    global alt
+    alt = 1 - alt
+    return alt
 
 @cacher
 def get_simple(num=0):
@@ -44,11 +52,15 @@ class Dummy():
 def test_non_cacher():
     app.config['CACHING'] = False
     eq_(get_random() == get_random(), False)
+    eq_( get_alt() , 0)
+    eq_( get_alt() , 1)
 
 def test_cacher():
     app.config['CACHING'] = True
     eq_( get_random() , get_random())
     eq_( get_simple(num=1) , get_simple(1))
+    eq_( get_alt() , 0)
+    eq_( get_alt() , 0)
 
 def test_class_non_cacher():
     app.config['CACHING'] = False
