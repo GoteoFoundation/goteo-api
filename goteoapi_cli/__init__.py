@@ -52,17 +52,19 @@ def crontab(install=False, remove=False):
         cprint('Installing crontab', 'yellow')
     else:
         cprint('Please specifiy --install (-i) or --remove (-r) argument', 'red')
-        return
-    command = os.getcwd() + '/manage.sh'
-    cron  = CronTab(user=True)
-    # Removes current crontab
-    _iter = cron.find_command(command)
-    for job in _iter:
-        cron.remove(job)
-    # Install job
-    if install:
-        job  = cron.new(command+  ' renewcache > ' + os.getcwd() + '/crontab.log 2>&1')
 
-    cron.write()
+    command = os.getcwd() + '/console'
+    cron  = CronTab(user=True)
+
+    if install or remove:
+        # Removes current crontab
+        _iter = cron.find_command(command)
+        for job in _iter:
+            cron.remove(job)
+        # Install job
+        if install:
+            job  = cron.new(command+  ' renewcache > ' + os.getcwd() + '/crontab.log 2>&1')
+        cron.write()
+
     print "{0}\n{1}".format(colored('CURRENT CRONTAB:', 'green'), cron)
 
