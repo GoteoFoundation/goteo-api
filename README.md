@@ -16,10 +16,10 @@ Remove crontab install:
 ## Run tests:
 
 All tests at once (verbose):
-    /run-tests.sh -v
+    /run-tests -v
 
-Specific tests: (verbose):
-    /run-tests.sh goteoapi -v
+Specific tests: (verbose, with echoes):
+    /run-tests goteoapi -v -s
 
 Tests uses [nosetests](https://nose.readthedocs.org). Same nosetests command arguments applies to run-tests.sh
 

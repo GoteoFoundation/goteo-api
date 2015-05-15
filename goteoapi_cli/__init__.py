@@ -48,7 +48,7 @@ def renewcache(execute=False, force=False):
     else:
         cprint("No keys to be renewed", 'red')
     if not force:
-        cprint("Run with option --force (-f) to force renew of non expired keys", 'yellow')
+        cprint("Run with option --force (-f) to force renew of non close-to-expire keys", 'yellow')
 
 @manager.command
 def crontab(install=False, remove=False):

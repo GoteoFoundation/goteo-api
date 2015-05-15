@@ -6,16 +6,19 @@ import time, random, datetime
 from nose.tools import *
 
 from . import app
-from goteoapi.cacher import cacher, cache, get_key_functions
+from goteoapi.cacher import cacher, cache, get_key_functions, get_key_list, save_key_list
 
 app.config['CACHE_TYPE'] = 'simple'
 app.config['CACHE_TIMEOUT'] = 300
-keylist = cache.get('KEY-LIST')
+keylist = get_key_list()
 
 
 def teardown():
-    cache.set('KEY-LIST', keylist)
+    save_key_list(keylist)
+    app.config['CACHING'] = False
 
+
+# Test Functions/Classes
 
 @cacher
 def get_simple(num=0):
@@ -57,8 +60,6 @@ def test_class_cacher():
     eq_( Dummy.get_random() , Dummy.get_random())
 
 def test_static_methods():
-    import pickle
-    print '['+pickle.dumps(('get_simple', 2)).replace("\n", '\\n')+']'
     keys = {
             "(S'get_simple'\np0\n(I1\ntp1\n(dp2\ntp3\n.": (50, datetime.datetime.now()),
             "(S'get_simple'\np0\n(cgoteoapi.tests.testcacher\nDummy\np1\nI1\ntp2\n(dp3\ntp4\n.": (50, datetime.datetime.now()),

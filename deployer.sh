@@ -12,5 +12,5 @@ pip install -r goteoapi_*/requirements.txt
 if [ $? == "0" ]; then
 	echo -e "\e[32mDone, if you want to execute the Flask application manually please run this commands:\e[0m"
     echo "source virtualenv/bin/activate"
-	echo "./run.sh"
+	echo "./run"
 fi

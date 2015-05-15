@@ -20,11 +20,17 @@ INFINITE = 365 * 24 * 3600
 #
 # ======================
 def get_key_list():
-    """List all cahed keys"""
+    """List all cached keys"""
     keys = cache.get('KEY-LIST')
     if not keys:
         return {}
     return keys
+
+def save_key_list(key_list):
+    """Saves a cached key list"""
+    if isinstance(key_list, dict):
+        return cache.set('KEY-LIST', key_list)
+    return False
 
 def add_key_list(key, timeout, time):
     """Save cache key to a listable set"""
@@ -39,6 +45,7 @@ def renew_key_list(key):
         keys[key] = (timeout, dtdatetime.now())
         return True
     return False
+
 def cacher(f):
     """Caches methods for model classes"""
     @wraps(f)
