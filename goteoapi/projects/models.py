@@ -3,8 +3,8 @@
 #from flask.ext.sqlalchemy import Pagination
 from sqlalchemy import func, Integer, String, Text, Date
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
-from sqlalchemy.orm.exc import MultipleResultsFound
-from sqlalchemy import or_, desc, and_, distinct
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from sqlalchemy import or_, asc, desc, and_, distinct
 
 from ..helpers import image_url, utc_from_local
 from ..cacher import cacher
@@ -78,6 +78,12 @@ class Project(db.Model):
     def date_failed(self):
         return utc_from_local(self.failed)
 
+
+    @hybrid_property
+    def filters(self):
+        "Basic filters"
+        return [self.status.in_(self.PUBLISHED_PROJECTS)]
+
     # Getting filters for this model
     @hybrid_method
     def get_filters(self, **kwargs):
@@ -104,7 +110,7 @@ class Project(db.Model):
         from ..models.reward import Reward
         from ..location.models import ProjectLocation
 
-        filters = [self.status.in_(self.PUBLISHED_PROJECTS)]
+        filters = self.filters
         # custom filters by project status
         if 'received' in kwargs and kwargs['received'] is not None:
             # Any project with a "updated" date set is a RECEIVED project
@@ -177,6 +183,30 @@ class Project(db.Model):
             filters.append(ProjectLocation.id.in_(subquery))
 
         return filters
+
+
+    @hybrid_method
+    @cacher
+    def get(self, project_id):
+        """Get a valid project form id"""
+        try:
+            filters = list(self.filters)
+            filters.append(self.id == project_id)
+            return self.query.filter(*filters).one()
+        except NoResultFound:
+            return None
+
+    @hybrid_method
+    @cacher
+    def list(self, **kwargs):
+        """Get a list of valid projects"""
+        try:
+            limit = kwargs['limit'] if 'limit' in kwargs else 10
+            page = kwargs['page'] if 'page' in kwargs else 0
+            filters = list(self.get_filters(**kwargs))
+            return self.query.distinct().filter(*filters).order_by(asc(self.id)).offset(page * limit).limit(limit).all()
+        except NoResultFound:
+            return []
 
     @hybrid_method
     @cacher

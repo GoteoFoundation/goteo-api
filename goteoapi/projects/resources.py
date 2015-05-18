@@ -19,8 +19,9 @@ class ProjectResponse(Response):
         "name"              : fields.String,
         "node"              : fields.String,
         "date-created"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
-        "profile-url"       : fields.String,
-        "profile-image-url" : fields.String,
+        "date-published"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
+        "project-url"       : fields.String,
+        "project-image-url" : fields.String,
     }
 
     required = resource_fields.keys()
@@ -35,9 +36,10 @@ class ProjectCompleteResponse(Response):
         "name"              : fields.String,
         "node"              : fields.String,
         "date-created"      : fields.DateTime(dt_format='rfc822'),
+        "date-published"    : fields.DateTime(dt_format='rfc822'),
         # "date-updated"    : fields.DateTime(dt_format='rfc822'),
-        "profile-url"       : fields.String,
-        "profile-image-url" : fields.String,
+        "project-url"       : fields.String,
+        "project-image-url" : fields.String,
     }
 
     required = resource_fields.keys()
@@ -85,15 +87,15 @@ class ProjectsListAPI(BaseList):
         """Get()'s method dirty work"""
 
         time_start = time.time()
-        # For privacy, removing location filter ?
-        args = self.parse_args(remove=('location'))
+        args = self.parse_args()
 
         items = []
-        for u in Project.list(**args):
-            item = marshal(u, ProjectResponse.resource_fields)
-            item['date-created'] = u.date_created
-            item['profile-url'] = u.profile_url
-            item['profile-image-url'] = u.profile_image_url
+        for p in Project.list(**args):
+            item = marshal(p, ProjectResponse.resource_fields)
+            item['date-created'] =p.date_created
+            item['date-published'] = p.date_published
+            # item['project-url'] = p.project_url
+            # item['project-image-url'] = p.project_image_url
             items.append( item )
 
         res = ProjectsListResponse(
@@ -132,12 +134,13 @@ class ProjectAPI(BaseItem):
     def _get(self, project_id):
         """Get()'s method dirty work"""
         time_start = time.time()
-        u = Project.get(project_id)
-        item = marshal(u, ProjectCompleteResponse.resource_fields)
-        if u != None:
-            item['date-created'] = u.date_created
-            item['profile-url'] = u.profile_url
-            item['profile-image-url'] = u.profile_image_url
+        p = Project.get(project_id)
+        item = marshal(p, ProjectCompleteResponse.resource_fields)
+        if p != None:
+            item['date-created'] = p.date_created
+            item['date-published'] = p.date_published
+            # item['project-url'] = p.project_url
+            # item['project-image-url'] = p.project_image_url
 
         res = ProjectCompleteResponse(
             starttime = time_start,

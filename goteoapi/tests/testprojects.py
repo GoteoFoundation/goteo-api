@@ -29,7 +29,6 @@ def test_projects():
         rv = test_app.get('/projects/' , query_string=f)
         check_content_type(rv.headers)
         resp = json.loads(rv.data)
-        print resp
         fields = ListResponse.resource_fields
         if 'time-elapsed' in fields:
             del fields['time-elapsed']
@@ -39,17 +38,22 @@ def test_projects():
         eq_(len(set(map(lambda x: str(x), resp.keys())) - set(fields.keys())) >= 0, True)
         eq_(rv.status_code, 200)
 
-# def test_project():
-#     rv = test_app.get('/projects/goteo/')
-#     check_content_type(rv.headers)
-#     resp = json.loads(rv.data)
-#     print resp
-#     fields = Response.resource_fields
-#     if 'time-elapsed' in fields:
-#         del fields['time-elapsed']
-#     if 'time-elapsed' in resp:
-#         del resp['time-elapsed']
+def test_project_no_slash():
+    rv = test_app.get('/projects/goteo')
+    assert 'text/html' in rv.headers['Content-Type']
+    assert 'location' in rv.headers, "%r not in %r" % ('location', rv.headers)
+    assert '/projects/goteo/' in rv.headers['Location'], "%r not in %r" % ('/projects/goteo/', rv.headers['Location'])
 
-#     eq_(len(set(map(lambda x: str(x), resp.keys())) - set(fields.keys())) >= 0, True)
-#     eq_(rv.status_code, 200)
+def test_project():
+    rv = test_app.get('/projects/160metros/')
+    check_content_type(rv.headers)
+    resp = json.loads(rv.data)
+    fields = Response.resource_fields
+    if 'time-elapsed' in fields:
+        del fields['time-elapsed']
+    if 'time-elapsed' in resp:
+        del resp['time-elapsed']
+
+    eq_(len(set(map(lambda x: str(x), resp.keys())) - set(fields.keys())) >= 0, True)
+    eq_(rv.status_code, 200)
 

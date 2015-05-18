@@ -38,17 +38,24 @@ def test_users():
         eq_(len(set(map(lambda x: str(x), resp.keys())) - set(fields.keys())) >= 0, True)
         eq_(rv.status_code, 200)
 
-# def test_user():
-#     rv = test_app.get('/users/goteo/')
-#     check_content_type(rv.headers)
-#     resp = json.loads(rv.data)
-#     print resp
-#     fields = Response.resource_fields
-#     if 'time-elapsed' in fields:
-#         del fields['time-elapsed']
-#     if 'time-elapsed' in resp:
-#         del resp['time-elapsed']
+def test_user_no_slash():
+    rv = test_app.get('/users/goteo')
+    assert 'text/html' in rv.headers['Content-Type']
+    assert 'location' in rv.headers, "%r not in %r" % ('location', rv.headers)
+    assert '/users/goteo/' in rv.headers['Location'], "%r not in %r" % ('/users/goteo/', rv.headers['Location'])
 
-#     eq_(len(set(map(lambda x: str(x), resp.keys())) - set(fields.keys())) >= 0, True)
-#     eq_(rv.status_code, 200)
+    print rv.headers
+
+def test_user():
+    rv = test_app.get('/users/goteo/')
+    check_content_type(rv.headers)
+    resp = json.loads(rv.data)
+    fields = Response.resource_fields
+    if 'time-elapsed' in fields:
+        del fields['time-elapsed']
+    if 'time-elapsed' in resp:
+        del resp['time-elapsed']
+
+    eq_(len(set(map(lambda x: str(x), resp.keys())) - set(fields.keys())) >= 0, True)
+    eq_(rv.status_code, 200)
 
