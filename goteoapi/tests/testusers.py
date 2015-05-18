@@ -15,7 +15,7 @@ FILTERS = [
 'page=1&limit=1',
 'lang=ca&lang=fr',
 'category=2',
-'node=barcelona',
+'node=barcelona&lang=en&lang=ca',
 'from_date=2014-01-01',
 'to_date=2014-12-31',
 'from_date=2014-01-01&to_date=2014-12-31',
@@ -38,13 +38,18 @@ def test_users():
         eq_(len(set(map(lambda x: str(x), resp.keys())) - set(fields.keys())) >= 0, True)
         eq_(rv.status_code, 200)
 
+def test_user_no_users():
+    rv = test_app.get('/users/', query_string='category=0')
+    eq_(rv.status_code, 404)
+    rv = test_app.get('/users/--i-dont-exits--/')
+    eq_(rv.status_code, 404)
+
 def test_user_no_slash():
     rv = test_app.get('/users/goteo')
+    eq_(rv.status_code, 301)
     assert 'text/html' in rv.headers['Content-Type']
     assert 'location' in rv.headers, "%r not in %r" % ('location', rv.headers)
     assert '/users/goteo/' in rv.headers['Location'], "%r not in %r" % ('/users/goteo/', rv.headers['Location'])
-
-    print rv.headers
 
 def test_user():
     rv = test_app.get('/users/goteo/')
