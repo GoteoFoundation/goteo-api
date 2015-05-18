@@ -34,12 +34,14 @@ class ProjectCompleteResponse(Response):
     resource_fields = {
         "id"                : fields.String,
         "name"              : fields.String,
+        "description-short" : fields.String,
         "node"              : fields.String,
         "date-created"      : fields.DateTime(dt_format='rfc822'),
         "date-published"    : fields.DateTime(dt_format='rfc822'),
         # "date-updated"    : fields.DateTime(dt_format='rfc822'),
         "project-url"       : fields.String,
         "project-image-url" : fields.String,
+        "project-video-url" : fields.String,
     }
 
     required = resource_fields.keys()
@@ -94,8 +96,8 @@ class ProjectsListAPI(BaseList):
             item = marshal(p, ProjectResponse.resource_fields)
             item['date-created'] =p.date_created
             item['date-published'] = p.date_published
-            # item['project-url'] = p.project_url
-            # item['project-image-url'] = p.project_image_url
+            item['project-url'] = project_url(p.id)
+            item['project-image-url'] = image_url(p.image, 'thumb', False)
             items.append( item )
 
         res = ProjectsListResponse(
@@ -139,8 +141,10 @@ class ProjectAPI(BaseItem):
         if p != None:
             item['date-created'] = p.date_created
             item['date-published'] = p.date_published
-            # item['project-url'] = p.project_url
-            # item['project-image-url'] = p.project_image_url
+            item['description-short'] = p.subtitle
+            item['project-video-url'] = p.media
+            item['project-image-url'] = image_url(p.image, 'big', False)
+            item['project-url'] = project_url(p.id)
 
         res = ProjectCompleteResponse(
             starttime = time_start,
