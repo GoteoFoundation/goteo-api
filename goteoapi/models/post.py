@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 #from flask.ext.sqlalchemy import Pagination
-from sqlalchemy import Integer, String, Text, Date
+from sqlalchemy import Integer, String, Text, Date, Boolean
 
 from .. import db
 
@@ -12,7 +12,7 @@ class Blog(db.Model):
     id = db.Column('id', Integer, primary_key=True)
     type = db.Column('type', String(10))
     owner = db.Column('owner', String(50))
-    active = db.Column('active', Integer)
+    active = db.Column('active', Boolean)
 
     def __repr__(self):
         return '<Blog(%d) %s %s>' % (self.id, self.type, self.owner)

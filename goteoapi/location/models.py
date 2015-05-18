@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import func, Integer, String, DateTime, Float
+from sqlalchemy import func, Integer, String, DateTime, Float, Boolean
 from sqlalchemy.ext.hybrid import hybrid_method
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from sqlalchemy.sql import select, column
@@ -16,7 +16,7 @@ class ItemLocation(object):
     latitude     = db.Column('latitude', Float)
     longitude    = db.Column('longitude', Float)
     method       = db.Column('method', String(50))
-    locable      = db.Column('locable', Integer)
+    locable      = db.Column('locable', Boolean)
     city         = db.Column('city', String(255))
     region       = db.Column('region', String(255))
     country      = db.Column('country', String(255))
@@ -29,10 +29,12 @@ class ItemLocation(object):
 
     @hybrid_method
     @cacher
-    def get(self, id):
+    def get(self, id, locable=True):
         """Get a valid Location Item from id"""
         try:
-            return self.query.get(id)
+            if locable is None:
+                return self.query.get(id)
+            return self.query.filter(self.id == id, self.locable == locable).one()
         except NoResultFound:
             return None
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import func, Integer, String, Date, DateTime
+from sqlalchemy import func, Integer, String, Date, DateTime, Boolean
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy import asc, desc, and_, or_, distinct
@@ -24,8 +24,8 @@ class User(db.Model):
     name = db.Column('name', String(100))
     avatar = db.Column('avatar', String(255))
     # email = db.Column('email', String(100))
-    active = db.Column('active', Integer)
-    hide = db.Column('hide', Integer)
+    active = db.Column('active', Boolean)
+    hide = db.Column('hide', Boolean)
     node = db.Column('node', String(50), db.ForeignKey('node.id'))
     created = db.Column('created', Date)
     updated = db.Column('modified', Date)

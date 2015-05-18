@@ -37,6 +37,9 @@ def image_url(img, size='medium', cut=False, default='la_gota.png'):
 def project_url(project_id):
     return 'https://goteo.org/project/' + project_id
 
+def project_widget_url(project_id):
+    return 'https://goteo.org/widget/project/' + project_id
+
 def user_url(user_id):
     return 'https://goteo.org/user/profile/' + user_id
 

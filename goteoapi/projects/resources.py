@@ -9,6 +9,7 @@ from ..decorators import *
 from ..base_resources import BaseItem, BaseList, Response
 
 from .models import Project
+from ..location.models import ProjectLocation
 
 @swagger.model
 class ProjectResponse(Response):
@@ -21,7 +22,39 @@ class ProjectResponse(Response):
         "date-created"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
         "date-published"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
         "project-url"       : fields.String,
-        "project-image-url" : fields.String,
+        "image-url" : fields.String,
+        "latitude" : fields.Float,
+        "longitude" : fields.Float,
+    }
+
+    required = resource_fields.keys()
+
+@swagger.model
+class ProjectGalleryResponse(Response):
+    """ProjectGalleryResponse"""
+
+    resource_fields = {
+        "name"              : fields.String,
+        "node"              : fields.String,
+        "date-created"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
+        "date-published"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
+        "project-url"       : fields.String,
+        "image-url" : fields.String,
+    }
+
+    required = resource_fields.keys()
+
+@swagger.model
+class ProjectLocationResponse(Response):
+    """ProjectLocationResponse"""
+
+    resource_fields = {
+        "city"              : fields.String,
+        "region"              : fields.String,
+        "country"              : fields.String,
+        "country_code"              : fields.String,
+        "latitude" : fields.Float,
+        "longitude" : fields.Float,
     }
 
     required = resource_fields.keys()
@@ -39,9 +72,13 @@ class ProjectCompleteResponse(Response):
         "date-created"      : fields.DateTime(dt_format='rfc822'),
         "date-published"    : fields.DateTime(dt_format='rfc822'),
         # "date-updated"    : fields.DateTime(dt_format='rfc822'),
+        "location" : fields.List(fields.Nested(ProjectLocationResponse.resource_fields)),
         "project-url"       : fields.String,
-        "project-image-url" : fields.String,
-        "project-video-url" : fields.String,
+        "widget-url"       : fields.String,
+        "image-url" : fields.String,
+        "image-url-big" : fields.String,
+        "image-gallery" : fields.List(fields.String),
+        "video-url" : fields.String,
     }
 
     required = resource_fields.keys()
@@ -97,7 +134,11 @@ class ProjectsListAPI(BaseList):
             item['date-created'] =p.date_created
             item['date-published'] = p.date_published
             item['project-url'] = project_url(p.id)
-            item['project-image-url'] = image_url(p.image, 'thumb', False)
+            item['image-url'] = image_url(p.image, 'medium', False)
+            location = ProjectLocation.get(p.id)
+            if location:
+                item['latitude'] = location.latitude
+                item['longitude'] = location.longitude
             items.append( item )
 
         res = ProjectsListResponse(
@@ -137,14 +178,23 @@ class ProjectAPI(BaseItem):
         """Get()'s method dirty work"""
         time_start = time.time()
         p = Project.get(project_id)
+
         item = marshal(p, ProjectCompleteResponse.resource_fields)
         if p != None:
             item['date-created'] = p.date_created
             item['date-published'] = p.date_published
             item['description-short'] = p.subtitle
-            item['project-video-url'] = p.media
-            item['project-image-url'] = image_url(p.image, 'big', False)
+            item['video-url'] = p.media
+            item['image-url'] = image_url(p.image, 'medium', False)
+            item['image-url-big'] = image_url(p.image, 'big', False)
             item['project-url'] = project_url(p.id)
+            item['widget-url'] = project_widget_url(p.id)
+            location = ProjectLocation.get(p.id)
+            if location:
+                item['location'] = marshal(location, ProjectLocationResponse.resource_fields)
+            #     item['latitude'] = location.latitude
+            #     item['longitude'] = location.longitude
+
 
         res = ProjectCompleteResponse(
             starttime = time_start,

@@ -105,7 +105,7 @@ class ProjectsAPI(Base):
             item['description-short'] = u['subtitle']
             item['video-url'] = u['media']
             item['date-published'] = utc_from_local(u['published'])
-            item['image-url'] = image_url(u['image'], 'big', False)
+            item['image-url'] = image_url(u['image'], 'medium', False)
             item['project-url'] = project_url(u['project'])
             top10_collaborations.append(item)
 
@@ -115,7 +115,7 @@ class ProjectsAPI(Base):
             item['description-short'] = u['subtitle']
             item['video-url'] = u['media']
             item['date-published'] = utc_from_local(u['published'])
-            item['image-url'] = image_url(u['image'], 'big', False)
+            item['image-url'] = image_url(u['image'], 'medium', False)
             item['project-url'] = project_url(u['project'])
             top10_donations.append(item)
 
@@ -125,7 +125,7 @@ class ProjectsAPI(Base):
             item['description-short'] = u['subtitle']
             item['video-url'] = u['media']
             item['date-published'] = utc_from_local(u['published'])
-            item['image-url'] = image_url(u['image'], 'big', False)
+            item['image-url'] = image_url(u['image'], 'medium', False)
             item['project-url'] = project_url(u['project'])
             top10_receipts.append(item)
 

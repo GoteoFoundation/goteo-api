@@ -78,7 +78,6 @@ class Project(db.Model):
     def date_failed(self):
         return utc_from_local(self.failed)
 
-
     @hybrid_property
     def filters(self):
         "Basic filters"
