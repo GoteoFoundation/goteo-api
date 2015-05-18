@@ -71,7 +71,7 @@ class LicensesListAPI(BaseList):
         """Dirty work for the get() method"""
 
         from ..models.reward import Reward
-        from ..models.project import Project
+        from ..projects.models import Project
 
         time_start = time.time()
         #removing not-needed standard filters

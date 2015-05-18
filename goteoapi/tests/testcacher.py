@@ -89,7 +89,10 @@ def test_static_methods():
         eq_( 1, int(f(*args, **kargs)))
 
 def test_invalid_keys():
-    keys = {"get_simple|1==2":(50, datetime.datetime.now()),}
+    keys = {
+        "get_simple|1==2":(50, datetime.datetime.now()),
+        "Cacher/total|<class 'goteoapi.users.models.User'>|node=None|category=[u'16']|lang=None|project=None|from_date=2013-01-01|location=None|year=None|to_date=2013-12-31":(50, datetime.datetime.now()),
+    }
     key_list = get_key_functions(keys)
     eq_( len(key_list) , 0)
 

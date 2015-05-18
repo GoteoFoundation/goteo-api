@@ -68,7 +68,7 @@ class CategoriesListAPI(BaseList):
         """Dirty work for the get() method"""
 
         from ..users.models import User
-        from ..models.project import Project
+        from ..projects.models import Project
 
         time_start = time.time()
         #removing not-needed standard filters

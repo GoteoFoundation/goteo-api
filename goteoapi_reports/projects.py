@@ -88,7 +88,7 @@ class ProjectsAPI(Base):
 
     def _get(self):
         """Get()'s method dirty work"""
-        from goteoapi.models.project import Project
+        from goteoapi.projects.models import Project
 
         time_start = time.time()
         # remove not used args

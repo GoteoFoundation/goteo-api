@@ -10,7 +10,7 @@ from ..helpers import svg_image_url, get_lang
 from ..cacher import cacher
 
 from .icon import Icon, IconLang
-from .project import Project, ProjectCategory
+from ..projects.models import Project, ProjectCategory
 
 from .. import db
 

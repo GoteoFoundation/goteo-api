@@ -45,7 +45,7 @@ class Category(db.Model):
     @hybrid_method
     def get_filters(self, **kwargs):
 
-        from ..models.project import Project, ProjectCategory
+        from ..projects.models import Project, ProjectCategory
         from ..location.models import ProjectLocation
 
         filters = self.filters

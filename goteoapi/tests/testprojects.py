@@ -6,7 +6,7 @@ import json
 from nose.tools import *
 
 from . import app,test_app, check_content_type
-from ..users.resources import UserResponse as Response, UsersListResponse as ListResponse
+from ..projects.resources import ProjectResponse as Response, ProjectsListResponse as ListResponse
 
 app.config['AUTH_ENABLED'] = False
 FILTERS = [
@@ -24,11 +24,12 @@ FILTERS = [
 'location=41.38879,2.15899,50&to_date=2014-12-31',
 'location=41.38879,2.15899,50&from_date=2014-01-01&to_date=2014-12-31'
 ]
-def test_users():
+def test_projects():
     for f in FILTERS:
-        rv = test_app.get('/users/' , query_string=f)
+        rv = test_app.get('/projects/' , query_string=f)
         check_content_type(rv.headers)
         resp = json.loads(rv.data)
+        print resp
         fields = ListResponse.resource_fields
         if 'time-elapsed' in fields:
             del fields['time-elapsed']
@@ -38,8 +39,8 @@ def test_users():
         eq_(len(set(map(lambda x: str(x), resp.keys())) - set(fields.keys())) >= 0, True)
         eq_(rv.status_code, 200)
 
-# def test_user():
-#     rv = test_app.get('/users/goteo/')
+# def test_project():
+#     rv = test_app.get('/projects/goteo/')
 #     check_content_type(rv.headers)
 #     resp = json.loads(rv.data)
 #     print resp

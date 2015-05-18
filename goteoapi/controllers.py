@@ -51,5 +51,6 @@ def index():
 # import sub-packages controllers definitions
 #
 __import__('goteoapi.users.controllers')
+__import__('goteoapi.projects.controllers')
 __import__('goteoapi.categories.controllers')
 __import__('goteoapi.licenses.controllers')

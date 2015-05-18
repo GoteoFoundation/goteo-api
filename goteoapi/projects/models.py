@@ -8,7 +8,7 @@ from sqlalchemy import or_, desc, and_, distinct
 
 from ..helpers import image_url, utc_from_local
 from ..cacher import cacher
-from .post import Post, Blog
+from ..models.post import Post, Blog
 from .. import db
 
 class Project(db.Model):
@@ -101,7 +101,7 @@ class Project(db.Model):
 
 
         """
-        from .reward import Reward
+        from ..models.reward import Reward
         from ..location.models import ProjectLocation
 
         filters = [self.status.in_(self.PUBLISHED_PROJECTS)]
@@ -277,7 +277,7 @@ class Project(db.Model):
     @cacher
     def collaborated_list(self, **kwargs):
         """Get a list of projects with more collaborations"""
-        from .message import Message
+        from ..models.message import Message
         limit = kwargs['limit'] if 'limit' in kwargs else 10
         page = kwargs['page'] if 'page' in kwargs else 0
         filters = list(self.get_filters(**kwargs))
@@ -302,7 +302,7 @@ class Project(db.Model):
     @cacher
     def donated_list(self, **kwargs):
         """Get a list of projects with more donations (by individual contributions)"""
-        from .invest import Invest
+        from ..models.invest import Invest
         limit = kwargs['limit'] if 'limit' in kwargs else 10
         page = kwargs['page'] if 'page' in kwargs else 0
         filters = list(self.get_filters(**kwargs))
@@ -328,7 +328,7 @@ class Project(db.Model):
     def received_list(self, **kwargs):
         """Get a list of projects with more donations (by amount)"""
 
-        from .invest import Invest
+        from ..models.invest import Invest
 
         limit = kwargs['limit'] if 'limit' in kwargs else 10
         page = kwargs['page'] if 'page' in kwargs else 0
