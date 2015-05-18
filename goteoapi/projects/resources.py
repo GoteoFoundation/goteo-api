@@ -8,7 +8,7 @@ from flask_restful_swagger import swagger
 from ..decorators import *
 from ..base_resources import BaseItem, BaseList, Response
 
-from .models import Project
+from .models import Project, ProjectImage
 from ..location.models import ProjectLocation
 
 @swagger.model
@@ -34,12 +34,8 @@ class ProjectGalleryResponse(Response):
     """ProjectGalleryResponse"""
 
     resource_fields = {
-        "name"              : fields.String,
-        "node"              : fields.String,
-        "date-created"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
-        "date-published"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
-        "project-url"       : fields.String,
         "image-url" : fields.String,
+        "resource-url"              : fields.String,
     }
 
     required = resource_fields.keys()
@@ -77,7 +73,7 @@ class ProjectCompleteResponse(Response):
         "widget-url"       : fields.String,
         "image-url" : fields.String,
         "image-url-big" : fields.String,
-        "image-gallery" : fields.List(fields.String),
+        "image-gallery" : fields.List(fields.Nested(ProjectGalleryResponse.resource_fields)),
         "video-url" : fields.String,
     }
 
@@ -191,9 +187,17 @@ class ProjectAPI(BaseItem):
             item['widget-url'] = project_widget_url(p.id)
             location = ProjectLocation.get(p.id)
             if location:
-                item['location'] = marshal(location, ProjectLocationResponse.resource_fields)
-            #     item['latitude'] = location.latitude
-            #     item['longitude'] = location.longitude
+                item['location'] = [marshal(location, ProjectLocationResponse.resource_fields)]
+            gallery = ProjectImage.get(p.id)
+            if gallery:
+                # item['image-gallery'] = marshal(gallery, ProjectGalleryResponse.resource_fields)
+                item['image-gallery'] = []
+                for i in gallery:
+                    item['image-gallery'].append({
+                        'image-url' : image_url(i.image, 'big', False),
+                        'resource-url' : image_resource_url(i.url)
+                        })
+                #     i['image-url'] = gallery.image
 
 
         res = ProjectCompleteResponse(

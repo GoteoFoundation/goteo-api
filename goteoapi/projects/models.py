@@ -12,6 +12,26 @@ from ..models.post import Post, Blog
 from .. import db
 
 class Project(db.Model):
+    """
+        Projects status
+        ===============
+        status = 0 : Non considered or rejected
+        status = 1 : EDITING, considerations:
+                     - DRAFT if it has an "ugly" id
+                     - NEGOTIATION if it has a "nice" id (is coming from the status = 2). Meaning, "needs more work by the user"
+                                   if it has the "updated" date set means "still needs more work"
+                     with date updated set
+        status = 2 : REVIEWING (has a "nice" id), considerations:
+                     - REVIEW PENDING if it doesn't have the "updated" date set
+                     - SECOND REVIEW PENDING if it has the "updated" date set (when it's coming from a second edition by the user)
+        status = 3 : Published (hast the "updated" date set) during the 2 rounds
+                     Funded if the has passed the first round
+        status = 4 : Funded, after the 2 rounds only
+        status = 5 : Fulfilled, after funded an editor can decide to put this status meaning "Outstanding project"
+        status = 6 : Project failed after an unsuccessful campaign
+
+
+        """
     __tablename__ = 'project'
 
     #PROJECT STATUS IDs
@@ -78,38 +98,17 @@ class Project(db.Model):
     def date_failed(self):
         return utc_from_local(self.failed)
 
-    @hybrid_property
-    def filters(self):
-        "Basic filters"
-        return [self.status.in_(self.PUBLISHED_PROJECTS)]
 
     # Getting filters for this model
     @hybrid_method
     def get_filters(self, **kwargs):
-        """
-        Projects status
-        ===============
-        status = 0 : Non considered or rejected
-        status = 1 : EDITING, considerations:
-                     - DRAFT if it has an "ugly" id
-                     - NEGOTIATION if it has a "nice" id (is coming from the status = 2). Meaning, "needs more work by the user"
-                                   if it has the "updated" date set means "still needs more work"
-                     with date updated set
-        status = 2 : REVIEWING (has a "nice" id), considerations:
-                     - REVIEW PENDING if it doesn't have the "updated" date set
-                     - SECOND REVIEW PENDING if it has the "updated" date set (when it's coming from a second edition by the user)
-        status = 3 : Published (hast the "updated" date set) during the 2 rounds
-                     Funded if the has passed the first round
-        status = 4 : Funded, after the 2 rounds only
-        status = 5 : Fulfilled, after funded an editor can decide to put this status meaning "Outstanding project"
-        status = 6 : Project failed after an unsuccessful campaign
-
-
-        """
+        "Return filters to be used"
         from ..models.reward import Reward
         from ..location.models import ProjectLocation
 
-        filters = self.filters
+        # Filters by default only published projects
+        filters = [self.status.in_(self.PUBLISHED_PROJECTS)]
+
         # custom filters by project status
         if 'received' in kwargs and kwargs['received'] is not None:
             # Any project with a "updated" date set is a RECEIVED project
@@ -189,7 +188,7 @@ class Project(db.Model):
     def get(self, project_id):
         """Get a valid project form id"""
         try:
-            filters = list(self.filters)
+            filters = self.get_filters()
             filters.append(self.id == project_id)
             return self.query.filter(*filters).one()
         except NoResultFound:
@@ -202,7 +201,7 @@ class Project(db.Model):
         try:
             limit = kwargs['limit'] if 'limit' in kwargs else 10
             page = kwargs['page'] if 'page' in kwargs else 0
-            filters = list(self.get_filters(**kwargs))
+            filters = self.get_filters(**kwargs)
             return self.query.distinct().filter(*filters).order_by(asc(self.id)).offset(page * limit).limit(limit).all()
         except NoResultFound:
             return []
@@ -212,7 +211,7 @@ class Project(db.Model):
     def total(self, **kwargs):
         """Total number of projects"""
         try:
-            filters = list(self.get_filters(**kwargs))
+            filters = self.get_filters(**kwargs)
             total = db.session.query(func.count(distinct(self.id))).filter(*filters).scalar()
             if total is None:
                 total = 0
@@ -225,7 +224,7 @@ class Project(db.Model):
     def pledged_total(self, **kwargs):
         """Total amount of money (€) raised by Goteo"""
         try:
-            filters = list(self.get_filters(**kwargs))
+            filters = self.get_filters(**kwargs)
             filters.append(self.status.in_(self.SUCCESSFUL_PROJECTS))
             total = db.session.query(func.sum(distinct(self.amount))).filter(*filters).scalar()
             if total is None:
@@ -239,7 +238,7 @@ class Project(db.Model):
     def refunded_total(self, **kwargs):
         """Refunded money (€) on failed projects """
         try:
-            filters = list(self.get_filters(**kwargs))
+            filters = self.get_filters(**kwargs)
             filters.append(self.status == self.STATUS_UNFUNDED)
             total = db.session.query(func.sum(distinct(self.amount))).filter(*filters).scalar()
             if total is None:
@@ -252,7 +251,7 @@ class Project(db.Model):
     @cacher
     def percent_pledged_successful(self, **kwargs):
         """Percentage of money raised over the minimum on successful projects"""
-        filters = list(self.get_filters(**kwargs))
+        filters = self.get_filters(**kwargs)
         filters.append(self.status.in_([self.STATUS_FUNDED,
                                         self.STATUS_FULFILLED]))
         total = db.session.query(func.avg(self.amount / self.minimum * 100 - 100)).filter(*filters).scalar()
@@ -263,7 +262,7 @@ class Project(db.Model):
     @cacher
     def percent_pledged_failed(self, **kwargs):
         """Percentage of money raised over the minimum on failed projects """
-        filters = list(self.get_filters(**kwargs))
+        filters = self.get_filters(**kwargs)
         filters.append(self.status == self.STATUS_UNFUNDED)
         total = db.session.query(func.avg(self.amount / self.minimum * 100)).filter(*filters).scalar()
         total = 0 if total is None else round(total, 2)
@@ -273,7 +272,7 @@ class Project(db.Model):
     @cacher
     def average_minimum(self, **kwargs):
         """Average minimum cost (€) for successful projects (NOTE: this field is not affected by the location filter)"""
-        filters = list(self.get_filters(**kwargs))
+        filters = self.get_filters(**kwargs)
         filters.append(self.status.in_([self.STATUS_FUNDED, self.STATUS_FULFILLED]))
         total = db.session.query(func.avg(self.minimum)).filter(*filters).scalar()
         total = 0 if total is None else round(total, 2)
@@ -283,7 +282,7 @@ class Project(db.Model):
     @cacher
     def average_total(self, **kwargs):
         """Average money raised (€) for projects"""
-        filters = list(self.get_filters(**kwargs))
+        filters = self.get_filters(**kwargs)
         total = db.session.query(func.avg(self.amount)).filter(*filters).scalar()
         total = 0 if total is None else round(total, 2)
         return total
@@ -292,7 +291,7 @@ class Project(db.Model):
     @cacher
     def average_posts(self, **kwargs):
         """Average number of posts by projects"""
-        filters = list(self.get_filters(**kwargs))
+        filters = self.get_filters(**kwargs)
         filters.append(Post.publish == 1)
         sq1 = db.session.query(func.count(self.id).label('posts')).select_from(Post)\
                             .join(Blog, and_(Blog.id == Post.blog, Blog.type == 'project'))\
@@ -309,7 +308,7 @@ class Project(db.Model):
         from ..models.message import Message
         limit = kwargs['limit'] if 'limit' in kwargs else 10
         page = kwargs['page'] if 'page' in kwargs else 0
-        filters = list(self.get_filters(**kwargs))
+        filters = self.get_filters(**kwargs)
 
         res = db.session.query(self.id.label('project'),
                                self.name,
@@ -334,7 +333,7 @@ class Project(db.Model):
         from ..models.invest import Invest
         limit = kwargs['limit'] if 'limit' in kwargs else 10
         page = kwargs['page'] if 'page' in kwargs else 0
-        filters = list(self.get_filters(**kwargs))
+        filters = self.get_filters(**kwargs)
 
         res = db.session.query(self.id.label('project'),
                        self.name,
@@ -361,7 +360,7 @@ class Project(db.Model):
 
         limit = kwargs['limit'] if 'limit' in kwargs else 10
         page = kwargs['page'] if 'page' in kwargs else 0
-        filters = list(self.get_filters(**kwargs))
+        filters = self.get_filters(**kwargs)
 
         filters.append(Invest.status.in_([Invest.STATUS_PENDING,
                                                   Invest.STATUS_CHARGED,
@@ -388,5 +387,29 @@ class ProjectCategory(db.Model):
     category = db.Column('category', Integer, db.ForeignKey('category.id'), primary_key=True)
 
     def __repr__(self):
-        return '<Category %s>' % (self.project)
+        return '<ProjectCategory %s-%s>' % (self.project, self.category)
 
+
+class ProjectImage(db.Model):
+    __tablename__ = 'project_image'
+
+    project = db.Column('project', String(50), db.ForeignKey('project.id'), primary_key=True)
+    image = db.Column('image', String(255), primary_key=True)
+    section = db.Column('section', String(50))
+    url = db.Column('url', Text)
+    order = db.Column('order', Integer)
+
+    def __repr__(self):
+        return '<ProjectImage %s-%s>' % (self.project, self.image)
+
+    @hybrid_method
+    @cacher
+    def get(self, id, section=''):
+        """Get a valid Location Item from id"""
+        try:
+            if section is None:
+                return self.query.get(id)
+            return self.query.filter(self.project == id, self.section == section).order_by(asc(self.order)).all()
+        except:
+            pass
+        return []
