@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 #from flask.ext.sqlalchemy import Pagination
-from sqlalchemy import func, Integer, String, Text, Date
+from sqlalchemy import func, Integer, String, Text, Date, Float
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy import or_, asc, desc, and_, distinct
@@ -42,6 +42,7 @@ class Project(db.Model):
     STATUS_FUNDED      = 4
     STATUS_FULFILLED   = 5 # 'Caso de exito'
     STATUS_UNFUNDED    = 6 # proyecto fallido
+    STATUS_STR = ('rejected', 'editing', 'reviewing', 'in_campaign', 'funded', 'fulfilled', 'unfunded')
 
     PUBLISHED_PROJECTS = [STATUS_IN_CAMPAIGN, STATUS_FUNDED, STATUS_FULFILLED, STATUS_UNFUNDED]
     SUCCESSFUL_PROJECTS = [STATUS_IN_CAMPAIGN, STATUS_FUNDED, STATUS_FULFILLED]
@@ -50,6 +51,15 @@ class Project(db.Model):
     owner = db.Column('owner', String(50), db.ForeignKey('user.id'))
     name = db.Column('name', Text)
     subtitle = db.Column('subtitle', Text)
+    description = db.Column('description', Text)
+    motivation = db.Column('motivation', Text)
+    goal = db.Column('goal', Text)
+    about = db.Column('about', Text)
+    # keywords = db.Column('keywords', Text)
+    # related = db.Column('related', Text)
+    lang = db.Column('lang', String(2))
+    currency = db.Column('currency', String(4))
+    currency_rate = db.Column('currency_rate', Float)
     image = db.Column('image', String(255))
     video = db.Column('video', String(255))
     media = db.Column('media', String(255))
@@ -64,6 +74,7 @@ class Project(db.Model):
     # luego coincidiria con el publicado
     published = db.Column('published', Date) # fecha de publicacion de proyecto
     closed = db.Column('closed', Date) # fecha de cierre de proyecto
+    success = db.Column('success', Date) # fecha de éxito de proyecto
     node = db.Column('node', String(50), db.ForeignKey('node.id'))
     # total_funding
     # active_date
@@ -95,9 +106,16 @@ class Project(db.Model):
         return utc_from_local(self.passed)
 
     @hybrid_property
-    def date_failed(self):
-        return utc_from_local(self.failed)
+    def date_success(self):
+        return utc_from_local(self.success)
 
+    @hybrid_property
+    def date_closed(self):
+        return utc_from_local(self.closed)
+
+    @hybrid_property
+    def status_string(self):
+        return self.STATUS_STR[self.status]
 
     # Getting filters for this model
     @hybrid_method

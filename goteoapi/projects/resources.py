@@ -25,6 +25,7 @@ class ProjectResponse(Response):
         "image-url" : fields.String,
         "latitude" : fields.Float,
         "longitude" : fields.Float,
+        "owner" : fields.String,
     }
 
     required = resource_fields.keys()
@@ -48,7 +49,7 @@ class ProjectLocationResponse(Response):
         "city"              : fields.String,
         "region"              : fields.String,
         "country"              : fields.String,
-        "country_code"              : fields.String,
+        "country-code"              : fields.String,
         "latitude" : fields.Float,
         "longitude" : fields.Float,
     }
@@ -64,11 +65,26 @@ class ProjectCompleteResponse(Response):
         "id"                : fields.String,
         "name"              : fields.String,
         "description-short" : fields.String,
+        "description" : fields.String,
+        "motivation" : fields.String,
+        "goal" : fields.String,
+        "about" : fields.String,
+        "lang" : fields.String,
+        "currency" : fields.String,
+        "currency-rate" : fields.Float,
+        "minimum" : fields.Float,
+        "optimum" : fields.Float,
+        "amount" : fields.Float,
+        "status" : fields.String,
         "node"              : fields.String,
         "date-created"      : fields.DateTime(dt_format='rfc822'),
         "date-published"    : fields.DateTime(dt_format='rfc822'),
-        # "date-updated"    : fields.DateTime(dt_format='rfc822'),
+        "date-updated"    : fields.DateTime(dt_format='rfc822'),
+        "date-succeeded"    : fields.DateTime(dt_format='rfc822'),
+        "date-closed"    : fields.DateTime(dt_format='rfc822'),
+        "date-passed"    : fields.DateTime(dt_format='rfc822'),
         "location" : fields.List(fields.Nested(ProjectLocationResponse.resource_fields)),
+        "owner" : fields.String,
         "project-url"       : fields.String,
         "widget-url"       : fields.String,
         "image-url" : fields.String,
@@ -179,15 +195,22 @@ class ProjectAPI(BaseItem):
         if p != None:
             item['date-created'] = p.date_created
             item['date-published'] = p.date_published
+            item['date-updated'] = p.date_updated
+            item['date-succeeded'] = p.date_success
+            item['date-closed'] = p.date_closed
+            item['date-passed'] = p.date_passed
             item['description-short'] = p.subtitle
             item['video-url'] = p.media
             item['image-url'] = image_url(p.image, 'medium', False)
             item['image-url-big'] = image_url(p.image, 'big', False)
             item['project-url'] = project_url(p.id)
             item['widget-url'] = project_widget_url(p.id)
+            item['currency-rate'] = p.currency_rate
+            item['status'] = p.status_string
             location = ProjectLocation.get(p.id)
             if location:
                 item['location'] = [marshal(location, ProjectLocationResponse.resource_fields)]
+                item['location'][0]['country-code'] = location.country_code
             gallery = ProjectImage.get(p.id)
             if gallery:
                 # item['image-gallery'] = marshal(gallery, ProjectGalleryResponse.resource_fields)
