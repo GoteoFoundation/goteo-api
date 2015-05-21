@@ -26,6 +26,7 @@ class ProjectResponse(Response):
         "latitude" : fields.Float,
         "longitude" : fields.Float,
         "owner" : fields.String,
+        "status" : fields.String,
     }
 
     required = resource_fields.keys()
@@ -146,6 +147,7 @@ class ProjectsListAPI(BaseList):
             item['date-created'] =p.date_created
             item['date-published'] = p.date_published
             item['project-url'] = project_url(p.id)
+            item['status'] = p.status_string
             item['image-url'] = image_url(p.image, 'medium', False)
             location = ProjectLocation.get(p.id)
             if location:

@@ -1,10 +1,10 @@
 TODO
 
-IMPORTANTE
+Enpoint projects:
 
-visualitzacio: posar un avis quan s'esta filtrant
-comprobar cache (cron)
-tests unitarios
+afegir categories
+posar link al mp4 directe
+link a la pagina d'aportacio
 
 -----
 
@@ -17,10 +17,4 @@ https://goteo.org/user/profile/olivier/profile
 2. Endpoint de iconos?
 
 reports de money con filtros de fecha, filtrar invest o proyecto?
-
-
-
-aportaciones anonimas
-
-enpoint projects
 
