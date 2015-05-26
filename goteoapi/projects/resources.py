@@ -12,6 +12,7 @@ from .models import Project, ProjectImage
 from ..location.models import ProjectLocation
 from ..models.reward import Reward
 from ..models.cost import Cost
+from ..models.support import Support
 
 @swagger.model
 class ProjectResponse(Response):
@@ -79,7 +80,7 @@ class ProjectNeedResponse(Response):
     """ProjectNeedResponse"""
 
     resource_fields = {
-        "need" : fields.String,
+        "support" : fields.String,
         "description"              : fields.String,
         "type"              : fields.String,
     }
@@ -281,6 +282,9 @@ class ProjectAPI(BaseItem):
                     it['from-date'] = i.date_from
                     it['to-date'] = i.date_to
                     item['costs'].append(it)
+            needs = Support.list_by_project(p.id)
+            if needs:
+                item['needs'] = marshal(needs, ProjectNeedResponse.resource_fields)
 
 
         res = ProjectCompleteResponse(
