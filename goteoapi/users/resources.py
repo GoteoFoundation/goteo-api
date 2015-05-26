@@ -7,6 +7,7 @@ from flask_restful_swagger import swagger
 
 from ..decorators import *
 from ..base_resources import BaseItem, BaseList, Response
+from ..location.models import ProjectLocation, UserLocation
 
 from .models import User
 
@@ -21,6 +22,8 @@ class UserResponse(Response):
         "date-created"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
         "profile-url"       : fields.String,
         "profile-image-url" : fields.String,
+        "latitude" : fields.Float,
+        "longitude" : fields.Float,
     }
 
     required = resource_fields.keys()
@@ -38,6 +41,8 @@ class UserCompleteResponse(Response):
         # "date-updated"    : fields.DateTime(dt_format='rfc822'),
         "profile-url"       : fields.String,
         "profile-image-url" : fields.String,
+        "latitude" : fields.Float,
+        "longitude" : fields.Float,
     }
 
     required = resource_fields.keys()
@@ -94,6 +99,11 @@ class UsersListAPI(BaseList):
             item['date-created'] = u.date_created
             item['profile-url'] = u.profile_url
             item['profile-image-url'] = u.profile_image_url
+            location = UserLocation.get(u.id)
+            if location:
+                item['latitude'] = location.latitude
+                item['longitude'] = location.longitude
+
             items.append( item )
 
         res = UsersListResponse(
@@ -138,6 +148,10 @@ class UserAPI(BaseItem):
             item['date-created'] = u.date_created
             item['profile-url'] = u.profile_url
             item['profile-image-url'] = u.profile_image_url
+            location = UserLocation.get(u.id)
+            if location:
+                item['latitude'] = location.latitude
+                item['longitude'] = location.longitude
 
         res = UserCompleteResponse(
             starttime = time_start,

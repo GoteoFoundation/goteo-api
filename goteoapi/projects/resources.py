@@ -9,7 +9,9 @@ from ..decorators import *
 from ..base_resources import BaseItem, BaseList, Response
 
 from .models import Project, ProjectImage
-from ..location.models import ProjectLocation
+from ..users.models import User
+from ..users.resources import UsersListAPI, UserResponse, UsersListResponse
+from ..location.models import ProjectLocation, UserLocation
 from ..models.reward import Reward
 from ..models.cost import Cost
 from ..models.support import Support
@@ -294,3 +296,52 @@ class ProjectAPI(BaseItem):
 
         return res
 
+
+class ProjectDonorsListAPI(BaseItem):
+    """Get donors list"""
+
+    @swagger.operation(
+        notes='donors list',
+        nickname='project_donors',
+        responseClass=UsersListResponse.__name__,
+        parameters=BaseList.INPUT_FILTERS,
+        responseMessages=BaseList.RESPONSE_MESSAGES
+    )
+    @requires_auth
+    @ratelimit()
+    def get(self, project_id):
+        """Get the donors list
+        <a href="http://developers.goteo.org/doc/users">developers.goteo.org/doc/users</a>
+        """
+        res = self._get(project_id)
+
+        if res.ret['items'] == []:
+            return bad_request('No users to list', 404)
+
+        return res.response()
+
+    def _get(self, project_id):
+        """Get()'s method dirty work"""
+
+        time_start = time.time()
+
+        items = []
+        for u in User.donors_by_project(project_id):
+            item = marshal(u, UserResponse.resource_fields)
+            item['date-created'] = u.date_created
+            item['profile-url'] = u.profile_url
+            item['profile-image-url'] = u.profile_image_url
+            location = UserLocation.get(u.id)
+            if location:
+                item['latitude'] = location.latitude
+                item['longitude'] = location.longitude
+            items.append( item )
+
+        res = UsersListResponse(
+            starttime = time_start,
+            attributes = {'items' : items},
+            # filters = args.items(),
+            # total = User.total(**args)
+        )
+
+        return res
