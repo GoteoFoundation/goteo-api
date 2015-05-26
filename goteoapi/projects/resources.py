@@ -10,6 +10,7 @@ from ..base_resources import BaseItem, BaseList, Response
 
 from .models import Project, ProjectImage
 from ..location.models import ProjectLocation
+from ..models.reward import Reward
 
 @swagger.model
 class ProjectResponse(Response):
@@ -38,6 +39,48 @@ class ProjectGalleryResponse(Response):
     resource_fields = {
         "image-url" : fields.String,
         "resource-url"              : fields.String,
+    }
+
+    required = resource_fields.keys()
+
+@swagger.model
+class ProjectRewardResponse(Response):
+    """ProjectRewardResponse"""
+
+    resource_fields = {
+        "reward" : fields.String,
+        "description"              : fields.String,
+        "license"              : fields.String,
+        "type"              : fields.String,
+        "icon"              : fields.String,
+    }
+
+    required = resource_fields.keys()
+
+@swagger.model
+class ProjectCostResponse(Response):
+    """ProjectNeedResponse"""
+
+    resource_fields = {
+        "cost" : fields.String,
+        "description"              : fields.String,
+        "type"              : fields.String,
+        "amount"              : fields.Float,
+        "required"              : fields.String,
+        "from-date"              : fields.DateTime(dt_format='rfc822'),
+        "to-date"              : fields.DateTime(dt_format='rfc822'),
+    }
+
+    required = resource_fields.keys()
+
+@swagger.model
+class ProjectNeedResponse(Response):
+    """ProjectNeedResponse"""
+
+    resource_fields = {
+        "need" : fields.String,
+        "description"              : fields.String,
+        "type"              : fields.String,
     }
 
     required = resource_fields.keys()
@@ -92,6 +135,9 @@ class ProjectCompleteResponse(Response):
         "image-url-big" : fields.String,
         "image-gallery" : fields.List(fields.Nested(ProjectGalleryResponse.resource_fields)),
         "video-url" : fields.String,
+        "rewards" : fields.List(fields.Nested(ProjectRewardResponse.resource_fields)),
+        "costs" : fields.List(fields.Nested(ProjectCostResponse.resource_fields)),
+        "needs" : fields.List(fields.Nested(ProjectNeedResponse.resource_fields)),
     }
 
     required = resource_fields.keys()
@@ -223,6 +269,10 @@ class ProjectAPI(BaseItem):
                         'resource-url' : image_resource_url(i.url)
                         })
                 #     i['image-url'] = gallery.image
+            rewards = Reward.list_by_project(p.id)
+            if rewards:
+                item['rewards'] = [marshal(rewards, ProjectRewardResponse.resource_fields)]
+
 
 
         res = ProjectCompleteResponse(

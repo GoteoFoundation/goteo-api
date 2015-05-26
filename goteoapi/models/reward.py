@@ -2,11 +2,11 @@
 
 from sqlalchemy import func, Integer, String, Text
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
-from sqlalchemy.orm.exc import MultipleResultsFound
+from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from sqlalchemy.orm import aliased
-from sqlalchemy import desc,and_, distinct
+from sqlalchemy import asc,desc,and_, distinct
 
-from ..helpers import svg_image_url, get_lang
+from ..helpers import get_lang
 from ..cacher import cacher
 
 from .icon import Icon, IconLang
@@ -20,11 +20,13 @@ class Reward(db.Model):
 
     id = db.Column('id', Integer, primary_key=True)
     project = db.Column('project', String(50), db.ForeignKey('project.id'))
-    reward = db.Column('reward', Text)
+    reward = db.Column('reward', String(50))
+    description = db.Column('description', Text)
     type = db.Column('type', String(50))
     amount = db.Column('amount', Integer)
     icon = db.Column('icon', String(50), db.ForeignKey('icon.id'))
     license = db.Column('license', String(50), db.ForeignKey('license.id'))
+    order = db.Column('order', Integer)
 
     def __repr__(self):
         return '<Reward(%d) %s: %s>' % (self.id, self.project[:10], self.title[:50])
@@ -66,6 +68,28 @@ class Reward(db.Model):
             filters.append(ProjectLocation.id.in_(subquery))
 
         return filters
+
+    @hybrid_method
+    @cacher
+    def list(self, **kwargs):
+        """Get a list of valid rewards"""
+        try:
+            limit = kwargs['limit'] if 'limit' in kwargs else 10
+            page = kwargs['page'] if 'page' in kwargs else 0
+            filters = self.get_filters(**kwargs)
+            return self.query.distinct().filter(*filters).order_by(asc(self.order), asc(self.amount)).offset(page * limit).limit(limit).all()
+        except NoResultFound:
+            return []
+
+    @hybrid_method
+    @cacher
+    def list_by_project(self, project_id):
+        """Get a list of valid rewards for project"""
+        try:
+            print project_id
+            return self.query.distinct().filter(self.project==project_id).order_by(asc(self.order), asc(self.amount)).all()
+        except NoResultFound:
+            return []
 
     @hybrid_method
     @cacher
