@@ -86,7 +86,6 @@ class Reward(db.Model):
     def list_by_project(self, project_id):
         """Get a list of valid rewards for project"""
         try:
-            print project_id
             return self.query.distinct().filter(self.project==project_id).order_by(asc(self.order), asc(self.amount)).all()
         except NoResultFound:
             return []

@@ -11,6 +11,7 @@ from ..base_resources import BaseItem, BaseList, Response
 from .models import Project, ProjectImage
 from ..location.models import ProjectLocation
 from ..models.reward import Reward
+from ..models.cost import Cost
 
 @swagger.model
 class ProjectResponse(Response):
@@ -271,8 +272,15 @@ class ProjectAPI(BaseItem):
                 #     i['image-url'] = gallery.image
             rewards = Reward.list_by_project(p.id)
             if rewards:
-                item['rewards'] = [marshal(rewards, ProjectRewardResponse.resource_fields)]
-
+                item['rewards'] = marshal(rewards, ProjectRewardResponse.resource_fields)
+            costs = Cost.list_by_project(p.id)
+            if costs:
+                item['costs'] = []
+                for i in costs:
+                    it = marshal(i, ProjectCostResponse.resource_fields)
+                    it['from-date'] = i.date_from
+                    it['to-date'] = i.date_to
+                    item['costs'].append(it)
 
 
         res = ProjectCompleteResponse(
