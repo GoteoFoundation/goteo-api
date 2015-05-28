@@ -23,6 +23,7 @@ class ProjectResponse(Response):
     resource_fields = {
         "id"                : fields.String,
         "name"              : fields.String,
+        "description-short"              : fields.String,
         "node"              : fields.String,
         "date-created"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
         "date-published"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
@@ -197,6 +198,7 @@ class ProjectsListAPI(BaseList):
             item['date-created'] =p.date_created
             item['date-published'] = p.date_published
             item['project-url'] = project_url(p.id)
+            item['description-short'] = p.subtitle
             item['status'] = p.status_string
             item['image-url'] = image_url(p.image, 'medium', False)
             location = ProjectLocation.get(p.id)
