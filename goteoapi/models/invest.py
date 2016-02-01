@@ -123,7 +123,7 @@ class Invest(db.Model):
         filters.append(~self.user.in_(admins))
         filters.append(~self.user.in_(calls))
         filters.append(~self.user.in_(owners))
-        res = db.session.query(self.user, User.name, User.id, User.avatar, func.count(self.id).label('contributions'), func.sum(self.amount).label('amount'))\
+        res = db.session.query(self.user, User.name, User.id, User.avatar, func.count(distinct(self.project)).label('contributions'), func.sum(self.amount).label('amount'))\
                                     .filter(*filters).group_by(self.user)\
                                     .order_by(desc('amount'), desc('contributions')).offset(page * limit).limit(limit)
         ret = []
@@ -155,7 +155,7 @@ class Invest(db.Model):
         filters.append(~self.user.in_(admins))
         filters.append(~self.user.in_(calls))
         filters.append(~self.user.in_(owners))
-        res = db.session.query(Invest.user, User.name, User.id, User.avatar, func.count(Invest.id).label('contributions'), func.sum(Invest.amount).label('amount'))\
+        res = db.session.query(Invest.user, User.name, User.id, User.avatar, func.count(distinct(self.project)).label('contributions'), func.sum(Invest.amount).label('amount'))\
                                     .filter(*filters).group_by(Invest.user)\
                                     .order_by(desc('contributions'), desc('amount')).offset(page * limit).limit(limit)
         ret = []
@@ -396,7 +396,7 @@ class InvestNode(db.Model):
     invest_node = db.Column('invest_node', String(50))
 
     def __repr__(self):
-        return '<Invest %d in node %s>' % (self.invest_id, self.invest_node)
+        return '<InvestNode %d in node %s>' % (self.invest_id, self.invest_node)
 
 
 class InvestReward(db.Model):
@@ -406,4 +406,4 @@ class InvestReward(db.Model):
     reward = db.Column('reward', Integer, db.ForeignKey('reward.id'), primary_key=True)
 
     def __repr__(self):
-        return '<Invest(%d) - Reward(%d)>' % (self.invest, self.reward)
+        return '<InvestReward(%d) - Reward(%d)>' % (self.invest, self.reward)

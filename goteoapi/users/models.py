@@ -133,6 +133,18 @@ class User(db.Model):
         except MultipleResultsFound:
             return 0
 
+    @hybrid_method
+    @cacher
+    def donors_by_project(self, project_id):
+        """Get a list of valid donors for project"""
+        try:
+            filters = self.get_filters()
+            filters.append(Invest.user==self.id)
+            filters.append(Invest.project==project_id)
+            return self.query.distinct().filter(*filters).all()
+        except NoResultFound:
+            return []
+
 
 #User roles
 class UserRole(db.Model):

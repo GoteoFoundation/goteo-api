@@ -1,11 +1,14 @@
 TODO
 
-IMPORTANTE
+Enpoint projects:
 
-visualitzacio: posar un avis quan s'esta filtrant
-comprobar cache (cron)
-tests unitarios
+afegir categories
+posar link al mp4 directe
+link a la pagina d'aportacio
+retornos
 
+CACHE
+delete key on update failure
 -----
 
 
@@ -18,9 +21,14 @@ https://goteo.org/user/profile/olivier/profile
 
 reports de money con filtros de fecha, filtrar invest o proyecto?
 
+TRANSATION:
 
+costs
+rewards
+needs
+task
+lend
 
-aportaciones anonimas
-
-enpoint projects
-
+langs in costs, rewards, needs
+project donors pagination
+project donors total
