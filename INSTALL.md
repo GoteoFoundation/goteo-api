@@ -1,9 +1,17 @@
-## API de Goteo basada en flask/sqlalchemy/flask-restful
+## Goteo API 
 
-TODO: revisar este archivo
+This is the code for the [goteo api](http://api.goteo.org/). 
 
-### Instalación
-En Ubuntu 14.04, primero assegurase que se tienen todas las librerias:
+Made with python with [flask](http://flask.pocoo.org/), [sqlalchemy](http://www.sqlalchemy.org/) and [flask-restful](http://flask-restful.readthedocs.org)
+
+### Installation
+
+
+This API uses [Redis](http://redis.io/) as a cache backend for complex SQL calculations and user/ratio management.
+
+Others python requirements can be installed using [pip](https://pip.pypa.io).
+
+In Ubuntu 14.04 you can run this commands to install all requirements:
 
 ```bash
 sudo apt-get install python-setuptools python-dev build-essential
@@ -13,9 +21,12 @@ sudo apt-get install redis-server python-redis
 sudo easy_install pip
 ```
 
-Para instalar el entorno local hay 2 opciones:
+For others systems, please refere to the oficial documentation for redis or pip.
 
-1. La primera es tener los entornos centralizados en un solo sitio, para ello se usa el script mkvirtualenv:
+There are two options for installing the system:
+
+1. If you prefer to have everything organized in the same place (such as `/your/user/path/.virtualenv`), you can use the `mkvirtualenv` script as many other packages does:
+
     ```bash
     mkdir ~/.virtualenvs
     echo 'export WORKON_HOME=~/.virtualenvs' >> ~/.bashrc
@@ -24,80 +35,39 @@ Para instalar el entorno local hay 2 opciones:
     pip install -r requirements.txt
     ```
 
-2. La segunda està pensada para no entrometerse con ningun script personalizado (como el .bashrc). Simplemente crea el entorno "virtual" en una subcarpeta `virtualenv` (el mismo método que usa el servidor web), para ello se puede usar el script `deployer.sh` que actualiza las dependencias automaticamente:
-    ```bash
-    ./deployer.sh
-    ```
-### Configuración
+2. Otherwise, you can just use the `deployer` script bash script witch will create the virtual enviroment in the same directory as the code. This option won't mess or touch any personal configuration files (sucha as `~/.bashrc`. This is the method used by the real web server for instance. Just run:
 
-Una vez instaladas las dependencias, hay que configurar los datos de conexión a la BD:
+    ```bash
+    ./deployer
+    ```
+
+    This will install all required dependencies.
+
+### Configuration
+
+You should create a properly configured settings file, just copy the example config file and edit the result `config/settings.py` file with your personal database credentials:
+
 ```bash
-cp config/settings.py.example config/settings.py
+cp config.py.example config.py
 ```
 
-Editar el archivo `settings.py` con los datos correctos.
+### Running the local server
 
-### Ejecución
+By default, local server listens to http://0.0.0.0:5000/
 
-1. Si se ha usado el método 1, entonces solo nos queda activar el virtualenvironment y ejecutar la API:
+1. If you have used method 1 (global virtualenv installation), execute this commands and you'll be up and running:
+
     ```bash
     workon goteoapi
     ./goteoapi.py
     ```
 
-2. En el caso del método 2 hay que ejectutar:
+2. If you have chosen method 2, just run the script:
+
     ```bash
-    source virtualenv/bin/activate
-    ./goteoapi.py
+    ./run-goteo
     ```
 
-Esto por defecto pone a la escucha un servidor web en http://0.0.0.0:5000/
+Now just point your browser (or curl) to http://0.0.0.0:5000/
 
-## Ejemplos de uso
-*NOTA:* POR REVISAR!
-
-Lista de proyectos:
-
-    curl -i http://0.0.0.0:5000/projects
-
-Detalles de un proyecto concreto:
-
-    curl -i http://0.0.0.0:5000/projects/057ce063ee014dee885b13840774463c
-
-Listado de proyectos con un mínimo de 1000€:
-
-    curl -i -X GET -H "Content-Type: application/json" -d '{"low_minimum":1000}' http://0.0.0.0:5000/projects/
-
-Listado de proyectos con un mínimo de hasta 2000€:
-
-    curl -i -X GET -H "Content-Type: application/json" -d '{"high_minimum":2000}' http://0.0.0.0:5000/projects/
-
-Listado de proyectos con un mínimo entre 1000€ y 2000€:
-
-    curl -i -X GET -H "Content-Type: application/json" -d '{"low_minimum":1000,"high_minimum":2000}' http://0.0.0.0:5000/projects/
-
-Error:
-
-    curl -i -X GET -H "Content-Type: application/json" http://0.0.0.0:5000/projects
-
-    HTTP/1.0 400 BAD REQUEST
-    Content-Type: application/json
-    Content-Length: 53
-    Server: Werkzeug/0.9.6 Python/2.7.6
-    Date: Sun, 05 Oct 2014 10:30:41 GMT
-
-    {
-        "message": "Bad Request",
-        "error": 400
-    }
-
-## Notas
-
-Durante el desarrollo de la API sale la [versión 2.0](https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md)
-de la especificación de swagger y por otra parte flask-restful-swagger solo soporta la versión 1.2.
-
-La versión 2.0 incluye, entre otras muchas mejoras, la posibilidad de especificar parámetros múltiples desde la interfaz web
-de la forma: http://URL?opt=bar&opt=foo
-
-Más información aquí:
-https://github.com/rantav/flask-restful-swagger/issues/50#issuecomment-65641980
+Please read the README.md file for more info.
