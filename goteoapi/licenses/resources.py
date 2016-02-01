@@ -2,16 +2,13 @@
 
 import time
 
+from .. import api
 from flask.ext.restful import fields, marshal
-from flask_restful_swagger import swagger
 
 from ..decorators import *
-
 from ..base_resources import BaseList, Response
-
 from .models import License
 
-@swagger.model
 class LicenseResponse(Response):
     """LicenseResponse"""
 
@@ -27,12 +24,6 @@ class LicenseResponse(Response):
 
     required = resource_fields.keys()
 
-
-@swagger.model
-@swagger.nested(**{
-                'items' : LicenseResponse.__name__,
-                }
-            )
 class LicensesListResponse(Response):
     """LicensesListResponse"""
 
@@ -43,21 +34,20 @@ class LicensesListResponse(Response):
     required = resource_fields.keys()
 
 
+model = api.model('Model', {
+    "items"         : fields.List
+})
+
+
 class LicensesListAPI(BaseList):
-    """Get License list"""
+    """License API"""
 
-
-    @swagger.operation(
-        notes='Licenses list',
-        nickname='licenses',
-        responseClass=LicensesListResponse.__name__,
-        parameters=BaseList.INPUT_FILTERS,
-        responseMessages=BaseList.RESPONSE_MESSAGES
-    )
     @requires_auth
     @ratelimit()
     def get(self):
-        """Get the licenses list
+        """
+        License API
+        This resource returns license information.
         <a href="http://developers.goteo.org/doc/licenses">developers.goteo.org/doc/licenses</a>
         """
         res = self._get()

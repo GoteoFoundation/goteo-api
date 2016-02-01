@@ -1,6 +1,7 @@
 Flask
 Flask-Cache
 Flask-RESTful
+flask-restplus
 Flask-Redis
 Flask-SQLAlchemy
 Jinja2
@@ -12,7 +13,6 @@ Werkzeug
 aniso8601
 argparse
 coverage
-flask-restful-swagger
 geopy
 itsdangerous
 mimerender

@@ -10,7 +10,7 @@ from ..base_resources import BaseItem, BaseList, Response
 
 from .models import Project, ProjectImage
 from ..users.models import User
-from ..users.resources import UsersListAPI, UserResponse, UsersListResponse
+from ..users.resources import UserResponse, UsersListResponse
 from ..location.models import ProjectLocation, UserLocation
 from ..models.reward import Reward
 from ..models.cost import Cost

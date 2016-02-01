@@ -6,8 +6,8 @@
 """
 
 from flask import Flask
-from flask_restful_swagger import swagger
-from flask.ext.restful import Api
+# from flask.ext.restful import Api
+from flask.ext.restplus import Api
 from flask.ext.sqlalchemy import SQLAlchemy
 
 # DB class
@@ -19,6 +19,7 @@ app.config.from_pyfile('../config.py', silent=True)
 
 app.debug = bool(app.config['DEBUG'])
 app.config['SQLALCHEMY_DATABASE_URI'] = app.config['DB_URI']
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 #app.config['SQLALCHEMY_POOL_TIMEOUT'] = 5
 #app.config['SQLALCHEMY_POOL_SIZE'] = 30
 if app.debug:
@@ -52,8 +53,6 @@ else:
     # handler.setLevel(logging.ERROR)
     # app.logger.addHandler(handler)
 
-#api = Api(app)
-api = swagger.docs(Api(app), apiVersion=app.config['VERSION'], description=app.config['DESCRIPTION'])
+# api = swagger.docs(Api(app), apiVersion=app.config['VERSION'], description=app.config['DESCRIPTION'])
 
-
-
+api = Api(app, version=app.config['VERSION'], description=app.config['DESCRIPTION'])

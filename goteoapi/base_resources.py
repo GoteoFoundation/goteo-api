@@ -5,7 +5,8 @@ import time
 from datetime import datetime as dtdatetime
 from dateutil.parser import parse
 from flask import jsonify
-from flask.ext.restful import Resource, reqparse
+# from flask.ext.restful import Resource, reqparse
+from flask.ext.restplus import Resource, reqparse
 
 from helpers import *
 from . import app
