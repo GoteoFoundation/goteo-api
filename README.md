@@ -76,13 +76,13 @@ Or (extra packages added: goteoapi_reports, goteoapi_digests)
 Obtain a list of active projects:
 
 ```bash
-curl -i http://0.0.0.0:5000/projects
+curl -i --user "goteo:goteo" http://0.0.0.0:5000/projects
 ```
 
 Getting details for a custom project:
 
 ```bash
-curl -i http://0.0.0.0:5000/projects/057ce063ee014dee885b13840774463c
+curl -i --user "goteo:goteo" http://0.0.0.0:5000/projects/project-id
 ```
 
 Filtering some data, in this case, all projectes published starting in october 2015:
@@ -94,7 +94,7 @@ curl --user "goteo:goteo" -i -X GET -H "Content-Type: application/json" -d '{"fr
 Obtaining an error message:
 
 ```bash
-curl -i -X GET -H "Content-Type: application/json" http://0.0.0.0:5000/projects
+curl -i --user "goteo:goteo" -X GET -H "Content-Type: application/json" http://0.0.0.0:5000/projects/
 ```
 
 Response:
@@ -102,19 +102,25 @@ Response:
     HTTP/1.0 400 BAD REQUEST
     Content-Type: application/json
     Content-Length: 53
-    Server: Werkzeug/0.9.6 Python/2.7.6
-    Date: Sun, 05 Oct 2014 10:30:41 GMT
+    Access-Control-Allow-Origin: *
+    Access-Control-Allow-Credentials: true
+    Access-Control-Allow-Methods: POST, OPTIONS, GET
+    Access-Control-Allow-Headers: Authorization
+    Access-Control-Max-Age: 1
+    Server: Werkzeug/0.10.4 Python/2.7.6
+    Date: Mon, 01 Feb 2016 13:36:53 GMT
     
     {
-        "message": "Bad Request",
-        "error": 400
+        "message": "Bad Request", 
+        "status": 400
     }
+
 
 Check the full documentation here: https://developers.goteo.org/doc/
 
 ## Notes
 
-- Check version [versión 2.0](https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md) for swagger compatibility in the flask-restful-swagger (currently in 1.2).
+- Check version [version 2.0](https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md) for swagger compatibility in the flask-restful-swagger (currently in 1.2).
 
-Mor info here:
+More info here:
 https://github.com/rantav/flask-restful-swagger/issues/50#issuecomment-65641980
