@@ -90,6 +90,10 @@ class CategoriesListAPI(BaseList):
                     id: categories
                     items:
                         $ref: '#/definitions/api_categories_categories_list_get_Category'
+            400:
+                description: Invalid parameters format
+            # 404:
+            #     description: Resource not found
 
         """
         res = self._get()

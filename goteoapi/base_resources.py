@@ -40,14 +40,10 @@ def limit_sanitizer(limit):
 
 class Response():
     """Base response for Reports Endpoints"""
-    resource_fields = {}
 
     def __init__(self, attributes = {}, filters = {}, total = None, starttime = 0):
         self.ret = {}
-        for var in self.resource_fields.keys():
-            self.ret[var] = None
         for var, value in attributes.iteritems():
-            # if var in self.resource_fields:
             self.ret[var] = value
 
         meta = {}
@@ -83,16 +79,6 @@ class BaseItem(Resource):
 
     def option(self):
         pass
-
-    # For Swagger specification
-    RESPONSE_MESSAGES = [
-        {
-            "code": 404,
-            "message": "Item not found"
-        }
-    ]
-
-    INPUT_FILTERS = []
 
 class BaseList(Resource):
     """Base class for list enpoint reports"""
@@ -136,84 +122,3 @@ class BaseList(Resource):
                 args['lang'] = args['lang'][:2]
 
         return args
-
-
-    # For Swagger specification
-    RESPONSE_MESSAGES = [
-        {
-            "code": 400,
-            "message": "Invalid parameters"
-        },
-        {
-            "code": 404,
-            "message": "Item not found"
-        }
-    ]
-
-    INPUT_FILTERS = [
-        {
-            "paramType": "query",
-            "name": "project",
-            "description": "Filter by individual project(s). Multiple projects can be specified",
-            "required": False,
-            "dataType": "string",
-            "allowMultiple": True
-        },
-        {
-            "paramType": "query",
-            "name": "from_date",
-            "description": 'Filter from date. Ex. "2013-01-01"',
-            "required": False,
-            "dataType": "string"
-        },
-        {
-            "paramType": "query",
-            "name": "to_date",
-            "description": 'Filter until date.. Ex. "2014-01-01"',
-            "required": False,
-            "dataType": "string"
-        },
-        {
-            "paramType": "query",
-            "name": "node",
-            "description": 'Filter by individual node(s). Multiple nodes can be specified',
-            "required": False,
-            "dataType": "string"
-        },
-        {
-            "paramType": "query",
-            "name": "category",
-            "description": 'Filter by project category. Multiple categories can be specified',
-            "required": False,
-            "dataType": "integer"
-        },
-        {
-            "paramType": "query",
-            "name": "lang",
-            "description": 'Get results by specified lang. Multiple langs can be specified',
-            "required": False,
-            "dataType": "string"
-        },
-        {
-            "paramType": "query",
-            "name": "location",
-            "description": 'Filter by project location (Latitude,longitude,Radius in Km)',
-            "required": False,
-            "dataType": "string"
-        },
-        {
-            "paramType": "query",
-            "name": "page",
-            "description": 'Page number (starting at 1) if the result can be paginated',
-            "required": False,
-            "dataType": "integer"
-        },
-        {
-            "paramType": "query",
-            "name": "limit",
-            "description": 'Page limit (maximum 50 results, defaults to 10) if the result can be paginated',
-            "required": False,
-            "dataType": "integer"
-        },
-
-    ]

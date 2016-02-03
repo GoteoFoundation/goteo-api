@@ -93,6 +93,10 @@ class LicensesListAPI(BaseList):
                     id: licenses
                     items:
                         $ref: '#/definitions/api_licenses_licenses_list_get_License'
+            400:
+                description: Invalid parameters format
+            # 404:
+            #     description: Resource not found
 
         """
         res = self._get()
