@@ -5,8 +5,7 @@ import time
 from datetime import datetime as dtdatetime
 from dateutil.parser import parse
 from flask import jsonify
-# from flask.ext.restful import Resource, reqparse
-from flask.ext.restplus import Resource, reqparse
+from flask.ext.restful import Resource, reqparse
 
 from helpers import *
 from . import app
@@ -43,20 +42,20 @@ class Response():
     """Base response for Reports Endpoints"""
     resource_fields = {}
 
-    def __init__(self, attributes = {}, filters = {}, total = 0, starttime = 0):
+    def __init__(self, attributes = {}, filters = {}, total = None, starttime = 0):
         self.ret = {}
         for var in self.resource_fields.keys():
             self.ret[var] = None
         for var, value in attributes.iteritems():
-            if var in self.resource_fields:
-                self.ret[var] = value
+            # if var in self.resource_fields:
+            self.ret[var] = value
 
         meta = {}
         if filters:
             for k, v in filters:
                 if v is not None:
                     meta[k] = v
-        if total:
+        if total is not None:
             meta['total'] = int(total)
 
         if meta:

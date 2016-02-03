@@ -6,8 +6,8 @@
 """
 
 from flask import Flask
-# from flask.ext.restful import Api
-from flask.ext.restplus import Api
+from flask.ext.restful import Api
+from flasgger import Swagger
 from flask.ext.sqlalchemy import SQLAlchemy
 
 # DB class
@@ -53,6 +53,49 @@ else:
     # handler.setLevel(logging.ERROR)
     # app.logger.addHandler(handler)
 
-# api = swagger.docs(Api(app), apiVersion=app.config['VERSION'], description=app.config['DESCRIPTION'])
+# Swagger auto-yaml specification
 
-api = Api(app, version=app.config['VERSION'], description=app.config['DESCRIPTION'])
+# api = swagger.docs(Api(app), apiVersion=app.config['VERSION'], description=app.config['DESCRIPTION'])
+# config your API specs
+# you can define multiple specs in the case your api has multiple versions
+# ommit configs to get the default (all views exposed in /spec url)
+# rule_filter is a callable that receives "Rule" object and
+#   returns a boolean to filter in only desired views
+
+app.config['SWAGGER'] = {
+    "swagger_version": "2.0",
+    # headers are optional, the following are default
+    # "headers": [
+    #     ('Access-Control-Allow-Origin', '*'),
+    #     ('Access-Control-Allow-Headers', "Authorization, Content-Type"),
+    #     ('Access-Control-Expose-Headers', "Authorization"),
+    #     ('Access-Control-Allow-Methods', "GET, POST, PUT, DELETE, OPTIONS"),
+    #     ('Access-Control-Allow-Credentials', "true"),
+    #     ('Access-Control-Max-Age', 60 * 60 * 24 * 20),
+    # ],
+    # another optional settings
+    # "url_prefix": "swaggerdocs",
+    # "subdomain": "docs.mysite,com",
+    # specs are also optional if not set /spec is registered exposing all views
+    "specs": [
+        {
+            "version": app.config['VERSION'],
+            "title": app.config['DESCRIPTION'],
+            "description": app.config['DESCRIPTION'],
+            "endpoint": 'spec',
+            "route": '/api/spec.json',
+
+            # rule_filter is optional
+            # it is a callable to filter the views to extract
+
+            # "rule_filter": lambda rule: rule.endpoint.startswith(
+            #    'should_be_v1_only'
+            # )
+        }
+    ],
+    "static_url_path": "/api"
+}
+
+Swagger(app)
+
+api = Api(app)

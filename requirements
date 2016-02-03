@@ -1,7 +1,7 @@
 Flask
 Flask-Cache
 Flask-RESTful
-flask-restplus
+flasgger
 Flask-Redis
 Flask-SQLAlchemy
 Jinja2
