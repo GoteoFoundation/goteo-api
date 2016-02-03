@@ -97,7 +97,6 @@ class LicensesListAPI(BaseList):
                 description: Invalid parameters format
             # 404:
             #     description: Resource not found
-
         """
         res = self._get()
 
