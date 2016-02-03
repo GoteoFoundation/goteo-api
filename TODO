@@ -33,3 +33,17 @@ lend
 langs in costs, rewards, needs
 project donors pagination
 project donors total
+
+FILTERS:
+
+/projects/
+?endorsed_by = user1, user2, user3, …
+?owned_by = user1, user2, user3, …
+?funded_by = user1, user2, user3, …
+?status=funded, unfunded, in_campaign, fullfilled
+
+/users/
+?min_recommended = 1, 2, 3, ...
+?min_funded_amount = 10, 20, 30, …
+?min_funded_projects = 1, 2, 3, 4
+?min_owned = 1, 2, 3
