@@ -1,11 +1,20 @@
 # -*- coding: utf-8 -*-
 
 import time
-from flask.ext.restful import fields, marshal
+from flask.ext.restful import fields
 
 from ..decorators import *
+from ..helpers import marshal
 from ..base_resources import BaseList, Response
 from .models import Category
+
+category_resource_fields = {
+    "id"             : fields.String,
+    "name"           : fields.String,
+    "description"    : fields.String,
+    "total-projects" : fields.Integer,
+    "total-users"    : fields.Integer
+}
 
 class CategoriesListAPI(BaseList):
     """Category list"""
@@ -110,15 +119,8 @@ class CategoriesListAPI(BaseList):
         args = self.parse_args(remove=('page','limit'))
 
         items = []
-        resource_fields = {
-            "id"             : fields.String,
-            "name"           : fields.String,
-            "description"    : fields.String,
-            "total-projects" : fields.Integer,
-            "total-users"    : fields.Integer
-        }
         for u in Category.list(**args):
-            item = marshal(u, resource_fields)
+            item = marshal(u, category_resource_fields)
             project_filter = args.copy()
             project_filter['category'] = [item['id']]
             item['total-projects'] = Project.total(**project_filter)

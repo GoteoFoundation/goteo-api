@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import func, desc, Integer, String, Date
+from sqlalchemy import func, desc, Integer, String, Date, Boolean
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy import or_, and_, distinct
@@ -36,6 +36,7 @@ class Invest(db.Model):
     status = db.Column('status', Integer)
     amount = db.Column('amount', Integer)
     method = db.Column('method', String(20))
+    anonymous = db.Column('anonymous', Boolean)
     date_invested = db.Column('invested', Date)
     date_charged = db.Column('charged', Date)
     resign = db.Column('resign', Integer)

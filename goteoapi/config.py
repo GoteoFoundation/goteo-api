@@ -29,7 +29,7 @@ REDIS_URL = False
 # for types and configuration options
 CACHE = { 'CACHE_TYPE' : 'null' }
 # Minimun timeout for function caching
-CACHE_MIN_TIMEOUT = 30
+CACHE_MIN_TIMEOUT = 0
 
 # Use Http Authentication
 AUTH_ENABLED = False

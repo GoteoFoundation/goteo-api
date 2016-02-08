@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import time
-from flask.ext.restful import fields, marshal
+from flask.ext.restful import fields
 
 from ..decorators import *
+from ..helpers import marshal
 from ..base_resources import BaseItem, BaseList, Response
 from ..location.models import UserLocation
 from .models import User
@@ -12,15 +13,15 @@ user_resource_fields = {
     "id"                : fields.String,
     "name"              : fields.String,
     "node"              : fields.String,
-    "date-created"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
-    "profile-url"       : fields.String,
-    "profile-image-url" : fields.String,
+    "date_created"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
+    "profile_url"       : fields.String,
+    "profile_image_url" : fields.String,
     "latitude" : fields.Float,
     "longitude" : fields.Float
 }
 
 user_full_resource_fields = user_resource_fields.copy()
-# user_full_resource_fields["date-updated"] = fields.DateTime(dt_format='rfc822')
+# user_full_resource_fields["date_updated"] = fields.DateTime(dt_format='rfc822')
 
 class UsersListAPI(BaseList):
     """User list"""
@@ -125,9 +126,6 @@ class UsersListAPI(BaseList):
         items = []
         for u in User.list(**args):
             item = marshal(u, user_resource_fields)
-            item['date-created'] = u.date_created
-            item['profile-url'] = u.profile_url
-            item['profile-image-url'] = u.profile_image_url
             location = UserLocation.get(u.id)
             if location:
                 item['latitude'] = location.latitude
@@ -188,9 +186,6 @@ class UserAPI(BaseItem):
 
         item = marshal(u, user_full_resource_fields)
         if u != None:
-            item['date-created'] = u.date_created
-            item['profile-url'] = u.profile_url
-            item['profile-image-url'] = u.profile_image_url
             location = UserLocation.get(u.id)
             if location:
                 item['latitude'] = location.latitude

@@ -1,12 +1,27 @@
 # -*- coding: utf-8 -*-
 import datetime
 import pytz
-
 from flask import jsonify
-from . import app, db
+from flask.ext.restful import marshal as s_marshal
+
+from . import app
+
+def marshal(data, fields, envelope=None):
+    """
+    Processes a dictionary with values as described in
+    http://flask-restful-cn.readthedocs.org/en/latest/api.html#flask_restful.marshal
+
+    and changes all underscore symbol (_) to hyphen symbol (-)
+    """
+    if isinstance(data, (list, tuple)):
+        return [marshal(d, fields, envelope) for d in data]
+    m = s_marshal(data, fields, envelope)
+    if isinstance(m, dict):
+        return { k.replace("_", "-"): v for k, v in m.iteritems() }
+    return m
 
 def get_lang(obj, field, langs=[]):
-    """Searchs langs alternatives on a object in the form of:
+    """Searches alternatives langs on a object in the form of:
     {
         field:'original',
         field_en:'english translation',

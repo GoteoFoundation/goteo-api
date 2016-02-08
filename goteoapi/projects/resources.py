@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import time
-from flask.ext.restful import fields, marshal
+from flask.ext.restful import fields
 
 from ..decorators import *
+from ..helpers import marshal, image_url, utc_from_local, user_url, get_lang
+
 from ..base_resources import BaseItem, BaseList, Response
 from .models import Project, ProjectImage
 from ..users.models import User
@@ -16,12 +18,12 @@ from ..models.support import Support
 project_resource_fields = {
     "id"                : fields.String,
     "name"              : fields.String,
-    "description-short"              : fields.String,
+    "description_short"              : fields.String,
     "node"              : fields.String,
-    "date-created"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
-    "date-published"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
-    "project-url"       : fields.String,
-    "image-url" : fields.String,
+    "date_created"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
+    "date_published"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
+    "project_url"       : fields.String,
+    "image_url" : fields.String,
     "latitude" : fields.Float,
     "longitude" : fields.Float,
     "owner" : fields.String,
@@ -29,8 +31,8 @@ project_resource_fields = {
 }
 
 project_gallery_resource_fields = {
-    "image-url" : fields.String,
-    "resource-url" : fields.String,
+    "image_url" : fields.String,
+    "resource_url" : fields.String,
 }
 
 project_reward_resource_fields = {
@@ -47,8 +49,8 @@ project_cost_resource_fields = {
     "type"              : fields.String,
     "amount"              : fields.Float,
     "required"              : fields.String,
-    "from-date"              : fields.DateTime(dt_format='rfc822'),
-    "to-date"              : fields.DateTime(dt_format='rfc822'),
+    "date_from"              : fields.DateTime(dt_format='rfc822'),
+    "date_to"              : fields.DateTime(dt_format='rfc822'),
 }
 
 project_need_resource_fields = {
@@ -61,7 +63,7 @@ project_location_resource_fields = {
     "city"              : fields.String,
     "region"              : fields.String,
     "country"              : fields.String,
-    "country-code"              : fields.String,
+    "country_code"              : fields.String,
     "latitude" : fields.Float,
     "longitude" : fields.Float,
 }
@@ -69,37 +71,40 @@ project_location_resource_fields = {
 project_full_resource_fields = {
     "id"                : fields.String,
     "name"              : fields.String,
-    "description-short" : fields.String,
+    "description_short" : fields.String,
     "description" : fields.String,
     "motivation" : fields.String,
     "goal" : fields.String,
     "about" : fields.String,
     "lang" : fields.String,
     "currency" : fields.String,
-    "currency-rate" : fields.Float,
+    "currency_rate" : fields.Float,
     "minimum" : fields.Float,
     "optimum" : fields.Float,
     "amount" : fields.Float,
     "status" : fields.String,
     "node"              : fields.String,
-    "date-created"      : fields.DateTime(dt_format='rfc822'),
-    "date-published"    : fields.DateTime(dt_format='rfc822'),
-    "date-updated"    : fields.DateTime(dt_format='rfc822'),
-    "date-succeeded"    : fields.DateTime(dt_format='rfc822'),
-    "date-closed"    : fields.DateTime(dt_format='rfc822'),
-    "date-passed"    : fields.DateTime(dt_format='rfc822'),
+    "date_created"      : fields.DateTime(dt_format='rfc822'),
+    "date_published"    : fields.DateTime(dt_format='rfc822'),
+    "date_updated"    : fields.DateTime(dt_format='rfc822'),
+    "date_succeeded"    : fields.DateTime(dt_format='rfc822'),
+    "date_closed"    : fields.DateTime(dt_format='rfc822'),
+    "date_passed"    : fields.DateTime(dt_format='rfc822'),
     "location" : fields.List(fields.Nested(project_location_resource_fields)),
     "owner" : fields.String,
-    "project-url"       : fields.String,
-    "widget-url"       : fields.String,
-    "image-url" : fields.String,
-    "image-url-big" : fields.String,
-    "image-gallery" : fields.List(fields.Nested(project_gallery_resource_fields)),
-    "video-url" : fields.String,
+    "project_url"       : fields.String,
+    "widget_url"       : fields.String,
+    "image_url" : fields.String,
+    "image_url_big" : fields.String,
+    "image_gallery" : fields.List(fields.Nested(project_gallery_resource_fields)),
+    "video_url" : fields.String,
     "rewards" : fields.List(fields.Nested(project_reward_resource_fields)),
     "costs" : fields.List(fields.Nested(project_cost_resource_fields)),
     "needs" : fields.List(fields.Nested(project_need_resource_fields))
 }
+
+donor_resource_fields = user_resource_fields.copy()
+donor_resource_fields['anonymous'] = fields.Boolean
 
 class ProjectsListAPI(BaseList):
     """Project list"""
@@ -216,8 +221,6 @@ class ProjectsListAPI(BaseList):
         items = []
         for p in Project.list(**args):
             item = marshal(p, project_resource_fields)
-            item['date-created'] =p.date_created
-            item['date-published'] = p.date_published
             item['project-url'] = project_url(p.id)
             item['description-short'] = p.subtitle
             item['status'] = p.status_string
@@ -416,9 +419,9 @@ class ProjectAPI(BaseItem):
                         type: float
                     required:
                         type: string
-                    from-date:
+                    date-from:
                         type: string
-                    to-date:
+                    date-to:
                         type: string
             - schema:
                 id: ProjectNeed
@@ -457,24 +460,16 @@ class ProjectAPI(BaseItem):
 
         item = marshal(p, project_full_resource_fields)
         if p != None:
-            item['date-created'] = p.date_created
-            item['date-published'] = p.date_published
-            item['date-updated'] = p.date_updated
-            item['date-succeeded'] = p.date_success
-            item['date-closed'] = p.date_closed
-            item['date-passed'] = p.date_passed
             item['description-short'] = p.subtitle
             item['video-url'] = p.media
             item['image-url'] = image_url(p.image, 'medium', False)
             item['image-url-big'] = image_url(p.image, 'big', False)
             item['project-url'] = project_url(p.id)
             item['widget-url'] = project_widget_url(p.id)
-            item['currency-rate'] = p.currency_rate
             item['status'] = p.status_string
             location = ProjectLocation.get(p.id)
             if location:
                 item['location'] = [marshal(location, project_location_resource_fields)]
-                item['location'][0]['country-code'] = location.country_code
             gallery = ProjectImage.get(p.id)
             if gallery:
                 item['image-gallery'] = []
@@ -489,12 +484,7 @@ class ProjectAPI(BaseItem):
                 item['rewards'] = marshal(rewards, project_reward_resource_fields)
             costs = Cost.list_by_project(p.id)
             if costs:
-                item['costs'] = []
-                for i in costs:
-                    it = marshal(i, project_cost_resource_fields)
-                    it['from-date'] = i.date_from
-                    it['to-date'] = i.date_to
-                    item['costs'].append(it)
+                item['costs'] = marshal(costs, project_cost_resource_fields)
             needs = Support.list_by_project(p.id)
             if needs:
                 item['needs'] = marshal(needs, project_need_resource_fields)
@@ -572,20 +562,25 @@ class ProjectDonorsListAPI(BaseList):
         """Get()'s method dirty work"""
 
         time_start = time.time()
-        args = self.parse_args()
+        args = self.parse_args(remove=('location'))
 
         items = []
         for u in User.donors_by_project(project_id, **args):
-            item = marshal(u, user_resource_fields)
-            item['date-created'] = u.date_created
-            item['profile-url'] = u.profile_url
-            item['profile-image-url'] = u.profile_image_url
-            location = UserLocation.get(u.id)
-            if location:
-                item['latitude'] = location.latitude
-                item['longitude'] = location.longitude
-            items.append( item )
+            item = marshal(u, donor_resource_fields)
+            item['profile-image-url'] = image_url(u['avatar'])
+            item['profile-url'] = user_url(u['id'])
+            if u['anonymous']:
+                item['id'] = None
+                item['name'] = 'Anonymous'
+                item['profile-image-url'] = None
+                item['profile-url'] = None
+            else:
+                location = UserLocation.get(u['id'])
+                if location:
+                    item['latitude'] = location.latitude
+                    item['longitude'] = location.longitude
 
+            items.append( item )
         res = Response(
             starttime = time_start,
             attributes = {'items' : items},

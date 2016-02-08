@@ -1,11 +1,22 @@
 # -*- coding: utf-8 -*-
 
 import time
-from flask.ext.restful import fields, marshal
+from flask.ext.restful import fields
 
 from ..decorators import *
+from ..helpers import marshal
 from ..base_resources import BaseList, Response
 from .models import License
+
+license_resource_fields = {
+    "id"             : fields.String,
+    "name"           : fields.String,
+    "description"    : fields.String,
+    "url"            : fields.String,
+    "svg-url"        : fields.String,
+    "total-rewards"  : fields.Integer,
+    "total-projects" : fields.Integer
+}
 
 class LicensesListAPI(BaseList):
     """License API"""
@@ -112,18 +123,9 @@ class LicensesListAPI(BaseList):
         #removing not-needed standard filters
         args = self.parse_args(remove=('page','limit'))
 
-        resource_fields = {
-            "id"             : fields.String,
-            "name"           : fields.String,
-            "description"    : fields.String,
-            "url"            : fields.String,
-            "svg-url"        : fields.String,
-            "total-rewards"  : fields.Integer,
-            "total-projects" : fields.Integer
-        }
         items = []
         for u in License.list(**args):
-            item = marshal(u, resource_fields)
+            item = marshal(u, license_resource_fields)
             item['svg-url'] = svg_image_url(item['id'] + '.svg')
             reward_filter = args.copy()
             reward_filter['license_type'] = 'social'
