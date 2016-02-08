@@ -2,63 +2,114 @@
 
 import time
 from flask.ext.restful import fields, marshal
-from flask_restful_swagger import swagger
 
 from goteoapi.helpers import utc_from_local, image_url, project_url, percent
 from goteoapi.decorators import ratelimit, requires_auth
 
 from goteoapi.base_resources import BaseList as Base, Response
-from .projects import ProjectContribution
-from .community import CategoryUsers
-from .rewards import FavouriteRewards
+from .projects import contribution_resource_fields
+from .rewards import favourite_resource_fields
 
-@swagger.model
-@swagger.nested(**{
-                'categories'           : CategoryUsers.__name__,
-                'top10-collaborations' : ProjectContribution.__name__,
-                'top10-donations'      : ProjectContribution.__name__
-                }
-            )
-class SummaryResponse(Response):
-
-    resource_fields = {
-        "pledged"                : fields.Integer,
-        "matchfund-amount"       : fields.Integer,
-        "matchfundpledge-amount" : fields.Integer,
-        "average-donation"       : fields.Float,
-        "users"                  : fields.Integer,
-        "projects-received"      : fields.Integer,
-        "projects-published"     : fields.Integer,
-        "projects-successful"    : fields.Integer,
-        "projects-failed"        : fields.Integer,
-        "categories"             : fields.List(fields.Nested(CategoryUsers.resource_fields)),
-        "favorite-rewards"       : fields.List(fields.Nested(FavouriteRewards.resource_fields)),
-        "top10-collaborations"   : fields.List(fields.Nested(ProjectContribution.resource_fields)),
-        "top10-donations"        : fields.List(fields.Nested(ProjectContribution.resource_fields)),
-    }
-
-    required = resource_fields.keys()
-
-
-@swagger.model
 class SummaryAPI(Base):
     """Get sumarized Statistics"""
 
     def __init__(self):
         super(SummaryAPI, self).__init__()
 
-    @swagger.operation(
-        notes='Summary report',
-        responseClass=SummaryResponse.__name__,
-        nickname='projects',
-        parameters=Base.INPUT_FILTERS,
-        responseMessages=Base.RESPONSE_MESSAGES
-    )
     @requires_auth
     @ratelimit()
     def get(self):
-        """Get the Projects Report
-        <a href="http://developers.goteo.org/doc/reports#projects">developers.goteo.org/doc/reports#projects</a>
+        """
+        Summary Stats API
+        <a href="http://developers.goteo.org/doc/reports#summary">developers.goteo.org/doc/reports#summary</a>
+        This resource returns statistics about the summary in Goteo.
+        ---
+        tags:
+            - summary_reports
+        definitions:
+            - schema:
+                id: Summary
+                properties:
+                    pledged:
+                        type: integer
+                    matchfund-amount:
+                        type: integer
+                    matchfundpledge-amount:
+                        type: integer
+                    average-donation:
+                        type: number
+                    users:
+                        type: integer
+                    projects-received:
+                        type: integer
+                    projects-published:
+                        type: integer
+                    projects-successful:
+                        type: integer
+                    projects-failed:
+                        type: integer
+                    categories:
+                        type: array
+                        items:
+                            $ref: '#/definitions/api_reports_community_get_Category'
+                    favourite-rewards:
+                        type: array
+                        items:
+                            $ref: '#/definitions/api_reports_rewards_get_Favourite'
+                    top10-collaborations:
+                        type: array
+                        items:
+                            $ref: '#/definitions/api_reports_projects_get_ProjectContribution'
+                    top10-donations:
+                        type: array
+                        items:
+                            $ref: '#/definitions/api_reports_projects_get_ProjectContribution'
+
+        parameters:
+            - in: query
+              type: string
+              name: node
+              description: Filter by individual node(s). Multiple nodes can be specified
+              collectionFormat: multi
+            - in: query
+              name: project
+              description: Filter by individual project(s). Multiple projects can be specified
+              type: string
+              collectionFormat: multi
+            - in: query
+              name: from_date
+              description: Filter from date. Ex. "2013-01-01"
+              type: string
+              format: date
+            - in: query
+              name: to_date
+              description: Filter until date.. Ex. "2014-01-01"
+              type: string
+              format: date
+            - in: query
+              name: category
+              description: Filter by project category. Multiple projects can be specified
+              type: integer
+            - in: query
+              name: location
+              description: Filter by project location (Latitude,longitude,Radius in Km)
+              type: number
+              collectionFormat: csv
+            - in: query
+              name: page
+              description: Page number (starting at 1) if the result can be paginated
+              type: integer
+            - in: query
+              name: limit
+              description: Page limit (maximum 50 results, defaults to 10) if the result can be paginated
+              type: integer
+        responses:
+            200:
+                description: List of available projects
+                schema:
+                    $ref: '#/definitions/api_reports_summary_get_Summary'
+            400:
+                description: Invalid parameters format
         """
         ret = self._get()
         return ret.response()
@@ -77,7 +128,7 @@ class SummaryAPI(Base):
 
         top10_collaborations = []
         for u in Project.collaborated_list(**args):
-            item = marshal(u, ProjectContribution.resource_fields)
+            item = marshal(u, contribution_resource_fields)
             item['description-short'] = u['subtitle']
             item['video-url'] = u['media']
             item['date-published'] = utc_from_local(u['published'])
@@ -87,7 +138,7 @@ class SummaryAPI(Base):
 
         top10_donations = []
         for u in Project.donated_list(**args):
-            item = marshal(u, ProjectContribution.resource_fields)
+            item = marshal(u, contribution_resource_fields)
             item['description-short'] = u['subtitle']
             item['video-url'] = u['media']
             item['date-published'] = utc_from_local(u['published'])
@@ -98,13 +149,13 @@ class SummaryAPI(Base):
         users = User.total(**args)
         categorias = UserInterest.categories(**args)
 
-        favorites = []
-        for u in Reward.favorite_reward(**args):
-            item = marshal(u, FavouriteRewards.resource_fields)
-            favorites.append(item)
+        favourites = []
+        for u in Reward.favourite_reward(**args):
+            item = marshal(u, favourite_resource_fields)
+            favourites.append(item)
 
 
-        res = SummaryResponse(
+        res = Response(
             starttime = time_start,
             attributes = {
                 'pledged'                 : Invest.pledged_total(**args),
@@ -124,7 +175,7 @@ class SummaryAPI(Base):
                                                     }, categorias),
                 'top10-collaborations'    : top10_collaborations,
                 'top10-donations'         : top10_donations,
-                'favorite-rewards'        : favorites
+                'favourite-rewards'        : favourites
             },
             filters = args.items()
         )

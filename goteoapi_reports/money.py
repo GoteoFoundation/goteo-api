@@ -3,52 +3,125 @@
 import time
 
 from flask.ext.restful import fields
-from flask_restful_swagger import swagger
 
 from goteoapi.decorators import ratelimit, requires_auth
 from goteoapi.base_resources import BaseList, Response
 
-@swagger.model
-class MoneyResponse(Response):
-    """MoneyResponse"""
-
-    resource_fields = {
-        "average-failed"                : fields.Float,
-        "average-donation"              : fields.Float,
-        "average-donation-paypal"       : fields.Float,
-        "average-minimum"               : fields.Float,
-        "average-received"              : fields.Float,
-        "average-second-round"          : fields.Float,
-        "matchfund-amount"              : fields.Integer,
-        "matchfundpledge-amount"        : fields.Integer,
-        "cash-amount"                   : fields.Integer,
-        "pledged"                       : fields.Integer,
-        "percentage-pledged-failed"     : fields.Float,
-        "percentage-pledged-successful" : fields.Float,
-        "refunded"                      : fields.Integer,
-        "fee-amount"                    : fields.Float,
-        "paypal-amount"                 : fields.Integer,
-        "creditcard-amount"             : fields.Integer
-    }
-
-    required = resource_fields.keys()
+money_resource_fields = {
+    "average-failed"                : fields.Float,
+    "average-donation"              : fields.Float,
+    "average-donation-paypal"       : fields.Float,
+    "average-minimum"               : fields.Float,
+    "average-received"              : fields.Float,
+    "average-second-round"          : fields.Float,
+    "matchfund-amount"              : fields.Integer,
+    "matchfundpledge-amount"        : fields.Integer,
+    "cash-amount"                   : fields.Integer,
+    "pledged"                       : fields.Integer,
+    "percentage-pledged-failed"     : fields.Float,
+    "percentage-pledged-successful" : fields.Float,
+    "refunded"                      : fields.Integer,
+    "fee-amount"                    : fields.Float,
+    "paypal-amount"                 : fields.Integer,
+    "creditcard-amount"             : fields.Integer
+}
 
 
 class MoneyAPI(BaseList):
-    """Get Money Statistics"""
+    """Money Statistics"""
 
-    @swagger.operation(
-        notes='Money report',
-        nickname='money',
-        responseClass=MoneyResponse.__name__,
-        parameters=BaseList.INPUT_FILTERS,
-        responseMessages=BaseList.RESPONSE_MESSAGES
-    )
     @requires_auth
     @ratelimit()
     def get(self):
-        """Get the Money Report
+        """
+        Money Stats API
         <a href="http://developers.goteo.org/doc/reports#money">developers.goteo.org/doc/reports#money</a>
+        This resource returns statistics about money in Goteo.
+        ---
+        tags:
+            - money_reports
+        definitions:
+            - schema:
+                id: Money
+                properties:
+                    average-failed:
+                        type: number
+                    average-donation:
+                        type: number
+                    average-donation-paypal:
+                        type: number
+                    average-minimum:
+                        type: number
+                    average-received:
+                        type: number
+                    average-second-round:
+                        type: number
+                    matchfund-amount:
+                        type: integer
+                    matchfundpledge-amount:
+                        type: integer
+                    cash-amount:
+                        type: integer
+                    pledged:
+                        type: integer
+                    percentage-pledged-failed:
+                        type: number
+                    percentage-pledged-successful:
+                        type: number
+                    refunded:
+                        type: integer
+                    fee-amount:
+                        type: number
+                    paypal-amount:
+                        type: integer
+                    creditcard-amount:
+                        type: integer
+
+        parameters:
+            - in: query
+              type: string
+              name: node
+              description: Filter by individual node(s). Multiple nodes can be specified
+              collectionFormat: multi
+            - in: query
+              name: project
+              description: Filter by individual project(s). Multiple projects can be specified
+              type: string
+              collectionFormat: multi
+            - in: query
+              name: from_date
+              description: Filter from date. Ex. "2013-01-01"
+              type: string
+              format: date
+            - in: query
+              name: to_date
+              description: Filter until date.. Ex. "2014-01-01"
+              type: string
+              format: date
+            - in: query
+              name: category
+              description: Filter by project category. Multiple projects can be specified
+              type: integer
+            - in: query
+              name: location
+              description: Filter by project location (Latitude,longitude,Radius in Km)
+              type: number
+              collectionFormat: csv
+            - in: query
+              name: page
+              description: Page number (starting at 1) if the result can be paginated
+              type: integer
+            - in: query
+              name: limit
+              description: Page limit (maximum 50 results, defaults to 10) if the result can be paginated
+              type: integer
+        responses:
+            200:
+                description: List of available projects
+                schema:
+                    $ref: '#/definitions/api_reports_money_get_Money'
+            400:
+                description: Invalid parameters format
         """
         ret = self._get()
         return ret.response()
@@ -64,7 +137,7 @@ class MoneyAPI(BaseList):
         #remove not used arguments
         args = self.parse_args(remove=('page','limit'))
 
-        res = MoneyResponse(
+        res = Response(
             starttime = time_start,
             attributes = {
                 # Dinero comprometido: Suma recaudada por la plataforma

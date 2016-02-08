@@ -2,86 +2,166 @@
 
 import time
 from flask.ext.restful import fields, marshal
-from flask_restful_swagger import swagger
 
 from goteoapi.decorators import ratelimit, requires_auth
 from goteoapi.helpers import utc_from_local, image_url, project_url, percent
 from goteoapi.base_resources import BaseList as Base, Response
 
-@swagger.model
-class ProjectContribution:
-    resource_fields = {
-        'project'  : fields.String,
-        'name'  : fields.String,
-        'project-url'  : fields.String,
-        'description-short'  : fields.String,
-        'image-url'  : fields.String,
-        'video-url'  : fields.String,
-        'date-published'  : fields.DateTime(dt_format='rfc822'),
-        'total' : fields.Integer
-    }
-    required = resource_fields.keys()
+contribution_resource_fields = {
+    'project'  : fields.String,
+    'name'  : fields.String,
+    'project-url'  : fields.String,
+    'description-short'  : fields.String,
+    'image-url'  : fields.String,
+    'video-url'  : fields.String,
+    'date-published'  : fields.DateTime(dt_format='rfc822'),
+    'total' : fields.Integer
+}
 
-@swagger.model
-class ProjectAmount:
-    resource_fields = {
-        'project'   : fields.String,
-        'name'   : fields.String,
-        'project-url'   : fields.String,
-        'description-short'  : fields.String,
-        'image-url'  : fields.String,
-        'video-url'  : fields.String,
-        'date-published'  : fields.DateTime(dt_format='rfc822'),
-        'amount' : fields.Float
-    }
-    required = resource_fields.keys()
+amount_resource_fields = {
+    'project'   : fields.String,
+    'name'   : fields.String,
+    'project-url'   : fields.String,
+    'description-short'  : fields.String,
+    'image-url'  : fields.String,
+    'video-url'  : fields.String,
+    'date-published'  : fields.DateTime(dt_format='rfc822'),
+    'amount' : fields.Float
+}
 
-@swagger.model
-@swagger.nested(**{
-                'top10-collaborations' : ProjectContribution.__name__,
-                'top10-donations'      : ProjectContribution.__name__,
-                'top10-receipts'       : ProjectAmount.__name__
-                }
-            )
-class ProjectsResponse(Response):
-
-    resource_fields = {
-        "failed"                         : fields.Integer,
-        "published"                      : fields.Integer,
-        "received"                       : fields.Integer,
-        "successful"                     : fields.Integer,
-        "successful-completed"           : fields.Integer,
-        "percentage-successful"          : fields.Float,
-        "percentage-successful-completed": fields.Float,
-        "average-amount-successful"      : fields.Float,
-        "top10-collaborations"           : fields.List(fields.Nested(ProjectContribution.resource_fields)),
-        "top10-donations"                : fields.List(fields.Nested(ProjectContribution.resource_fields)),
-        "top10-receipts"                 : fields.List(fields.Nested(ProjectAmount.resource_fields)),
-        "average-posts-successful"       : fields.Float
-    }
-
-    required = resource_fields.keys()
-
-
-@swagger.model
 class ProjectsAPI(Base):
-    """Get Projects Statistics"""
+    """Projects Statistics"""
 
     def __init__(self):
         super(ProjectsAPI, self).__init__()
 
-    @swagger.operation(
-        notes='Projects report',
-        responseClass=ProjectsResponse.__name__,
-        nickname='projects',
-        parameters=Base.INPUT_FILTERS,
-        responseMessages=Base.RESPONSE_MESSAGES
-    )
     @requires_auth
     @ratelimit()
     def get(self):
-        """Get the Projects Report
+        """
+        Projects Stats API
         <a href="http://developers.goteo.org/doc/reports#projects">developers.goteo.org/doc/reports#projects</a>
+        This resource returns statistics about projects in Goteo.
+        ---
+        tags:
+            - project_reports
+        definitions:
+            - schema:
+                id: ProjectContribution
+                properties:
+                    project:
+                        type: string
+                    name:
+                        type: string
+                    project-url:
+                        type: string
+                    description-short:
+                        type: string
+                    image-url:
+                        type: string
+                    video-url:
+                        type: string
+                    date-published:
+                        type: string
+                    total:
+                        type: integer
+            - schema:
+                id: ProjectAmount
+                properties:
+                    project:
+                        type: string
+                    name:
+                        type: string
+                    project-url:
+                        type: string
+                    description-short:
+                        type: string
+                    image-url:
+                        type: string
+                    video-url:
+                        type: string
+                    date-published:
+                        type: string
+                    total:
+                        type: integer
+            - schema:
+                id: Project
+                properties:
+                    failed:
+                        type: integer
+                    published:
+                        type: integer
+                    received:
+                        type: integer
+                    successful:
+                        type: integer
+                    successful:
+                        type: integer
+                    percentage:
+                        type: number
+                    percentage:
+                        type: number
+                    average-amount:
+                        type: number
+                    top10-collaborations:
+                        type: array
+                        items:
+                            $ref: '#/definitions/api_reports_projects_get_ProjectContribution'
+                    top10-donations:
+                        type: array
+                        items:
+                            $ref: '#/definitions/api_reports_projects_get_ProjectContribution'
+                    top10-receipts:
+                        type: array
+                        items:
+                            $ref: '#/definitions/api_reports_projects_get_ProjectAmount'
+                    average-posts:
+                        type: number
+        parameters:
+            - in: query
+              type: string
+              name: node
+              description: Filter by individual node(s). Multiple nodes can be specified.
+              collectionFormat: multi
+            - in: query
+              name: project
+              description: Filter by individual project(s). Multiple projects can be specified
+              type: string
+              collectionFormat: multi
+            - in: query
+              name: from_date
+              description: Filter from date. Ex. "2013-01-01"
+              type: string
+              format: date
+            - in: query
+              name: to_date
+              description: Filter until date.. Ex. "2014-01-01"
+              type: string
+              format: date
+            - in: query
+              name: category
+              description: Filter by project category. Multiple projects can be specified
+              type: integer
+            - in: query
+              name: location
+              description: Filter by project location (Latitude,longitude,Radius in Km)
+              type: number
+              collectionFormat: csv
+            - in: query
+              name: page
+              description: Page number (starting at 1) if the result can be paginated
+              type: integer
+            - in: query
+              name: limit
+              description: Page limit (maximum 50 results, defaults to 10) if the result can be paginated
+              type: integer
+        responses:
+            200:
+                description: List of available projects
+                schema:
+                    $ref: '#/definitions/api_reports_projects_get_Project'
+            400:
+                description: Invalid parameters format
         """
         ret = self._get()
         return ret.response()
@@ -101,7 +181,7 @@ class ProjectsAPI(Base):
 
         top10_collaborations = []
         for u in Project.collaborated_list(**args):
-            item = marshal(u, ProjectContribution.resource_fields)
+            item = marshal(u, contribution_resource_fields)
             item['description-short'] = u['subtitle']
             item['video-url'] = u['media']
             item['date-published'] = utc_from_local(u['published'])
@@ -111,7 +191,7 @@ class ProjectsAPI(Base):
 
         top10_donations = []
         for u in Project.donated_list(**args):
-            item = marshal(u, ProjectContribution.resource_fields)
+            item = marshal(u, contribution_resource_fields)
             item['description-short'] = u['subtitle']
             item['video-url'] = u['media']
             item['date-published'] = utc_from_local(u['published'])
@@ -121,7 +201,7 @@ class ProjectsAPI(Base):
 
         top10_receipts = []
         for u in Project.received_list(finished=True, **args):
-            item = marshal(u, ProjectAmount.resource_fields)
+            item = marshal(u, amount_resource_fields)
             item['description-short'] = u['subtitle']
             item['video-url'] = u['media']
             item['date-published'] = utc_from_local(u['published'])
@@ -129,7 +209,7 @@ class ProjectsAPI(Base):
             item['project-url'] = project_url(u['project'])
             top10_receipts.append(item)
 
-        res = ProjectsResponse(
+        res = Response(
             starttime = time_start,
             attributes = {
                 'received'                       : Project.total(received=True, **args),

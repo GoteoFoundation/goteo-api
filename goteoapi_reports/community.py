@@ -3,88 +3,34 @@
 import time
 
 from flask.ext.restful import fields, marshal
-from flask_restful_swagger import swagger
-
 from goteoapi.decorators import ratelimit, requires_auth
 from goteoapi.helpers import image_url, user_url, percent
 
 from goteoapi.base_resources import BaseList as Base, Response
 
-@swagger.model
-class CategoryUsers:
-    resource_fields = {
-        'id'              : fields.Integer,
-        'name'            : fields.String,
-        'percentage-users': fields.Float,
-        'users'           : fields.Integer
-    }
-    required = resource_fields.keys()
+category_resource_fields = {
+    'id'              : fields.Integer,
+    'name'            : fields.String,
+    'percentage-users': fields.Float,
+    'users'           : fields.Integer
+}
 
-@swagger.model
-class UserDonation:
-    resource_fields = {
-        'user'         : fields.String,
-        'name'              : fields.String,
-        'profile-image-url' : fields.String,
-        'profile-url' : fields.String,
-        'amount'       : fields.Float,
-        'contributions': fields.Integer
-    }
-    required = resource_fields.keys()
+donation_resource_fields = {
+    'user'         : fields.String,
+    'name'              : fields.String,
+    'profile-image-url' : fields.String,
+    'profile-url' : fields.String,
+    'amount'       : fields.Float,
+    'contributions': fields.Integer
+}
 
-@swagger.model
-class UserCollaboration:
-    resource_fields = {
-        'user'              : fields.String,
-        'name'              : fields.String,
-        'profile-image-url' : fields.String,
-        'profile-url' : fields.String,
-        'interactions'      : fields.Integer
-    }
-    required = resource_fields.keys()
-
-@swagger.model
-@swagger.nested(**{
-                'categories'         : CategoryUsers.__name__,
-                'top10-donors'       : UserDonation.__name__,
-                'top10-multidonors'  : UserDonation.__name__,
-                'top10-collaborators': UserCollaboration.__name__
-                }
-            )
-class CommunityResponse(Response):
-    """CommunityResponse"""
-
-    resource_fields = {
-        "users"                            : fields.Integer,
-        "donors"                           : fields.Integer,
-        "percentage-donors-users"          : fields.Float,
-        "percentage-unsubscribed-users"    : fields.Float,
-        "donors-collaborators"             : fields.Integer,
-        "multidonors"                      : fields.Integer,
-        "percentage-multidonor-donors"     : fields.Float,
-        "percentage-multidonor-users"      : fields.Float,
-        "paypal-donors"                    : fields.Integer,
-        "creditcard-donors"                : fields.Integer,
-        "cash-donors"                      : fields.Integer,
-        "collaborators"                    : fields.Integer,
-        'average-donors'                   : fields.Integer,
-        'average-collaborators'            : fields.Integer,
-        'creators-donors'                  : fields.Integer,
-        'creators-collaborators'           : fields.Integer,
-        'leading-category'                 : fields.Integer,
-        'second-category'                  : fields.Integer,
-        'users-leading-category'           : fields.Integer,
-        'users-second-category'            : fields.Integer,
-        'percentage-users-leading-category': fields.Float,
-        'percentage-users-second-category' : fields.Float,
-        'categories'                       : fields.List(fields.Nested(CategoryUsers.resource_fields)),
-        "top10-donors"                     : fields.List(fields.Nested(UserDonation.resource_fields)),
-        "top10-multidonors"                : fields.List(fields.Nested(UserDonation.resource_fields)),
-        "top10-collaborators"              : fields.List(fields.Nested(UserCollaboration.resource_fields))
-    }
-
-    required = resource_fields.keys()
-
+collaboration_resource_fields = {
+    'user'              : fields.String,
+    'name'              : fields.String,
+    'profile-image-url' : fields.String,
+    'profile-url' : fields.String,
+    'interactions'      : fields.Integer
+}
 
 class CommunityAPI(Base):
     """Get Community Statistics"""
@@ -92,18 +38,164 @@ class CommunityAPI(Base):
     def __init__(self):
         super(CommunityAPI, self).__init__()
 
-    @swagger.operation(
-        notes='Community report',
-        responseClass=CommunityResponse.__name__,
-        nickname='community',
-        parameters=Base.INPUT_FILTERS,
-        responseMessages=Base.RESPONSE_MESSAGES
-    )
     @requires_auth
     @ratelimit()
     def get(self):
-        """Get the community reports
+        """
+        Community Stats API
         <a href="http://developers.goteo.org/doc/reports#community">developers.goteo.org/doc/reports#community</a>
+        This resource returns statistics about the community in Goteo.
+        ---
+        tags:
+            - community_reports
+        definitions:
+            - schema:
+                id: Category
+                properties:
+                    id:
+                        type: integer
+                    name:
+                        type: string
+                    percentage-users:
+                        type: number
+                    users:
+                        type: integer
+            - schema:
+                id: Donation
+                properties:
+                    user:
+                        type: string
+                    name:
+                        type: string
+                    profile-image-url:
+                        type: string
+                    profile-url:
+                        type: string
+                    amount:
+                        type: number
+                    contributions:
+                        type: integer
+            - schema:
+                id: Collaboration
+                properties:
+                    user:
+                        type: string
+                    name:
+                        type: string
+                    profile-image-url:
+                        type: string
+                    profile-url:
+                        type: string
+                    interactions:
+                        type: integer
+            - schema:
+                id: Community
+                properties:
+                    users:
+                        type: integer
+                    donors:
+                        type: integer
+                    percentage-donors-users:
+                        type: number
+                    percentage-unsubscribed-users:
+                        type: number
+                    donors-collaborators:
+                        type: integer
+                    multidonors:
+                        type: integer
+                    percentage-multidonor-donors:
+                        type: number
+                    percentage-multidonor-users:
+                        type: number
+                    paypal-donors:
+                        type: integer
+                    creditcard-donors:
+                        type: integer
+                    cash-donors:
+                        type: integer
+                    collaborators:
+                        type: integer
+                    average-donors:
+                        type: integer
+                    average-collaborators:
+                        type: integer
+                    creators-donors:
+                        type: integer
+                    creators-collaborators:
+                        type: integer
+                    leading-category:
+                        type: integer
+                    second-category:
+                        type: integer
+                    users-leading-category:
+                        type: integer
+                    users-second-category:
+                        type: integer
+                    percentage-users-leading-category:
+                        type: number
+                    percentage-users-second-category:
+                        type: number
+                    categories:
+                        type: array
+                        items:
+                            $ref: '#/definitions/api_reports_community_get_Category'
+                    top10-donors:
+                        type: array
+                        items:
+                            $ref: '#/definitions/api_reports_community_get_Donation'
+                    top10-multidonors:
+                        type: array
+                        items:
+                            $ref: '#/definitions/api_reports_community_get_Donation'
+                    top10-collaborators:
+                        type: array
+                        items:
+                            $ref: '#/definitions/api_reports_community_get_Collaboration'
+        parameters:
+            - in: query
+              type: string
+              name: node
+              description: Filter by individual node(s). Multiple nodes can be specified
+              collectionFormat: multi
+            - in: query
+              name: project
+              description: Filter by individual project(s). Multiple projects can be specified
+              type: string
+              collectionFormat: multi
+            - in: query
+              name: from_date
+              description: Filter from date. Ex. "2013-01-01"
+              type: string
+              format: date
+            - in: query
+              name: to_date
+              description: Filter until date.. Ex. "2014-01-01"
+              type: string
+              format: date
+            - in: query
+              name: category
+              description: Filter by project category. Multiple projects can be specified
+              type: integer
+            - in: query
+              name: location
+              description: Filter by project location (Latitude,longitude,Radius in Km)
+              type: number
+              collectionFormat: csv
+            - in: query
+              name: page
+              description: Page number (starting at 1) if the result can be paginated
+              type: integer
+            - in: query
+              name: limit
+              description: Page limit (maximum 50 results, defaults to 10) if the result can be paginated
+              type: integer
+        responses:
+            200:
+                description: List of available projects
+                schema:
+                    $ref: '#/definitions/api_reports_community_get_Community'
+            400:
+                description: Invalid parameters format
         """
         ret = self._get()
         return ret.response()
@@ -137,26 +229,26 @@ class CommunityAPI(Base):
 
         top10_multidonors = []
         for u in Invest.multidonors_list(**args):
-            item = marshal(u, UserDonation.resource_fields)
+            item = marshal(u, donation_resource_fields)
             item['profile-image-url'] = image_url(u['avatar'])
             item['profile-url'] = user_url(u['id'])
             top10_multidonors.append(item)
 
         top10_donors = []
         for u in Invest.donors_list(**args):
-            item = marshal(u, UserDonation.resource_fields)
+            item = marshal(u, donation_resource_fields)
             item['profile-image-url'] = image_url(u['avatar'])
             item['profile-url'] = user_url(u['id'])
             top10_donors.append(item)
 
         top10_collaborations = []
         for u in Message.collaborators_list(**args):
-            item = marshal(u, UserCollaboration.resource_fields)
+            item = marshal(u, collaboration_resource_fields)
             item['profile-image-url'] = image_url(u['avatar'])
             item['profile-url'] = user_url(u['id'])
             top10_collaborations.append(item)
 
-        res = CommunityResponse(
+        res = Response(
             starttime = time_start,
             attributes = {
                 'users'                             : users,
