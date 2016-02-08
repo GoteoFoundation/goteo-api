@@ -55,7 +55,8 @@ DEFAULT_DB_LANG = 'es'
 
 # Some usefull links
 LINKS = {
-	'Swagger Interface' : '/apidocs/index.html'
+    'Swagger Interface' : '/api/spec.json',
+    'Swagger Documentation' : '/api/index.html'
 }
 
 # Built-in Users Authentication
@@ -65,6 +66,6 @@ USERS = {
 }
 
 # Api version
-VERSION = 1.1
+VERSION = "1.1"
 
 

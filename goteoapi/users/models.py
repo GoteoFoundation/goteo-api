@@ -135,16 +135,34 @@ class User(db.Model):
 
     @hybrid_method
     @cacher
-    def donors_by_project(self, project_id):
+    def donors_by_project(self, project_id, **kwargs):
         """Get a list of valid donors for project"""
         try:
-            filters = self.get_filters()
+            limit = kwargs['limit'] if 'limit' in kwargs else 10
+            page = kwargs['page'] if 'page' in kwargs else 0
+            del kwargs['project']
+            filters = list(self.get_filters(**kwargs))
             filters.append(Invest.user==self.id)
             filters.append(Invest.project==project_id)
-            return self.query.distinct().filter(*filters).all()
+            return self.query.distinct().filter(*filters).order_by(asc(self.id)).offset(page * limit).limit(limit).all()
         except NoResultFound:
             return []
 
+    @hybrid_method
+    @cacher
+    def donors_by_project_total(self, project_id, **kwargs):
+        """Returns the total number of valid of valid donors for project"""
+        try:
+            del kwargs['project']
+            filters = list(self.get_filters(**kwargs))
+            filters.append(Invest.user==self.id)
+            filters.append(Invest.project==project_id)
+            count = db.session.query(func.count(distinct(self.id))).filter(*filters).scalar()
+            if count is None:
+                count = 0
+            return count
+        except MultipleResultsFound:
+            return 0
 
 #User roles
 class UserRole(db.Model):

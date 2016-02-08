@@ -57,7 +57,6 @@ class UsersListAPI(BaseList):
                     date-created:
                         type: string
                         description: Date when the user was created RFC822 format
-
         parameters:
             - in: query
               type: string
