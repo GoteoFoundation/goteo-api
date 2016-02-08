@@ -1,178 +1,109 @@
 # -*- coding: utf-8 -*-
 
 import time
-
 from flask.ext.restful import fields, marshal
-from flask_restful_swagger import swagger
 
 from ..decorators import *
 from ..base_resources import BaseItem, BaseList, Response
-
 from .models import Project, ProjectImage
 from ..users.models import User
-from ..users.resources import UserResponse, UsersListResponse
+from ..users.resources import user_resource_fields
 from ..location.models import ProjectLocation, UserLocation
 from ..models.reward import Reward
 from ..models.cost import Cost
 from ..models.support import Support
 
-@swagger.model
-class ProjectResponse(Response):
-    """ProjectResponse"""
+project_resource_fields = {
+    "id"                : fields.String,
+    "name"              : fields.String,
+    "description-short"              : fields.String,
+    "node"              : fields.String,
+    "date-created"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
+    "date-published"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
+    "project-url"       : fields.String,
+    "image-url" : fields.String,
+    "latitude" : fields.Float,
+    "longitude" : fields.Float,
+    "owner" : fields.String,
+    "status" : fields.String,
+}
 
-    resource_fields = {
-        "id"                : fields.String,
-        "name"              : fields.String,
-        "description-short"              : fields.String,
-        "node"              : fields.String,
-        "date-created"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
-        "date-published"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
-        "project-url"       : fields.String,
-        "image-url" : fields.String,
-        "latitude" : fields.Float,
-        "longitude" : fields.Float,
-        "owner" : fields.String,
-        "status" : fields.String,
-    }
+project_gallery_resource_fields = {
+    "image-url" : fields.String,
+    "resource-url"              : fields.String,
+}
 
-    required = resource_fields.keys()
+project_reward_resource_fields = {
+    "reward" : fields.String,
+    "description"              : fields.String,
+    "license"              : fields.String,
+    "type"              : fields.String,
+    "icon"              : fields.String,
+}
 
-@swagger.model
-class ProjectGalleryResponse(Response):
-    """ProjectGalleryResponse"""
+project_cost_resource_fields = {
+    "cost" : fields.String,
+    "description"              : fields.String,
+    "type"              : fields.String,
+    "amount"              : fields.Float,
+    "required"              : fields.String,
+    "from-date"              : fields.DateTime(dt_format='rfc822'),
+    "to-date"              : fields.DateTime(dt_format='rfc822'),
+}
 
-    resource_fields = {
-        "image-url" : fields.String,
-        "resource-url"              : fields.String,
-    }
+project_need_resource_fields = {
+    "support" : fields.String,
+    "description"              : fields.String,
+    "type"              : fields.String,
+}
 
-    required = resource_fields.keys()
+project_location_resource_fields = {
+    "city"              : fields.String,
+    "region"              : fields.String,
+    "country"              : fields.String,
+    "country-code"              : fields.String,
+    "latitude" : fields.Float,
+    "longitude" : fields.Float,
+}
 
-@swagger.model
-class ProjectRewardResponse(Response):
-    """ProjectRewardResponse"""
-
-    resource_fields = {
-        "reward" : fields.String,
-        "description"              : fields.String,
-        "license"              : fields.String,
-        "type"              : fields.String,
-        "icon"              : fields.String,
-    }
-
-    required = resource_fields.keys()
-
-@swagger.model
-class ProjectCostResponse(Response):
-    """ProjectNeedResponse"""
-
-    resource_fields = {
-        "cost" : fields.String,
-        "description"              : fields.String,
-        "type"              : fields.String,
-        "amount"              : fields.Float,
-        "required"              : fields.String,
-        "from-date"              : fields.DateTime(dt_format='rfc822'),
-        "to-date"              : fields.DateTime(dt_format='rfc822'),
-    }
-
-    required = resource_fields.keys()
-
-@swagger.model
-class ProjectNeedResponse(Response):
-    """ProjectNeedResponse"""
-
-    resource_fields = {
-        "support" : fields.String,
-        "description"              : fields.String,
-        "type"              : fields.String,
-    }
-
-    required = resource_fields.keys()
-
-@swagger.model
-class ProjectLocationResponse(Response):
-    """ProjectLocationResponse"""
-
-    resource_fields = {
-        "city"              : fields.String,
-        "region"              : fields.String,
-        "country"              : fields.String,
-        "country-code"              : fields.String,
-        "latitude" : fields.Float,
-        "longitude" : fields.Float,
-    }
-
-    required = resource_fields.keys()
-
-
-@swagger.model
-class ProjectCompleteResponse(Response):
-    """ProjectCompleteResponse"""
-
-    resource_fields = {
-        "id"                : fields.String,
-        "name"              : fields.String,
-        "description-short" : fields.String,
-        "description" : fields.String,
-        "motivation" : fields.String,
-        "goal" : fields.String,
-        "about" : fields.String,
-        "lang" : fields.String,
-        "currency" : fields.String,
-        "currency-rate" : fields.Float,
-        "minimum" : fields.Float,
-        "optimum" : fields.Float,
-        "amount" : fields.Float,
-        "status" : fields.String,
-        "node"              : fields.String,
-        "date-created"      : fields.DateTime(dt_format='rfc822'),
-        "date-published"    : fields.DateTime(dt_format='rfc822'),
-        "date-updated"    : fields.DateTime(dt_format='rfc822'),
-        "date-succeeded"    : fields.DateTime(dt_format='rfc822'),
-        "date-closed"    : fields.DateTime(dt_format='rfc822'),
-        "date-passed"    : fields.DateTime(dt_format='rfc822'),
-        "location" : fields.List(fields.Nested(ProjectLocationResponse.resource_fields)),
-        "owner" : fields.String,
-        "project-url"       : fields.String,
-        "widget-url"       : fields.String,
-        "image-url" : fields.String,
-        "image-url-big" : fields.String,
-        "image-gallery" : fields.List(fields.Nested(ProjectGalleryResponse.resource_fields)),
-        "video-url" : fields.String,
-        "rewards" : fields.List(fields.Nested(ProjectRewardResponse.resource_fields)),
-        "costs" : fields.List(fields.Nested(ProjectCostResponse.resource_fields)),
-        "needs" : fields.List(fields.Nested(ProjectNeedResponse.resource_fields)),
-    }
-
-    required = resource_fields.keys()
-
-@swagger.model
-@swagger.nested(**{
-                'items' : ProjectResponse.__name__,
-                }
-            )
-class ProjectsListResponse(Response):
-    """ProjectsListResponse"""
-
-    resource_fields = {
-        "items"         : fields.List(fields.Nested(ProjectResponse.resource_fields)),
-    }
-
-    required = resource_fields.keys()
-
+project_full_resource_fields = {
+    "id"                : fields.String,
+    "name"              : fields.String,
+    "description-short" : fields.String,
+    "description" : fields.String,
+    "motivation" : fields.String,
+    "goal" : fields.String,
+    "about" : fields.String,
+    "lang" : fields.String,
+    "currency" : fields.String,
+    "currency-rate" : fields.Float,
+    "minimum" : fields.Float,
+    "optimum" : fields.Float,
+    "amount" : fields.Float,
+    "status" : fields.String,
+    "node"              : fields.String,
+    "date-created"      : fields.DateTime(dt_format='rfc822'),
+    "date-published"    : fields.DateTime(dt_format='rfc822'),
+    "date-updated"    : fields.DateTime(dt_format='rfc822'),
+    "date-succeeded"    : fields.DateTime(dt_format='rfc822'),
+    "date-closed"    : fields.DateTime(dt_format='rfc822'),
+    "date-passed"    : fields.DateTime(dt_format='rfc822'),
+    "location" : fields.List(fields.Nested(project_location_resource_fields)),
+    "owner" : fields.String,
+    "project-url"       : fields.String,
+    "widget-url"       : fields.String,
+    "image-url" : fields.String,
+    "image-url-big" : fields.String,
+    "image-gallery" : fields.List(fields.Nested(project_gallery_resource_fields)),
+    "video-url" : fields.String,
+    "rewards" : fields.List(fields.Nested(project_reward_resource_fields)),
+    "costs" : fields.List(fields.Nested(project_cost_resource_fields)),
+    "needs" : fields.List(fields.Nested(project_need_resource_fields)),
+}
 
 class ProjectsListAPI(BaseList):
     """Get Project list"""
 
-
-    @swagger.operation(
-        notes='Projects list',
-        nickname='projects',
-        responseClass=ProjectsListResponse.__name__,
-        parameters=BaseList.INPUT_FILTERS,
-        responseMessages=BaseList.RESPONSE_MESSAGES
-    )
     @requires_auth
     @ratelimit()
     def get(self):
@@ -180,9 +111,6 @@ class ProjectsListAPI(BaseList):
         <a href="http://developers.goteo.org/doc/projects">developers.goteo.org/doc/projects</a>
         """
         res = self._get()
-
-        if res.ret['items'] == []:
-            return bad_request('No projects to list', 404)
 
         return res.response()
 
@@ -194,7 +122,7 @@ class ProjectsListAPI(BaseList):
 
         items = []
         for p in Project.list(**args):
-            item = marshal(p, ProjectResponse.resource_fields)
+            item = marshal(p, project_resource_fields)
             item['date-created'] =p.date_created
             item['date-published'] = p.date_published
             item['project-url'] = project_url(p.id)
@@ -207,7 +135,7 @@ class ProjectsListAPI(BaseList):
                 item['longitude'] = location.longitude
             items.append( item )
 
-        res = ProjectsListResponse(
+        res = Response(
             starttime = time_start,
             attributes = {'items' : items},
             filters = args.items(),
@@ -221,12 +149,6 @@ class ProjectsListAPI(BaseList):
 class ProjectAPI(BaseItem):
     """Get Project Details"""
 
-    @swagger.operation(
-        notes='Project profile',
-        nickname='project',
-        responseClass=ProjectCompleteResponse.__name__,
-        responseMessages=BaseItem.RESPONSE_MESSAGES
-    )
     @requires_auth
     @ratelimit()
     def get(self, project_id):
@@ -245,7 +167,7 @@ class ProjectAPI(BaseItem):
         time_start = time.time()
         p = Project.get(project_id)
 
-        item = marshal(p, ProjectCompleteResponse.resource_fields)
+        item = marshal(p, project_full_resource_fields)
         if p != None:
             item['date-created'] = p.date_created
             item['date-published'] = p.date_published
@@ -263,11 +185,10 @@ class ProjectAPI(BaseItem):
             item['status'] = p.status_string
             location = ProjectLocation.get(p.id)
             if location:
-                item['location'] = [marshal(location, ProjectLocationResponse.resource_fields)]
+                item['location'] = [marshal(location, project_location_resource_fields)]
                 item['location'][0]['country-code'] = location.country_code
             gallery = ProjectImage.get(p.id)
             if gallery:
-                # item['image-gallery'] = marshal(gallery, ProjectGalleryResponse.resource_fields)
                 item['image-gallery'] = []
                 for i in gallery:
                     item['image-gallery'].append({
@@ -277,21 +198,21 @@ class ProjectAPI(BaseItem):
                 #     i['image-url'] = gallery.image
             rewards = Reward.list_by_project(p.id)
             if rewards:
-                item['rewards'] = marshal(rewards, ProjectRewardResponse.resource_fields)
+                item['rewards'] = marshal(rewards, project_reward_resource_fields)
             costs = Cost.list_by_project(p.id)
             if costs:
                 item['costs'] = []
                 for i in costs:
-                    it = marshal(i, ProjectCostResponse.resource_fields)
+                    it = marshal(i, project_cost_resource_fields)
                     it['from-date'] = i.date_from
                     it['to-date'] = i.date_to
                     item['costs'].append(it)
             needs = Support.list_by_project(p.id)
             if needs:
-                item['needs'] = marshal(needs, ProjectNeedResponse.resource_fields)
+                item['needs'] = marshal(needs, project_need_resource_fields)
 
 
-        res = ProjectCompleteResponse(
+        res = Response(
             starttime = time_start,
             attributes = item
         )
@@ -302,13 +223,6 @@ class ProjectAPI(BaseItem):
 class ProjectDonorsListAPI(BaseItem):
     """Get donors list"""
 
-    @swagger.operation(
-        notes='donors list',
-        nickname='project_donors',
-        responseClass=UsersListResponse.__name__,
-        parameters=BaseList.INPUT_FILTERS,
-        responseMessages=BaseList.RESPONSE_MESSAGES
-    )
     @requires_auth
     @ratelimit()
     def get(self, project_id):
@@ -329,7 +243,7 @@ class ProjectDonorsListAPI(BaseItem):
 
         items = []
         for u in User.donors_by_project(project_id):
-            item = marshal(u, UserResponse.resource_fields)
+            item = marshal(u, user_resource_fields)
             item['date-created'] = u.date_created
             item['profile-url'] = u.profile_url
             item['profile-image-url'] = u.profile_image_url
@@ -339,7 +253,7 @@ class ProjectDonorsListAPI(BaseItem):
                 item['longitude'] = location.longitude
             items.append( item )
 
-        res = UsersListResponse(
+        res = Response(
             starttime = time_start,
             attributes = {'items' : items},
             # filters = args.items(),

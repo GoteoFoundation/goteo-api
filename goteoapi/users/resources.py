@@ -8,6 +8,20 @@ from ..base_resources import BaseItem, BaseList, Response
 from ..location.models import UserLocation
 from .models import User
 
+user_resource_fields = {
+    "id"                : fields.String,
+    "name"              : fields.String,
+    "node"              : fields.String,
+    "date-created"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
+    "profile-url"       : fields.String,
+    "profile-image-url" : fields.String,
+    "latitude" : fields.Float,
+    "longitude" : fields.Float
+}
+
+user_full_resource_fields = user_resource_fields.copy()
+# user_full_resource_fields["date-updated"] = fields.DateTime(dt_format='rfc822')
+
 class UsersListAPI(BaseList):
     """User list"""
 
@@ -109,19 +123,9 @@ class UsersListAPI(BaseList):
         # For privacy, removing location filter ?
         args = self.parse_args(remove=('location'))
 
-        resource_fields = {
-            "id"                : fields.String,
-            "name"              : fields.String,
-            "node"              : fields.String,
-            "date-created"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
-            "profile-url"       : fields.String,
-            "profile-image-url" : fields.String,
-            "latitude" : fields.Float,
-            "longitude" : fields.Float
-        }
         items = []
         for u in User.list(**args):
-            item = marshal(u, resource_fields)
+            item = marshal(u, user_resource_fields)
             item['date-created'] = u.date_created
             item['profile-url'] = u.profile_url
             item['profile-image-url'] = u.profile_image_url
@@ -182,18 +186,8 @@ class UserAPI(BaseItem):
         """Get()'s method dirty work"""
         time_start = time.time()
         u = User.get(user_id)
-        resource_fields = {
-            "id"                : fields.String,
-            "name"              : fields.String,
-            "node"              : fields.String,
-            "date-created"      : fields.DateTime(dt_format='rfc822'),
-            # "date-updated"    : fields.DateTime(dt_format='rfc822'),
-            "profile-url"       : fields.String,
-            "profile-image-url" : fields.String,
-            "latitude" : fields.Float,
-            "longitude" : fields.Float,
-        }
-        item = marshal(u, resource_fields)
+
+        item = marshal(u, user_full_resource_fields)
         if u != None:
             item['date-created'] = u.date_created
             item['profile-url'] = u.profile_url
