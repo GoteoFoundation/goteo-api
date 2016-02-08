@@ -15,7 +15,7 @@ __import__('goteoapi.controllers')
 __import__('goteoapi_reports.controllers')
 
 # digests endpoints
-# __import__('goteoapi_digests.controllers')
+__import__('goteoapi_digests.controllers')
 
 
 #This part will not be executed under uWSGI module (nginx)

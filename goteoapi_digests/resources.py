@@ -6,7 +6,6 @@ import calendar
 from datetime import date as dtdate, datetime as dtdatetime
 
 from flask.ext.restful import fields
-from flask_restful_swagger import swagger
 
 #import current endpoints
 from goteoapi.decorators import *
@@ -18,34 +17,6 @@ def year_sanitizer(data):
     if d > dtdatetime.now():
         raise Exception("Invalid parameter year")
     return str(d.year)
-
-@swagger.model
-class DigestResponse(Response):
-    """DigestResponse, here just for swagger documentation
-    final Responses will be the related endpoints"""
-
-    resource_fields = {
-    }
-
-    required = resource_fields.keys()
-
-
-@swagger.model
-@swagger.nested(**{
-                'response' : DigestResponse.__name__,
-                }
-            )
-class DigestsListResponse(Response):
-    """DigestsListResponse"""
-
-    resource_fields = {
-        "global"    : fields.Nested(DigestResponse.resource_fields),
-        "buckets"    : fields.List(fields.Nested(DigestResponse.resource_fields)),
-        'endpoint' : fields.String
-    }
-
-    required = resource_fields.keys()
-
 
 class DigestsListAPI(BaseList):
     """Get Digest list"""
@@ -60,18 +31,75 @@ class DigestsListAPI(BaseList):
         '/licenses/'
         ]
 
-    @swagger.operation(
-        notes='Digests list',
-        nickname='digests',
-        responseClass=DigestsListResponse.__name__,
-        parameters=BaseList.INPUT_FILTERS,
-        responseMessages=BaseList.RESPONSE_MESSAGES
-    )
     @requires_auth
     @ratelimit()
     def get(self, endpoint):
         """Get the digests list
+        Digest Stats API
         <a href="http://developers.goteo.org/doc/digests">developers.goteo.org/doc/digests</a>
+        This resource returns grouped statistics
+        ---
+        tags:
+            - digests_reports
+        definitions:
+            - schema:
+                id: Group
+            - schema:
+                id: Digest
+                properties:
+                    global:
+                        $ref: '#/definitions/api_digests_get_Group'
+                    buckets:
+                        type: array
+                        items:
+                            $ref: '#/definitions/api_digests_get_Group'
+                    endpoint:
+                        type:  string
+        parameters:
+            - in: query
+              type: string
+              name: node
+              description: Filter by individual node(s). Multiple nodes can be specified
+              collectionFormat: multi
+            - in: query
+              name: project
+              description: Filter by individual project(s). Multiple projects can be specified
+              type: string
+              collectionFormat: multi
+            - in: query
+              name: from_date
+              description: Filter from date. Ex. "2013-01-01"
+              type: string
+              format: date
+            - in: query
+              name: to_date
+              description: Filter until date.. Ex. "2014-01-01"
+              type: string
+              format: date
+            - in: query
+              name: category
+              description: Filter by project category. Multiple projects can be specified
+              type: integer
+            - in: query
+              name: location
+              description: Filter by project location (Latitude,longitude,Radius in Km)
+              type: number
+              collectionFormat: csv
+            - in: query
+              name: page
+              description: Page number (starting at 1) if the result can be paginated
+              type: integer
+            - in: query
+              name: limit
+              description: Page limit (maximum 50 results, defaults to 10) if the result can be paginated
+              type: integer
+        responses:
+            200:
+                description: List of available projects
+                schema:
+                    $ref: '#/definitions/api_digests_get_Digest'
+            400:
+                description: Invalid parameters format
         """
         time_start = time.time()
         self.reqparse.add_argument('year', type=year_sanitizer, default=None)
@@ -144,7 +172,7 @@ class DigestsListAPI(BaseList):
         if global_ == []:
             return bad_request('No digests to list.', 404)
 
-        res = DigestsListResponse(
+        res = Response(
             starttime = time_start,
             attributes = {'global' : global_, 'buckets' : buckets, 'endpoint' : endpoint },
             filters = args.items()
