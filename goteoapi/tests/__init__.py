@@ -7,6 +7,8 @@ app.debug = False
 app.config['DEBUG'] = False
 app.config['SQLALCHEMY_ECHO'] = False
 app.config['CACHING'] = False
+app.config['CACHE_TYPE'] = 'simple'
+app.config['CACHE_TIMEOUT'] = 300
 app.config['CACHE_KEY_PREFIX'] = 'Test/'
 
 test_app = app.test_client()

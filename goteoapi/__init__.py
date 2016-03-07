@@ -14,8 +14,11 @@ from flask.ext.sqlalchemy import SQLAlchemy
 #app = Flask(__name__)
 app = Flask(__name__, static_url_path="")
 app.config.from_pyfile('config.py')
-#Custom config override
+# Custom config override
+# From file
 app.config.from_pyfile('../config.py', silent=True)
+# From envvars
+app.config.from_envvar('GOTEO_API_CONF', silent=True)
 
 app.debug = bool(app.config['DEBUG'])
 app.config['SQLALCHEMY_DATABASE_URI'] = app.config['DB_URI']

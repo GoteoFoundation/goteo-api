@@ -8,9 +8,6 @@ from nose.tools import *
 from . import app
 from goteoapi.cacher import cacher, cache, get_key_functions
 
-app.config['CACHE_TYPE'] = 'simple'
-app.config['CACHE_TIMEOUT'] = 300
-
 cache.clear()
 
 def teardown():
@@ -58,27 +55,29 @@ def test_non_cacher():
 def test_cacher():
     app.config['CACHING'] = True
     eq_( get_random() , get_random())
+    eq_( get_simple() , get_simple(0))
     eq_( get_simple(num=1) , get_simple(1))
     eq_( get_alt() , 0)
     eq_( get_alt() , 0)
 
 def test_class_non_cacher():
     app.config['CACHING'] = False
-    eq_( 1 == Dummy.get_simple(1), True)
+    eq_( 0 == Dummy.get_simple(0), True)
     eq_( Dummy.get_random() == Dummy.get_random(), False)
 
 def test_class_cacher():
     app.config['CACHING'] = True
+    eq_( 1 == Dummy.get_simple(1), True)
     eq_( Dummy.get_random() , Dummy.get_random())
 
 def test_static_methods():
+    Dummy.get_simple(num=0)
     keys = {
-            "(S'get_simple'\np0\n(I1\ntp1\n(dp2\ntp3\n.": (50, datetime.datetime.now()),
-            "(S'get_simple'\np0\n(cgoteoapi.tests.testcacher\nDummy\np1\nI1\ntp2\n(dp3\ntp4\n.": (50, datetime.datetime.now()),
-            "(S'get_simple'\np0\n(t(dp1\nS'num'\np2\nI1\nstp3\n.": (50, datetime.datetime.now())
+            b'\x80\x04\x95\x13\x00\x00\x00\x00\x00\x00\x00\x8c\nget_simple\x94)}\x94\x87\x94.': (50, datetime.datetime.now()),
+            b'\x80\x04\x95\x16\x00\x00\x00\x00\x00\x00\x00\x8c\nget_simple\x94K\x00\x85\x94}\x94\x87\x94.': (50, datetime.datetime.now()),
+            b'\x80\x04\x95C\x00\x00\x00\x00\x00\x00\x00\x8c\nget_simple\x94\x8c\x19goteoapi.tests.testcacher\x94\x8c\x05Dummy\x94\x93\x94\x85\x94}\x94\x8c\x03num\x94K\x00s\x87\x94.': (50, datetime.datetime.now())
             }
     key_list = get_key_functions(keys)
-
     eq_(len(key_list) , len(keys))
     for key, clas, f, args, kargs in key_list:
         if not hasattr(f, '__call__'):
@@ -86,7 +85,7 @@ def test_static_methods():
                 f = locals()[f]
             elif f in globals():
                 f = globals()[f]
-        eq_( 1, int(f(*args, **kargs)))
+        eq_( 0, int(f(*args, **kargs)))
 
 def test_invalid_keys():
     keys = {

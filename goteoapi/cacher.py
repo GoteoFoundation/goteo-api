@@ -45,7 +45,7 @@ def add_key_list(key, timeout, time):
     val = (timeout, time)
     if redis:
         # A more efficient way to touch a single key instead of retrieving the full set
-        return redis.set(app.config['CACHE_KEY_PREFIX'] + 'KEY-ITEM/' + key, pickle.dumps(val))
+        return redis.set(app.config['CACHE_KEY_PREFIX'] + 'KEY-ITEM/' + key, pickle.dumps(val, pickle.HIGHEST_PROTOCOL))
 
     keys = get_key_list()
     keys[key] = val
@@ -75,7 +75,7 @@ def cacher(f):
         if not app.config['CACHING']:
             return f(*args, **kwargs)
 
-        key = pickle.dumps((f.__name__, args, kwargs));
+        key = pickle.dumps((f.__name__, args, kwargs), pickle.HIGHEST_PROTOCOL);
 
         #TODO: lower the cache time depending on the to_date parameter
                 # if present use that date as maxdate (else now)
@@ -115,9 +115,18 @@ def cacher(f):
 
 def get_key_parts(key):
     """Decodes a cache key"""
-    # print (key)
     try:
-        (func, args, kwargs) = pickle.loads(key)
+        parts = pickle.loads(key)
+        # print(parts)
+        func = parts[0]
+        args = ()
+        kwargs = {}
+        for k in parts:
+            if isinstance(k, dict):
+                kwargs = k
+            elif not isinstance(k, str):
+                args = k
+        # print (func, kwargs, args)
         clas = None
         if args and hasattr(args[0], func):
             clas = args[0]
