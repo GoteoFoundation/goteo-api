@@ -41,9 +41,11 @@ definitions:
                 items:
                     $ref: '#/definitions/api_reports_rewards_get_Favourite'
             percentage-reward-refusal:
-                type: float
+                type: number
             rewards-per-amount:
-                $ref: '#/definitions/api_reports_rewards_get_PerAmount'
+                type: array
+                items:
+                    $ref: '#/definitions/api_reports_rewards_get_PerAmount'
 
 parameters:
     - in: query

@@ -147,7 +147,7 @@ parameters:
       type: integer
 responses:
     200:
-        description: List of available projects
+        description: Community object
         schema:
             $ref: '#/definitions/api_reports_community_get_Community'
     400:

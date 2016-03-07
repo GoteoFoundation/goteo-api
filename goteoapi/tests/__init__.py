@@ -28,6 +28,12 @@ def check_content_type(headers):
 def get_json(rv_object):
   return json.loads(rv_object.get_data(as_text=True))
 
+def get_swagger(file):
+    import yaml
+    print(file)
+    docs = yaml.load_all(open(file, "r"))
+    next(docs)
+    return next(docs)
 
 # def teardown():
 #   # db_session.remove()
