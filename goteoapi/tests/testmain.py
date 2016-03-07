@@ -2,15 +2,16 @@
 #
 # Minimal tests for main routes
 #
-import json
 from nose.tools import *
 
-from . import app,test_app, check_content_type
+from . import test_app, check_content_type, get_json
 
 def test_main_routes():
     rv = test_app.get('/')
     check_content_type(rv.headers)
-    resp = json.loads(rv.data)
+    print(rv.data)
+    resp = get_json(rv)
+    print(resp)
     #make sure we get a response
     eq_(rv.status_code, 200)
 
@@ -22,7 +23,7 @@ def test_main_routes():
 def test_error_routes():
     rv = test_app.get('/i-dont-exists')
     check_content_type(rv.headers)
-    resp = json.loads(rv.data)
+    resp = get_json(rv)
     eq_(rv.status_code, 404)
     assert 'error' in resp
     eq_(resp['error'], 404)

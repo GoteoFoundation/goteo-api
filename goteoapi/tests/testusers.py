@@ -2,13 +2,11 @@
 #
 # Minimal tests for main routes
 #
-import json
 from nose.tools import *
 
-from . import app,test_app, check_content_type
-from ..users.resources import UserResponse as Response, UsersListResponse as ListResponse
+from . import test_app, check_content_type, get_json
+from ..users.resources import user_resource_fields
 
-app.config['AUTH_ENABLED'] = False
 FILTERS = [
 'page=0',
 'limit=1',
@@ -28,8 +26,8 @@ def test_users():
     for f in FILTERS:
         rv = test_app.get('/users/' , query_string=f)
         check_content_type(rv.headers)
-        resp = json.loads(rv.data)
-        fields = ListResponse.resource_fields
+        resp = get_json(rv)
+        fields = user_resource_fields
         if 'time-elapsed' in fields:
             del fields['time-elapsed']
         if 'time-elapsed' in resp:
@@ -52,10 +50,11 @@ def test_user_no_slash():
     assert '/users/goteo/' in rv.headers['Location'], "%r not in %r" % ('/users/goteo/', rv.headers['Location'])
 
 def test_user():
+    # TODO: generic user
     rv = test_app.get('/users/goteo/')
     check_content_type(rv.headers)
-    resp = json.loads(rv.data)
-    fields = Response.resource_fields
+    resp = get_json(rv)
+    fields = user_resource_fields
     if 'time-elapsed' in fields:
         del fields['time-elapsed']
     if 'time-elapsed' in resp:

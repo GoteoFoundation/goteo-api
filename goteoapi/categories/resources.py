@@ -2,14 +2,14 @@
 
 import time
 from flask.ext.restful import fields
-
+from flasgger.utils import swag_from
 from ..decorators import *
 from ..helpers import marshal
 from ..base_resources import BaseList, Response
 from .models import Category
 
 category_resource_fields = {
-    "id"             : fields.String,
+    "id"             : fields.Integer,
     "name"           : fields.String,
     "description"    : fields.String,
     "total-projects" : fields.Integer,
@@ -21,91 +21,9 @@ class CategoriesListAPI(BaseList):
 
     @requires_auth
     @ratelimit()
+    @swag_from('swagger_specs.yml')
     def get(self):
-        """
-        Category API
-        This resource returns categories information.
-        <a href="http://developers.goteo.org/doc/categories">developers.goteo.org/doc/categories</a>
-        ---
-        tags:
-            - categories
-        definitions:
-            - schema:
-                id: Category
-                properties:
-                    id:
-                        type: string
-                        description: Category unique identifier
-                    name:
-                        type: string
-                        description: Category name
-                    description:
-                        type: string
-                        description: Category short description
-                    total-users:
-                        type: integer
-                        description: Number of users using this license
-                    total-projects:
-                        type: integer
-                        description: Number of projects using this license
-        parameters:
-            - in: query
-              type: string
-              name: node
-              description: Filter by individual node(s). Multiple nodes can be specified. Restricts the list to the categories used in projects assigned in that nodes
-              collectionFormat: multi
-            - in: query
-              name: project
-              description: Filter by individual project(s). Multiple projects can be specified. Restricts the list to the categories used in that projects
-              type: string
-              collectionFormat: multi
-            - in: query
-              name: from_date
-              description: Filter from date. Ex. "2013-01-01". Restricts the list to the categories used in projects created between that dates
-              type: string
-              format: date
-            - in: query
-              name: to_date
-              description: Filter until date.. Ex. "2014-01-01". Restricts the list to the categories used in projects created between that dates
-              type: string
-              format: date
-            # - in: query
-            #   name: category
-            #   description: Filter by project category. Multiple categories can be specified. Restricts the list to the categories used in projects in that categories
-            #   type: integer
-            - in: query
-              name: lang
-              description: Get results by specified lang. Multiple langs can be specified
-              type: string
-              collectionFormat: multi
-            - in: query
-              name: location
-              description: Filter by project location (Latitude,longitude,Radius in Km). Restricts the list to the categories used in projects geolocated in that area
-              type: number
-              collectionFormat: csv
-            # - in: query
-            #   name: page
-            #   description: Page number (starting at 1) if the result can be paginated
-            #   type: integer
-            # - in: query
-            #   name: limit
-            #   description: Page limit (maximum 50 results, defaults to 10) if the result can be paginated
-            #   type: integer
-        responses:
-            200:
-                description: List of available categories
-                schema:
-                    type: array
-                    id: categories
-                    items:
-                        $ref: '#/definitions/api_categories_categories_list_get_Category'
-            400:
-                description: Invalid parameters format
-            # 404:
-            #     description: Resource not found
-        """
         res = self._get()
-
         return res.response()
 
     def _get(self):

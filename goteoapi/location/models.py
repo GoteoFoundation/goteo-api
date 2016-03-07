@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import func, Integer, String, DateTime, Float, Boolean
+from sqlalchemy import func, String, DateTime, Float, Boolean
 from sqlalchemy.ext.hybrid import hybrid_method
-from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
+from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import select, column
 
 from ..cacher import cacher
@@ -78,7 +78,7 @@ class ItemLocation(object):
             ) * R
         ).label('distance')
         subquery = db.session.query(self.id,self.latitude,self.longitude,self.method,self.city,self.country,self.country_code,self.modified,distance).filter(*filters).subquery('FirstCut')
-        sub = select(fields).select_from(subquery).where(distance <= radius)#
+        sub = select(map(lambda x: column(x), fields)).select_from(subquery).where(distance <= radius)
         return sub
 
     # Vincenty Method, slightly better precision, high cost on querying database

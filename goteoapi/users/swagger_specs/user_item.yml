@@ -1,0 +1,19 @@
+User API
+This resource returns user information.
+<a href="http://developers.goteo.org/users#user">developers.goteo.org/users#user</a>
+---
+tags:
+    - users
+parameters:
+    - in: path
+      type: string
+      name: user_id
+      description: Unique ID for the user
+      required: true
+responses:
+    200:
+        description: User data
+        schema:
+            $ref: '#/definitions/api_users_users_list_get_User'
+    404:
+        description: Resource not found

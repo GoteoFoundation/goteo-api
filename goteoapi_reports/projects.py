@@ -2,7 +2,7 @@
 
 import time
 from flask.ext.restful import fields, marshal
-
+from flasgger.utils import swag_from
 from goteoapi.decorators import ratelimit, requires_auth
 from goteoapi.helpers import utc_from_local, image_url, project_url, percent
 from goteoapi.base_resources import BaseList as Base, Response
@@ -37,132 +37,8 @@ class ProjectsAPI(Base):
 
     @requires_auth
     @ratelimit()
+    @swag_from('swagger_specs/projects.yml')
     def get(self):
-        """
-        Projects Stats API
-        <a href="http://developers.goteo.org/doc/reports#projects">developers.goteo.org/doc/reports#projects</a>
-        This resource returns statistics about projects in Goteo.
-        ---
-        tags:
-            - project_reports
-        definitions:
-            - schema:
-                id: ProjectContribution
-                properties:
-                    project:
-                        type: string
-                    name:
-                        type: string
-                    project-url:
-                        type: string
-                    description-short:
-                        type: string
-                    image-url:
-                        type: string
-                    video-url:
-                        type: string
-                    date-published:
-                        type: string
-                    total:
-                        type: integer
-            - schema:
-                id: ProjectAmount
-                properties:
-                    project:
-                        type: string
-                    name:
-                        type: string
-                    project-url:
-                        type: string
-                    description-short:
-                        type: string
-                    image-url:
-                        type: string
-                    video-url:
-                        type: string
-                    date-published:
-                        type: string
-                    total:
-                        type: integer
-            - schema:
-                id: Project
-                properties:
-                    failed:
-                        type: integer
-                    published:
-                        type: integer
-                    received:
-                        type: integer
-                    successful:
-                        type: integer
-                    successful:
-                        type: integer
-                    percentage:
-                        type: number
-                    percentage:
-                        type: number
-                    average-amount:
-                        type: number
-                    top10-collaborations:
-                        type: array
-                        items:
-                            $ref: '#/definitions/api_reports_projects_get_ProjectContribution'
-                    top10-donations:
-                        type: array
-                        items:
-                            $ref: '#/definitions/api_reports_projects_get_ProjectContribution'
-                    top10-receipts:
-                        type: array
-                        items:
-                            $ref: '#/definitions/api_reports_projects_get_ProjectAmount'
-                    average-posts:
-                        type: number
-        parameters:
-            - in: query
-              type: string
-              name: node
-              description: Filter by individual node(s). Multiple nodes can be specified.
-              collectionFormat: multi
-            - in: query
-              name: project
-              description: Filter by individual project(s). Multiple projects can be specified
-              type: string
-              collectionFormat: multi
-            - in: query
-              name: from_date
-              description: Filter from date. Ex. "2013-01-01"
-              type: string
-              format: date
-            - in: query
-              name: to_date
-              description: Filter until date.. Ex. "2014-01-01"
-              type: string
-              format: date
-            - in: query
-              name: category
-              description: Filter by project category. Multiple projects can be specified
-              type: integer
-            - in: query
-              name: location
-              description: Filter by project location (Latitude,longitude,Radius in Km)
-              type: number
-              collectionFormat: csv
-            - in: query
-              name: page
-              description: Page number (starting at 1) if the result can be paginated
-              type: integer
-            - in: query
-              name: limit
-              description: Page limit (maximum 50 results, defaults to 10) if the result can be paginated
-              type: integer
-        responses:
-            200:
-                description: List of available projects
-                schema:
-                    $ref: '#/definitions/api_reports_projects_get_Project'
-            400:
-                description: Invalid parameters format
-        """
         ret = self._get()
         return ret.response()
 

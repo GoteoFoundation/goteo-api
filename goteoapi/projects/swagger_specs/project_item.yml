@@ -1,0 +1,196 @@
+Project API
+<a href="http://developers.goteo.org/projects#project">developers.goteo.org/projects#project</a>
+This resource returns project detailed information.
+---
+tags:
+    - projects
+definitions:
+    - schema:
+        id: ProjectFull
+        properties:
+            id:
+                type: string
+                description: Project unique identifier
+            name:
+                type: string
+                description: Name of the project
+            node:
+                type: string
+                description: Node where the project was created originally
+            description-short:
+                type: string
+                description: Short description of the project
+            description:
+                type: string
+                description: Full description of the project
+            motivation:
+                type: string
+                description: Motivation text writen by the owner of the project
+            goal:
+                type: string
+                description: Goal of the project
+            about:
+                type: string
+                description: About the project or his creators
+            lang:
+                type: string
+                description: Main language of the project
+            currency:
+                type: string
+                description: Currency used in the project (ISO4217 Format)
+            currency-rate:
+                type: number
+                description: Currency rate when the project was created (if was not EUR)
+            minimum:
+                type: number
+                description: Minimum amount to achieve to consider the project succeeded
+            optimum:
+                type: number
+                description: Optimum amount to achieve for the project to achieve all his goals
+            amount:
+                type: number
+                description: Currently achieved amount for the project
+            project-url:
+                type: string
+                description: URL where for the project
+            widget-url:
+                type: string
+                description:  URL with the main widget (embed code) of the project
+            image-url:
+                type: string
+                description:  URL with the main image of the project
+            image-url-big:
+                type: string
+                description:  URL with the main image (big size) of the project
+            video-url:
+                type: string
+                description:  URL with the main video of the project
+            date-created:
+                type: string
+                description: Date when the project was created RFC822 format
+            date-published:
+                type: string
+                description: Date when the project was published RFC822 format
+            date-succeeded:
+                type: string
+                description: Date when the project was succeeded RFC822 format
+            date-closed:
+                type: string
+                description: Date when the project was closed (if was a failed project) RFC822 format
+            date-passed:
+                type: string
+                description: Date when the project passed the first round (reached the minimum) RFC822 format
+            date-updated:
+                type: string
+                description: Date when the project was updated RFC822 format
+            latitude:
+                type: number
+                description: Latitude coordinate for the project
+            longitude:
+                type: number
+                description: Longitude coordinate for the project
+            owner:
+                type: string
+                description: Projects owner's user ID
+            status:
+                type: string
+                description: Status of the project
+            location:
+                type: array
+                description: Location of the project
+                items:
+                    $ref: '#/definitions/api_projects_project_get_ProjectLocation'
+            image-gallery:
+                type: array
+                description: List of images for the project
+                items:
+                    $ref: '#/definitions/api_projects_project_get_ProjectGallery'
+            rewards:
+                type: array
+                description: List of rewards for the project
+                items:
+                    $ref: '#/definitions/api_projects_project_get_ProjectReward'
+            costs:
+                type: array
+                description: Economical detailed list of necessities
+                items:
+                    $ref: '#/definitions/api_projects_project_get_ProjectCost'
+            needs:
+                type: array
+                description: Non-economical detailed list of necessities
+                items:
+                    $ref: '#/definitions/api_projects_project_get_ProjectNeed'
+    - schema:
+        id: ProjectLocation
+        properties:
+            city:
+                type: string
+            region:
+                type: string
+            country:
+                type: string
+            country-code:
+                type: string
+            latitude:
+                type: number
+            longitude:
+                type: number
+    - schema:
+        id: ProjectGallery
+        properties:
+            image-url:
+                type: string
+            resource-url:
+                type: string
+    - schema:
+        id: ProjectReward
+        properties:
+            reward:
+                type: string
+            description:
+                type: string
+            license:
+                type: string
+            type:
+                type: string
+            icon:
+                type: string
+    - schema:
+        id: ProjectCost
+        properties:
+            cost:
+                type: string
+            description:
+                type: string
+            type:
+                type: string
+            amount:
+                type: float
+            required:
+                type: string
+            date-from:
+                type: string
+            date-to:
+                type: string
+    - schema:
+        id: ProjectNeed
+        properties:
+            support:
+                type: string
+            description:
+                type: string
+            type:
+                type: string
+parameters:
+    - in: path
+      type: string
+      name: project_id
+      description: Unique ID for the project
+      required: true
+responses:
+    200:
+        description: Project data
+        schema:
+            $ref: '#/definitions/api_projects_project_get_ProjectFull'
+    404:
+        description: Resource not found

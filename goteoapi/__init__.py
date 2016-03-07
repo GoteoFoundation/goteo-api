@@ -18,7 +18,7 @@ app.config.from_pyfile('config.py')
 # From file
 app.config.from_pyfile('../config.py', silent=True)
 # From envvars
-app.config.from_envvar('GOTEO_API_CONF', silent=True)
+app.config.from_envvar('GOTEO_API_CONFIG_FILE', silent=True)
 
 app.debug = bool(app.config['DEBUG'])
 app.config['SQLALCHEMY_DATABASE_URI'] = app.config['DB_URI']

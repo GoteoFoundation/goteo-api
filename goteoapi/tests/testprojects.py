@@ -5,8 +5,8 @@
 import json
 from nose.tools import *
 
-from . import app,test_app, check_content_type
-from ..projects.resources import ProjectResponse as Response, ProjectsListResponse as ListResponse
+from . import app,test_app, check_content_type, get_json
+from ..projects.resources import project_resource_fields, project_full_resource_fields
 
 app.config['AUTH_ENABLED'] = False
 FILTERS = [
@@ -28,8 +28,8 @@ def test_projects():
     for f in FILTERS:
         rv = test_app.get('/projects/' , query_string=f)
         check_content_type(rv.headers)
-        resp = json.loads(rv.data)
-        fields = ListResponse.resource_fields
+        resp = get_json(rv)
+        fields = project_resource_fields
         if 'time-elapsed' in fields:
             del fields['time-elapsed']
         if 'time-elapsed' in resp:
@@ -39,23 +39,27 @@ def test_projects():
         eq_(rv.status_code, 200)
 
 def test_project_no_projects():
-    rv = test_app.get('/projects/', query_string='category=0')
-    eq_(rv.status_code, 404)
     rv = test_app.get('/projects/--i-dont-exits--/')
     eq_(rv.status_code, 404)
+    rv = test_app.get('/projects/', query_string='category=0')
+    resp = get_json(rv)
+    eq_(rv.status_code, 200)
+    assert 'items' in resp
+    eq_(resp['items'], [])
 
 def test_project_no_slash():
-    rv = test_app.get('/projects/goteo')
+    rv = test_app.get('/projects/test-project')
     eq_(rv.status_code, 301)
     assert 'text/html' in rv.headers['Content-Type']
     assert 'location' in rv.headers, "%r not in %r" % ('location', rv.headers)
-    assert '/projects/goteo/' in rv.headers['Location'], "%r not in %r" % ('/projects/goteo/', rv.headers['Location'])
+    assert '/projects/test-project/' in rv.headers['Location'], "%r not in %r" % ('/projects/test-project/', rv.headers['Location'])
 
 def test_project():
+    # TODO: generic project here
     rv = test_app.get('/projects/160metros/')
     check_content_type(rv.headers)
-    resp = json.loads(rv.data)
-    fields = Response.resource_fields
+    resp = get_json(rv)
+    fields = project_full_resource_fields
     if 'time-elapsed' in fields:
         del fields['time-elapsed']
     if 'time-elapsed' in resp:

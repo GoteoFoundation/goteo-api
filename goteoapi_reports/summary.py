@@ -2,7 +2,7 @@
 
 import time
 from flask.ext.restful import marshal
-
+from flasgger.utils import swag_from
 from goteoapi.helpers import utc_from_local, image_url, project_url, percent
 from goteoapi.decorators import ratelimit, requires_auth
 
@@ -18,99 +18,8 @@ class SummaryAPI(Base):
 
     @requires_auth
     @ratelimit()
+    @swag_from('swagger_specs/summary.yml')
     def get(self):
-        """
-        Summary Stats API
-        <a href="http://developers.goteo.org/doc/reports#summary">developers.goteo.org/doc/reports#summary</a>
-        This resource returns statistics about the summary in Goteo.
-        ---
-        tags:
-            - summary_reports
-        definitions:
-            - schema:
-                id: Summary
-                properties:
-                    pledged:
-                        type: integer
-                    matchfund-amount:
-                        type: integer
-                    matchfundpledge-amount:
-                        type: integer
-                    average-donation:
-                        type: number
-                    users:
-                        type: integer
-                    projects-received:
-                        type: integer
-                    projects-published:
-                        type: integer
-                    projects-successful:
-                        type: integer
-                    projects-failed:
-                        type: integer
-                    categories:
-                        type: array
-                        items:
-                            $ref: '#/definitions/api_reports_community_get_Category'
-                    favorite-rewards:
-                        type: array
-                        items:
-                            $ref: '#/definitions/api_reports_rewards_get_Favourite'
-                    top10-collaborations:
-                        type: array
-                        items:
-                            $ref: '#/definitions/api_reports_projects_get_ProjectContribution'
-                    top10-donations:
-                        type: array
-                        items:
-                            $ref: '#/definitions/api_reports_projects_get_ProjectContribution'
-
-        parameters:
-            - in: query
-              type: string
-              name: node
-              description: Filter by individual node(s). Multiple nodes can be specified
-              collectionFormat: multi
-            - in: query
-              name: project
-              description: Filter by individual project(s). Multiple projects can be specified
-              type: string
-              collectionFormat: multi
-            - in: query
-              name: from_date
-              description: Filter from date. Ex. "2013-01-01"
-              type: string
-              format: date
-            - in: query
-              name: to_date
-              description: Filter until date.. Ex. "2014-01-01"
-              type: string
-              format: date
-            - in: query
-              name: category
-              description: Filter by project category. Multiple projects can be specified
-              type: integer
-            - in: query
-              name: location
-              description: Filter by project location (Latitude,longitude,Radius in Km)
-              type: number
-              collectionFormat: csv
-            - in: query
-              name: page
-              description: Page number (starting at 1) if the result can be paginated
-              type: integer
-            - in: query
-              name: limit
-              description: Page limit (maximum 50 results, defaults to 10) if the result can be paginated
-              type: integer
-        responses:
-            200:
-                description: List of available projects
-                schema:
-                    $ref: '#/definitions/api_reports_summary_get_Summary'
-            400:
-                description: Invalid parameters format
-        """
         ret = self._get()
         return ret.response()
 
