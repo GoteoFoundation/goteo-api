@@ -26,6 +26,12 @@ definitions:
             date-created:
                 type: string
                 description: Date when the user was created RFC822 format
+            latitude:
+                type: number
+                description: Latitude coordinate for the user
+            longitude:
+                type: number
+                description: Longitude coordinate for the user
 parameters:
     - in: query
       type: string

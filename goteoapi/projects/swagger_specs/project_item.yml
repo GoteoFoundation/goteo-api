@@ -83,12 +83,6 @@ definitions:
             date-updated:
                 type: string
                 description: Date when the project was updated RFC822 format
-            latitude:
-                type: number
-                description: Latitude coordinate for the project
-            longitude:
-                type: number
-                description: Longitude coordinate for the project
             owner:
                 type: string
                 description: Projects owner's user ID

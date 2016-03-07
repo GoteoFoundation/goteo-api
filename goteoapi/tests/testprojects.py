@@ -2,13 +2,13 @@
 #
 # Minimal tests for main routes
 #
-import json
 from nose.tools import *
-
-from . import app,test_app, check_content_type, get_json
+import os
+from . import test_app, check_content_type, get_json, get_swagger
 from ..projects.resources import project_resource_fields, project_full_resource_fields
 
-app.config['AUTH_ENABLED'] = False
+DIR = os.path.dirname(__file__) + '/../projects/'
+
 FILTERS = [
 'page=0',
 'limit=1',
@@ -25,18 +25,20 @@ FILTERS = [
 'location=41.38879,2.15899,50&from_date=2014-01-01&to_date=2014-12-31'
 ]
 def test_projects():
+    fields_swagger = get_swagger(DIR + 'swagger_specs/project_list.yml', 'Project')
     for f in FILTERS:
         rv = test_app.get('/projects/' , query_string=f)
         check_content_type(rv.headers)
         resp = get_json(rv)
         fields = project_resource_fields
-        if 'time-elapsed' in fields:
-            del fields['time-elapsed']
         if 'time-elapsed' in resp:
             del resp['time-elapsed']
 
         eq_(len(set(map(lambda x: str(x), resp.keys())) - set(fields.keys())) >= 0, True)
         eq_(rv.status_code, 200)
+        # Swagger test
+        eq_(set(resp['items'][0].keys()) , set(fields_swagger.keys()))
+
 
 def test_project_no_projects():
     rv = test_app.get('/projects/--i-dont-exits--/')
@@ -60,11 +62,12 @@ def test_project():
     check_content_type(rv.headers)
     resp = get_json(rv)
     fields = project_full_resource_fields
-    if 'time-elapsed' in fields:
-        del fields['time-elapsed']
     if 'time-elapsed' in resp:
         del resp['time-elapsed']
 
     eq_(len(set(map(lambda x: str(x), resp.keys())) - set(fields.keys())) >= 0, True)
     eq_(rv.status_code, 200)
+    # Swagger test
+    fields = get_swagger(DIR + 'swagger_specs/project_item.yml', 'ProjectFull')
+    eq_(set(resp.keys()) , set(fields.keys()))
 

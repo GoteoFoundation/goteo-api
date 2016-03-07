@@ -5,7 +5,7 @@ from dateutil.parser import parse
 import calendar
 from datetime import date as dtdate, datetime as dtdatetime
 
-from flask.ext.restful import fields
+from flasgger.utils import swag_from
 
 #import current endpoints
 from goteoapi.decorators import *
@@ -33,74 +33,9 @@ class DigestsListAPI(BaseList):
 
     @requires_auth
     @ratelimit()
+    @swag_from('swagger_specs.yml')
     def get(self, endpoint):
-        """Get the digests list
-        Digest Stats API
-        <a href="http://developers.goteo.org/doc/digests">developers.goteo.org/doc/digests</a>
-        This resource returns grouped statistics
-        ---
-        tags:
-            - digests_reports
-        definitions:
-            - schema:
-                id: Group
-            - schema:
-                id: Digest
-                properties:
-                    global:
-                        $ref: '#/definitions/api_digests_get_Group'
-                    buckets:
-                        type: array
-                        items:
-                            $ref: '#/definitions/api_digests_get_Group'
-                    endpoint:
-                        type:  string
-        parameters:
-            - in: query
-              type: string
-              name: node
-              description: Filter by individual node(s). Multiple nodes can be specified
-              collectionFormat: multi
-            - in: query
-              name: project
-              description: Filter by individual project(s). Multiple projects can be specified
-              type: string
-              collectionFormat: multi
-            - in: query
-              name: from_date
-              description: Filter from date. Ex. "2013-01-01"
-              type: string
-              format: date
-            - in: query
-              name: to_date
-              description: Filter until date.. Ex. "2014-01-01"
-              type: string
-              format: date
-            - in: query
-              name: category
-              description: Filter by project category. Multiple projects can be specified
-              type: integer
-            - in: query
-              name: location
-              description: Filter by project location (Latitude,longitude,Radius in Km)
-              type: number
-              collectionFormat: csv
-            - in: query
-              name: page
-              description: Page number (starting at 1) if the result can be paginated
-              type: integer
-            - in: query
-              name: limit
-              description: Page limit (maximum 50 results, defaults to 10) if the result can be paginated
-              type: integer
-        responses:
-            200:
-                description: List of available projects
-                schema:
-                    $ref: '#/definitions/api_digests_get_Digest'
-            400:
-                description: Invalid parameters format
-        """
+        """Get the digests list"""
         time_start = time.time()
         self.reqparse.add_argument('year', type=year_sanitizer, default=None)
         #removing not-needed standard filters

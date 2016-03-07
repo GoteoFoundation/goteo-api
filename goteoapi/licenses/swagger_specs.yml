@@ -17,6 +17,9 @@ definitions:
             description:
                 type: string
                 description: License short description
+            url:
+                type: string
+                description: License's URL
             svg-url:
                 type: string
                 description: Icon URL for the license

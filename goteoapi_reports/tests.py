@@ -20,8 +20,7 @@ def test_money():
     resp = get_json(rv)
     if 'time-elapsed' in resp:
         del resp['time-elapsed']
-    docs = get_swagger(DIR + 'swagger_specs/money.yml')
-    fields = docs['definitions'][-1]['schema']['properties']
+    fields = get_swagger(DIR + 'swagger_specs/money.yml', 'Money')
     eq_(set(resp.keys()) , set(fields.keys()))
     eq_(rv.status_code, 200)
 
@@ -31,8 +30,7 @@ def test_projects():
     resp = get_json(rv)
     if 'time-elapsed' in resp:
         del resp['time-elapsed']
-    docs = get_swagger(DIR + 'swagger_specs/projects.yml')
-    fields = docs['definitions'][-1]['schema']['properties']
+    fields = get_swagger(DIR + 'swagger_specs/projects.yml', 'Project')
     eq_(set(resp.keys()) , set(fields.keys()))
     eq_(rv.status_code, 200)
 
@@ -42,8 +40,7 @@ def test_community():
     resp = get_json(rv)
     if 'time-elapsed' in resp:
         del resp['time-elapsed']
-    docs = get_swagger(DIR + 'swagger_specs/community.yml')
-    fields = docs['definitions'][-1]['schema']['properties']
+    fields = get_swagger(DIR + 'swagger_specs/community.yml', 'Community')
     eq_(set(resp.keys()) , set(fields.keys()))
     eq_(rv.status_code, 200)
 
@@ -54,8 +51,7 @@ def test_rewards():
 
     if 'time-elapsed' in resp:
         del resp['time-elapsed']
-    docs = get_swagger(DIR + 'swagger_specs/rewards.yml')
-    fields = docs['definitions'][-1]['schema']['properties']
+    fields = get_swagger(DIR + 'swagger_specs/rewards.yml', 'Reward')
     eq_(set(resp.keys()) , set(fields.keys()))
     eq_(rv.status_code, 200)
 
@@ -66,14 +62,7 @@ def test_summary():
 
     if 'time-elapsed' in resp:
         del resp['time-elapsed']
-    docs = get_swagger(DIR + 'swagger_specs/summary.yml')
-    fields = docs['definitions'][-1]['schema']['properties']
-    print('JSON:')
-    print(set(resp.keys()))
-    print('YML:')
-    print(set(fields.keys()))
-    print('DIFF:')
-    print(set(resp.keys()) - set(fields.keys()))
+    fields = get_swagger(DIR + 'swagger_specs/summary.yml', 'Summary')
     eq_(set(resp.keys()) , set(fields.keys()))
     eq_(rv.status_code, 200)
 
