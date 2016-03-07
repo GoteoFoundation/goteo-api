@@ -17,7 +17,7 @@ def marshal(data, fields, envelope=None):
         return [marshal(d, fields, envelope) for d in data]
     m = s_marshal(data, fields, envelope)
     if isinstance(m, dict):
-        return { k.replace("_", "-"): v for k, v in m.iteritems() }
+        return { k.replace("_", "-"): v for k, v in m.items() }
     return m
 
 def get_lang(obj, field, langs=[]):

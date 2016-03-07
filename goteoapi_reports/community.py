@@ -36,7 +36,7 @@ class CommunityAPI(Base):
     """Get Community Statistics"""
 
     def __init__(self):
-        super(CommunityAPI, self).__init__()
+        super().__init__()
 
     @requires_auth
     @ratelimit()
@@ -267,12 +267,12 @@ class CommunityAPI(Base):
                 'average-collaborators'             : Message.average_collaborators(**args),
                 'creators-donors'                   : Invest.donors_creators_total(**args),
                 'creators-collaborators'            : Message.collaborators_creators_total(**args),
-                'categories'                        : map(lambda t: {t['id']:
+                'categories'                        : list(map(lambda t: {t['id']:
                                                                         {'users': t['users'],
                                                                          'id': t['id'],
                                                                          'name': t['name'],
                                                                          'percentage-users': percent(t['users'], users)}
-                                                                        }, categorias),
+                                                                        }, categorias)),
                 'leading-category'                  : categorias[0]['id'] if len(categorias) > 0 else None,
                 'users-leading-category'            : users_categoria1,
                 'percentage-users-leading-category' : percent(users_categoria1, users),

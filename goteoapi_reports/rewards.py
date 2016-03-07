@@ -8,7 +8,7 @@ from goteoapi.decorators import ratelimit, requires_auth
 from goteoapi.helpers import percent
 from goteoapi.base_resources import BaseList as Base, Response
 
-favourite_resource_fields = {
+favorite_resource_fields = {
     "icon"    : fields.String,
     "name"    : fields.String,
     "description"    : fields.String,
@@ -28,7 +28,7 @@ class RewardsAPI(Base):
     """Get Rewards Statistics"""
 
     def __init__(self):
-        super(RewardsAPI, self).__init__()
+        super().__init__()
 
     @requires_auth
     @ratelimit()
@@ -143,7 +143,7 @@ class RewardsAPI(Base):
         renuncias = Invest.total(is_refusal=True, **args);
         favorites = []
         for u in Reward.favorite_reward(**args):
-            item = marshal(u, favourite_resource_fields)
+            item = marshal(u, favorite_resource_fields)
             favorites.append(item)
 
         res = Response(

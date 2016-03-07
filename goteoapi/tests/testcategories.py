@@ -40,7 +40,6 @@ def test_categories():
 #     rv = test_app.get('/categories/2/')
 #     check_content_type(rv.headers)
 #     resp = json.loads(rv.data)
-#     print resp
 #     fields = Response.resource_fields
 #     if 'time-elapsed' in fields:
 #         del fields['time-elapsed']

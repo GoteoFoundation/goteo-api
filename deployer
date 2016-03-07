@@ -4,12 +4,12 @@
 # a self-contained environment for the pytohn app
 #
 
-PYEXE=$(env which python2.7)
+PYEXE=$(env which python3.4)
 
 /usr/bin/virtualenv -p $PYEXE virtualenv
 source virtualenv/bin/activate
-pip install -r requirements.txt
-pip install -r goteoapi_*/requirements.txt
+pip install -r requirements #.txt
+pip install -r goteoapi_*/requirements #.txt
 
 if [ $? == "0" ]; then
 	echo -e "\e[32mDone, if you want to execute the Flask application manually please run this commands:\e[0m"

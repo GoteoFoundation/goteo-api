@@ -33,7 +33,7 @@ class ProjectsAPI(Base):
     """Projects Statistics"""
 
     def __init__(self):
-        super(ProjectsAPI, self).__init__()
+        super().__init__()
 
     @requires_auth
     @ratelimit()

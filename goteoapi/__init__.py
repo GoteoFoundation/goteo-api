@@ -83,7 +83,7 @@ app.config['SWAGGER'] = {
             "title": app.config['DESCRIPTION'],
             "description": app.config['DESCRIPTION'],
             "endpoint": 'spec',
-            "route": '/api/spec.json',
+            "route": '/apidocs/spec.json',
 
             # rule_filter is optional
             # it is a callable to filter the views to extract
@@ -93,7 +93,7 @@ app.config['SWAGGER'] = {
             # )
         }
     ],
-    "static_url_path": "/api"
+    "static_url_path": "/apidocs"
 }
 
 Swagger(app)

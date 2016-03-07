@@ -27,9 +27,9 @@ def get_key_list():
             keys = {}
             for key in _keys:
                 keys[key[len(app.config['CACHE_KEY_PREFIX'] + 'KEY-ITEM/'):]] = pickle.loads(redis.get(key))
-                # print "KEY", len(app.config['CACHE_KEY_PREFIX'] + 'KEY-ITEM/'), key[len(app.config['CACHE_KEY_PREFIX'] + 'KEY-ITEM/'):]
+                # print ("KEY", len(app.config['CACHE_KEY_PREFIX'] + 'KEY-ITEM/'), key[len(app.config['CACHE_KEY_PREFIX'] + 'KEY-ITEM/'):])
                 # val = pickle.loads(redis.get(key))
-                # print "VAL", val[1]
+                # print ("VAL", val[1])
         except:
             pass
     else:
@@ -115,7 +115,7 @@ def cacher(f):
 
 def get_key_parts(key):
     """Decodes a cache key"""
-    # print key
+    # print (key)
     try:
         (func, args, kwargs) = pickle.loads(key)
         clas = None
@@ -132,9 +132,9 @@ def get_key_parts(key):
 def get_key_functions(keys, force=False):
     """Returns a list with functions and parameters (ready to execute) associated with the keys in cache"""
     funcs = []
-    for key,(timeout,time) in keys.iteritems():
+    for key,(timeout,time) in keys.items():
         delta = dtdatetime.now() - time
-        # print key, timeout, time.isoformat(), delta.total_seconds(), timeout / delta.total_seconds(), delta.total_seconds() / timeout
+        # print (key, timeout, time.isoformat(), delta.total_seconds(), timeout / delta.total_seconds(), delta.total_seconds() / timeout)
         # if delta.total_seconds() / timeout < 0.75 and (timeout - delta.total_seconds()) > 60:
         if not force and (timeout - delta.total_seconds()) > 60:
             app.logger.debug("BYPASSING Key '{0}' with timeout {1} still have {2} seconds to expire".format(key, timeout, timeout - delta.total_seconds()))

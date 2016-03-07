@@ -103,7 +103,7 @@ def check_auth(username, password):
         from .users.models import UserApi
         user = db.session.query(UserApi).filter(UserApi.user == username, UserApi.key == password).one()
         if user.expiration_date is not None and user.expiration_date <= dtdatetime.today():
-            # print user.expiration_date, '<=', dtdatetime.today()
+            # print (user.expiration_date, '<=', dtdatetime.today())
             return 'API Key expired. Please get new valid key! '
         return True
     except NoResultFound:

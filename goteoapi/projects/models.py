@@ -36,8 +36,8 @@ class Project(db.Model):
 
     #PROJECT STATUS IDs
     STATUS_REJECTED    = 0
-    STATUS_EDITING     = 1 # en negociación
-    STATUS_REVIEWING   = 2 #
+    STATUS_EDITING     = 1 #
+    STATUS_REVIEWING   = 2 # reviewing
     STATUS_IN_CAMPAIGN = 3
     STATUS_FUNDED      = 4
     STATUS_FULFILLED   = 5 # 'Caso de exito'

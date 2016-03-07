@@ -7,7 +7,7 @@ from dateutil.parser import parse
 from flask import jsonify
 from flask.ext.restful import Resource, reqparse
 
-from helpers import *
+from .helpers import *
 from . import app
 
 def date_sanitizer(data):
@@ -43,7 +43,7 @@ class Response():
 
     def __init__(self, attributes = {}, filters = {}, total = None, starttime = 0):
         self.ret = {}
-        for var, value in attributes.iteritems():
+        for var, value in attributes.items():
             self.ret[var] = value
 
         meta = {}
@@ -75,7 +75,7 @@ class BaseItem(Resource):
     """Base class for individual enpoint reports"""
 
     def __init__(self):
-        super(BaseItem, self).__init__()
+        super().__init__()
 
     def option(self):
         pass
@@ -96,7 +96,7 @@ class BaseList(Resource):
         self.reqparse.add_argument('limit', type=limit_sanitizer, default=10)
         self.reqparse.add_argument('lang', type=lang_sanitizer, action='append')
 
-        super(BaseList, self).__init__()
+        super().__init__()
 
     def parse_args(self, remove=()):
         """Standard args parser santizizer

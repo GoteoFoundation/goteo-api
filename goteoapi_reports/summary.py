@@ -1,20 +1,20 @@
     # -*- coding: utf-8 -*-
 
 import time
-from flask.ext.restful import fields, marshal
+from flask.ext.restful import marshal
 
 from goteoapi.helpers import utc_from_local, image_url, project_url, percent
 from goteoapi.decorators import ratelimit, requires_auth
 
 from goteoapi.base_resources import BaseList as Base, Response
 from .projects import contribution_resource_fields
-from .rewards import favourite_resource_fields
+from .rewards import favorite_resource_fields
 
 class SummaryAPI(Base):
     """Get sumarized Statistics"""
 
     def __init__(self):
-        super(SummaryAPI, self).__init__()
+        super().__init__()
 
     @requires_auth
     @ratelimit()
@@ -52,7 +52,7 @@ class SummaryAPI(Base):
                         type: array
                         items:
                             $ref: '#/definitions/api_reports_community_get_Category'
-                    favourite-rewards:
+                    favorite-rewards:
                         type: array
                         items:
                             $ref: '#/definitions/api_reports_rewards_get_Favourite'
@@ -149,10 +149,10 @@ class SummaryAPI(Base):
         users = User.total(**args)
         categorias = UserInterest.categories(**args)
 
-        favourites = []
-        for u in Reward.favourite_reward(**args):
-            item = marshal(u, favourite_resource_fields)
-            favourites.append(item)
+        favorites = []
+        for u in Reward.favorite_reward(**args):
+            item = marshal(u, favorite_resource_fields)
+            favorites.append(item)
 
 
         res = Response(
@@ -167,15 +167,15 @@ class SummaryAPI(Base):
                 'projects-published'      : Project.total(**args),
                 'projects-successful'     : Project.total(successful=True, **args),
                 'projects-failed'         : Project.total(failed=True, **args),
-                'categories'              : map(lambda t: {t['id']:
+                'categories'              : list(map(lambda t: {t['id']:
                                                     {'users': t['users'],
                                                      'id': t['id'],
                                                      'name': t['name'],
                                                      'percentage-users': percent(t['users'], users)}
-                                                    }, categorias),
+                                                    }, categorias)),
                 'top10-collaborations'    : top10_collaborations,
                 'top10-donations'         : top10_donations,
-                'favourite-rewards'        : favourites
+                'favorite-rewards'       : favorites
             },
             filters = args.items()
         )

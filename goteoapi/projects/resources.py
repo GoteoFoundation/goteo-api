@@ -554,7 +554,11 @@ class ProjectDonorsListAPI(BaseList):
             404:
                 description: Resource not found
         """
+
         res = self._get(project_id)
+
+        if res.ret['id'] == None:
+            return bad_request('Project not found', 404)
 
         return res.response()
 
@@ -565,6 +569,9 @@ class ProjectDonorsListAPI(BaseList):
         args = self.parse_args(remove=('location'))
 
         items = []
+        if Project.get(project_id) == None:
+            return Response(attributes = {'id': None})
+
         for u in User.donors_by_project(project_id, **args):
             item = marshal(u, donor_resource_fields)
             item['profile-image-url'] = image_url(u['avatar'])
@@ -583,7 +590,7 @@ class ProjectDonorsListAPI(BaseList):
             items.append( item )
         res = Response(
             starttime = time_start,
-            attributes = {'items' : items},
+            attributes = {'id':project_id, 'items' : items},
             filters = args.items(),
             total = User.donors_by_project_total(project_id, **args)
         )

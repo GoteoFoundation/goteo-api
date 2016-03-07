@@ -28,7 +28,6 @@ def test_licenses():
 #     rv = test_app.get('/licenses/gpl/')
 #     check_content_type(rv.headers)
 #     resp = json.loads(rv.data)
-#     print resp
 #     fields = Response.resource_fields
 #     if 'time-elapsed' in fields:
 #         del fields['time-elapsed']

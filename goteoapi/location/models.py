@@ -78,9 +78,7 @@ class ItemLocation(object):
             ) * R
         ).label('distance')
         subquery = db.session.query(self.id,self.latitude,self.longitude,self.method,self.city,self.country,self.country_code,self.modified,distance).filter(*filters).subquery('FirstCut')
-        # print "\n--\n"; print subquery; print "\n-->--\n";
         sub = select(fields).select_from(subquery).where(distance <= radius)#
-        # print sub; print "\n--<--\n";
         return sub
 
     # Vincenty Method, slightly better precision, high cost on querying database

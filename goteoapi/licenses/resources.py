@@ -129,7 +129,6 @@ class LicensesListAPI(BaseList):
             item['svg-url'] = svg_image_url(item['id'] + '.svg')
             reward_filter = args.copy()
             reward_filter['license_type'] = 'social'
-            # print item
             reward_filter['license'] = [item['id']]
             item['total-rewards'] = Reward.total(**reward_filter)
             item['total-projects'] = Project.total(**reward_filter)

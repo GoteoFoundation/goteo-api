@@ -43,8 +43,8 @@ DESCRIPTION = 'Goteo.org API'
 # Usefull links for general messages
 LINKS = {
 	'Developers Documentation' : 'http://developers.goteo.org',
-    'Swagger Interface' : '/api/spec.json',
-    'Swagger Documentation' : '/api/index.html'
+    'Swagger Interface' : '/apidocs/spec.json',
+    'Swagger Documentation' : '/apidocs/index.html'
 }
 
 # Built-in Users Authentication

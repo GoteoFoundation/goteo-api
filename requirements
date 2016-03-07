@@ -4,9 +4,9 @@ Flask-RESTful
 flasgger
 Flask-Redis
 Flask-SQLAlchemy
+mysqlclient
 Jinja2
 MarkupSafe
-MySQL-python
 Pygments
 SQLAlchemy
 Werkzeug
@@ -23,5 +23,3 @@ python-mimeparse
 pytz
 redis
 simplejson
-six
-wsgiref
