@@ -4,7 +4,9 @@
 # a self-contained environment for the pytohn app
 #
 
-/usr/bin/virtualenv virtualenv
+PYEXE=$(env which python2.7)
+
+/usr/bin/virtualenv -p $PYEXE virtualenv
 source virtualenv/bin/activate
 pip install -r requirements.txt
 pip install -r goteoapi_*/requirements.txt
