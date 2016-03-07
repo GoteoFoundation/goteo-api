@@ -51,6 +51,12 @@ Running code coverage tests:
 ./run-tests --cover-html --with-coverage
 ```
 
+Running code coverage tests with all packages:
+
+```bash
+./run-tests --cover-html --with-coverage --cover-package=goteoapi_reports --cover-package=goteoapi_digests
+```
+
 Tests uses [nosetests](https://nose.readthedocs.org). Same nosetests command arguments applies to `run-tests` script
 
 ## Install/update dependencies:
