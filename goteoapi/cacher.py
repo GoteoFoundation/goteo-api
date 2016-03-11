@@ -75,12 +75,12 @@ def cacher(f):
         if not app.config['CACHING']:
             return f(*args, **kwargs)
 
-        key = pickle.dumps((f.__name__, args, kwargs), pickle.HIGHEST_PROTOCOL);
+        key = str(pickle.dumps((f.__name__, args, kwargs), pickle.HIGHEST_PROTOCOL));
 
-        #TODO: lower the cache time depending on the to_date parameter
-                # if present use that date as maxdate (else now)
-                # if maxdate is > now() - 2 months (configurable)
-                    # timeout variable (the closer to now, the lesser the value)
+        # TODO: lower the cache time depending on the to_date parameter
+        # if present use that date as maxdate (else now)
+        # if maxdate is > now() - 2 months (configurable)
+        # timeout variable (the closer to now, the lesser the value)
         timeout = app.config['CACHE_MIN_TIMEOUT']
         now = dtdatetime.now()
         if 'to_date' in kwargs and kwargs['to_date'] != None:
