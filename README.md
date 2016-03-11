@@ -1,6 +1,6 @@
 # GOTEO API
 
-This is the code for the [goteo api](http://api.goteo.org/). 
+This is the code for the [goteo api](http://api.goteo.org/).
 
 Please referer to the INSTALL.md file for info about installing this API.
 
@@ -105,28 +105,22 @@ curl -i --user "goteo:goteo" -X GET -H "Content-Type: application/json" http://0
 
 Response:
 
-    HTTP/1.0 400 BAD REQUEST
-    Content-Type: application/json
-    Content-Length: 53
-    Access-Control-Allow-Origin: *
-    Access-Control-Allow-Credentials: true
-    Access-Control-Allow-Methods: POST, OPTIONS, GET
-    Access-Control-Allow-Headers: Authorization
-    Access-Control-Max-Age: 1
-    Server: Werkzeug/0.10.4 Python/2.7.6
-    Date: Mon, 01 Feb 2016 13:36:53 GMT
-    
-    {
-        "message": "Bad Request", 
-        "status": 400
-    }
+```json
+HTTP/1.0 400 BAD REQUEST
+Content-Type: application/json
+Content-Length: 53
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Methods: POST, OPTIONS, GET
+Access-Control-Allow-Headers: Authorization
+Access-Control-Max-Age: 1
+Server: Werkzeug/0.10.4 Python/2.7.6
+Date: Mon, 01 Feb 2016 13:36:53 GMT
 
+{
+    "message": "Bad Request",
+    "status": 400
+}
+```
 
 Check the full documentation here: https://developers.goteo.org/doc/
-
-## Notes
-
-- Check version [version 2.0](https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md) for swagger compatibility in the flask-restful-swagger (currently in 1.2).
-
-More info here:
-https://github.com/rantav/flask-restful-swagger/issues/50#issuecomment-65641980
