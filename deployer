@@ -4,7 +4,7 @@
 # a self-contained environment for the pytohn app
 #
 
-PYEXE=$(env which python3.4)
+PYEXE=$(env which python3)
 
 /usr/bin/virtualenv -p $PYEXE virtualenv
 source virtualenv/bin/activate
