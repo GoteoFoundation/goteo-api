@@ -23,3 +23,5 @@ python-mimeparse
 pytz
 redis
 simplejson
+passlib
+bcrypt

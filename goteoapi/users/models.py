@@ -11,8 +11,12 @@ from ..helpers import image_url, utc_from_local, user_url, get_lang
 
 from ..categories.models import Category, CategoryLang
 from ..models.invest import Invest
+from ..models.node import Node
 from ..models.message import Message
 from ..location.models import UserLocation
+
+from hashlib import sha1
+from passlib.context import CryptContext
 
 from .. import db
 
@@ -21,15 +25,15 @@ class User(db.Model):
     __tablename__ = 'user'
 
     id = db.Column('id', String(50), primary_key=True)
+    password_hash = db.Column('password', String(255))
     name = db.Column('name', String(100))
     avatar = db.Column('avatar', String(255))
-    # email = db.Column('email', String(100))
+    email = db.Column('email', String(255))
     active = db.Column('active', Boolean)
     hide = db.Column('hide', Boolean)
-    node = db.Column('node', String(50), db.ForeignKey('node.id'))
+    node = db.Column('node', String(50), db.ForeignKey(Node.id))
     created = db.Column('created', Date)
     updated = db.Column('modified', Date)
-    # email = db.Column('email', String(255))
 
 
     def __repr__(self):
@@ -51,6 +55,35 @@ class User(db.Model):
     @hybrid_property
     def date_updated(self):
         return utc_from_local(self.updated)
+
+    @hybrid_method
+    def get_context(self):
+        myctx = CryptContext(schemes=["bcrypt"], bcrypt__default_rounds=12)
+        return myctx
+
+    @hybrid_method
+    def hash_password(self, password):
+        """Hashes password. Passswords are pre-sha1 encoded"""
+        sha = sha1(password.encode('utf-8'))
+        self.password_hash = self.get_context().encrypt(sha.hexdigest())
+        return self.password_hash
+
+    @hybrid_method
+    def verify_password(self, password):
+        """Verifies password. Passswords are pre-sha1 encoded"""
+
+        sha = sha1(password.encode('utf-8'))
+        try:
+            (ok, update) = self.get_context().verify_and_update(sha.hexdigest(), self.password_hash)
+        except ValueError:
+            print('old ' + self.password_hash)
+            # Old plain SHA-1 database stored password
+            ok = sha.hexdigest() == self.password_hash
+            update = self.get_context().encrypt(self.password_hash)
+        if ok and update:
+            # update database
+            self.password_hash = update
+        return ok
 
     @hybrid_property
     def filters(self):

@@ -19,7 +19,7 @@ In Ubuntu 14.04 you can run this commands to install all requirements:
 
 ```bash
 sudo apt-get install python-setuptools python-dev python3-dev build-essential
-sudo apt-get install libevent1-dev libmysqlclient-dev libpython-dev
+sudo apt-get install libffi6 libffi-dev libevent1-dev libmysqlclient-dev libpython-dev
 sudo apt-get install python-virtualenv virtualenvwrapper
 sudo apt-get install redis-server python-redis
 sudo easy_install pip
