@@ -63,13 +63,13 @@ By default, local server listens to http://0.0.0.0:5000/
 
     ```bash
     workon goteoapi
-    ./goteoapi.py
+    ./run.py
     ```
 
 2. If you have chosen method 2, just run the script:
 
     ```bash
-    ./run-goteo
+    ./run
     ```
 
 Now just point your browser (or curl) to http://0.0.0.0:5000/

@@ -71,10 +71,19 @@ Tests uses [nosetests](https://nose.readthedocs.org). Same nosetests command arg
 ./run
 ```
 
-Or (extra packages added: goteoapi_reports, goteoapi_digests)
+To run the API with extra packages you must configure the variable `MODULES` int the file `config.py` (extra packages such as: goteoapi_reports, goteoapi_digests)
 
-```bash
-./run-goteo
+```python
+...
+
+MODULES = {
+    # reports endpoints
+    'goteoapi_reports.controllers',
+    # digests endpoints
+    'goteoapi_digests.controllers'
+}
+
+...
 ```
 
 ## Examples

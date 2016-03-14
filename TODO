@@ -2,7 +2,6 @@ TODO
 
 Enpoint projects:
 
-afegir categories
 posar link al mp4 directe
 link a la pagina d'aportacio
 retornos
@@ -11,12 +10,6 @@ add collaborations
 CACHE
 delete key on update failure
 -----
-
-
-Location refactor
-
-Añadir info de usuario:
-https://goteo.org/user/profile/olivier/profile
 
 2. Endpoint de iconos?
 

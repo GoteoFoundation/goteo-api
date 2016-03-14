@@ -22,7 +22,7 @@ REQUESTS_LIMIT = 300
 REQUESTS_TIME = 60 * 15
 
 # redis (mandatory if requests_limit activated)
-REDIS_URI = "redis://devgoteo.org:6379/0"
+REDIS_URI = "redis://localhost:6379/0"
 
 # Extend the API functionality by enabling additional modules/plugins
 MODULES = {
