@@ -4,6 +4,7 @@ import time
 from flask.ext.restful import fields
 from flasgger.utils import swag_from
 from ..decorators import *
+from ..auth.decorators import requires_auth
 from ..helpers import marshal
 from ..base_resources import BaseItem, BaseList, Response
 from ..location.models import UserLocation
@@ -70,6 +71,7 @@ class UserAPI(BaseItem):
 
     @requires_auth
     @ratelimit()
+    @swag_from('swagger_specs/user_item.yml')
     def get(self, user_id):
         res = self._get(user_id)
 

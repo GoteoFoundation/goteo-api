@@ -13,6 +13,9 @@ dbpass = 'goteo1234'
 dbname = 'goteo'
 DB_URI = 'mysql://' + dbuser + ':' + dbpass + '@' + dbhost + '/' + dbname
 
+# A unique secret key for this application
+SECRET_KEY = 'a-super-secret-and-random-key'
+
 # Optional config:
 # ================
 

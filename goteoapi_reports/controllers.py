@@ -4,6 +4,7 @@ from flask import jsonify
 
 from goteoapi import app, api
 from goteoapi.decorators import *
+from goteoapi.auth.decorators import requires_auth
 
 from .money import MoneyAPI
 from .projects import ProjectsAPI

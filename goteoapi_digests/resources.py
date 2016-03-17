@@ -9,6 +9,7 @@ from flasgger.utils import swag_from
 
 #import current endpoints
 from goteoapi.decorators import *
+from goteoapi.auth.decorators import requires_auth
 from goteoapi.base_resources import BaseList, Response
 from goteoapi import app
 

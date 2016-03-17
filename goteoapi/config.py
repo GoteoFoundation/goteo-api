@@ -11,6 +11,9 @@
 # DB URI
 DB_URI = 'mysql://user:pass@mysqlhost/dbname'
 
+# A unique secret key for this application
+SECRET_KEY = 'a-super-secret-and-random-key'
+
 # Optional config:
 # ================
 
@@ -33,6 +36,14 @@ CACHE_MIN_TIMEOUT = 0
 
 # Use Http Authentication
 AUTH_ENABLED = False
+
+# Extend the API functionality by enabling additional modules/plugins
+MODULES = {
+    # reports endpoints
+    # 'goteoapi_reports.controllers',
+    # digests endpoints
+    # 'goteoapi_digests.controllers'
+}
 
 # debug (False by default)
 DEBUG = False

@@ -4,7 +4,8 @@ import time
 from flask.ext.restful import marshal
 from flasgger.utils import swag_from
 from goteoapi.helpers import utc_from_local, image_url, project_url, percent
-from goteoapi.decorators import ratelimit, requires_auth
+from goteoapi.decorators import ratelimit
+from goteoapi.auth.decorators import requires_auth
 
 from goteoapi.base_resources import BaseList as Base, Response
 from .projects import contribution_resource_fields

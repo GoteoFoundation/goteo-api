@@ -4,7 +4,8 @@ import time
 
 from flask.ext.restful import fields
 from flasgger.utils import swag_from
-from goteoapi.decorators import ratelimit, requires_auth
+from goteoapi.decorators import ratelimit
+from goteoapi.auth.decorators import requires_auth
 from goteoapi.base_resources import BaseList, Response
 
 money_resource_fields = {

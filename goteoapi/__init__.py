@@ -40,6 +40,9 @@ for i in app.config['CACHE']:
     if i.startswith('CACHE_'):
         app.config[i] = app.config['CACHE'][i]
 
+# Secret key
+app.secret_key = app.config['SECRET_KEY']
+
 db = SQLAlchemy(app)
 
 # DEBUG
