@@ -178,8 +178,19 @@ class User(db.Model):
             filters.append(Invest.user==self.id)
             filters.append(Invest.project==project_id)
             # return self.query.distinct().filter(*filters).order_by(asc(self.id)).offset(page * limit).limit(limit).all()
-            return [d._asdict() for d in db.session.query(Invest.anonymous, self.id, self.name, self.avatar, self.active, self.hide, self.node, self.created, self.updated) \
-                            .filter(*filters).order_by(asc(self.id)).offset(page * limit).limit(limit)]
+            return [d._asdict() for d in db.session.query(Invest.anonymous, \
+                                                                        self.id, \
+                                                                        self.name, \
+                                                                        self.avatar, \
+                                                                        self.active, \
+                                                                        self.hide, \
+                                                                        self.node, \
+                                                                        self.created, \
+                                                                        self.updated) \
+                                                    .filter(*filters). \
+                                                    order_by(asc(self.id)). \
+                                                    offset(page * limit). \
+                                                    limit(limit)]
         except NoResultFound:
             return []
 
