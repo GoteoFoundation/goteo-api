@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 from flask import request, jsonify
 from . import app
+from .ratelimit import get_view_rate_limit
 
 @app.after_request
-def add_cors(resp):
-    """ Ensure all responses have the CORS headers. This ensures any failures are also accessible
-        by the client. """
+def inject_addtional_headers(resp):
+    """
+    Ensure all responses have the CORS headers.
+    This ensures any failures are also accessible by the client.
+    """
     # Default global opened CORS
     origin = request.headers.get('Origin','*')
     # Check system user bind to CORS response
@@ -25,6 +28,15 @@ def add_cors(resp):
         resp.headers['Access-Control-Max-Age'] = 1
     else:
         resp.headers['Access-Control-Max-Age'] = 60 * 60 * 24 * 20
+
+    # Limit headers
+    limit = get_view_rate_limit()
+    if limit:
+        h = resp.headers
+        h.add('X-RateLimit-Remaining', str(limit.remaining))
+        h.add('X-RateLimit-Limit', str(limit.limit))
+        h.add('X-RateLimit-Reset', str(limit.reset))
+
     return resp
 
 @app.errorhandler(400)
@@ -54,7 +66,10 @@ def index():
         # Filter out rules non Goteo-api rules
         if "GET" in rule.methods and rule.endpoint.startswith('api_'):
             func_list[rule.rule] = app.view_functions[rule.endpoint].__doc__
-    return jsonify(version=app.config['VERSION'], message=app.config['DESCRIPTION'] + ' v' + str(app.config['VERSION']), endpoints=func_list, links=app.config['LINKS'])
+    return jsonify( version=app.config['VERSION'],
+                    message=app.config['DESCRIPTION'] + ' v' + str(app.config['VERSION']),
+                    endpoints=func_list,
+                    links=app.config['LINKS'])
 
 
 #

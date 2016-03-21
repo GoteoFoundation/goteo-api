@@ -4,11 +4,20 @@
     ~~~~~~~~
     goteoapi main application package
 """
-
+import time
 from flask import Flask
 from flask.ext.restful import Api
 from flasgger import Swagger
 from flask.ext.sqlalchemy import SQLAlchemy
+
+def debug_time(func):
+    def new_f(*args, **kwargs):
+        time_start = time.time()
+        res = func(*args, **kwargs)
+        total_time = time.time() - time_start
+        app.logger.debug('Time ' + func.__name__ + ': ' + str(total_time))
+        return res
+    return new_f
 
 # DB class
 #app = Flask(__name__)
@@ -28,17 +37,20 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 if app.debug:
     app.config['SQLALCHEMY_ECHO'] = True
 
+if 'CACHE' not in app.config:
+    app.config['CACHE_'] = {}
+
 app.config['CACHING'] = False
 if 'CACHE_TYPE' in app.config['CACHE']:
     if app.config['CACHE']['CACHE_TYPE'] != 'null':
         app.config['CACHING'] = True
-    if app.config['CACHE']['CACHE_TYPE'] == 'redis':
-        if 'CACHE_KEY_PREFIX' not in app.config['CACHE']:
-            app.config['CACHE']['CACHE_KEY_PREFIX'] = 'Cacher/'
 
 for i in app.config['CACHE']:
     if i.startswith('CACHE_'):
         app.config[i] = app.config['CACHE'][i]
+
+if 'REDIS_URL' in app.config and 'CACHE_KEY_PREFIX' not in app.config['CACHE']:
+    app.config['CACHE']['CACHE_KEY_PREFIX'] = 'Cacher/'
 
 # Secret key
 app.secret_key = app.config['SECRET_KEY']
@@ -47,7 +59,6 @@ db = SQLAlchemy(app)
 
 # DEBUG
 if app.debug:
-    from .decorators import debug_time
     db.session.query = debug_time(db.session.query)
 else:
     # loggin errors to a file if not debugging

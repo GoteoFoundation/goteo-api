@@ -89,7 +89,6 @@ class BaseList(Resource):
         self.reqparse.add_argument('to_date', type=date_sanitizer)
         self.reqparse.add_argument('node', type=str, action='append')
         self.reqparse.add_argument('project', type=str, action='append')
-        # TODO: buscar por nombre de categoria dependiendo de idioma
         self.reqparse.add_argument('category', type=int, action='append')
         self.reqparse.add_argument('location', type=location_sanitizer)
         self.reqparse.add_argument('page', type=int, default=0)
@@ -99,8 +98,9 @@ class BaseList(Resource):
         super().__init__()
 
     def parse_args(self, remove=()):
-        """Standard args parser santizizer
-           returns a dict of arguments and values
+        """
+        Standard args parser santizizer
+        returns a dict of arguments and values
         """
         if remove:
             for r in remove:

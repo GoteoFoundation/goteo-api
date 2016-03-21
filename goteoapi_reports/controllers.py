@@ -3,7 +3,7 @@
 from flask import jsonify
 
 from goteoapi import app, api
-from goteoapi.decorators import *
+from goteoapi.ratelimit import ratelimit
 from goteoapi.auth.decorators import requires_auth
 
 from .money import MoneyAPI

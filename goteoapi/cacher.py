@@ -3,17 +3,19 @@ from datetime import datetime as dtdatetime
 from dateutil.parser import parse
 from functools import wraps
 from flask.ext.cache import Cache
+
 import pickle
 from .helpers import *
-from .decorators import redis
 
 from . import app
-
-cache = Cache(app)
+from .ratelimit import redis
 
 # a long time, when the cars will fly...
 INFINITE = 365 * 24 * 3600
+if redis:
+    redis_prefix = app.config['CACHE']['CACHE_KEY_PREFIX'].encode('utf-8') + b'KEY-ITEM/'
 
+cache = Cache(app, config=app.config['CACHE'])
 
 #
 # CACHER BY ARGS FILTERS
@@ -23,15 +25,14 @@ def get_key_list():
     """List all cached keys"""
     if redis:
         try:
-            _keys = redis.keys(app.config['CACHE_KEY_PREFIX'] + 'KEY-ITEM/*')
+            key_list = redis.keys(redis_prefix + b'*')
             keys = {}
-            for key in _keys:
-                keys[key[len(app.config['CACHE_KEY_PREFIX'] + 'KEY-ITEM/'):]] = pickle.loads(redis.get(key))
-                # print ("KEY", len(app.config['CACHE_KEY_PREFIX'] + 'KEY-ITEM/'), key[len(app.config['CACHE_KEY_PREFIX'] + 'KEY-ITEM/'):])
-                # val = pickle.loads(redis.get(key))
-                # print ("VAL", val[1])
-        except:
-            pass
+            for key in key_list:
+                val = redis.get(key)
+                decoded = pickle.loads(val)
+                keys[key[len(redis_prefix):]] = decoded
+        except Exception as e:
+            app.logger.debug('Error decoding key {key} [{e}]'.format(key=key, e=e))
     else:
         keys = cache.get('KEY-LIST')
 
@@ -45,7 +46,9 @@ def add_key_list(key, timeout, time):
     val = (timeout, time)
     if redis:
         # A more efficient way to touch a single key instead of retrieving the full set
-        return redis.set(app.config['CACHE_KEY_PREFIX'] + 'KEY-ITEM/' + key, pickle.dumps(val, pickle.HIGHEST_PROTOCOL))
+        app.logger.debug('Adding key to REDIS {key} {val}'.format(key=key, val=val))
+        v = pickle.dumps(val, pickle.HIGHEST_PROTOCOL)
+        return redis.set(redis_prefix + key, v)
 
     keys = get_key_list()
     keys[key] = val
@@ -55,13 +58,14 @@ def renew_key_list(key):
     if redis:
         # A more efficient way to touch a single key instead of retrieving the full set
         try:
-            (timeout, time) = pickle.loads(redis.get(app.config['CACHE_KEY_PREFIX'] + 'KEY-ITEM/' + key))
+            (timeout, time) = pickle.loads(redis.get(redis_prefix + key).decode('utf-8'))
+            return add_key_list(key, timeout, dtdatetime.now())
         except:
             pass
-    else:
-        keys = get_key_list()
-        if key in keys:
-            (timeout, time) = keys[key]
+
+    keys = get_key_list()
+    if key in keys:
+        (timeout, time) = keys[key]
 
     if timeout and time:
         return add_key_list(key, timeout, dtdatetime.now())
@@ -75,8 +79,7 @@ def cacher(f):
         if not app.config['CACHING']:
             return f(*args, **kwargs)
 
-        key = str(pickle.dumps((f.__name__, args, kwargs), pickle.HIGHEST_PROTOCOL));
-
+        key = pickle.dumps((f.__name__, args, kwargs), pickle.HIGHEST_PROTOCOL);
         # TODO: lower the cache time depending on the to_date parameter
         # if present use that date as maxdate (else now)
         # if maxdate is > now() - 2 months (configurable)
@@ -95,7 +98,7 @@ def cacher(f):
 
         app.logger.debug('CACHER FOR FUNCTION: {0} TIMEOUT: {1}s KEY: {2}'.format(f.__name__, timeout, key))
 
-        cached = cache.get(key)
+        cached = cache.get(str(key))
         if cached is not None:
             if 'BYPASS_CACHING' in app.config and app.config['BYPASS_CACHING'] and app.debug:
                 app.logger.debug('--Bypassing caching result---')
@@ -107,7 +110,7 @@ def cacher(f):
 
         add_key_list(key, timeout, now)
         result = f(*args, **kwargs)
-        cache.set(key, result, timeout=timeout)
+        cache.set(str(key), result, timeout=timeout)
         return result
 
     return decorated
@@ -117,7 +120,6 @@ def get_key_parts(key):
     """Decodes a cache key"""
     try:
         parts = pickle.loads(key)
-        # print(parts)
         func = parts[0]
         args = ()
         kwargs = {}

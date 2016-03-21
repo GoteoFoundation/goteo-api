@@ -21,7 +21,8 @@ def marshal(data, fields, envelope=None):
     return m
 
 def get_lang(obj, field, langs=[]):
-    """Searches alternatives langs on a object in the form of:
+    """
+    Searches alternatives langs on a object in the form of:
     {
         field:'original',
         field_en:'english translation',

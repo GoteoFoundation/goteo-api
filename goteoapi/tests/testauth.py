@@ -4,8 +4,7 @@
 #
 from nose.tools import *
 
-from . import test_app
-from . import app
+from . import test_app, app
 from base64 import b64encode
 
 app.config['AUTH_ENABLED'] = True

@@ -7,7 +7,6 @@ import os
 
 from goteoapi.tests import test_app, get_json, get_swagger
 
-__import__('goteoapi.controllers')
 __import__('goteoapi_digests.controllers')
 
 DIR = os.path.dirname(__file__) + '/'

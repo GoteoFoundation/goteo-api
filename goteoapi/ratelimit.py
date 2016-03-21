@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
 import time
-from datetime import datetime as dtdatetime
 
-from functools import wraps, update_wrapper
-from flask import request, g, jsonify
-from flask_redis import Redis
-from netaddr import IPSet, AddrFormatError
-from sqlalchemy.orm.exc import NoResultFound
+from functools import update_wrapper
+from flask import request, g
+from flask_redis import FlaskRedis
 
 from .helpers import *
-
-from . import app, db
+from . import app
 
 #
 # REDIS RATE LIMITER
@@ -18,7 +14,8 @@ from . import app, db
 
 redis = False
 if app.config['REDIS_URL']:
-    redis = Redis(app)
+    redis = FlaskRedis(app)
+
 
 class RateLimit(object):
     expiration_window = 10
@@ -62,24 +59,3 @@ def ratelimit(limit=app.config['REQUESTS_LIMIT'], per=app.config['REQUESTS_TIME'
             return f(*args, **kwargs)
         return update_wrapper(rate_limited, f)
     return decorator
-
-@app.after_request
-def inject_x_rate_headers(response):
-    limit = get_view_rate_limit()
-    if limit:
-        h = response.headers
-        h.add('X-RateLimit-Remaining', str(limit.remaining))
-        h.add('X-RateLimit-Limit', str(limit.limit))
-        h.add('X-RateLimit-Reset', str(limit.reset))
-    return response
-
-
-############################ debug ############################
-def debug_time(func):
-    def new_f(*args, **kwargs):
-        time_start = time.time()
-        res = func(*args, **kwargs)
-        total_time = time.time() - time_start
-        app.logger.debug('Time ' + func.__name__ + ': ' + str(total_time))
-        return res
-    return new_f

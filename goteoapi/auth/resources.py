@@ -3,7 +3,7 @@
 import time
 from flask.ext.restful import fields
 from flasgger.utils import swag_from
-from ..decorators import *
+from ..ratelimit import ratelimit
 from ..base_resources import BaseItem, Response
 from ..users.models import User
 

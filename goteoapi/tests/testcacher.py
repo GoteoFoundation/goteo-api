@@ -4,11 +4,14 @@
 #
 import random, datetime
 from nose.tools import *
-
+from time import sleep
 from . import app
-from goteoapi.cacher import cacher, cache, get_key_functions
+from goteoapi.cacher import cache, cacher, get_key_functions, get_key_list
 
-cache.clear()
+app.config['REDIS_URL'] = None
+app.config['CACHE_MIN_TIMEOUT'] = 1
+app.config['CACHE']['CACHE_TYPE'] = 'simple'
+cache.init_app(app, config=app.config['CACHE'])
 
 def teardown():
     cache.clear()
@@ -20,8 +23,10 @@ def teardown():
 
 alt = 1
 @cacher
-def get_alt():
+def get_alt(a=None):
     global alt
+    if a is not None:
+        alt = a
     alt = 1 - alt
     return alt
 
@@ -57,8 +62,12 @@ def test_cacher():
     eq_( get_random() , get_random())
     eq_( get_simple() , get_simple(0))
     eq_( get_simple(num=1) , get_simple(1))
+    get_alt(0)
     eq_( get_alt() , 0)
     eq_( get_alt() , 0)
+    sleep(1.1)
+    eq_( get_alt() , 1)
+    assert len(get_key_list()) > 0
 
 def test_class_non_cacher():
     app.config['CACHING'] = False
@@ -69,6 +78,13 @@ def test_class_cacher():
     app.config['CACHING'] = True
     eq_( 1 == Dummy.get_simple(1), True)
     eq_( Dummy.get_random() , Dummy.get_random())
+
+def test_renew_cacher():
+    key_list = get_key_list()
+    assert len(key_list) > 0
+    func_list = get_key_functions(get_key_list(), True)
+    print(func_list)
+    assert len(func_list) > 0
 
 def test_static_methods():
     Dummy.get_simple(num=0)

@@ -4,7 +4,9 @@
 #
 from nose.tools import *
 
-from . import test_app, get_json
+from . import test_app, app, get_json
+
+app.config['AUTH_ENABLED']
 
 def test_main_routes():
     rv = test_app.get('/')
@@ -52,5 +54,6 @@ def test_cors_headers():
     eq_(len(rv.headers.getlist('Access-Control-Allow-Methods')), 1)
     eq_(len(rv.headers.getlist('Access-Control-Allow-Credentials')), 1)
     eq_(len(rv.headers.getlist('Access-Control-Max-Age')), 1)
+
 
 
