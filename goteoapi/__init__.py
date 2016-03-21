@@ -71,14 +71,14 @@ else:
 app.config['SWAGGER'] = {
     "swagger_version": "2.0",
     # headers are optional, the following are default
-    # "headers": [
-    #     ('Access-Control-Allow-Origin', '*'),
-    #     ('Access-Control-Allow-Headers', "Authorization, Content-Type"),
-    #     ('Access-Control-Expose-Headers', "Authorization"),
-    #     ('Access-Control-Allow-Methods', "GET, POST, PUT, DELETE, OPTIONS"),
-    #     ('Access-Control-Allow-Credentials', "true"),
-    #     ('Access-Control-Max-Age', 60 * 60 * 24 * 20),
-    # ],
+    "headers": [
+        # ('Access-Control-Allow-Origin', '*'),
+        # ('Access-Control-Allow-Headers', "Authorization, Content-Type"),
+        # ('Access-Control-Expose-Headers', "Authorization"),
+        # ('Access-Control-Allow-Methods', "GET, POST, PUT, DELETE, OPTIONS"),
+        # ('Access-Control-Allow-Credentials', "true"),
+        # ('Access-Control-Max-Age', 60 * 60 * 24 * 20),
+    ],
     # another optional settings
     # "url_prefix": "swaggerdocs",
     # "subdomain": "docs.mysite,com",

@@ -1,20 +1,30 @@
 # -*- coding: utf-8 -*-
-import flask
-from flask import jsonify
-
+from flask import request, jsonify
 from . import app
 
 @app.after_request
 def add_cors(resp):
     """ Ensure all responses have the CORS headers. This ensures any failures are also accessible
         by the client. """
-    # resp.headers['Access-Control-Allow-Origin'] = flask.request.headers.get('Origin','*')
-    # resp.headers['Access-Control-Allow-Credentials'] = 'true'
-    # resp.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS, GET'
-    # resp.headers['Access-Control-Allow-Headers'] = flask.request.headers.get('Access-Control-Request-Headers', 'Authorization')
+    # Default global opened CORS
+    origin = request.headers.get('Origin','*')
+    # Check system user bind to CORS response
+    auth = request.authorization
+    if auth and app.config['USERS'] and auth.username in app.config['USERS'] and 'password' in app.config['USERS'][auth.username]:
+        user = app.config['USERS'][auth.username]
+        if user['password'] == auth.password:
+            if 'cors' in user and origin not in user['cors']:
+                origin = ''
+    resp.headers['Access-Control-Allow-Origin'] = origin
+    resp.headers['Access-Control-Allow-Credentials'] = 'true'
+    resp.headers['Access-Control-Expose-Headers'] = 'Authorization'
+    resp.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS, GET'
+    resp.headers['Access-Control-Allow-Headers'] = request.headers.get('Access-Control-Request-Headers', 'Authorization')
     # set low for debugging
     if app.debug:
-        resp.headers['Access-Control-Max-Age'] = '1'
+        resp.headers['Access-Control-Max-Age'] = 1
+    else:
+        resp.headers['Access-Control-Max-Age'] = 60 * 60 * 24 * 20
     return resp
 
 @app.errorhandler(400)

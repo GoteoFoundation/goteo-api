@@ -4,7 +4,7 @@
 #
 from nose.tools import *
 import os
-from . import test_app, check_content_type, get_json, get_swagger
+from . import test_app, get_json, get_swagger
 from ..users.resources import user_resource_fields
 
 DIR = os.path.dirname(__file__) + '/../users/'
@@ -28,7 +28,7 @@ def test_users():
     fields_swagger = get_swagger(DIR + 'swagger_specs/user_list.yml', 'User')
     for f in FILTERS:
         rv = test_app.get('/users/' , query_string=f)
-        check_content_type(rv.headers)
+        eq_(rv.headers['Content-Type'], 'application/json')
         resp = get_json(rv)
         fields = user_resource_fields
         if 'time-elapsed' in resp:
@@ -56,7 +56,7 @@ def test_user_no_slash():
 def test_user():
     # TODO: generic user
     rv = test_app.get('/users/goteo/')
-    check_content_type(rv.headers)
+    eq_(rv.headers['Content-Type'], 'application/json')
     resp = get_json(rv)
     fields = user_resource_fields
     if 'time-elapsed' in fields:

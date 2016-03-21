@@ -4,14 +4,12 @@
 #
 from nose.tools import *
 
-from . import test_app, check_content_type, get_json
+from . import test_app, get_json
 
 def test_main_routes():
     rv = test_app.get('/')
-    check_content_type(rv.headers)
-    print(rv.data)
+    eq_(rv.headers['Content-Type'], 'application/json')
     resp = get_json(rv)
-    print(resp)
     #make sure we get a response
     eq_(rv.status_code, 200)
 
@@ -22,9 +20,37 @@ def test_main_routes():
 
 def test_error_routes():
     rv = test_app.get('/i-dont-exists')
-    check_content_type(rv.headers)
+    eq_(rv.headers['Content-Type'], 'application/json')
     resp = get_json(rv)
     eq_(rv.status_code, 404)
     assert 'error' in resp
     eq_(resp['error'], 404)
     assert 'message' in resp
+
+def test_trailing_slash():
+    rv = test_app.get('/projects')
+    eq_(rv.status_code, 301)
+    eq_(rv.headers['Location'], 'http://localhost/projects/')
+
+def test_bad_request():
+    rv = test_app.get('/projects/?category=string')
+    eq_(rv.status_code, 400)
+
+
+def test_cors_headers():
+    rv = test_app.get('/projects/')
+    eq_(rv.headers['Content-Type'], 'application/json')
+    assert 'Access-Control-Allow-Origin' in rv.headers
+    assert 'Access-Control-Allow-Headers' in rv.headers
+    assert 'Access-Control-Expose-Headers' in rv.headers
+    assert 'Access-Control-Allow-Methods' in rv.headers
+    assert 'Access-Control-Allow-Credentials' in rv.headers
+    assert 'Access-Control-Max-Age' in rv.headers
+    eq_(len(rv.headers.getlist('Access-Control-Allow-Origin')), 1)
+    eq_(len(rv.headers.getlist('Access-Control-Allow-Headers')), 1)
+    eq_(len(rv.headers.getlist('Access-Control-Expose-Headers')), 1)
+    eq_(len(rv.headers.getlist('Access-Control-Allow-Methods')), 1)
+    eq_(len(rv.headers.getlist('Access-Control-Allow-Credentials')), 1)
+    eq_(len(rv.headers.getlist('Access-Control-Max-Age')), 1)
+
+

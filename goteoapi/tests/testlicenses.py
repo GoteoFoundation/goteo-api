@@ -4,15 +4,20 @@
 #
 from nose.tools import *
 import os
-from . import test_app, check_content_type, get_json, get_swagger
+from . import test_app, get_json, get_swagger
 from ..licenses.resources import license_resource_fields
 
 DIR = os.path.dirname(__file__) + '/../licenses/'
 
+FILTERS = [
+'',
+'lang=ca'
+]
+
 def test_licenses():
     fields_swagger = get_swagger(DIR + 'swagger_specs.yml', 'License')
     rv = test_app.get('/licenses/')
-    check_content_type(rv.headers)
+    eq_(rv.headers['Content-Type'], 'application/json')
     resp = get_json(rv)
 
     fields = license_resource_fields

@@ -71,10 +71,7 @@ LINKS = {
 }
 
 # Built-in Users Authentication
-# Users can be bind to a ip or a ip range using a mask (eg: ip/mask)
-USERS = {
-    'goteo' : {'password':'goteo', 'remotes' : ['127.0.0.0/16', '192.168.0.0/24']}
-}
+USERS = {}
 
 # Api version
 VERSION = "1.1"

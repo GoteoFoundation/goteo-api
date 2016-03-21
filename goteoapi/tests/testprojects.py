@@ -4,7 +4,7 @@
 #
 from nose.tools import *
 import os
-from . import test_app, check_content_type, get_json, get_swagger
+from . import test_app, get_json, get_swagger
 from ..projects.resources import project_resource_fields, project_full_resource_fields
 
 DIR = os.path.dirname(__file__) + '/../projects/'
@@ -28,7 +28,7 @@ def test_projects():
     fields_swagger = get_swagger(DIR + 'swagger_specs/project_list.yml', 'Project')
     for f in FILTERS:
         rv = test_app.get('/projects/' , query_string=f)
-        check_content_type(rv.headers)
+        eq_(rv.headers['Content-Type'], 'application/json')
         resp = get_json(rv)
         fields = project_resource_fields
         if 'time-elapsed' in resp:
@@ -59,7 +59,7 @@ def test_project_no_slash():
 def test_project():
     # TODO: generic project here
     rv = test_app.get('/projects/160metros/')
-    check_content_type(rv.headers)
+    eq_(rv.headers['Content-Type'], 'application/json')
     resp = get_json(rv)
     fields = project_full_resource_fields
     if 'time-elapsed' in resp:

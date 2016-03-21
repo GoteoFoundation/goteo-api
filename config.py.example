@@ -60,7 +60,13 @@ LINKS = {
 
 # Built-in Users Authentication
 # Users can be bind to a ip or a ip range using a mask (eg: ip/mask)
-
+# cors referes to the "Access-Control-Allow-Origin" header directive
 USERS = {
-	'goteo' : {'password':'goteo', 'remotes' : ['127.0.0.0/16', '192.168.0.0/24']}
+    # username (optional)
+	'goteo' : {
+        'password':'goteo',
+        # Optional fields:
+        # 'remotes' : ['127.0.0.0/16', '192.168.0.0/24'],
+        # 'cors': ['http://stats.goteo.org', 'https://stats.goteo.org']
+    }
 }

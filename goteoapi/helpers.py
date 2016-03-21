@@ -98,7 +98,7 @@ def bad_request(message, code = 400):
 
 # Generic percentage
 def percent(number, base=None):
-    """Porcentaje en base a un total"""
+    """Fload percent number"""
     if base is None:
         return 0
     if base == 0:

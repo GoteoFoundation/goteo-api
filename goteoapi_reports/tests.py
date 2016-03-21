@@ -5,7 +5,7 @@
 from nose.tools import *
 import os
 
-from goteoapi.tests import test_app, check_content_type, get_json, get_swagger
+from goteoapi.tests import test_app, get_json, get_swagger
 
 __import__('goteoapi_reports.controllers')
 
@@ -13,7 +13,7 @@ DIR = os.path.dirname(__file__) + '/'
 
 def test_money():
     rv = test_app.get('/reports/money/')
-    check_content_type(rv.headers)
+    eq_(rv.headers['Content-Type'], 'application/json')
     resp = get_json(rv)
     #make sure we get a response
     eq_(rv.status_code, 200)
@@ -26,7 +26,7 @@ def test_money():
 
 def test_projects():
     rv = test_app.get('/reports/projects/')
-    check_content_type(rv.headers)
+    eq_(rv.headers['Content-Type'], 'application/json')
     resp = get_json(rv)
     if 'time-elapsed' in resp:
         del resp['time-elapsed']
@@ -36,7 +36,7 @@ def test_projects():
 
 def test_community():
     rv = test_app.get('/reports/community/')
-    check_content_type(rv.headers)
+    eq_(rv.headers['Content-Type'], 'application/json')
     resp = get_json(rv)
     if 'time-elapsed' in resp:
         del resp['time-elapsed']
@@ -46,7 +46,7 @@ def test_community():
 
 def test_rewards():
     rv = test_app.get('/reports/rewards/')
-    check_content_type(rv.headers)
+    eq_(rv.headers['Content-Type'], 'application/json')
     resp = get_json(rv)
 
     if 'time-elapsed' in resp:
@@ -57,7 +57,7 @@ def test_rewards():
 
 def test_summary():
     rv = test_app.get('/reports/summary/')
-    check_content_type(rv.headers)
+    eq_(rv.headers['Content-Type'], 'application/json')
     resp = get_json(rv)
 
     if 'time-elapsed' in resp:
