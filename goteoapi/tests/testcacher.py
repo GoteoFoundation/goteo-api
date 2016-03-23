@@ -8,14 +8,22 @@ from time import sleep
 from . import app
 from goteoapi.cacher import cache, cacher, get_key_functions, get_key_list
 
-app.config['REDIS_URL'] = None
-app.config['CACHE_MIN_TIMEOUT'] = 1
-app.config['CACHE']['CACHE_TYPE'] = 'simple'
-cache.init_app(app, config=app.config['CACHE'])
+old_redis_url = app.config['REDIS_URL']
+old_cache_min_timeout = app.config['CACHE_MIN_TIMEOUT'] = 1
+old_cache_type = app.config['CACHE']['CACHE_TYPE'] = 'redis'
+
+def setup():
+    app.config['REDIS_URL'] = None
+    app.config['CACHE_MIN_TIMEOUT'] = 1
+    app.config['CACHE']['CACHE_TYPE'] = 'simple'
+    cache.init_app(app, config=app.config['CACHE'])
 
 def teardown():
     cache.clear()
     app.config['CACHING'] = False
+    app.config['REDIS_URL'] = old_redis_url
+    app.config['CACHE_MIN_TIMEOUT'] = old_cache_min_timeout
+    app.config['CACHE']['CACHE_TYPE'] = old_cache_type
 
 
 # Test Functions/Classes
@@ -83,7 +91,6 @@ def test_renew_cacher():
     key_list = get_key_list()
     assert len(key_list) > 0
     func_list = get_key_functions(get_key_list(), True)
-    print(func_list)
     assert len(func_list) > 0
 
 def test_static_methods():
