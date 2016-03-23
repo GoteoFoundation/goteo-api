@@ -4,6 +4,6 @@
 
 
 from .. import api
-from .resources import LoginAPI
+from .resources import TokenAPI
 
-# api.add_resource(LoginAPI, '/login/', endpoint='api_login.login')
+api.add_resource(TokenAPI, '/login', endpoint='api_auth.token')

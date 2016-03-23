@@ -111,7 +111,7 @@ donor_resource_fields['anonymous'] = fields.Boolean
 class ProjectsListAPI(BaseList):
     """Project list"""
 
-    @requires_auth
+    @requires_auth()
     @ratelimit()
     @swag_from('swagger_specs/project_list.yml')
     def get(self):
@@ -152,7 +152,7 @@ class ProjectsListAPI(BaseList):
 class ProjectAPI(BaseItem):
     """Project Details"""
 
-    @requires_auth
+    @requires_auth()
     @ratelimit()
     @swag_from('swagger_specs/project_item.yml')
     def get(self, project_id):
@@ -211,7 +211,7 @@ class ProjectAPI(BaseItem):
 class ProjectDonorsListAPI(BaseList):
     """Donors list"""
 
-    @requires_auth
+    @requires_auth()
     @ratelimit()
     @swag_from('swagger_specs/project_donors.yml')
     def get(self, project_id):

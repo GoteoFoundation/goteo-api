@@ -31,7 +31,7 @@ class RewardsAPI(Base):
     def __init__(self):
         super().__init__()
 
-    @requires_auth
+    @requires_auth()
     @ratelimit()
     @swag_from('swagger_specs/rewards.yml')
     def get(self):

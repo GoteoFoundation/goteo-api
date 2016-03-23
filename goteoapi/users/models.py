@@ -4,7 +4,6 @@ from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy import asc, desc, and_, or_, distinct
 from sqlalchemy.orm import aliased
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired
 
 from ..cacher import cacher
 from ..helpers import image_url, utc_from_local, user_url, get_lang
@@ -18,7 +17,7 @@ from ..location.models import UserLocation
 from hashlib import sha1
 from passlib.context import CryptContext
 
-from .. import db, app
+from .. import db
 
 # User stuff
 class User(db.Model):
@@ -84,22 +83,6 @@ class User(db.Model):
             # update database
             self.password_hash = update
         return ok
-
-    def generate_auth_token(self, expiration = 600):
-        s = Serializer(app.secret_key, expires_in = expiration)
-        return s.dumps({ 'id': self.id })
-
-    @staticmethod
-    def verify_auth_token(token):
-        s = Serializer(app.secret_key)
-        try:
-            data = s.loads(token)
-        except SignatureExpired:
-            return None # valid token, but expired
-        except BadSignature:
-            return None # invalid token
-        user = User.query.get(data['id'])
-        return user
 
     @hybrid_property
     def filters(self):

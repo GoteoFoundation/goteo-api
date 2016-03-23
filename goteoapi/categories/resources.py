@@ -20,7 +20,7 @@ category_resource_fields = {
 class CategoriesListAPI(BaseList):
     """Category list"""
 
-    @requires_auth
+    @requires_auth()
     @ratelimit()
     @swag_from('swagger_specs.yml')
     def get(self):

@@ -34,7 +34,7 @@ CACHE = { 'CACHE_TYPE' : 'null' }
 # Minimun timeout for function caching
 CACHE_MIN_TIMEOUT = 0
 
-# Use Http Authentication
+# Use Http Authentication for public scopes
 AUTH_ENABLED = False
 
 # Extend the API functionality by enabling additional modules/plugins

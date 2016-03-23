@@ -33,7 +33,7 @@ class DigestsListAPI(BaseList):
         '/licenses/'
         ]
 
-    @requires_auth
+    @requires_auth()
     @ratelimit()
     @swag_from('swagger_specs.yml')
     def get(self, endpoint):

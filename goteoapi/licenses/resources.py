@@ -22,7 +22,7 @@ license_resource_fields = {
 class LicensesListAPI(BaseList):
     """License API"""
 
-    @requires_auth
+    @requires_auth()
     @ratelimit()
     @swag_from('swagger_specs.yml')
     def get(self):

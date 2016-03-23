@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import time
+from flask import g
 from flask.ext.restful import fields
 from flasgger.utils import swag_from
 from ..ratelimit import ratelimit
@@ -27,7 +28,7 @@ user_full_resource_fields = user_resource_fields.copy()
 class UsersListAPI(BaseList):
     """User list"""
 
-    @requires_auth
+    @requires_auth()
     @ratelimit()
     @swag_from('swagger_specs/user_list.yml')
     def get(self):
@@ -66,10 +67,24 @@ class UsersListAPI(BaseList):
 
 
 
+class UserOwnerAPI(BaseItem):
+    """Authenticated User Details"""
+    @requires_auth(scope='private')
+    @ratelimit()
+    # @swag_from('swagger_specs/user_item.yml')
+    def get(self):
+        res = UserAPI()._get(g.user.id)
+
+        if res.ret['id'] == None:
+            return bad_request('User not found', 404)
+
+        return res.response()
+
+
 class UserAPI(BaseItem):
     """User Details"""
 
-    @requires_auth
+    @requires_auth()
     @ratelimit()
     @swag_from('swagger_specs/user_item.yml')
     def get(self, user_id):

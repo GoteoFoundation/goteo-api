@@ -56,7 +56,7 @@ def page_not_found(e):
 
 # HOME
 @app.route('/', endpoint='api_home')
-# @requires_auth
+# @requires_auth()
 # @ratelimit()
 def index():
     """API Welcome. All the available endpoints of the API"""

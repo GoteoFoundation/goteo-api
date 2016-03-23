@@ -18,6 +18,8 @@ SECRET_KEY = 'a-super-secret-and-random-key'
 
 # Optional config:
 # ================
+# Number of seconds to auto-expire access tokens
+ACCESS_TOKEN_DURATION = 600
 
 # api requests rate limit
 # Users are allowed 300 requests in 15 minutes
@@ -35,7 +37,7 @@ MODULES = {
     #'goteoapi_digests.controllers'
 }
 
-# Use Http Authentication
+# Use Http Authentication for public scopes
 AUTH_ENABLED = True
 
 # debug (False by default)

@@ -40,7 +40,7 @@ class CommunityAPI(Base):
     def __init__(self):
         super().__init__()
 
-    @requires_auth
+    @requires_auth()
     @ratelimit()
     @swag_from('swagger_specs/community.yml')
     def get(self):

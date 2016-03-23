@@ -31,7 +31,7 @@ money_resource_fields = {
 class MoneyAPI(BaseList):
     """Money Statistics"""
 
-    @requires_auth
+    @requires_auth()
     @ratelimit()
     @swag_from('swagger_specs/money.yml')
     def get(self):
