@@ -18,12 +18,6 @@
 # User owner | ---user/api_key---> | /login
 #            | <--access_token---- |
 #
-# Or with Bearer token header (only valid for the API key):
-#
-#              HEADER Authorize: Bearer
-# User owner | ---base64(user:api_key)--> | /login
-#            | <-------access_token------ |
-#
 # ----------------------------------------
 # Access to public protected resources
 # ----------------------------------------
@@ -96,7 +90,7 @@ def check_builtin_auth(username, password):
             if 'cors' in user:
                 if origin not in user['cors']:
                     return 'Origin header not valid'
-            g.loginId = username
+            g.loginId = '#' + username
             return True
     return False
 
