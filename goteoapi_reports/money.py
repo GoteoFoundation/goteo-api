@@ -88,15 +88,14 @@ class MoneyAPI(BaseList):
                 "average-donation-paypal" : Invest.average_donation(method=Invest.METHOD_PAYPAL, **args),
                 # Coste mínimo medio por proyecto exitoso: Presupuesto mínimo medio por proyecto exitoso
                 # TODO: ¿parametro location?
-                # OJO: En reporting.php no calcula esto mismo
                 "average-minimum"         : Project.average_minimum(**args),
                 # Recaudación media por proyecto exitoso ( financiado )
                 "average-received"        : Project.average_total(status=[Project.STATUS_FUNDED, Project.STATUS_FULFILLED], **args),
-                # (Nuevo) Dinero medio solo obtenido en 2a ronda
+                # Dinero medio solo obtenido en 2a ronda
                 "average-second-round"    : Invest.average_second_round(**args),
-                # - [Renombrar Dinero compr. medio en proyectos archivados] Dinero recaudado de media en campañas fallidas
+                # - Dinero compr. medio en proyectos archivados
                 "average-failed"          : Project.average_total(status=[Project.STATUS_UNFUNDED], **args),
-                # - [Renombrar]Perc. dinero compr. medio (dinero recaudado de media) sobre mínimo (número del dato anterior)
+                # - Perc. dinero compr. medio (dinero recaudado de media) sobre mínimo (número del dato anterior)
             },
             filters = args.items()
         )
