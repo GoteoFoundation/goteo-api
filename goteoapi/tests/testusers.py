@@ -43,19 +43,24 @@ def test_users():
 def test_user_no_users():
     rv = test_app.get('/users/', query_string='category=0')
     eq_(rv.status_code, 404)
-    rv = test_app.get('/users/--i-dont-exits--/')
+    rv = test_app.get('/users/--i-dont-exits--')
     eq_(rv.status_code, 404)
 
-def test_user_no_slash():
-    rv = test_app.get('/users/goteo')
+def test_user_trailing_slash():
+    rv = test_app.get('/users')
     eq_(rv.status_code, 301)
     assert 'text/html' in rv.headers['Content-Type']
     assert 'location' in rv.headers, "%r not in %r" % ('location', rv.headers)
-    assert '/users/goteo/' in rv.headers['Location'], "%r not in %r" % ('/users/goteo/', rv.headers['Location'])
+    assert '/users/' in rv.headers['Location'], "%r not in %r" % ('/users/', rv.headers['Location'])
+    rv = test_app.get('/users/goteo/')
+    eq_(rv.status_code, 301)
+    assert 'text/html' in rv.headers['Content-Type']
+    assert 'location' in rv.headers, "%r not in %r" % ('location', rv.headers)
+    assert '/users/goteo' in rv.headers['Location'], "%r not in %r" % ('/users/goteo', rv.headers['Location'])
 
 def test_user():
     # TODO: generic user
-    rv = test_app.get('/users/goteo/')
+    rv = test_app.get('/users/goteo')
     eq_(rv.headers['Content-Type'], 'application/json')
     resp = get_json(rv)
     fields = user_resource_fields

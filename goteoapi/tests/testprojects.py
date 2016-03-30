@@ -41,7 +41,7 @@ def test_projects():
 
 
 def test_project_no_projects():
-    rv = test_app.get('/projects/--i-dont-exits--/')
+    rv = test_app.get('/projects/--i-dont-exits--')
     eq_(rv.status_code, 404)
     rv = test_app.get('/projects/', query_string='category=0')
     resp = get_json(rv)
@@ -49,16 +49,23 @@ def test_project_no_projects():
     assert 'items' in resp
     eq_(resp['items'], [])
 
-def test_project_no_slash():
-    rv = test_app.get('/projects/test-project')
+def test_project_trailing_slash():
+    rv = test_app.get('/projects')
     eq_(rv.status_code, 301)
     assert 'text/html' in rv.headers['Content-Type']
     assert 'location' in rv.headers, "%r not in %r" % ('location', rv.headers)
-    assert '/projects/test-project/' in rv.headers['Location'], "%r not in %r" % ('/projects/test-project/', rv.headers['Location'])
+    assert '/projects/' in rv.headers['Location'], "%r not in %r" % ('/projects/', rv.headers['Location'])
+    rv = test_app.get('/projects/test-project/')
+    eq_(rv.status_code, 301)
+    assert 'text/html' in rv.headers['Content-Type']
+    assert 'location' in rv.headers, "%r not in %r" % ('location', rv.headers)
+    assert '/projects/test-project' in rv.headers['Location'], "%r not in %r" % ('/projects/test-project', rv.headers['Location'])
 
 def test_project():
     # TODO: generic project here
     rv = test_app.get('/projects/160metros/')
+    eq_(rv.status_code, 301)
+    rv = test_app.get('/projects/160metros')
     eq_(rv.headers['Content-Type'], 'application/json')
     resp = get_json(rv)
     fields = project_full_resource_fields
