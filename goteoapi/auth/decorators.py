@@ -105,7 +105,7 @@ def check_apikey_auth(username, password):
             return 'API Key expired'
         user = User.query.filter(User.id == userapi.user).one()
     except NoResultFound:
-        return 'Invalid username or password'
+        return 'Invalid API Key or secret'
     g.loginId = user.id
     return True
 
@@ -120,6 +120,13 @@ def check_user_auth(username, password):
     return 'Invalid username or password'
 
 def requires_auth(scope='public'):
+    """
+    scope:
+        - public: Either "Bearer" token or a pair key/secret can be used to gain access to the resource
+        - access_token: Either user/password or key/secret can be used to gain access
+                        The endpoint using this kind of auth should return the "Bearer" token
+        - private: Only "Bearer" token will be accepted as authorization
+    """
     def decorator(f):
         def wrapped_function(*args, **kwargs):
             if not app.config['AUTH_ENABLED'] and scope == 'public':

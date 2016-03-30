@@ -82,6 +82,21 @@ def test_accept_auth_by_token():
                         'Authorization': 'Bearer %s' % token
                     })
     eq_(rv.status_code, 200)
+    rv = test_app.get('/licenses/',
+                      headers={
+                        'Authorization': 'Bearer %s' % token
+                    })
+    eq_(rv.status_code, 200)
+    rv = test_app.get('/users/',
+                      headers={
+                        'Authorization': 'Bearer %s' % token
+                    })
+    eq_(rv.status_code, 200)
+    rv = test_app.get('/categories/',
+                      headers={
+                        'Authorization': 'Bearer %s' % token
+                    })
+    eq_(rv.status_code, 200)
 
 # TODO: test by SQL users
 #
