@@ -17,6 +17,9 @@ SECRET_KEY = 'a-super-secret-and-random-key'
 # Optional config:
 # ================
 
+# Number of seconds to auto-expire access tokens
+ACCESS_TOKEN_DURATION = 600
+
 # api requests rate limit (Needs REDIS_URL configured)
 # Users are allowed 300 requests in 15 minutes
 REQUESTS_LIMIT = 300
