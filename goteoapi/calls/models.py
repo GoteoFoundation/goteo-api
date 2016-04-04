@@ -5,14 +5,14 @@ from sqlalchemy import func, and_, distinct, asc, Integer, String, Text, Date
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm import aliased,relationship
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
-from flask.ext.restful import marshal
 
 from ..helpers import image_url, utc_from_local, get_lang
+from ..base_resources import AbstractLang
 from ..cacher import cacher
 
 from .. import db
 
-class CallLang(db.Model):
+class CallLang(AbstractLang, db.Model):
     __tablename__ = 'call_lang'
 
     id = db.Column('id', String(50), db.ForeignKey('call.id'), primary_key=True)
@@ -31,22 +31,6 @@ class CallLang(db.Model):
 
     def __repr__(self):
         return '<CallLang %s(%s): %r>' % (self.id, self.lang, self.name_lang)
-
-    @staticmethod
-    def get_translate_keys():
-        ret = []
-        for k in dict(CallLang.__table__.columns):
-            if k not in ('id', 'lang', 'pending'):
-                ret.append(k)
-        return ret
-
-    @staticmethod
-    def get_translated_object(full_dict, langs):
-        for k in CallLang.get_translate_keys():
-            full_dict[k] = get_lang(full_dict, k, langs)
-            for l in langs:
-                full_dict.pop(k + '_' + l, None)
-        return Call(**full_dict)
 
 class Call(db.Model):
     __tablename__ = 'call'
@@ -149,11 +133,11 @@ class Call(db.Model):
 
     @hybrid_method
     @cacher
-    def get(self, project_id):
+    def get(self, call_id):
         """Get a valid matchfunding form id"""
         try:
             filters = self.get_filters()
-            filters.append(self.id == matchfunding_id)
+            filters.append(self.id == call_id)
             return self.query.filter(*filters).one()
         except NoResultFound:
             return None
@@ -168,22 +152,15 @@ class Call(db.Model):
             filters = self.get_filters(**kwargs)
             # In case of requiring languages, a LEFT JOIN must be generated
             if 'lang' in kwargs and kwargs['lang'] is not None:
-                joins = []
-                langs = {}
-                cols = list(self.__table__.columns)
-                for l in kwargs['lang']:
-                    langs[l] = aliased(CallLang)
-                    for k in CallLang.get_translate_keys():
-                        cols.append(getattr(langs[l], k + '_lang').label(k + '_' + l))
-                    joins.append((langs[l], and_(langs[l].id == self.id, langs[l].lang == l)))
                 ret = []
-                for u in db.session.query(*cols).distinct().outerjoin(*joins) \
-                                                .filter(*filters).order_by(asc(self.opened)) \
-                                                .offset(page * limit).limit(limit):
+                for u in CallLang.get_query(kwargs['lang']) \
+                                 .filter(*filters).order_by(asc(self.opened)) \
+                                 .offset(page * limit).limit(limit):
                     ret.append(CallLang.get_translated_object(u._asdict(), kwargs['lang']))
                 return ret
-
-            return self.query.distinct().filter(*filters).order_by(asc(self.opened)).offset(page * limit).limit(limit).all()
+            return self.query.distinct().filter(*filters) \
+                                        .order_by(asc(self.opened)) \
+                                        .offset(page * limit).limit(limit).all()
         except NoResultFound:
             return []
 

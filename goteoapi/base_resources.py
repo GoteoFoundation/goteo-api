@@ -6,9 +6,11 @@ from datetime import datetime as dtdatetime
 from dateutil.parser import parse
 from flask import jsonify
 from flask.ext.restful import Resource, reqparse
+from sqlalchemy import and_
+from sqlalchemy.orm import aliased
 
 from .helpers import *
-from . import app
+from . import app, db
 
 def date_sanitizer(data):
     d = parse(data)
@@ -37,6 +39,45 @@ def limit_sanitizer(limit):
     if(l > 50):
         l = 50
     return l
+
+class AbstractLang():
+    """Common methods for Language Model implementation in Goteo"""
+    @classmethod
+    def get_sub_class(cls):
+        class_name = cls.__name__[:-4]
+        return getattr(__import__(cls.__module__, fromlist=[class_name]), class_name)
+
+    @classmethod
+    def get_translate_keys(cls):
+        ret = []
+        for k in dict(cls.__table__.columns):
+            if k not in ('id', 'lang', 'pending'):
+                ret.append(k)
+        return ret
+
+    @classmethod
+    def get_translated_object(cls, full_dict, langs):
+        sub_class = cls.get_sub_class()
+        for k in cls.get_translate_keys():
+            full_dict[k] = get_lang(full_dict, k, langs)
+            for l in langs:
+                full_dict.pop(k + '_' + l, None)
+        return sub_class(**full_dict)
+
+    @classmethod
+    def get_query(cls, search_langs):
+        sub_class = cls.get_sub_class()
+        joins = []
+        langs = {}
+        cols = list(sub_class.__table__.columns)
+        for l in search_langs:
+            langs[l] = aliased(cls)
+            for k in cls.get_translate_keys():
+                cols.append(getattr(langs[l], k + '_lang').label(k + '_' + l))
+            joins.append((langs[l], and_(langs[l].id == sub_class.id, langs[l].lang == l)))
+        return db.session.query(*cols).distinct().outerjoin(*joins);
+
+
 
 class Response():
     """Base response for Reports Endpoints"""
