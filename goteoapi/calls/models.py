@@ -9,7 +9,7 @@ from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from ..helpers import image_url, utc_from_local, get_lang
 from ..base_resources import AbstractLang
 from ..cacher import cacher
-from ..projects.models import ProjectCategory
+from ..projects.models import Project, ProjectCategory
 
 from .. import db
 
@@ -137,6 +137,10 @@ class Call(db.Model):
             filters.append(self.id == CallProject.call)
             filters.append(CallProject.project == ProjectCategory.project)
             filters.append(ProjectCategory.category.in_(kwargs['category']))
+        if 'node' in kwargs and kwargs['node'] is not None:
+            filters.append(self.id == CallProject.call)
+            filters.append(CallProject.project == Project.id)
+            filters.append(Project.node.in_(kwargs['node']))
 
         return filters
 
