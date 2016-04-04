@@ -129,7 +129,9 @@ class Call(db.Model):
         # counting license created before this date
         if 'to_date' in kwargs and kwargs['to_date'] is not None:
             filters.append(self.opened <= kwargs['to_date'])
-
+        if 'project' in kwargs and kwargs['project'] is not None:
+            filters.append(self.id == CallProject.call)
+            filters.append(CallProject.project.in_(kwargs['project']))
         return filters
 
     @hybrid_method
@@ -191,3 +193,13 @@ class Call(db.Model):
             return total
         except MultipleResultsFound:
             return 0
+
+# Call projects
+class CallProject(db.Model):
+    __tablename__ = 'call_project'
+
+    call = db.Column('call', String(50), db.ForeignKey('call.id'), primary_key=True)
+    project = db.Column('project', String(50), db.ForeignKey('project.id'), primary_key=True)
+
+    def __repr__(self):
+        return '<CallProject from %s to project %s>' % (self.call, self.project)
