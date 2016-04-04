@@ -3,6 +3,7 @@
 #from flask.ext.sqlalchemy import Pagination
 from sqlalchemy import and_, desc, func, Integer, String, DateTime
 from sqlalchemy.ext.hybrid import hybrid_method
+from sqlalchemy.orm.exc import NoResultFound
 
 from ..projects.models import Project, ProjectCategory
 from ..cacher import cacher
@@ -62,14 +63,14 @@ class Message(db.Model):
         filters.append(self.user == User.id)
         # Exclude threads initiated by owners
         filters.append(self.thread != None)
-        res = db.session.query(Message.user, User.name, User.id, User.avatar, func.count(Message.id).label('interactions'))\
-                        .filter(*filters).group_by(Message.user)\
-                        .order_by(desc('interactions')).offset(page * limit).limit(limit)
-        ret = []
-        for u in res:
-            u = u._asdict()
-            ret.append(u)
-        return ret
+        try:
+            return db.session.query(Message.user, User.name, User.id, User.avatar,
+                                    func.count(Message.id).label('interactions')) \
+                             .filter(*filters).group_by(Message.user) \
+                             .order_by(desc('interactions')) \
+                             .offset(page * limit).limit(limit).all()
+        except NoResultFound:
+            return []
 
     @hybrid_method
     @cacher
@@ -90,13 +91,13 @@ class Message(db.Model):
         filters.append(self.thread > 0)
         filters.append(self.thread.in_(sq_blocked))
         filters.append(self.project != Project.id)
-        res = db.session.query(func.count(func.distinct(self.user)))\
+        res = db.session.query(func.count(func.distinct(self.user))) \
                                     .join(Project, and_(Project.owner == self.user, Project.status.in_([
                                         Project.STATUS_FUNDED,
                                         Project.STATUS_FULFILLED,
                                         Project.STATUS_IN_CAMPAIGN,
                                         Project.STATUS_UNFUNDED
-                                    ])))\
+                                    ]))) \
                                     .filter(*filters).scalar()
         if res is None:
             res = 0
@@ -109,8 +110,8 @@ class Message(db.Model):
         filters = list(self.get_filters(**kwargs))
         filters.append(Project.status.in_([Project.STATUS_FUNDED,
                                            Project.STATUS_FULFILLED]))
-        sq = db.session.query(func.count(func.distinct(Message.user)).label("co"))\
-                                    .join(Project, Message.project == Project.id)\
+        sq = db.session.query(func.count(func.distinct(Message.user)).label("co")) \
+                                    .join(Project, Message.project == Project.id) \
                                     .filter(*filters).group_by(Message.project).subquery()
         res = db.session.query(func.avg(sq.c.co)).scalar()
         if res is None:

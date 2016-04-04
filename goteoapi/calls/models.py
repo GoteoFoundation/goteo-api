@@ -68,6 +68,7 @@ class Call(db.Model):
     logo = db.Column('logo', String(255))
     image = db.Column('image', String(255))
     backimage = db.Column('backimage', String(255))
+    call_location = db.Column('call_location', String(255))
     # call_langs = relationship("CallLang", order_by=CallLang.id, back_populates="call")
 
     def __repr__(self):
@@ -158,6 +159,7 @@ class Call(db.Model):
                                  .offset(page * limit).limit(limit):
                     ret.append(CallLang.get_translated_object(u._asdict(), kwargs['lang']))
                 return ret
+            # No langs, normal query
             return self.query.distinct().filter(*filters) \
                                         .order_by(asc(self.opened)) \
                                         .offset(page * limit).limit(limit).all()

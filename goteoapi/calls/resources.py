@@ -17,15 +17,15 @@ call_resource_fields = {
     "id"                : fields.String,
     "name"              : fields.String,
     "description_short" : fields.String,
-    "node"              : fields.String,
     "date_opened"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
     "date_published"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
     "date_succeeded"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
-    "call_url"       : fields.String,
+    "matchfunding_url"       : fields.String,
     "logo_url" : fields.String,
     "image_url" : fields.String,
     "latitude" : fields.Float,
     "longitude" : fields.Float,
+    "call_location" : fields.String,
     "owner" : fields.String,
     "status" : fields.String,
 }
@@ -50,16 +50,16 @@ call_full_resource_fields = {
     "lang" : fields.String,
     "currency" : fields.String,
     "currency_rate" : fields.Float,
-    "node"              : fields.String,
     "date_opened"      : fields.DateTime(dt_format='rfc822'),
     "date_published"    : fields.DateTime(dt_format='rfc822'),
     "date_updated"    : fields.DateTime(dt_format='rfc822'),
     "date_succeeded"    : fields.DateTime(dt_format='rfc822'),
     "date_closed"    : fields.DateTime(dt_format='rfc822'),
     "date_passed"    : fields.DateTime(dt_format='rfc822'),
+    "call_location" : fields.String,
     "location" : fields.List(fields.Nested(call_location_resource_fields)),
     "owner" : fields.String,
-    "call_url"       : fields.String
+    "matchfunding_url"    : fields.String
 }
 
 donor_resource_fields = user_resource_fields.copy()

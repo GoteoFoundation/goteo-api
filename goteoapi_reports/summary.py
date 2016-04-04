@@ -38,22 +38,22 @@ class SummaryAPI(Base):
 
         top10_collaborations = []
         for u in Project.collaborated_list(**args):
-            item = marshal(u, contribution_resource_fields)
-            item['description-short'] = u['subtitle']
-            item['video-url'] = u['media']
-            item['date-published'] = utc_from_local(u['published'])
-            item['image-url'] = image_url(u['image'], 'medium', False)
-            item['project-url'] = project_url(u['project'])
+            item = marshal(u._asdict(), contribution_resource_fields)
+            item['description-short'] = u.subtitle
+            item['video-url'] = u.media
+            item['date-published'] = utc_from_local(u.published)
+            item['image-url'] = image_url(u.image, 'medium', False)
+            item['project-url'] = project_url(u.project)
             top10_collaborations.append(item)
 
         top10_donations = []
         for u in Project.donated_list(**args):
-            item = marshal(u, contribution_resource_fields)
-            item['description-short'] = u['subtitle']
-            item['video-url'] = u['media']
-            item['date-published'] = utc_from_local(u['published'])
-            item['image-url'] = image_url(u['image'], 'medium', False)
-            item['project-url'] = project_url(u['project'])
+            item = marshal(u._asdict(), contribution_resource_fields)
+            item['description-short'] = u.subtitle
+            item['video-url'] = u.media
+            item['date-published'] = utc_from_local(u.published)
+            item['image-url'] = image_url(u.image, 'medium', False)
+            item['project-url'] = project_url(u.project)
             top10_donations.append(item)
 
         users = User.total(**args)
@@ -77,11 +77,11 @@ class SummaryAPI(Base):
                 'projects-published'      : Project.total(**args),
                 'projects-successful'     : Project.total(successful=True, **args),
                 'projects-failed'         : Project.total(failed=True, **args),
-                'categories'              : list(map(lambda t: {t['id']:
-                                                    {'users': t['users'],
-                                                     'id': t['id'],
-                                                     'name': t['name'],
-                                                     'percentage-users': percent(t['users'], users)}
+                'categories'              : list(map(lambda t: {t.id:
+                                                    {'users': t.users,
+                                                     'id': t.id,
+                                                     'name': t.name,
+                                                     'percentage-users': percent(t.users, users)}
                                                     }, categorias)),
                 'top10-collaborations'    : top10_collaborations,
                 'top10-donations'         : top10_donations,

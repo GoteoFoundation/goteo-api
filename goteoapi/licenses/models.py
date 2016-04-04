@@ -3,17 +3,17 @@
 from sqlalchemy import func, Integer, String, Text
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
-from sqlalchemy.orm import aliased
-from sqlalchemy import asc, and_, distinct
+from sqlalchemy import asc, distinct
 
-from ..helpers import svg_image_url, get_lang
+from ..helpers import svg_image_url
+from ..base_resources import AbstractLang
 from ..cacher import cacher
 
 from .. import db
 
 
 # License stuff
-class LicenseLang(db.Model):
+class LicenseLang(AbstractLang, db.Model):
     __tablename__ = 'license_lang'
 
     id = db.Column('id', String(50), db.ForeignKey('license.id'), primary_key=True)
@@ -24,7 +24,7 @@ class LicenseLang(db.Model):
     pending = db.Column('pending', Integer)
 
     def __repr__(self):
-        return '<LicenseLang %s: %r>' % (self.id, self.name_lang)
+        return '<LicenseLang %s(%s): %r>' % (self.id, self.lang, self.name_lang)
 
 # License stuff
 class License(db.Model):
@@ -110,28 +110,14 @@ class License(db.Model):
 
             # In case of requiring languages, a LEFT JOIN must be generated
             if 'lang' in kwargs and kwargs['lang'] is not None:
-                joins = []
-                langs = {}
-                cols = [self.id,self.name,self.url,self.description]
-                for l in kwargs['lang']:
-                    langs[l] = aliased(LicenseLang)
-                    cols.append(langs[l].name_lang.label('name_' + l))
-                    cols.append(langs[l].description_lang.label('description_' + l))
-                    cols.append(langs[l].url_lang.label('url_' + l))
-                    # cols.append(langs[l])
-                    joins.append((langs[l], and_(langs[l].id == self.id, langs[l].lang == l)))
                 ret = []
-                for u in db.session.query(*cols).distinct().outerjoin(*joins).filter(*filters).order_by(asc(self.order)):
-                    u = u._asdict()
-                    u['name'] = get_lang(u, 'name', kwargs['lang'])
-                    u['description'] = get_lang(u, 'description', kwargs['lang'])
-                    u['url'] = get_lang(u, 'url', kwargs['lang'])
-                    ret.append(u)
+                for u in LicenseLang.get_query(kwargs['lang']) \
+                                 .filter(*filters).order_by(asc(self.order)):
+                    ret.append(LicenseLang.get_translated_object(u._asdict(), kwargs['lang']))
                 return ret
-
-            # No need for languages by default
-            return self.query.distinct().filter(*filters).order_by(asc(self.order)).all()
-
+            # No langs, normal query
+            return self.query.distinct().filter(*filters) \
+                                        .order_by(asc(self.order)).all()
         except NoResultFound:
             return []
 

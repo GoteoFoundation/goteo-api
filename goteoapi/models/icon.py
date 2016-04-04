@@ -5,7 +5,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy import asc, or_
 
-from ..helpers import get_lang, svg_image_url
+from ..helpers import svg_image_url
 from ..cacher import cacher
 
 from .. import db

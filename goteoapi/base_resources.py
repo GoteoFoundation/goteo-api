@@ -8,6 +8,7 @@ from flask import jsonify
 from flask.ext.restful import Resource, reqparse
 from sqlalchemy import and_
 from sqlalchemy.orm import aliased
+from sqlalchemy.inspection import inspect
 
 from .helpers import *
 from . import app, db
@@ -56,25 +57,26 @@ class AbstractLang():
         return ret
 
     @classmethod
-    def get_translated_object(cls, full_dict, langs):
+    def get_translated_object(cls, full_dict, langs, root_lang=app.config['DEFAULT_DB_LANG']):
         sub_class = cls.get_sub_class()
         for k in cls.get_translate_keys():
-            full_dict[k] = get_lang(full_dict, k, langs)
+            full_dict[k] = get_lang(full_dict, k, langs, root_lang)
             for l in langs:
                 full_dict.pop(k + '_' + l, None)
         return sub_class(**full_dict)
 
     @classmethod
-    def get_query(cls, search_langs):
+    def get_query(cls, search_langs, cols = None):
         sub_class = cls.get_sub_class()
         joins = []
-        langs = {}
-        cols = list(sub_class.__table__.columns)
+        if cols is None:
+            cols = list(map(lambda c: getattr(sub_class, c), inspect(sub_class).columns.keys()))
         for l in search_langs:
-            langs[l] = aliased(cls)
+            alias = aliased(cls)
             for k in cls.get_translate_keys():
-                cols.append(getattr(langs[l], k + '_lang').label(k + '_' + l))
-            joins.append((langs[l], and_(langs[l].id == sub_class.id, langs[l].lang == l)))
+                cols.append(getattr(alias, k + '_lang').label(k + '_' + l))
+            joins.append((alias, and_(alias.id == sub_class.id, alias.lang == l)))
+            print(joins)
         return db.session.query(*cols).distinct().outerjoin(*joins);
 
 
@@ -152,7 +154,8 @@ class BaseList(Resource):
         if 'lang' in args and args['lang'] is not None:
             langs = []
             for l in args['lang']:
-                if app.config['DEFAULT_DB_LANG'] != l:
+                # if app.config['DEFAULT_DB_LANG'] != l and
+                if l not in langs:
                     langs.append(l)
 
             args['lang'] = langs

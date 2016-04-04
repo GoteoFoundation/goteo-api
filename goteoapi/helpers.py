@@ -6,6 +6,10 @@ from flask.ext.restful import marshal as s_marshal
 
 from . import app
 
+class objectview(object):
+    def __init__(self, d):
+        self.__dict__ = d
+
 def marshal(data, fields, envelope=None):
     """
     Processes a dictionary with values as described in
@@ -20,7 +24,7 @@ def marshal(data, fields, envelope=None):
         return { k.replace("_", "-"): v for k, v in m.items() }
     return m
 
-def get_lang(obj, field, langs=[]):
+def get_lang(obj, field, langs=[], root_lang=app.config['DEFAULT_DB_LANG']):
     """
     Searches alternatives langs on a object in the form of:
     {
@@ -32,10 +36,13 @@ def get_lang(obj, field, langs=[]):
     """
     if langs:
         for l in langs:
+            prop = field + '_' + l
+            if l == root_lang:
+                prop = field
             if type(obj) == dict:
-                val = obj[field + '_' + l]
+                val = obj[prop]
             else:
-                val = getattr(obj, field + '_' + l)
+                val = getattr(obj, prop)
             if val:
                 return val
 

@@ -20,7 +20,8 @@ from ..models.support import Support
 project_resource_fields = {
     "id"                : fields.String,
     "name"              : fields.String,
-    "description_short"              : fields.String,
+    "description_short" : fields.String,
+    "lang" : fields.String,
     "node"              : fields.String,
     "date_created"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
     "date_published"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?

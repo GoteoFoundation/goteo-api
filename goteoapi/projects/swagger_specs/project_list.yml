@@ -20,6 +20,9 @@ definitions:
             description-short:
                 type: string
                 description: Short description of the project
+            lang:
+                type: string
+                description: Main language of the project
             project-url:
                 type: string
                 description: URL where for the project

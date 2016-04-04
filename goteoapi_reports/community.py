@@ -71,28 +71,28 @@ class CommunityAPI(Base):
         # paypal_multidonors = Invest.multidonors_total(**dict(args, **{'method' : Invest.METHOD_PAYPAL}))
 
         categorias = UserInterest.categories(**args)
-        users_categoria1 = categorias[0]['users'] if len(categorias) > 0 else 0
-        users_categoria2 = categorias[1]['users'] if len(categorias) > 1 else 0
+        users_categoria1 = categorias[0].users if len(categorias) > 0 else 0
+        users_categoria2 = categorias[1].users if len(categorias) > 1 else 0
 
         top10_multidonors = []
         for u in Invest.multidonors_list(**args):
-            item = marshal(u, donation_resource_fields)
-            item['profile-image-url'] = image_url(u['avatar'])
-            item['profile-url'] = user_url(u['id'])
+            item = marshal(u._asdict(), donation_resource_fields)
+            item['profile-image-url'] = image_url(u.avatar)
+            item['profile-url'] = user_url(u.id)
             top10_multidonors.append(item)
 
         top10_donors = []
         for u in Invest.donors_list(**args):
-            item = marshal(u, donation_resource_fields)
-            item['profile-image-url'] = image_url(u['avatar'])
-            item['profile-url'] = user_url(u['id'])
+            item = marshal(u._asdict(), donation_resource_fields)
+            item['profile-image-url'] = image_url(u.avatar)
+            item['profile-url'] = user_url(u.id)
             top10_donors.append(item)
 
         top10_collaborations = []
         for u in Message.collaborators_list(**args):
-            item = marshal(u, collaboration_resource_fields)
-            item['profile-image-url'] = image_url(u['avatar'])
-            item['profile-url'] = user_url(u['id'])
+            item = marshal(u._asdict(), collaboration_resource_fields)
+            item['profile-image-url'] = image_url(u.avatar)
+            item['profile-url'] = user_url(u.id)
             top10_collaborations.append(item)
 
         res = Response(
@@ -114,16 +114,16 @@ class CommunityAPI(Base):
                 'average-collaborators'             : Message.average_collaborators(**args),
                 'creators-donors'                   : Invest.donors_creators_total(**args),
                 'creators-collaborators'            : Message.collaborators_creators_total(**args),
-                'categories'                        : list(map(lambda t: {t['id']:
-                                                                        {'users': t['users'],
-                                                                         'id': t['id'],
-                                                                         'name': t['name'],
-                                                                         'percentage-users': percent(t['users'], users)}
+                'categories'                        : list(map(lambda t: {t.id:
+                                                                        {'users': t.users,
+                                                                         'id': t.id,
+                                                                         'name': t.name,
+                                                                         'percentage-users': percent(t.users, users)}
                                                                         }, categorias)),
-                'leading-category'                  : categorias[0]['id'] if len(categorias) > 0 else None,
+                'leading-category'                  : categorias[0].id if len(categorias) > 0 else None,
                 'users-leading-category'            : users_categoria1,
                 'percentage-users-leading-category' : percent(users_categoria1, users),
-                'second-category'                   : categorias[1]['id'] if len(categorias) > 1 else None,
+                'second-category'                   : categorias[1].id if len(categorias) > 1 else None,
                 'users-second-category'             : users_categoria2,
                 'percentage-users-second-category'  : percent(users_categoria2, users),
                 'top10-multidonors'                 : top10_multidonors,

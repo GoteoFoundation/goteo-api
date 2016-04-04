@@ -2,7 +2,7 @@
 
 from sqlalchemy import func, desc, Integer, String, Date, Boolean
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
-from sqlalchemy.orm.exc import MultipleResultsFound
+from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from sqlalchemy import or_, and_, distinct
 
 from ..cacher import cacher
@@ -124,14 +124,15 @@ class Invest(db.Model):
         filters.append(~self.user.in_(admins))
         filters.append(~self.user.in_(calls))
         filters.append(~self.user.in_(owners))
-        res = db.session.query(self.user, User.name, User.id, User.avatar, func.count(distinct(self.project)).label('contributions'), func.sum(self.amount).label('amount'))\
-                                    .filter(*filters).group_by(self.user)\
-                                    .order_by(desc('amount'), desc('contributions')).offset(page * limit).limit(limit)
-        ret = []
-        for u in res:
-            u = u._asdict()
-            ret.append(u)
-        return ret
+        try:
+            return db.session.query(self.user, User.name, User.id, User.avatar,
+                                    func.count(distinct(self.project)).label('contributions'),
+                                    func.sum(self.amount).label('amount')) \
+                             .filter(*filters).group_by(self.user) \
+                             .order_by(desc('amount'), desc('contributions')) \
+                             .offset(page * limit).limit(limit).all()
+        except NoResultFound:
+            return []
 
     @hybrid_method
     @cacher
@@ -156,14 +157,15 @@ class Invest(db.Model):
         filters.append(~self.user.in_(admins))
         filters.append(~self.user.in_(calls))
         filters.append(~self.user.in_(owners))
-        res = db.session.query(Invest.user, User.name, User.id, User.avatar, func.count(distinct(self.project)).label('contributions'), func.sum(Invest.amount).label('amount'))\
-                                    .filter(*filters).group_by(Invest.user)\
-                                    .order_by(desc('contributions'), desc('amount')).offset(page * limit).limit(limit)
-        ret = []
-        for u in res:
-            u = u._asdict()
-            ret.append(u)
-        return ret
+        try:
+            return db.session.query(Invest.user, User.name, User.id, User.avatar,
+                                    func.count(distinct(self.project)).label('contributions'),
+                                    func.sum(Invest.amount).label('amount')) \
+                             .filter(*filters).group_by(Invest.user) \
+                             .order_by(desc('contributions'), desc('amount')) \
+                             .offset(page * limit).limit(limit).all()
+        except NoResultFound:
+            return []
 
     @hybrid_method
     @cacher
@@ -187,8 +189,8 @@ class Invest(db.Model):
                                         self.STATUS_CHARGED,
                                         self.STATUS_PAID,
                                         self.STATUS_RETURNED]))
-        total = db.session.query(self.user).filter(*filters).group_by(self.user).\
-                                                    having(func.count(self.user) > 1).\
+        total = db.session.query(self.user).filter(*filters).group_by(self.user). \
+                                                    having(func.count(self.user) > 1). \
                                                     having(func.count(self.project) > 1)
         res = total.count()
         if res is None:

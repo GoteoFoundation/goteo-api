@@ -58,32 +58,32 @@ class ProjectsAPI(Base):
 
         top10_collaborations = []
         for u in Project.collaborated_list(**args):
-            item = marshal(u, contribution_resource_fields)
-            item['description-short'] = u['subtitle']
-            item['video-url'] = u['media']
-            item['date-published'] = utc_from_local(u['published'])
-            item['image-url'] = image_url(u['image'], 'medium', False)
-            item['project-url'] = project_url(u['project'])
+            item = marshal(u._asdict(), contribution_resource_fields)
+            item['description-short'] = u.subtitle
+            item['video-url'] = u.media
+            item['date-published'] = utc_from_local(u.published)
+            item['image-url'] = image_url(u.image, 'medium', False)
+            item['project-url'] = project_url(u.project)
             top10_collaborations.append(item)
 
         top10_donations = []
         for u in Project.donated_list(**args):
-            item = marshal(u, contribution_resource_fields)
-            item['description-short'] = u['subtitle']
-            item['video-url'] = u['media']
-            item['date-published'] = utc_from_local(u['published'])
-            item['image-url'] = image_url(u['image'], 'medium', False)
-            item['project-url'] = project_url(u['project'])
+            item = marshal(u._asdict(), contribution_resource_fields)
+            item['description-short'] = u.subtitle
+            item['video-url'] = u.media
+            item['date-published'] = utc_from_local(u.published)
+            item['image-url'] = image_url(u.image, 'medium', False)
+            item['project-url'] = project_url(u.project)
             top10_donations.append(item)
 
         top10_receipts = []
         for u in Project.received_list(finished=True, **args):
-            item = marshal(u, amount_resource_fields)
-            item['description-short'] = u['subtitle']
-            item['video-url'] = u['media']
-            item['date-published'] = utc_from_local(u['published'])
-            item['image-url'] = image_url(u['image'], 'medium', False)
-            item['project-url'] = project_url(u['project'])
+            item = marshal(u._asdict(), amount_resource_fields)
+            item['description-short'] = u.subtitle
+            item['video-url'] = u.media
+            item['date-published'] = utc_from_local(u.published)
+            item['image-url'] = image_url(u.image, 'medium', False)
+            item['project-url'] = project_url(u.project)
             top10_receipts.append(item)
 
         res = Response(

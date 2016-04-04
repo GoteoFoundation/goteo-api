@@ -6,7 +6,7 @@ from sqlalchemy import asc, desc, and_, or_, distinct
 from sqlalchemy.orm import aliased
 
 from ..cacher import cacher
-from ..helpers import image_url, utc_from_local, user_url, get_lang
+from ..helpers import image_url, utc_from_local, user_url, get_lang, objectview
 
 from ..categories.models import Category, CategoryLang
 from ..models.invest import Invest
@@ -278,11 +278,10 @@ class UserInterest(db.Model):
         # In case of requiring languages, a LEFT JOIN must be generated
         if 'lang' in kwargs and kwargs['lang'] is not None:
             joins = []
-            _langs = {}
             for l in kwargs['lang']:
-                _langs[l] = aliased(CategoryLang)
-                cols.append(_langs[l].name_lang.label('name_' + l))
-                joins.append((_langs[l], and_(_langs[l].id == Category.id, _langs[l].lang == l)))
+                alias = aliased(CategoryLang)
+                cols.append(alias.name_lang.label('name_' + l))
+                joins.append((alias, and_(alias.id == Category.id, alias.lang == l)))
             query = db.session.query(*cols).join(Category, Category.id == self.interest).outerjoin(*joins)
         else:
             query = db.session.query(*cols).join(Category, Category.id == self.interest)
@@ -293,7 +292,6 @@ class UserInterest(db.Model):
             u = u._asdict()
             if 'lang' in kwargs and kwargs['lang'] is not None:
                 u['name'] = get_lang(u, 'name', kwargs['lang'])
-            ret.append(u)
-        if ret is None:
-            ret = []
+            ret.append(objectview(u))
+
         return ret

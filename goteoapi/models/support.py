@@ -6,7 +6,6 @@ from sqlalchemy.ext.hybrid import hybrid_method
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import asc
 
-from ..helpers import get_lang
 from ..cacher import cacher
 
 from .. import db

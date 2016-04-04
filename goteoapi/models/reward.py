@@ -6,7 +6,7 @@ from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from sqlalchemy.orm import aliased
 from sqlalchemy import asc,desc,and_, distinct
 
-from ..helpers import get_lang
+from ..helpers import get_lang, objectview
 from ..cacher import cacher
 
 from .icon import Icon, IconLang
@@ -133,7 +133,7 @@ class Reward(db.Model):
             if 'lang' in kwargs and kwargs['lang'] is not None:
                 u['name'] = get_lang(u, 'name', kwargs['lang'])
                 u['description'] = get_lang(u, 'description', kwargs['lang'])
-            ret.append(u)
+            ret.append(objectview(u))
         if ret is None:
             ret = []
         return ret

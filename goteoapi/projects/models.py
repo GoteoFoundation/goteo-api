@@ -7,16 +7,17 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from ..helpers import image_url, utc_from_local
 from ..cacher import cacher
+from ..base_resources import AbstractLang
 from ..models.post import Post, Blog
 from .. import db
 
 
-class ProjectLang(db.Model):
+class ProjectLang(AbstractLang, db.Model):
     __tablename__ = 'project_lang'
 
     id = db.Column('id', String(50), db.ForeignKey('project.id'), primary_key=True)
     lang = db.Column('lang', String(2), primary_key=True)
-    name_lang = db.Column('name', String(100))
+    # name_lang = db.Column('name', String(100))
     subtitle_lang = db.Column('subtitle', Text)
     description_lang = db.Column('description', Text)
     motivation_lang = db.Column('motivation', Text)
@@ -29,7 +30,7 @@ class ProjectLang(db.Model):
     pending = db.Column('pending', Integer)
 
     def __repr__(self):
-        return '<ProjectLang %s: %r>' % (self.id, self.name_lang)
+        return '<ProjectLang %s(%s): %r>' % (self.id, self.lang, self.subtitle_lang)
 
 class Project(db.Model):
     """
@@ -77,6 +78,7 @@ class Project(db.Model):
     about = db.Column('about', Text)
     keywords = db.Column('keywords', Text)
     related = db.Column('related', Text)
+    reward = db.Column('reward', Text)
     lang = db.Column('lang', String(2))
     currency = db.Column('currency', String(4))
     currency_rate = db.Column('currency_rate', Float)
@@ -240,7 +242,18 @@ class Project(db.Model):
             limit = kwargs['limit'] if 'limit' in kwargs else 10
             page = kwargs['page'] if 'page' in kwargs else 0
             filters = self.get_filters(**kwargs)
-            return self.query.distinct().filter(*filters).order_by(asc(self.created)).offset(page * limit).limit(limit).all()
+            # In case of requiring languages, a LEFT JOIN must be generated
+            if 'lang' in kwargs and kwargs['lang'] is not None:
+                ret = []
+                for u in ProjectLang.get_query(kwargs['lang']) \
+                                 .filter(*filters).order_by(asc(self.created)) \
+                                 .offset(page * limit).limit(limit):
+                    ret.append(ProjectLang.get_translated_object(u._asdict(), kwargs['lang'], u.lang))
+                return ret
+            # No langs, normal query
+            return self.query.distinct().filter(*filters) \
+                                        .order_by(asc(self.created)) \
+                                        .offset(page * limit).limit(limit).all()
         except NoResultFound:
             return []
 
@@ -348,21 +361,18 @@ class Project(db.Model):
         page = kwargs['page'] if 'page' in kwargs else 0
         filters = self.get_filters(**kwargs)
 
-        res = db.session.query(self.id.label('project'),
+        try:
+            return db.session.query(self.id.label('project'),
                                self.name,
                                self.subtitle,
                                self.image,
                                self.media,
                                self.published,
-                               func.count(Message.id).label('total')).join(Message)\
-                            .filter(*filters).group_by(Message.project)\
-                            .order_by(desc('total')).offset(page * limit).limit(limit)
-
-        ret = []
-        for u in res:
-            u = u._asdict()
-            ret.append(u)
-        return ret
+                               func.count(Message.id).label('total')).join(Message) \
+                            .filter(*filters).group_by(Message.project) \
+                            .order_by(desc('total')).offset(page * limit).limit(limit).all()
+        except NoResultFound:
+            return []
 
     @hybrid_method
     @cacher
@@ -373,7 +383,8 @@ class Project(db.Model):
         page = kwargs['page'] if 'page' in kwargs else 0
         filters = self.get_filters(**kwargs)
 
-        res = db.session.query(self.id.label('project'),
+        try:
+            return db.session.query(self.id.label('project'),
                        self.name,
                        self.subtitle,
                        self.image,
@@ -381,13 +392,10 @@ class Project(db.Model):
                        self.published,
                        func.count(Invest.id).label('total')).join(Invest)\
                             .filter(*filters).group_by(Invest.project)\
-                            .order_by(desc('total')).offset(page * limit).limit(limit)
+                            .order_by(desc('total')).offset(page * limit).limit(limit).all()
 
-        ret = []
-        for u in res:
-            u = u._asdict()
-            ret.append(u)
-        return ret
+        except NoResultFound:
+            return []
 
     @hybrid_method
     @cacher
@@ -403,7 +411,8 @@ class Project(db.Model):
         filters.append(Invest.status.in_([Invest.STATUS_PENDING,
                                                   Invest.STATUS_CHARGED,
                                                   Invest.STATUS_PAID]))
-        res = db.session.query(Project.id.label('project'),
+        try:
+            return db.session.query(Project.id.label('project'),
                                Project.name,
                                Project.subtitle,
                                Project.image,
@@ -411,12 +420,10 @@ class Project(db.Model):
                                Project.published,
                                func.sum(Invest.amount).label('amount')).join(Invest)\
                                     .filter(*filters).group_by(Invest.project)\
-                                    .order_by(desc('amount')).offset(page * limit).limit(limit)
-        ret = []
-        for u in res:
-            u = u._asdict()
-            ret.append(u)
-        return ret
+                                    .order_by(desc('amount')).offset(page * limit).limit(limit).all()
+        except NoResultFound:
+            return []
+
 
 class ProjectCategory(db.Model):
     __tablename__ = 'project_category'
