@@ -32,9 +32,17 @@ def get_lang(obj, field, langs=[]):
     """
     if langs:
         for l in langs:
-            if obj[field + '_' + l]:
-                return obj[field + '_' + l]
-    return obj[field]
+            if type(obj) == dict:
+                val = obj[field + '_' + l]
+            else:
+                val = getattr(obj, field + '_' + l)
+            if val:
+                return val
+
+    if type(obj) == dict:
+        return obj[field]
+    else:
+        return getattr(obj, field)
 
 def image_url(img, size='medium', cut=False, default='la_gota.png'):
     """
@@ -64,6 +72,9 @@ def image_resource_url(url):
 
 def project_url(project_id):
     return 'https://goteo.org/project/' + project_id
+
+def call_url(call_id):
+    return 'https://goteo.org/call/' + call_id
 
 def project_widget_url(project_id):
     return 'https://goteo.org/widget/project/' + project_id

@@ -21,7 +21,8 @@ def inject_addtional_headers(resp):
     resp.headers['Access-Control-Allow-Origin'] = origin
     resp.headers['Access-Control-Allow-Credentials'] = 'true'
     resp.headers['Access-Control-Expose-Headers'] = 'Authorization'
-    resp.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS, GET'
+    # resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, HEAD, PUT, DELETE, OPTIONS'
+    resp.headers['Access-Control-Allow-Methods'] = 'GET, HEAD, OPTIONS'
     resp.headers['Access-Control-Allow-Headers'] = request.headers.get('Access-Control-Request-Headers', 'Authorization')
     # set low for debugging
     if app.debug:
@@ -80,3 +81,4 @@ __import__('goteoapi.auth.controllers')
 __import__('goteoapi.projects.controllers')
 __import__('goteoapi.categories.controllers')
 __import__('goteoapi.licenses.controllers')
+__import__('goteoapi.calls.controllers')

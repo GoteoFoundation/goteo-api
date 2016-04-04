@@ -1,15 +1,35 @@
 # -*- coding: utf-8 -*-
 
 #from flask.ext.sqlalchemy import Pagination
-from sqlalchemy import func, Integer, String, Text, Date, Float
+from sqlalchemy import or_, asc, desc, and_, distinct, func, Integer, String, Text, Date, Float
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
-from sqlalchemy import or_, asc, desc, and_, distinct
 
 from ..helpers import image_url, utc_from_local
 from ..cacher import cacher
 from ..models.post import Post, Blog
 from .. import db
+
+
+class ProjectLang(db.Model):
+    __tablename__ = 'project_lang'
+
+    id = db.Column('id', String(50), db.ForeignKey('project.id'), primary_key=True)
+    lang = db.Column('lang', String(2), primary_key=True)
+    name_lang = db.Column('name', String(100))
+    subtitle_lang = db.Column('subtitle', Text)
+    description_lang = db.Column('description', Text)
+    motivation_lang = db.Column('motivation', Text)
+    about_lang = db.Column('about', Text)
+    related_lang = db.Column('related', Text)
+    reward_lang = db.Column('reward', Text)
+    keywords_lang = db.Column('keywords', Text)
+    video_lang = db.Column('video', String(255))
+    media_lang = db.Column('media', String(255))
+    pending = db.Column('pending', Integer)
+
+    def __repr__(self):
+        return '<ProjectLang %s: %r>' % (self.id, self.name_lang)
 
 class Project(db.Model):
     """
@@ -55,8 +75,8 @@ class Project(db.Model):
     motivation = db.Column('motivation', Text)
     goal = db.Column('goal', Text)
     about = db.Column('about', Text)
-    # keywords = db.Column('keywords', Text)
-    # related = db.Column('related', Text)
+    keywords = db.Column('keywords', Text)
+    related = db.Column('related', Text)
     lang = db.Column('lang', String(2))
     currency = db.Column('currency', String(4))
     currency_rate = db.Column('currency_rate', Float)
@@ -106,7 +126,7 @@ class Project(db.Model):
         return utc_from_local(self.passed)
 
     @hybrid_property
-    def date_success(self):
+    def date_succeeded(self):
         return utc_from_local(self.success)
 
     @hybrid_property
@@ -220,7 +240,7 @@ class Project(db.Model):
             limit = kwargs['limit'] if 'limit' in kwargs else 10
             page = kwargs['page'] if 'page' in kwargs else 0
             filters = self.get_filters(**kwargs)
-            return self.query.distinct().filter(*filters).order_by(asc(self.id)).offset(page * limit).limit(limit).all()
+            return self.query.distinct().filter(*filters).order_by(asc(self.created)).offset(page * limit).limit(limit).all()
         except NoResultFound:
             return []
 

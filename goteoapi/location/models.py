@@ -131,3 +131,12 @@ class ProjectLocation(db.Model, ItemLocation):
 
     def __repr__(self):
         return '<ProjectLocation: (%s) in %f,%f>' % (self.id, self.latitude, self.longitude)
+
+class CallLocation(db.Model, ItemLocation):
+    """Call location particular case"""
+    __tablename__ = 'call_location'
+
+    id = db.Column('id', String(50), db.ForeignKey('call.id'), primary_key=True)
+
+    def __repr__(self):
+        return '<CallLocation: (%s) in %f,%f>' % (self.id, self.latitude, self.longitude)
