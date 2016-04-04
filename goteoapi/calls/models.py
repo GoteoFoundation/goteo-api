@@ -9,6 +9,7 @@ from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from ..helpers import image_url, utc_from_local, get_lang
 from ..base_resources import AbstractLang
 from ..cacher import cacher
+from ..projects.models import ProjectCategory
 
 from .. import db
 
@@ -132,6 +133,11 @@ class Call(db.Model):
         if 'project' in kwargs and kwargs['project'] is not None:
             filters.append(self.id == CallProject.call)
             filters.append(CallProject.project.in_(kwargs['project']))
+        if 'category' in kwargs and kwargs['category'] is not None:
+            filters.append(self.id == CallProject.call)
+            filters.append(CallProject.project == ProjectCategory.project)
+            filters.append(ProjectCategory.category.in_(kwargs['category']))
+
         return filters
 
     @hybrid_method
