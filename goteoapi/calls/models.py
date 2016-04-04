@@ -9,7 +9,6 @@ from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from ..helpers import image_url, utc_from_local, get_lang
 from ..base_resources import AbstractLang
 from ..cacher import cacher
-from ..projects.models import Project, ProjectCategory
 
 from .. import db
 
@@ -123,6 +122,9 @@ class Call(db.Model):
     # Getting filters for this model
     @hybrid_method
     def get_filters(self, **kwargs):
+        from ..location.models import CallLocation
+        from ..projects.models import Project, ProjectCategory
+
         filters = self.filters
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
             filters.append(self.opened >= kwargs['from_date'])
@@ -141,6 +143,10 @@ class Call(db.Model):
             filters.append(self.id == CallProject.call)
             filters.append(CallProject.project == Project.id)
             filters.append(Project.node.in_(kwargs['node']))
+        if 'location' in kwargs and kwargs['location'] is not None:
+            subquery = CallLocation.location_subquery(**kwargs['location'])
+            filters.append(CallLocation.id == self.id)
+            filters.append(CallLocation.id.in_(subquery))
 
         return filters
 
