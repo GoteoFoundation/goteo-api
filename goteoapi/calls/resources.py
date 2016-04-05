@@ -9,7 +9,7 @@ from ..auth.decorators import requires_auth
 from ..helpers import *
 
 from ..base_resources import BaseItem, BaseList, Response
-from .models import Call
+from .models import Call, CallLang
 from ..users.resources import user_resource_fields
 from ..location.models import CallLocation
 
@@ -43,20 +43,22 @@ call_full_resource_fields = {
     "id"                : fields.String,
     "name"              : fields.String,
     "description_short" : fields.String,
-    "description" : fields.String,
-    "motivation" : fields.String,
-    "goal" : fields.String,
-    "about" : fields.String,
-    "lang" : fields.String,
-    "currency" : fields.String,
-    "currency_rate" : fields.Float,
-    "date_opened"      : fields.DateTime(dt_format='rfc822'),
-    "date_published"    : fields.DateTime(dt_format='rfc822'),
-    "date_updated"    : fields.DateTime(dt_format='rfc822'),
-    "date_succeeded"    : fields.DateTime(dt_format='rfc822'),
-    "date_closed"    : fields.DateTime(dt_format='rfc822'),
-    "date_passed"    : fields.DateTime(dt_format='rfc822'),
+    "description"              : fields.String,
+    "legal"              : fields.String,
+    "whom"              : fields.String,
+    "applies"              : fields.String,
+    "dossier"              : fields.String,
+    "tweet"              : fields.String,
+    "resources"              : fields.String,
+    "date_opened"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
+    "date_published"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
+    "date_succeeded"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
+    "matchfunding_url"       : fields.String,
+    "logo_url" : fields.String,
+    "image_url" : fields.String,
     "call_location" : fields.String,
+    "owner" : fields.String,
+    "status" : fields.String,
     "location" : fields.List(fields.Nested(call_location_resource_fields)),
     "owner" : fields.String,
     "matchfunding_url"    : fields.String
@@ -117,7 +119,7 @@ class CallAPI(BaseItem):
         res = self._get(call_id)
 
         if res.ret['id'] == None:
-            return bad_request('Call not found', 404)
+            return bad_request('Matchfunding not found', 404)
 
         return res.response()
 
@@ -128,16 +130,20 @@ class CallAPI(BaseItem):
 
         item = marshal(p, call_full_resource_fields)
         if p != None:
+            item['matchfunding-url'] = call_url(p.id)
             item['description-short'] = p.subtitle
-            item['video-url'] = p.media
-            item['image-url'] = image_url(p.image, 'medium', False)
-            item['image-url-big'] = image_url(p.image, 'big', False)
-            item['call-url'] = call_url(p.id)
-            item['widget-url'] = call_widget_url(p.id)
             item['status'] = p.status_string
+            item['logo-url'] = p.logo_url
+            item['image-url'] = image_url(p.image, 'medium', False)
             location = CallLocation.get(p.id)
             if location:
                 item['location'] = [marshal(location, call_location_resource_fields)]
+            translations = {}
+            translate_keys = {k: v for k, v in call_full_resource_fields.items() if k in CallLang.get_translate_keys()}
+            for k in p.translations:
+                translations[k.lang] = marshal(k, translate_keys)
+                translations[k.lang]['description-short'] = k.subtitle
+            item['translations'] = translations
 
         res = Response(
             starttime = time_start,

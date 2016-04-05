@@ -51,7 +51,8 @@ class AbstractLang():
     @classmethod
     def get_translate_keys(cls):
         ret = []
-        for k in dict(cls.__table__.columns):
+        # for k in dict(cls.__table__.columns):
+        for k in inspect(cls).columns.keys():
             if k not in ('id', 'lang', 'pending'):
                 ret.append(k)
         return ret

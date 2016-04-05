@@ -6,7 +6,7 @@ from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm import aliased,relationship
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 
-from ..helpers import image_url, utc_from_local, get_lang
+from ..helpers import image_url, utc_from_local
 from ..base_resources import AbstractLang
 from ..cacher import cacher
 
@@ -22,7 +22,7 @@ class CallLang(AbstractLang, db.Model):
     description = db.Column('description', Text)
     legal = db.Column('legal', Text)
     whom = db.Column('whom', Text)
-    apply = db.Column('apply', Text)
+    applies = db.Column('apply', Text)
     dossier = db.Column('dossier', Text)
     tweet = db.Column('tweet', Text)
     resources = db.Column('resources', Text)
@@ -52,7 +52,7 @@ class Call(db.Model):
     description = db.Column('description', Text)
     owner = db.Column('owner', String(50))
     whom = db.Column('whom', Text)
-    apply = db.Column('apply', Text)
+    applies = db.Column('apply', Text)
     legal = db.Column('legal', Text)
     dossier = db.Column('dossier', Text)
     tweet = db.Column('tweet', Text)
@@ -70,7 +70,7 @@ class Call(db.Model):
     backimage = db.Column('backimage', String(255))
     call_location = db.Column('call_location', String(255))
     translations = relationship("CallLang",
-                                primaryjoin = "and_(Call.id==CallLang.id, ProjectLang.pending==0)",
+                                primaryjoin = "and_(Call.id==CallLang.id, CallLang.pending==0)",
                                 back_populates="call")
 
     def __repr__(self):

@@ -204,6 +204,8 @@ class ProjectAPI(BaseItem):
             translate_keys = {k: v for k, v in project_full_resource_fields.items() if k in ProjectLang.get_translate_keys()}
             for k in p.translations:
                 translations[k.lang] = marshal(k, translate_keys)
+                translations[k.lang]['description-short'] = k.subtitle
+                translations[k.lang]['video-url'] = k.media
             item['translations'] = translations
 
         res = Response(
