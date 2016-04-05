@@ -4,8 +4,9 @@
 from sqlalchemy import or_, asc, desc, and_, distinct, func, Integer, String, Text, Date, Float
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from sqlalchemy.orm import aliased
 
-from ..helpers import image_url, utc_from_local
+from ..helpers import image_url, utc_from_local, get_lang, objectview
 from ..cacher import cacher
 from ..base_resources import AbstractLang
 from ..models.post import Post, Blog
@@ -344,9 +345,9 @@ class Project(db.Model):
         """Average number of posts by projects"""
         filters = self.get_filters(**kwargs)
         filters.append(Post.publish == 1)
-        sq1 = db.session.query(func.count(self.id).label('posts')).select_from(Post)\
-                            .join(Blog, and_(Blog.id == Post.blog, Blog.type == 'project'))\
-                            .join(self, self.id == Blog.owner)\
+        sq1 = db.session.query(func.count(self.id).label('posts')).select_from(Post) \
+                            .join(Blog, and_(Blog.id == Post.blog, Blog.type == 'project')) \
+                            .join(self, self.id == Blog.owner) \
                             .filter(*filters).group_by(Post.blog).subquery()
         total = db.session.query(func.avg(sq1.c.posts)).scalar()
         total = 0 if total is None else round(total, 2)
@@ -361,41 +362,95 @@ class Project(db.Model):
         page = kwargs['page'] if 'page' in kwargs else 0
         filters = self.get_filters(**kwargs)
 
-        try:
-            return db.session.query(self.id.label('project'),
-                               self.name,
-                               self.subtitle,
-                               self.image,
-                               self.media,
-                               self.published,
-                               func.count(Message.id).label('total')).join(Message) \
-                            .filter(*filters).group_by(Message.project) \
-                            .order_by(desc('total')).offset(page * limit).limit(limit).all()
-        except NoResultFound:
-            return []
+        cols = [self.id,
+                self.name,
+                self.subtitle,
+                self.image,
+                self.media,
+                self.published,
+                func.count(Message.id).label('total')]
+
+        if 'lang' in kwargs and kwargs['lang'] is not None:
+            joins = []
+            for l in kwargs['lang']:
+                alias = aliased(ProjectLang)
+                cols.append(alias.subtitle_lang.label('subtitle_' + l))
+                joins.append((alias, and_(alias.id == self.id, alias.lang == l)))
+            query = db.session.query(*cols).outerjoin(*joins)
+        else:
+            query = db.session.query(*cols)
+
+        ret = []
+        for u in query.join(Message) \
+                      .filter(*filters).group_by(Message.project) \
+                      .order_by(desc('total')).offset(page * limit).limit(limit):
+            u = u._asdict()
+            if 'lang' in kwargs and kwargs['lang'] is not None:
+                u['subtitle'] = get_lang(u, 'subtitle', kwargs['lang'])
+            ret.append(objectview(u))
+
+        return ret
+
+        # try:
+        #     return db.session.query(self.id.label('project'),
+        #                        self.name,
+        #                        self.subtitle,
+        #                        self.image,
+        #                        self.media,
+        #                        self.published,
+        #                        func.count(Message.id).label('total')).join(Message) \
+        #                     .filter(*filters).group_by(Message.project) \
+        #                     .order_by(desc('total')).offset(page * limit).limit(limit).all()
+        # except NoResultFound:
+        #     return []
 
     @hybrid_method
     @cacher
     def donated_list(self, **kwargs):
         """Get a list of projects with more donations (by individual contributions)"""
+
         from ..models.invest import Invest
+
         limit = kwargs['limit'] if 'limit' in kwargs else 10
         page = kwargs['page'] if 'page' in kwargs else 0
         filters = self.get_filters(**kwargs)
+        cols = [self.id,
+                self.name,
+                self.subtitle,
+                self.image,
+                self.media,
+                self.published,
+                func.count(Invest.id).label('total')]
 
-        try:
-            return db.session.query(self.id.label('project'),
-                       self.name,
-                       self.subtitle,
-                       self.image,
-                       self.media,
-                       self.published,
-                       func.count(Invest.id).label('total')).join(Invest)\
-                            .filter(*filters).group_by(Invest.project)\
-                            .order_by(desc('total')).offset(page * limit).limit(limit).all()
+        if 'lang' in kwargs and kwargs['lang'] is not None:
+            joins = []
+            for l in kwargs['lang']:
+                alias = aliased(ProjectLang)
+                cols.append(alias.subtitle_lang.label('subtitle_' + l))
+                joins.append((alias, and_(alias.id == self.id, alias.lang == l)))
+            query = db.session.query(*cols).outerjoin(*joins)
+        else:
+            query = db.session.query(*cols)
 
-        except NoResultFound:
-            return []
+        ret = []
+        for u in query.join(Invest) \
+                      .filter(*filters).group_by(Invest.project) \
+                      .order_by(desc('total')).offset(page * limit).limit(limit):
+            u = u._asdict()
+            if 'lang' in kwargs and kwargs['lang'] is not None:
+                u['subtitle'] = get_lang(u, 'subtitle', kwargs['lang'])
+            ret.append(objectview(u))
+
+        return ret
+
+
+        # try:
+        #     return db.session.query(*cols).join(Invest) \
+        #                     .filter(*filters).group_by(Invest.project) \
+        #                     .order_by(desc('total')).offset(page * limit).limit(limit).all()
+
+        # except NoResultFound:
+        #     return []
 
     @hybrid_method
     @cacher
@@ -407,22 +462,38 @@ class Project(db.Model):
         limit = kwargs['limit'] if 'limit' in kwargs else 10
         page = kwargs['page'] if 'page' in kwargs else 0
         filters = self.get_filters(**kwargs)
-
+        cols = [self.id,
+                self.name,
+                self.subtitle,
+                self.image,
+                self.media,
+                self.lang,
+                self.published,
+                func.sum(Invest.amount).label('amount')]
         filters.append(Invest.status.in_([Invest.STATUS_PENDING,
-                                                  Invest.STATUS_CHARGED,
-                                                  Invest.STATUS_PAID]))
-        try:
-            return db.session.query(Project.id.label('project'),
-                               Project.name,
-                               Project.subtitle,
-                               Project.image,
-                               Project.media,
-                               Project.published,
-                               func.sum(Invest.amount).label('amount')).join(Invest)\
-                                    .filter(*filters).group_by(Invest.project)\
-                                    .order_by(desc('amount')).offset(page * limit).limit(limit).all()
-        except NoResultFound:
-            return []
+                                          Invest.STATUS_CHARGED,
+                                          Invest.STATUS_PAID]))
+
+        if 'lang' in kwargs and kwargs['lang'] is not None:
+            joins = []
+            for l in kwargs['lang']:
+                alias = aliased(ProjectLang)
+                cols.append(alias.subtitle_lang.label('subtitle_' + l))
+                joins.append((alias, and_(alias.id == self.id, alias.lang == l)))
+            query = db.session.query(*cols).outerjoin(*joins)
+        else:
+            query = db.session.query(*cols)
+
+        ret = []
+        for u in query.join(Invest) \
+                      .filter(*filters).group_by(Invest.project) \
+                      .order_by(desc('amount')).offset(page * limit).limit(limit):
+            u = u._asdict()
+            if 'lang' in kwargs and kwargs['lang'] is not None:
+                u['subtitle'] = get_lang(u, 'subtitle', kwargs['lang'])
+            ret.append(objectview(u))
+
+        return ret
 
 
 class ProjectCategory(db.Model):
