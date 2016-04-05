@@ -38,22 +38,22 @@ class SummaryAPI(Base):
 
         top10_collaborations = []
         for u in Project.collaborated_list(**args):
-            item = marshal(u._asdict(), contribution_resource_fields)
+            item = marshal(u, contribution_resource_fields)
             item['description-short'] = u.subtitle
             item['video-url'] = u.media
             item['date-published'] = utc_from_local(u.published)
             item['image-url'] = image_url(u.image, 'medium', False)
-            item['project-url'] = project_url(u.project)
+            item['project-url'] = project_url(u.id)
             top10_collaborations.append(item)
 
         top10_donations = []
         for u in Project.donated_list(**args):
-            item = marshal(u._asdict(), contribution_resource_fields)
+            item = marshal(u, contribution_resource_fields)
             item['description-short'] = u.subtitle
             item['video-url'] = u.media
             item['date-published'] = utc_from_local(u.published)
             item['image-url'] = image_url(u.image, 'medium', False)
-            item['project-url'] = project_url(u.project)
+            item['project-url'] = project_url(u.id)
             top10_donations.append(item)
 
         users = User.total(**args)
