@@ -70,6 +70,8 @@ class Project(db.Model):
     PUBLISHED_PROJECTS = [STATUS_IN_CAMPAIGN, STATUS_FUNDED, STATUS_FULFILLED, STATUS_UNFUNDED]
     SUCCESSFUL_PROJECTS = [STATUS_IN_CAMPAIGN, STATUS_FUNDED, STATUS_FULFILLED]
 
+    SCOPES_STR = ('', 'local', 'regional', 'national', 'global')
+
     id = db.Column('id', String(50), primary_key=True)
     owner = db.Column('owner', String(50), db.ForeignKey('user.id'))
     name = db.Column('name', Text)
@@ -91,6 +93,7 @@ class Project(db.Model):
     optimum = db.Column('maxcost', Integer)
     amount = db.Column('amount', Integer)
     status = db.Column('status', Integer) # estado del proyecto
+    scope = db.Column('scope', Integer) #
     passed = db.Column('passed', Date) # fecha de paso de primera ronda
     created = db.Column('created', Date) # fecha de creacion
     updated = db.Column('updated', Date) # fecha de actualizacion de datos de formulario
@@ -144,6 +147,10 @@ class Project(db.Model):
     @hybrid_property
     def status_string(self):
         return self.STATUS_STR[self.status]
+
+    @hybrid_property
+    def scope_string(self):
+        return self.SCOPES_STR[self.scope]
 
     # Getting filters for this model
     @hybrid_method

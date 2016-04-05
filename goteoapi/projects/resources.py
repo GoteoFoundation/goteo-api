@@ -86,6 +86,7 @@ project_full_resource_fields = {
     "optimum" : fields.Float,
     "amount" : fields.Float,
     "status" : fields.String,
+    "scope" : fields.String,
     "node"              : fields.String,
     "date_created"      : fields.DateTime(dt_format='rfc822'),
     "date_published"    : fields.DateTime(dt_format='rfc822'),
@@ -178,6 +179,7 @@ class ProjectAPI(BaseItem):
             item['project-url'] = project_url(p.id)
             item['widget-url'] = project_widget_url(p.id)
             item['status'] = p.status_string
+            item['scope'] = p.scope_string
             location = ProjectLocation.get(p.id)
             if location:
                 item['location'] = [marshal(location, project_location_resource_fields)]

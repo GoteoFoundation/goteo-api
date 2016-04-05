@@ -45,6 +45,8 @@ class Call(db.Model):
     STATUS_EXPIRED    = 6
     STATUS_STR = ('pending', 'editing', 'reviewing', 'applying', 'published', 'succeeded', 'expired')
 
+    SCOPES_STR = ('', 'local', 'regional', 'national', 'global')
+
     id = db.Column('id', String(50), primary_key=True)
     name = db.Column('name', Text)
     amount = db.Column('amount', Integer)
@@ -59,6 +61,7 @@ class Call(db.Model):
     resources = db.Column('resources', Text)
     lang = db.Column('lang', String(2))
     status = db.Column('status', Integer)
+    scope = db.Column('scope', Integer)
     created = db.Column('created', Date)
     updated = db.Column('updated', Date)
     opened = db.Column('opened', Date)
@@ -68,6 +71,7 @@ class Call(db.Model):
     logo = db.Column('logo', String(255))
     image = db.Column('image', String(255))
     backimage = db.Column('backimage', String(255))
+    facebook = db.Column('fbappid', String(255))
     call_location = db.Column('call_location', String(255))
     translations = relationship("CallLang",
                                 primaryjoin = "and_(Call.id==CallLang.id, CallLang.pending==0)",
@@ -115,6 +119,10 @@ class Call(db.Model):
     @hybrid_property
     def status_string(self):
         return self.STATUS_STR[self.status]
+
+    @hybrid_property
+    def scope_string(self):
+        return self.SCOPES_STR[self.scope]
 
     #Filters for this table
     @hybrid_property

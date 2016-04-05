@@ -89,6 +89,9 @@ definitions:
             status:
                 type: string
                 description: Status of the project
+            scope:
+                type: string
+                description: Scope of the project
             location:
                 type: array
                 description: Location of the project

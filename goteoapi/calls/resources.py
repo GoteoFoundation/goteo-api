@@ -42,6 +42,7 @@ call_location_resource_fields = {
 call_full_resource_fields = {
     "id"                : fields.String,
     "name"              : fields.String,
+    "lang"              : fields.String,
     "description_short" : fields.String,
     "description"              : fields.String,
     "legal"              : fields.String,
@@ -53,9 +54,13 @@ call_full_resource_fields = {
     "date_opened"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
     "date_published"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
     "date_succeeded"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
+    "date_closed"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
     "matchfunding_url"       : fields.String,
     "logo_url" : fields.String,
     "image_url" : fields.String,
+    "image_url_big" : fields.String,
+    "image_background" : fields.String,
+    "facebook-url" : fields.String,
     "call_location" : fields.String,
     "owner" : fields.String,
     "status" : fields.String,
@@ -133,8 +138,12 @@ class CallAPI(BaseItem):
             item['matchfunding-url'] = call_url(p.id)
             item['description-short'] = p.subtitle
             item['status'] = p.status_string
+            item['scope'] = p.scope_string
             item['logo-url'] = p.logo_url
+            item['facebook-url'] = p.facebook
             item['image-url'] = image_url(p.image, 'medium', False)
+            item['image-url-big'] = image_url(p.image, 'big', False)
+            item['image-background'] = image_url(p.backimage, 'big', False)
             location = CallLocation.get(p.id)
             if location:
                 item['location'] = [marshal(location, call_location_resource_fields)]
