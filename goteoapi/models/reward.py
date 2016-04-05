@@ -117,12 +117,11 @@ class Reward(db.Model):
         if 'lang' in kwargs and kwargs['lang'] is not None:
             # In case of requiring languages, a LEFT JOIN must be generated
             joins = []
-            _langs = {}
             for l in kwargs['lang']:
-                _langs[l] = aliased(IconLang)
-                cols.append(_langs[l].name_lang.label('name_' + l))
-                cols.append(_langs[l].description_lang.label('description_' + l))
-                joins.append((_langs[l], and_(_langs[l].id == Icon.id, _langs[l].lang == l)))
+                alias = aliased(IconLang)
+                cols.append(alias.name.label('name_' + l))
+                cols.append(alias.description.label('description_' + l))
+                joins.append((alias, and_(alias.id == Icon.id, alias.lang == l)))
             query = db.session.query(*cols).join(*injoins).outerjoin(*joins)
         else:
             query = db.session.query(*cols).join(*injoins)

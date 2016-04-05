@@ -280,7 +280,7 @@ class UserInterest(db.Model):
             joins = []
             for l in kwargs['lang']:
                 alias = aliased(CategoryLang)
-                cols.append(alias.name_lang.label('name_' + l))
+                cols.append(alias.name.label('name_' + l))
                 joins.append((alias, and_(alias.id == Category.id, alias.lang == l)))
             query = db.session.query(*cols).join(Category, Category.id == self.interest).outerjoin(*joins)
         else:

@@ -9,7 +9,7 @@ from ..auth.decorators import requires_auth
 from ..helpers import *
 
 from ..base_resources import BaseItem, BaseList, Response
-from .models import Project, ProjectImage
+from .models import Project, ProjectImage, ProjectLang
 from ..users.models import User
 from ..users.resources import user_resource_fields
 from ..location.models import ProjectLocation, UserLocation
@@ -200,6 +200,11 @@ class ProjectAPI(BaseItem):
             if needs:
                 item['needs'] = marshal(needs, project_need_resource_fields)
 
+            translations = {}
+            translate_keys = {k: v for k, v in project_full_resource_fields.items() if k in ProjectLang.get_translate_keys()}
+            for k in p.translations:
+                translations[k.lang] = marshal(k, translate_keys)
+            item['translations'] = translations
 
         res = Response(
             starttime = time_start,

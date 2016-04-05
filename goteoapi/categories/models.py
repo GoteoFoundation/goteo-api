@@ -17,12 +17,12 @@ class CategoryLang(AbstractLang, db.Model):
 
     id = db.Column('id', Integer, db.ForeignKey('category.id'), primary_key=True)
     lang = db.Column('lang', String(2), primary_key=True)
-    name_lang = db.Column('name', Text)
-    description_lang = db.Column('description', Text)
+    name = db.Column('name', Text)
+    description = db.Column('description', Text)
     pending = db.Column('pending', Integer)
 
     def __repr__(self):
-        return '<CategoryLang %s(%s): %r>' % (self.id, self.lang, self.name_lang)
+        return '<CategoryLang %s(%s): %r>' % (self.id, self.lang, self.name)
 
 class Category(db.Model):
     __tablename__ = 'category'

@@ -18,12 +18,12 @@ class IconLang(db.Model):
 
     id = db.Column('id', String(50), db.ForeignKey('icon.id'), primary_key=True)
     lang = db.Column('lang', String(2), primary_key=True)
-    name_lang = db.Column('name', Text)
-    description_lang = db.Column('description', Text)
+    name = db.Column('name', Text)
+    description = db.Column('description', Text)
     pending = db.Column('pending', Integer)
 
     def __repr__(self):
-        return '<IconLang %s: %r>' % (self.id, self.name_lang)
+        return '<IconLang %s: %r>' % (self.id, self.name)
 
 class Icon(db.Model):
     __tablename__ = 'icon'

@@ -17,20 +17,20 @@ class CallLang(AbstractLang, db.Model):
 
     id = db.Column('id', String(50), db.ForeignKey('call.id'), primary_key=True)
     lang = db.Column('lang', String(2), primary_key=True)
-    name_lang = db.Column('name', String(100))
-    subtitle_lang = db.Column('subtitle', Text)
-    description_lang = db.Column('description', Text)
-    legal_lang = db.Column('legal', Text)
-    whom_lang = db.Column('whom', Text)
-    apply_lang = db.Column('apply', Text)
-    dossier_lang = db.Column('dossier', Text)
-    tweet_lang = db.Column('tweet', Text)
-    resources_lang = db.Column('resources', Text)
+    name = db.Column('name', String(100))
+    subtitle = db.Column('subtitle', Text)
+    description = db.Column('description', Text)
+    legal = db.Column('legal', Text)
+    whom = db.Column('whom', Text)
+    apply = db.Column('apply', Text)
+    dossier = db.Column('dossier', Text)
+    tweet = db.Column('tweet', Text)
+    resources = db.Column('resources', Text)
     pending = db.Column('pending', Integer)
-    # call = relationship('Call', back_populates='call_langs')
+    call = relationship('Call', back_populates='translations')
 
     def __repr__(self):
-        return '<CallLang %s(%s): %r>' % (self.id, self.lang, self.name_lang)
+        return '<CallLang %s(%s): %r>' % (self.id, self.lang, self.name)
 
 class Call(db.Model):
     __tablename__ = 'call'
@@ -69,7 +69,9 @@ class Call(db.Model):
     image = db.Column('image', String(255))
     backimage = db.Column('backimage', String(255))
     call_location = db.Column('call_location', String(255))
-    # call_langs = relationship("CallLang", order_by=CallLang.id, back_populates="call")
+    translations = relationship("CallLang",
+                                primaryjoin = "and_(Call.id==CallLang.id, ProjectLang.pending==0)",
+                                back_populates="call")
 
     def __repr__(self):
         return '<Call %s: %s>' % (self.id, self.name)

@@ -114,6 +114,11 @@ definitions:
                 description: Non-economical detailed list of necessities
                 items:
                     $ref: '#/definitions/api_projects_project_get_ProjectNeed'
+            translations:
+                type: array
+                description: All available translations in a list by language
+                items:
+                    $ref: '#/definitions/api_projects_project_get_ProjectTranslation'
     - schema:
         id: ProjectLocation
         properties:
@@ -175,6 +180,28 @@ definitions:
                 type: string
             type:
                 type: string
+    - schema:
+        id: ProjectTranslation
+        properties:
+            subtitle:
+                type: string
+            description:
+                type: string
+            motivation:
+                type: string
+            about:
+                type: string
+            related:
+                type: string
+            reward:
+                type: string
+            keywords:
+                type: string
+            video:
+                type: string
+            media:
+                type: string
+
 parameters:
     - in: path
       type: string

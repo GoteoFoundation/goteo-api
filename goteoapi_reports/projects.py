@@ -59,6 +59,7 @@ class ProjectsAPI(Base):
         top10_collaborations = []
         for u in Project.collaborated_list(**args):
             item = marshal(u, contribution_resource_fields)
+            item['project'] = u.id
             item['description-short'] = u.subtitle
             item['video-url'] = u.media
             item['date-published'] = utc_from_local(u.published)
@@ -69,6 +70,7 @@ class ProjectsAPI(Base):
         top10_donations = []
         for u in Project.donated_list(**args):
             item = marshal(u, contribution_resource_fields)
+            item['project'] = u.id
             item['description-short'] = u.subtitle
             item['video-url'] = u.media
             item['date-published'] = utc_from_local(u.published)
@@ -79,6 +81,7 @@ class ProjectsAPI(Base):
         top10_receipts = []
         for u in Project.received_list(finished=True, **args):
             item = marshal(u, amount_resource_fields)
+            item['project'] = u.id
             item['description-short'] = u.subtitle
             item['video-url'] = u.media
             item['date-published'] = utc_from_local(u.published)

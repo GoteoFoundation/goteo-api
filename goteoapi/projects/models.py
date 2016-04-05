@@ -4,7 +4,7 @@
 from sqlalchemy import or_, asc, desc, and_, distinct, func, Integer, String, Text, Date, Float
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
-from sqlalchemy.orm import aliased
+from sqlalchemy.orm import aliased, relationship
 
 from ..helpers import image_url, utc_from_local, get_lang, objectview
 from ..cacher import cacher
@@ -18,20 +18,21 @@ class ProjectLang(AbstractLang, db.Model):
 
     id = db.Column('id', String(50), db.ForeignKey('project.id'), primary_key=True)
     lang = db.Column('lang', String(2), primary_key=True)
-    # name_lang = db.Column('name', String(100))
-    subtitle_lang = db.Column('subtitle', Text)
-    description_lang = db.Column('description', Text)
-    motivation_lang = db.Column('motivation', Text)
-    about_lang = db.Column('about', Text)
-    related_lang = db.Column('related', Text)
-    reward_lang = db.Column('reward', Text)
-    keywords_lang = db.Column('keywords', Text)
-    video_lang = db.Column('video', String(255))
-    media_lang = db.Column('media', String(255))
+    # name = db.Column('name', String(100))
+    subtitle = db.Column('subtitle', Text)
+    description = db.Column('description', Text)
+    motivation = db.Column('motivation', Text)
+    about = db.Column('about', Text)
+    related = db.Column('related', Text)
+    reward = db.Column('reward', Text)
+    keywords = db.Column('keywords', Text)
+    video = db.Column('video', String(255))
+    media = db.Column('media', String(255))
     pending = db.Column('pending', Integer)
+    project = relationship('Project', back_populates='translations')
 
     def __repr__(self):
-        return '<ProjectLang %s(%s): %r>' % (self.id, self.lang, self.subtitle_lang)
+        return '<ProjectLang %s(%s): %r>' % (self.id, self.lang, self.subtitle)
 
 class Project(db.Model):
     """
@@ -104,6 +105,10 @@ class Project(db.Model):
     # rewards
     # platform
     #aportes = db.relationship('Invest', backref='project')
+    #
+    translations = relationship("ProjectLang",
+                                primaryjoin = "and_(Project.id==ProjectLang.id, ProjectLang.pending==0)",
+                                back_populates="project")
 
     def __repr__(self):
         return '<Project %s: %s>' % (self.id, self.name)
@@ -374,7 +379,7 @@ class Project(db.Model):
             joins = []
             for l in kwargs['lang']:
                 alias = aliased(ProjectLang)
-                cols.append(alias.subtitle_lang.label('subtitle_' + l))
+                cols.append(alias.subtitle.label('subtitle_' + l))
                 joins.append((alias, and_(alias.id == self.id, alias.lang == l)))
             query = db.session.query(*cols).outerjoin(*joins)
         else:
@@ -426,7 +431,7 @@ class Project(db.Model):
             joins = []
             for l in kwargs['lang']:
                 alias = aliased(ProjectLang)
-                cols.append(alias.subtitle_lang.label('subtitle_' + l))
+                cols.append(alias.subtitle.label('subtitle_' + l))
                 joins.append((alias, and_(alias.id == self.id, alias.lang == l)))
             query = db.session.query(*cols).outerjoin(*joins)
         else:
@@ -478,7 +483,7 @@ class Project(db.Model):
             joins = []
             for l in kwargs['lang']:
                 alias = aliased(ProjectLang)
-                cols.append(alias.subtitle_lang.label('subtitle_' + l))
+                cols.append(alias.subtitle.label('subtitle_' + l))
                 joins.append((alias, and_(alias.id == self.id, alias.lang == l)))
             query = db.session.query(*cols).outerjoin(*joins)
         else:

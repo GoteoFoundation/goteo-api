@@ -18,13 +18,13 @@ class LicenseLang(AbstractLang, db.Model):
 
     id = db.Column('id', String(50), db.ForeignKey('license.id'), primary_key=True)
     lang = db.Column('lang', String(2), primary_key=True)
-    name_lang = db.Column('name', String(100))
-    description_lang = db.Column('description', Text)
-    url_lang = db.Column('url', String(255))
+    name = db.Column('name', String(100))
+    description = db.Column('description', Text)
+    url = db.Column('url', String(255))
     pending = db.Column('pending', Integer)
 
     def __repr__(self):
-        return '<LicenseLang %s(%s): %r>' % (self.id, self.lang, self.name_lang)
+        return '<LicenseLang %s(%s): %r>' % (self.id, self.lang, self.name)
 
 # License stuff
 class License(db.Model):
