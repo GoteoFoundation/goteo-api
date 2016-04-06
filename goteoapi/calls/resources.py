@@ -27,6 +27,12 @@ call_resource_fields = {
     "longitude" : fields.Float,
     "call_location" : fields.String,
     "owner" : fields.String,
+    "amount_total" : fields.Float,
+    "amount_committed" : fields.Float,
+    "projects_total" : fields.Integer,
+    "projects_applied" : fields.Integer,
+    "projects_active" : fields.Integer,
+    "projects_succeeded" : fields.Integer,
     "status" : fields.String,
 }
 
@@ -64,6 +70,12 @@ call_full_resource_fields = {
     "call_location" : fields.String,
     "owner" : fields.String,
     "status" : fields.String,
+    "amount_total" : fields.Float,
+    "amount_committed" : fields.Float,
+    "projects_total" : fields.Integer,
+    "projects_applied" : fields.Integer,
+    "projects_active" : fields.Integer,
+    "projects_succeeded" : fields.Integer,
     "location" : fields.List(fields.Nested(call_location_resource_fields)),
     "owner" : fields.String,
     "matchfunding_url"    : fields.String
@@ -95,7 +107,6 @@ class CallsListAPI(BaseList):
             item['matchfunding-url'] = call_url(p.id)
             item['description-short'] = p.subtitle
             item['status'] = p.status_string
-            item['logo-url'] = p.logo_url
             item['image-url'] = image_url(p.image, 'medium', False)
             location = CallLocation.get(p.id)
             if location:
@@ -139,7 +150,6 @@ class CallAPI(BaseItem):
             item['description-short'] = p.subtitle
             item['status'] = p.status_string
             item['scope'] = p.scope_string
-            item['logo-url'] = p.logo_url
             item['facebook-url'] = p.facebook
             item['image-url'] = image_url(p.image, 'medium', False)
             item['image-url-big'] = image_url(p.image, 'big', False)

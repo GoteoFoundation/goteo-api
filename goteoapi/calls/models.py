@@ -49,7 +49,6 @@ class Call(db.Model):
 
     id = db.Column('id', String(50), primary_key=True)
     name = db.Column('name', Text)
-    amount = db.Column('amount', Integer)
     subtitle = db.Column('subtitle', Text)
     description = db.Column('description', Text)
     owner = db.Column('owner', String(50))
@@ -57,6 +56,13 @@ class Call(db.Model):
     applies = db.Column('apply', Text)
     legal = db.Column('legal', Text)
     dossier = db.Column('dossier', Text)
+    amount_total = db.Column('amount', Integer) # Total available amount
+    amount_available = db.Column('rest', Integer) # Total Amount remaining to distribute
+    amount_committed = db.Column('used', Integer) # Total Amount committed on projects
+    projects_total = db.Column('num_projects', Integer) # Selected projects
+    projects_applied = db.Column('applied', Integer) # Applied projects succeeded
+    projects_active = db.Column('running_projects', Integer) # Applied projects in active campaign
+    projects_succeeded = db.Column('success_projects', Integer) # Applied successful projects
     tweet = db.Column('tweet', Text)
     resources = db.Column('resources', Text)
     lang = db.Column('lang', String(2))
