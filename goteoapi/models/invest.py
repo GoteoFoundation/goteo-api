@@ -64,10 +64,22 @@ class Invest(db.Model):
                                             self.STATUS_CHARGED,
                                             self.STATUS_PAID,
                                             self.STATUS_RETURNED]))
-        if 'is_call' in kwargs and kwargs['is_call'] is not None:
-            filters.append(self.call != None)
+        # Can be used to get Invest applying to a Call
+        # or Invests not applying to any Call if None
+        #  call == False   => Invest not applying to any Call
+        #  call == True   => Invest applying to any Call
+        #  call == 'call-id'   => Invest applying to that specific Call
+        if 'call' in kwargs and kwargs['call'] is not None:
+            if kwargs['call'] is True:
+                filters.append(and_(self.call != None, self.call != ''))
+            elif kwargs['call'] is False:
+                filters.append(or_(self.call == None, self.call == ''))
+            else:
+                filters.append(self.call == kwargs['call'])
         if 'method' in kwargs and kwargs['method'] is not None:
             filters.append(self.method == kwargs['method'])
+        if 'not_method' in kwargs and kwargs['not_method'] is not None:
+            filters.append(self.method != kwargs['not_method'])
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
             filters.append(self.date_invested >= kwargs['from_date'])
         if 'to_date' in kwargs and kwargs['to_date'] is not None:

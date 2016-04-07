@@ -75,7 +75,7 @@ class MoneyAPI(BaseList):
                 # SOLO CONVOCATORIA:
                 "matchfund-amount"        : Invest.pledged_total(method=Invest.METHOD_DROP, **args),
                 # CONVOCATORIA y aportes individuales
-                # "matchfund-amount"        : Invest.pledged_total(is_call=True, **args),
+                # "matchfund-amount"        : Invest.pledged_total(call=True, **args),
                 # Capital Riego de Goteo (fondos captados de instituciones y empresas destinados a la bolsa de Capital Riego https://goteo.org/service/resources)
                 "matchfundpledge-amount"  : Call.pledged_total(**args),
                 # Total 8% recaudado por Goteo

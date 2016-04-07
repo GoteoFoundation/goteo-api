@@ -9,6 +9,7 @@ from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from ..helpers import image_url, utc_from_local
 from ..base_resources import AbstractLang
 from ..cacher import cacher
+from ..models.invest import Invest
 
 from .. import db
 
@@ -56,8 +57,8 @@ class Call(db.Model):
     applies = db.Column('apply', Text)
     legal = db.Column('legal', Text)
     dossier = db.Column('dossier', Text)
-    amount_total = db.Column('amount', Integer) # Total available amount
-    amount_available = db.Column('rest', Integer) # Total Amount remaining to distribute
+    amount_available = db.Column('amount', Integer) # Total available amount
+    amount_remaining = db.Column('rest', Integer) # Total Amount remaining to distribute
     amount_committed = db.Column('used', Integer) # Total Amount committed on projects
     projects_total = db.Column('num_projects', Integer) # Selected projects
     projects_applied = db.Column('applied', Integer) # Applied projects succeeded
@@ -85,6 +86,19 @@ class Call(db.Model):
 
     def __repr__(self):
         return '<Call %s: %s>' % (self.id, self.name)
+
+    @hybrid_property
+    def amount_peers(self):
+        return float(Invest.pledged_total(not_method=Invest.METHOD_DROP, call = self.id))
+
+    @hybrid_property
+    def user(self):
+        from ..users.models import User
+        return User.get(self.owner)
+
+    @hybrid_property
+    def owner_name(self):
+        return self.user.name
 
     @hybrid_property
     def image_url(self):

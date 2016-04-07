@@ -20,15 +20,18 @@ call_resource_fields = {
     "date_opened"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
     "date_published"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
     "date_succeeded"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
-    "matchfunding_url"       : fields.String,
+    "matchfund_url"       : fields.String,
     "logo_url" : fields.String,
     "image_url" : fields.String,
     "latitude" : fields.Float,
     "longitude" : fields.Float,
     "call_location" : fields.String,
     "owner" : fields.String,
-    "amount_total" : fields.Float,
+    "owner_name" : fields.String,
+    "amount_available" : fields.Float,
+    "amount_peers" : fields.Float,
     "amount_committed" : fields.Float,
+    "amount_remaining" : fields.Float,
     "projects_total" : fields.Integer,
     "projects_applied" : fields.Integer,
     "projects_active" : fields.Integer,
@@ -61,7 +64,7 @@ call_full_resource_fields = {
     "date_published"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
     "date_succeeded"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
     "date_closed"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
-    "matchfunding_url"       : fields.String,
+    "matchfund_url"       : fields.String,
     "logo_url" : fields.String,
     "image_url" : fields.String,
     "image_url_big" : fields.String,
@@ -69,16 +72,20 @@ call_full_resource_fields = {
     "facebook-url" : fields.String,
     "call_location" : fields.String,
     "owner" : fields.String,
+    "user" : fields.Nested(user_resource_fields),
     "status" : fields.String,
-    "amount_total" : fields.Float,
+    "amount_available" : fields.Float,
+    "amount_peers" : fields.Float,
     "amount_committed" : fields.Float,
+    "amount_remaining" : fields.Float,
     "projects_total" : fields.Integer,
     "projects_applied" : fields.Integer,
     "projects_active" : fields.Integer,
     "projects_succeeded" : fields.Integer,
     "location" : fields.List(fields.Nested(call_location_resource_fields)),
     "owner" : fields.String,
-    "matchfunding_url"    : fields.String
+    "owner_name" : fields.String,
+    "matchfund_url"    : fields.String
 }
 
 donor_resource_fields = user_resource_fields.copy()
@@ -104,10 +111,11 @@ class CallsListAPI(BaseList):
         items = []
         for p in Call.list(**args):
             item = marshal(p, call_resource_fields)
-            item['matchfunding-url'] = call_url(p.id)
+            item['matchfund-url'] = call_url(p.id)
             item['description-short'] = p.subtitle
             item['status'] = p.status_string
             item['image-url'] = image_url(p.image, 'medium', False)
+            # item["amount-peers"] =
             location = CallLocation.get(p.id)
             if location:
                 item['latitude'] = location.latitude
@@ -146,7 +154,7 @@ class CallAPI(BaseItem):
 
         item = marshal(p, call_full_resource_fields)
         if p != None:
-            item['matchfunding-url'] = call_url(p.id)
+            item['matchfund-url'] = call_url(p.id)
             item['description-short'] = p.subtitle
             item['status'] = p.status_string
             item['scope'] = p.scope_string

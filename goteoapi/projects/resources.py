@@ -30,6 +30,7 @@ project_resource_fields = {
     "latitude" : fields.Float,
     "longitude" : fields.Float,
     "owner" : fields.String,
+    "owner_name" : fields.String,
     "status" : fields.String,
 }
 
@@ -96,6 +97,8 @@ project_full_resource_fields = {
     "date_passed"    : fields.DateTime(dt_format='rfc822'),
     "location" : fields.List(fields.Nested(project_location_resource_fields)),
     "owner" : fields.String,
+    "owner_name" : fields.String,
+    "user" : fields.Nested(user_resource_fields),
     "project_url"       : fields.String,
     "widget_url"       : fields.String,
     "image_url" : fields.String,

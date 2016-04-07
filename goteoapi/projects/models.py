@@ -117,6 +117,15 @@ class Project(db.Model):
         return '<Project %s: %s>' % (self.id, self.name)
 
     @hybrid_property
+    def user(self):
+        from ..users.models import User
+        return User.get(self.owner)
+
+    @hybrid_property
+    def owner_name(self):
+        return self.user.name
+
+    @hybrid_property
     def image_url(self):
         return image_url(self.image, size="big")
 
