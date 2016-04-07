@@ -57,18 +57,18 @@ class Call(db.Model):
     applies = db.Column('apply', Text)
     legal = db.Column('legal', Text)
     dossier = db.Column('dossier', Text)
-    amount_available = db.Column('amount', Integer) # Total available amount
-    amount_remaining = db.Column('rest', Integer) # Total Amount remaining to distribute
-    amount_committed = db.Column('used', Integer) # Total Amount committed on projects
-    projects_total = db.Column('num_projects', Integer) # Selected projects
-    projects_applied = db.Column('applied', Integer) # Applied projects succeeded
-    projects_active = db.Column('running_projects', Integer) # Applied projects in active campaign
-    projects_succeeded = db.Column('success_projects', Integer) # Applied successful projects
+    amount_available = db.Column('amount', Integer, nullable=False) # Total available amount
+    amount_remaining = db.Column('rest', Integer, nullable=False) # Total Amount remaining to distribute
+    amount_committed = db.Column('used', Integer, nullable=False) # Total Amount committed on projects
+    projects_total = db.Column('num_projects', Integer, nullable=False) # Selected projects
+    projects_applied = db.Column('applied', Integer, nullable=False) # Applied projects succeeded
+    projects_active = db.Column('running_projects', Integer, nullable=False) # Applied projects in active campaign
+    projects_succeeded = db.Column('success_projects', Integer, nullable=False) # Applied successful projects
     tweet = db.Column('tweet', Text)
     resources = db.Column('resources', Text)
     lang = db.Column('lang', String(2))
-    status = db.Column('status', Integer)
-    scope = db.Column('scope', Integer)
+    status = db.Column('status', Integer, nullable=False)
+    scope = db.Column('scope', Integer, nullable=False)
     created = db.Column('created', Date)
     updated = db.Column('updated', Date)
     opened = db.Column('opened', Date)

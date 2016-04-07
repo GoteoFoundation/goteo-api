@@ -86,6 +86,9 @@ definitions:
             owner:
                 type: string
                 description: Projects owner's user ID
+            user:
+                type: string
+                description: Projects owner's user Object
             status:
                 type: string
                 description: Status of the project

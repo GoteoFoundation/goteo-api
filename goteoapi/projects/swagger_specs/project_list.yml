@@ -44,6 +44,9 @@ definitions:
             owner:
                 type: string
                 description: Projects owner's user ID
+            owner-name:
+                type: string
+                description: Projects owner's user name
             status:
                 type: string
                 description: Status of the project
