@@ -233,7 +233,7 @@ class Call(db.Model):
         """Capital Riego de Goteo (funds from institutions and companies added to the Capital Riego) """
         try:
             filters = list(self.get_filters(**kwargs))
-            total = db.session.query(func.sum(Call.amount_total)).filter(*filters).scalar()
+            total = db.session.query(func.sum(Call.amount_available)).filter(*filters).scalar()
             if total is None:
                 total = 0
             return total
