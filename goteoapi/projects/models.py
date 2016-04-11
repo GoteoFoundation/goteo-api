@@ -67,6 +67,7 @@ class Project(db.Model):
     STATUS_UNFUNDED    = 6 # proyecto fallido
     STATUS_STR = ('rejected', 'editing', 'reviewing', 'in_campaign', 'funded', 'fulfilled', 'unfunded')
 
+    RECEIVED_PROJECTS = [STATUS_REVIEWING, STATUS_IN_CAMPAIGN, STATUS_FUNDED, STATUS_FULFILLED, STATUS_UNFUNDED]
     PUBLISHED_PROJECTS = [STATUS_IN_CAMPAIGN, STATUS_FUNDED, STATUS_FULFILLED, STATUS_UNFUNDED]
     SUCCESSFUL_PROJECTS = [STATUS_IN_CAMPAIGN, STATUS_FUNDED, STATUS_FULFILLED]
 
@@ -169,29 +170,38 @@ class Project(db.Model):
         from ..location.models import ProjectLocation
 
         # Filters by default only published projects
-        filters = [self.status.in_(self.PUBLISHED_PROJECTS)]
+        filters = []
 
         # custom filters by project status
         if 'received' in kwargs and kwargs['received'] is not None:
             # Any project with a "updated" date set is a RECEIVED project
             # overwrite the default published filters
             filters = [self.updated != None, self.updated != '0000-00-00']
+            kwargs['status'] = self.RECEIVED_PROJECTS
         elif 'successful' in kwargs and kwargs['successful'] is not None:
+            # successful projects (checked by passed date only)
             filters.append(self.passed != None)
             filters.append(self.passed != '0000-00-00')
+        elif 'finished' in kwargs and kwargs['finished'] is not None:
+            # successful projects (checked by status bit)
+            kwargs['status'] = [self.STATUS_FUNDED, self.STATUS_FULFILLED]
             # filters.append(self.status > self.STATUS_REJECTED)
         elif 'closed' in kwargs and kwargs['closed'] is not None:
             # successful, and closed campaign projects
             and1 = and_(self.passed != None, self.passed != '0000-00-00')
             and2 = and_(self.closed != None, self.closed != '0000-00-00')
             filters.append(or_(and1, and2))
-        elif 'finished' in kwargs and kwargs['finished'] is not None:
-            # successful projects
-            #overwrite default status search
-            filters = [self.status.in_([self.STATUS_FUNDED, self.STATUS_FULFILLED])]
         elif 'failed' in kwargs and kwargs['failed'] is not None:
             #overwrite default status search
-            filters = [self.status == self.STATUS_UNFUNDED]
+            kwargs['status'] = self.STATUS_UNFUNDED
+
+        if 'status' in kwargs and kwargs['status'] is not None:
+            if isinstance(kwargs['status'], (list, tuple)):
+                filters.append(self.status.in_(kwargs['status']))
+            else:
+                filters.append(self.status == kwargs['status'])
+        else:
+            filters.append(self.status.in_(self.PUBLISHED_PROJECTS))
 
         # # Join project table if filters
         for i in ('license', 'license_type'):
@@ -201,8 +211,7 @@ class Project(db.Model):
             filters.append(Reward.type == kwargs['license_type'])
         if 'license' in kwargs and kwargs['license'] is not None:
             filters.append(Reward.license.in_(kwargs['license']))
-        if 'status' in kwargs and kwargs['status'] is not None:
-            filters.append(self.status.in_(kwargs['status']))
+
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
             if 'received' in kwargs:
                 #Look at the updated date on RECEIVED projects
@@ -219,6 +228,7 @@ class Project(db.Model):
             else:
                 #Look at the published date on PUBLISHED projects
                 filters.append(self.published >= kwargs['from_date'])
+
         if 'to_date' in kwargs and kwargs['to_date'] is not None:
             if 'received' in kwargs:
                 filters.append(self.updated <= kwargs['to_date'])
@@ -230,13 +240,17 @@ class Project(db.Model):
                 filters.append(self.closed <= kwargs['to_date'])
             else:
                 filters.append(self.published <= kwargs['to_date'])
+
         if 'project' in kwargs and kwargs['project'] is not None:
             filters.append(self.id.in_(kwargs['project']))
+
         if 'node' in kwargs and kwargs['node'] is not None:
             filters.append(self.node.in_(kwargs['node']))
+
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(self.id == ProjectCategory.project)
             filters.append(ProjectCategory.category.in_(kwargs['category']))
+
         if 'location' in kwargs and kwargs['location'] is not None:
             subquery = ProjectLocation.location_subquery(**kwargs['location'])
             filters.append(ProjectLocation.id == self.id)
@@ -298,7 +312,6 @@ class Project(db.Model):
         """Total amount of money (€) raised by Goteo"""
         try:
             filters = self.get_filters(**kwargs)
-            filters.append(self.status.in_(self.SUCCESSFUL_PROJECTS))
             total = db.session.query(func.sum(distinct(self.amount))).filter(*filters).scalar()
             if total is None:
                 total = 0
@@ -309,10 +322,9 @@ class Project(db.Model):
     @hybrid_method
     @cacher
     def refunded_total(self, **kwargs):
-        """Refunded money (€) on failed projects """
+        """Refunded money (€) on projects """
         try:
             filters = self.get_filters(**kwargs)
-            filters.append(self.status == self.STATUS_UNFUNDED)
             total = db.session.query(func.sum(distinct(self.amount))).filter(*filters).scalar()
             if total is None:
                 total = 0
@@ -322,21 +334,9 @@ class Project(db.Model):
 
     @hybrid_method
     @cacher
-    def percent_pledged_successful(self, **kwargs):
-        """Percentage of money raised over the minimum on successful projects"""
+    def percent_pledged(self, **kwargs):
+        """Percentage of money raised over the minimum on projects """
         filters = self.get_filters(**kwargs)
-        filters.append(self.status.in_([self.STATUS_FUNDED,
-                                        self.STATUS_FULFILLED]))
-        total = db.session.query(func.avg(self.amount / self.minimum * 100 - 100)).filter(*filters).scalar()
-        total = 0 if total is None else round(total, 2)
-        return total
-
-    @hybrid_method
-    @cacher
-    def percent_pledged_failed(self, **kwargs):
-        """Percentage of money raised over the minimum on failed projects """
-        filters = self.get_filters(**kwargs)
-        filters.append(self.status == self.STATUS_UNFUNDED)
         total = db.session.query(func.avg(self.amount / self.minimum * 100)).filter(*filters).scalar()
         total = 0 if total is None else round(total, 2)
         return total
@@ -344,9 +344,8 @@ class Project(db.Model):
     @hybrid_method
     @cacher
     def average_minimum(self, **kwargs):
-        """Average minimum cost (€) for successful projects (NOTE: this field is not affected by the location filter)"""
+        """Average minimum cost (€) for projects (NOTE: this field is not affected by the location filter)"""
         filters = self.get_filters(**kwargs)
-        filters.append(self.status.in_([self.STATUS_FUNDED, self.STATUS_FULFILLED]))
         total = db.session.query(func.avg(self.minimum)).filter(*filters).scalar()
         total = 0 if total is None else round(total, 2)
         return total
