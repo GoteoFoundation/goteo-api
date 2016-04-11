@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import func, String, DateTime, Float, Boolean
+from sqlalchemy import func, String, DateTime, Float, Boolean, Integer
+from flask.ext.restful import fields
 from sqlalchemy.ext.hybrid import hybrid_method
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import select, column
@@ -8,6 +9,15 @@ from sqlalchemy.sql import select, column
 from ..cacher import cacher
 
 from .. import db
+
+location_resource_fields = {
+    "city"           : fields.String,
+    "region"         : fields.String,
+    "country"        : fields.String,
+    "country_code"   : fields.String,
+    "latitude"       : fields.Float,
+    "longitude"      : fields.Float,
+}
 
 class ItemLocation(object):
     """This class can be used as base for the implementing SQL tables"""
@@ -145,7 +155,7 @@ class InvestLocation(db.Model, ItemLocation):
     """Invest location particular case"""
     __tablename__ = 'invest_location'
 
-    id = db.Column('id', String(50), db.ForeignKey('invest.id'), primary_key=True)
+    id = db.Column('id', Integer, db.ForeignKey('invest.id'), primary_key=True)
 
     def __repr__(self):
         return '<InvestLocation: (%s) in %f,%f>' % (self.id, self.latitude, self.longitude)

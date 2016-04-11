@@ -23,17 +23,18 @@ class Invest(db.Model):
     METHOD_DROP   = 'drop'
 
     #INVEST STATUS IDs
-    STATUS_PROCESSING = -1
-    STATUS_PENDING    = 0
-    STATUS_CHARGED    = 1
-    STATUS_CANCELLED   = 2
-    STATUS_PAID       = 3
-    STATUS_RETURNED   = 4
-    STATUS_RELOCATED  = 5
+    STATUS_PROCESSING = -1  # payment gateway not reached yet or just a failed payment
+    STATUS_PENDING    = 0   # In a status that requires post-processing (former paypal preapprovals)
+    STATUS_CHARGED    = 1   # charged by the platform
+    STATUS_CANCELLED  = 2   # refunded to the user by some admin manual action, won't be added to any total
+    STATUS_PAID       = 3   # paid to the project (successful project) NOT REALLY USED
+    STATUS_RETURNED   = 4   # automatically refunded to the user due a failed project
+    STATUS_RELOCATED  = 5   # deprecated status
+    STATUS_TO_POOL    = 6   # refunded to user's pool
 
-    VALID_INVESTS = [STATUS_PENDING, STATUS_CHARGED, STATUS_PAID, STATUS_RETURNED]
-    STATUS_STR = ('processing', 'pending', 'charged', 'cancelled', 'paid', 'returned', 'relocated')
-    METHOD_STR = {'tpv' : 'card'}
+
+    VALID_INVESTS = [STATUS_PENDING, STATUS_CHARGED, STATUS_PAID, STATUS_RETURNED, STATUS_TO_POOL]
+    STATUS_STR = ('processing', 'pending', 'charged', 'cancelled', 'paid', 'returned', 'relocated', 'pool-returned')
 
     id = db.Column('id', Integer, primary_key=True)
     user_id = db.Column('user', String(50), db.ForeignKey('user.id'))
@@ -49,6 +50,7 @@ class Invest(db.Model):
     charged = db.Column('charged', Date)
     returned = db.Column('returned', Date)
     resign = db.Column('resign', Boolean, nullable=False)
+    pool = db.Column('pool', Boolean, nullable=False) # if the invest goes to pool in case of failing
 
     def __repr__(self):
         return '<Invest %d: %s (%d EUR)>' % (self.id, self.project, self.amount)
@@ -87,10 +89,10 @@ class Invest(db.Model):
         return self.STATUS_STR[self.status + 1]
 
     @hybrid_property
-    def method_string(self):
-        if self.method in self.METHOD_STR:
-            return self.METHOD_STR[self.method]
-        return self.method
+    def method_simplified(self):
+        if self.method == 'drop':
+            return 'drop'
+        return 'payment'
 
     # Getting filters for this model
     @hybrid_method
@@ -145,6 +147,17 @@ class Invest(db.Model):
             filters.append(InvestLocation.id.in_(subquery))
 
         return filters
+
+    @hybrid_method
+    @cacher
+    def get(self, invest_id):
+        """Get a valid invest form id"""
+        try:
+            filters = self.get_filters()
+            filters.append(self.id == invest_id)
+            return self.query.filter(*filters).one()
+        except NoResultFound:
+            return None
 
     @hybrid_method
     @cacher

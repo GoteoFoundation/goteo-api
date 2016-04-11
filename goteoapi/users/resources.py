@@ -18,8 +18,9 @@ user_resource_fields = {
     "date_created"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
     "profile_url"       : fields.String,
     "profile_image_url" : fields.String,
-    "latitude" : fields.Float,
-    "longitude" : fields.Float
+    # privacy concerns here
+    # "latitude" : fields.Float,
+    # "longitude" : fields.Float
 }
 
 user_full_resource_fields = user_resource_fields.copy()
@@ -49,10 +50,11 @@ class UsersListAPI(BaseList):
         items = []
         for u in User.list(**args):
             item = marshal(u, user_resource_fields)
-            location = UserLocation.get(u.id)
-            if location:
-                item['latitude'] = location.latitude
-                item['longitude'] = location.longitude
+            if 'latitude' in user_resource_fields:
+                location = UserLocation.get(u.id)
+                if location:
+                    item['latitude'] = location.latitude
+                    item['longitude'] = location.longitude
 
             items.append( item )
 
@@ -101,7 +103,7 @@ class UserAPI(BaseItem):
         u = User.get(user_id)
 
         item = marshal(u, user_full_resource_fields)
-        if u != None:
+        if u != None and 'latitude' in user_full_resource_fields:
             location = UserLocation.get(u.id)
             if location:
                 item['latitude'] = location.latitude

@@ -11,7 +11,7 @@ from ..helpers import *
 from ..base_resources import BaseItem, BaseList, Response
 from .models import Call, CallLang
 from ..users.resources import user_resource_fields
-from ..location.models import CallLocation
+from ..location.models import CallLocation, location_resource_fields
 
 call_resource_fields = {
     "id"                : fields.String,
@@ -37,15 +37,6 @@ call_resource_fields = {
     "projects_active" : fields.Integer,
     "projects_succeeded" : fields.Integer,
     "status" : fields.String,
-}
-
-call_location_resource_fields = {
-    "city"              : fields.String,
-    "region"              : fields.String,
-    "country"              : fields.String,
-    "country_code"              : fields.String,
-    "latitude" : fields.Float,
-    "longitude" : fields.Float,
 }
 
 call_full_resource_fields = {
@@ -82,7 +73,7 @@ call_full_resource_fields = {
     "projects_applied" : fields.Integer,
     "projects_active" : fields.Integer,
     "projects_succeeded" : fields.Integer,
-    "location" : fields.List(fields.Nested(call_location_resource_fields)),
+    "location" : fields.List(fields.Nested(location_resource_fields)),
     "owner" : fields.String,
     "owner_name" : fields.String,
     "matchfund_url"    : fields.String
@@ -163,7 +154,7 @@ class CallAPI(BaseItem):
             item['image-background'] = image_url(p.backimage, 'big', False)
             location = CallLocation.get(p.id)
             if location:
-                item['location'] = [marshal(location, call_location_resource_fields)]
+                item['location'] = [marshal(location, location_resource_fields)]
             translations = {}
             translate_keys = {k: v for k, v in call_full_resource_fields.items() if k in CallLang.get_translate_keys()}
             for k in p.translations:

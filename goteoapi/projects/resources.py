@@ -12,7 +12,7 @@ from ..base_resources import BaseItem, BaseList, Response
 from .models import Project, ProjectImage, ProjectLang
 from ..users.models import User
 from ..users.resources import user_resource_fields
-from ..location.models import ProjectLocation, UserLocation
+from ..location.models import ProjectLocation, UserLocation, location_resource_fields
 from ..models.reward import Reward
 from ..models.cost import Cost
 from ..models.support import Support
@@ -63,15 +63,6 @@ project_need_resource_fields = {
     "type"              : fields.String,
 }
 
-project_location_resource_fields = {
-    "city"              : fields.String,
-    "region"              : fields.String,
-    "country"              : fields.String,
-    "country_code"              : fields.String,
-    "latitude" : fields.Float,
-    "longitude" : fields.Float,
-}
-
 project_full_resource_fields = {
     "id"                : fields.String,
     "name"              : fields.String,
@@ -95,7 +86,7 @@ project_full_resource_fields = {
     "date_succeeded"    : fields.DateTime(dt_format='rfc822'),
     "date_closed"    : fields.DateTime(dt_format='rfc822'),
     "date_passed"    : fields.DateTime(dt_format='rfc822'),
-    "location" : fields.List(fields.Nested(project_location_resource_fields)),
+    "location" : fields.List(fields.Nested(location_resource_fields)),
     "owner" : fields.String,
     "user" : fields.Nested(user_resource_fields),
     "project_url"       : fields.String,
@@ -184,7 +175,7 @@ class ProjectAPI(BaseItem):
             item['scope'] = p.scope_string
             location = ProjectLocation.get(p.id)
             if location:
-                item['location'] = [marshal(location, project_location_resource_fields)]
+                item['location'] = [marshal(location, location_resource_fields)]
             gallery = ProjectImage.get(p.id)
             if gallery:
                 item['image-gallery'] = []
