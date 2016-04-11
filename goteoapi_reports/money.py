@@ -54,16 +54,16 @@ class MoneyAPI(BaseList):
             attributes = {
                 # Dinero comprometido: Suma recaudada por la plataforma
                 "pledged"                 : Invest.pledged_total(**args),
-                # "pledged"                 : Project.pledged_total(**args),
+                # "pledged"                 : Project.pledged_total(finished=True, **args),
                 # Perc. medio de recaudación sobre el mínimo recaudado
                 # "percentage-pledged-successful"      : Invest.percent_pledged_successful(**args), # <- este metodo filtra por fecha de invest, da numeros negativos
-                "percentage-pledged-successful"      : Project.percent_pledged_successful(**args), # <- filtra por fecha de proyecto
+                "percentage-pledged-successful"      : Project.percent_pledged(finished=True, **args), # <- filtra por fecha de proyecto
                 # Perc. dinero compr. medio sobre mínimo',
                 # "percentage-pledged-failed"          : Invest.percent_pledged_failed(**args),
-                "percentage-pledged-failed"          : Project.percent_pledged_failed(**args),
+                "percentage-pledged-failed"          : Project.percent_pledged(failed=True, **args),
                 # Dinero devuelto (en proyectos archivados)
                 "refunded"                : Invest.refunded_total(**args),
-                # "refunded"                : Project.refunded_total(**args),
+                # "refunded"                : Project.refunded_total(failed=True, **args),
                 # Recaudado mediante PayPal
                 # TODO: confirmar si hay que quitar devueltos
                 "paypal-amount"           : Invest.pledged_total(method=Invest.METHOD_PAYPAL, **args),
@@ -88,13 +88,13 @@ class MoneyAPI(BaseList):
                 "average-donation-paypal" : Invest.average_donation(method=Invest.METHOD_PAYPAL, **args),
                 # Coste mínimo medio por proyecto exitoso: Presupuesto mínimo medio por proyecto exitoso
                 # TODO: ¿parametro location?
-                "average-minimum"         : Project.average_minimum(**args),
+                "average-minimum"         : Project.average_minimum(finished=True, **args),
                 # Recaudación media por proyecto exitoso ( financiado )
-                "average-received"        : Project.average_total(status=[Project.STATUS_FUNDED, Project.STATUS_FULFILLED], **args),
+                "average-received"        : Project.average_total(finished=True, **args),
                 # Dinero medio solo obtenido en 2a ronda
                 "average-second-round"    : Invest.average_second_round(**args),
                 # - Dinero compr. medio en proyectos archivados
-                "average-failed"          : Project.average_total(status=[Project.STATUS_UNFUNDED], **args),
+                "average-failed"          : Project.average_total(failed=True, **args),
                 # - Perc. dinero compr. medio (dinero recaudado de media) sobre mínimo (número del dato anterior)
             },
             filters = args.items()
