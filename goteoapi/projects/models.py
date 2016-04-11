@@ -67,6 +67,7 @@ class Project(db.Model):
     STATUS_UNFUNDED    = 6 # proyecto fallido
     STATUS_STR = ('rejected', 'editing', 'reviewing', 'in_campaign', 'funded', 'fulfilled', 'unfunded')
 
+    RECEIVED_PROJECTS = [STATUS_REVIEWING, STATUS_IN_CAMPAIGN, STATUS_FUNDED, STATUS_FULFILLED, STATUS_UNFUNDED]
     PUBLISHED_PROJECTS = [STATUS_IN_CAMPAIGN, STATUS_FUNDED, STATUS_FULFILLED, STATUS_UNFUNDED]
     SUCCESSFUL_PROJECTS = [STATUS_IN_CAMPAIGN, STATUS_FUNDED, STATUS_FULFILLED]
 
@@ -176,6 +177,7 @@ class Project(db.Model):
             # Any project with a "updated" date set is a RECEIVED project
             # overwrite the default published filters
             filters = [self.updated != None, self.updated != '0000-00-00']
+            kwargs['status'] = self.RECEIVED_PROJECTS
         elif 'successful' in kwargs and kwargs['successful'] is not None:
             # successful projects (checked by passed date only)
             filters.append(self.passed != None)
