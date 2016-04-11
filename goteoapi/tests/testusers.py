@@ -42,7 +42,10 @@ def test_users():
 
 def test_user_no_users():
     rv = test_app.get('/users/', query_string='category=0')
-    eq_(rv.status_code, 404)
+    resp = get_json(rv)
+    eq_(rv.status_code, 200)
+    assert 'items' in resp
+    eq_(resp['items'], [])
     rv = test_app.get('/users/--i-dont-exits--')
     eq_(rv.status_code, 404)
 
