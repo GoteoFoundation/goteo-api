@@ -13,6 +13,25 @@ from .models import Invest
 from ..users.resources import user_resource_fields
 from ..location.models import InvestLocation
 
+invest_resource_fields = {
+    "id"             : fields.Integer,
+    "owner"        : fields.String,
+    "owner_name"        : fields.String,
+    "project"        : fields.String,
+    "call"        : fields.String,
+    "amount"         : fields.Float,
+    "status"         : fields.String,
+    "method"         : fields.String,
+    "currency"         : fields.String,
+    "conversion_ratio"         : fields.Float,
+    "anonymous"         : fields.Boolean,
+    "resign"         : fields.Boolean,
+    "latitude" : fields.Float,
+    "longitude" : fields.Float,
+    "date_invested"  : fields.DateTime(dt_format='rfc822'),
+    "date_charged"  : fields.DateTime(dt_format='rfc822'),
+    "date_returned"  : fields.DateTime(dt_format='rfc822'),
+}
 
 class InvestsListAPI(BaseList):
     """Invest list"""
@@ -33,21 +52,24 @@ class InvestsListAPI(BaseList):
 
         items = []
         for p in Invest.list(**args):
-            item = marshal(p, call_resource_fields)
-            item['matchfund-url'] = call_url(p.id)
-            item['description-short'] = p.subtitle
+            item = marshal(p, invest_resource_fields)
             item['status'] = p.status_string
-            item['image-url'] = image_url(p.image, 'medium', False)
-            # item["amount-peers"] =
+            item['method'] = p.method_string
             location = InvestLocation.get(p.id)
-            if location:
+            if location and not p.anonymous:
                 item['latitude'] = location.latitude
                 item['longitude'] = location.longitude
             items.append( item )
 
         res = Response(
             starttime = time_start,
-            attributes = {'items' : items},
+            attributes = {  'items' : items,
+                            'extra' : {
+                                'pledged': float(Invest.pledged_total(**args)),
+                                'refunded': float(Invest.refunded_total(**args)),
+                                'projects': Invest.projects_total(**args)
+                            }
+                        },
             filters = args.items(),
             total = Invest.total(**args)
         )

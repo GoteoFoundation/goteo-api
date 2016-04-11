@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import func, desc, Integer, String, Date, Boolean
+from sqlalchemy import func, desc, Integer, String, Date, Boolean, Float
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from sqlalchemy import or_, and_, distinct
@@ -8,9 +8,10 @@ from sqlalchemy import or_, and_, distinct
 from ..cacher import cacher
 
 from ..projects.models import Project, ProjectCategory
+from ..location.models import InvestLocation
 from ..models.reward import Reward
 from ..models.message import Message
-
+from ..helpers import utc_from_local
 from .. import db
 
 class Invest(db.Model):
@@ -25,45 +26,90 @@ class Invest(db.Model):
     STATUS_PROCESSING = -1
     STATUS_PENDING    = 0
     STATUS_CHARGED    = 1
-    STATUS_CANCELED   = 2
+    STATUS_CANCELLED   = 2
     STATUS_PAID       = 3
     STATUS_RETURNED   = 4
     STATUS_RELOCATED  = 5
 
+    VALID_INVESTS = [STATUS_PENDING, STATUS_CHARGED, STATUS_PAID, STATUS_RETURNED]
+    STATUS_STR = ('processing', 'pending', 'charged', 'cancelled', 'paid', 'returned', 'relocated')
+    METHOD_STR = {'tpv' : 'card'}
+
     id = db.Column('id', Integer, primary_key=True)
-    user = db.Column('user', String(50), db.ForeignKey('user.id'))
+    user_id = db.Column('user', String(50), db.ForeignKey('user.id'))
     project = db.Column('project', String(50), db.ForeignKey('project.id'))
+    call = db.Column('call', String(50), db.ForeignKey('call.id'))
     status = db.Column('status', Integer)
     amount = db.Column('amount', Integer)
     method = db.Column('method', String(20))
-    anonymous = db.Column('anonymous', Boolean)
-    date_invested = db.Column('invested', Date)
-    date_charged = db.Column('charged', Date)
-    resign = db.Column('resign', Integer)
-    call = db.Column('call', String(50))
+    currency = db.Column('currency', String(3))
+    conversion_ratio = db.Column('currency_rate', Float)
+    anonymous = db.Column('anonymous', Boolean, nullable=False)
+    invested = db.Column('invested', Date)
+    charged = db.Column('charged', Date)
+    returned = db.Column('returned', Date)
+    resign = db.Column('resign', Boolean, nullable=False)
 
     def __repr__(self):
         return '<Invest %d: %s (%d EUR)>' % (self.id, self.project, self.amount)
 
-    #Filters for this table
     @hybrid_property
-    def filters(self):
-        return []
+    def user(self):
+        from ..users.models import User
+        return User.get(self.user_id)
+
+    @hybrid_property
+    def owner(self):
+        if(self.anonymous):
+            return None
+        return self.user_id
+
+    @hybrid_property
+    def owner_name(self):
+        if(self.anonymous):
+            return 'Anonymous'
+        return self.user.name
+
+    @hybrid_property
+    def date_invested(self):
+        return utc_from_local(self.invested)
+
+    @hybrid_property
+    def date_charged(self):
+        return utc_from_local(self.charged)
+
+    @hybrid_property
+    def date_returned(self):
+        return utc_from_local(self.returned)
+
+    @hybrid_property
+    def status_string(self):
+        return self.STATUS_STR[self.status + 1]
+
+    @hybrid_property
+    def method_string(self):
+        if self.method in self.METHOD_STR:
+            return self.METHOD_STR[self.method]
+        return self.method
 
     # Getting filters for this model
     @hybrid_method
     def get_filters(self, **kwargs):
 
-        from ..location.models import UserLocation
 
-        filters = self.filters
+        filters = []
+
+        if 'status' in kwargs and kwargs['status'] is not None:
+            if isinstance(kwargs['status'], (list, tuple)):
+                filters.append(self.status.in_(kwargs['status']))
+            else:
+                filters.append(self.status == kwargs['status'])
+        else:
+            filters.append(self.status.in_(self.VALID_INVESTS))
+
         if 'is_refusal' in kwargs and kwargs['is_refusal'] is not None:
             filters.append(self.resign == True)
-            # FIXME: No incluir status=STATUS_REVIEWING?
-            filters.append(self.status.in_([self.STATUS_PENDING,
-                                            self.STATUS_CHARGED,
-                                            self.STATUS_PAID,
-                                            self.STATUS_RETURNED]))
+
         # Can be used to get Invest applying to a Call
         # or Invests not applying to any Call if None
         #  call == False   => Invest not applying to any Call
@@ -94,9 +140,9 @@ class Invest(db.Model):
             filters.append(ProjectCategory.category.in_(kwargs['category']))
 
         if 'location' in kwargs and kwargs['location'] is not None:
-            filters.append(self.user == UserLocation.id)
-            subquery = UserLocation.location_subquery(**kwargs['location'])
-            filters.append(UserLocation.id.in_(subquery))
+            filters.append(self.id == InvestLocation.id)
+            subquery = InvestLocation.location_subquery(**kwargs['location'])
+            filters.append(InvestLocation.id.in_(subquery))
 
         return filters
 
@@ -113,6 +159,20 @@ class Invest(db.Model):
         except MultipleResultsFound:
             return 0
 
+    @hybrid_method
+    @cacher
+    def list(self, **kwargs):
+        """Get a list of valid invests"""
+        try:
+            limit = kwargs['limit'] if 'limit' in kwargs else 10
+            page = kwargs['page'] if 'page' in kwargs else 0
+            filters = self.get_filters(**kwargs)
+            return self.query.distinct().filter(*filters) \
+                                        .order_by(desc(self.date_invested)) \
+                                        .offset(page * limit).limit(limit).all()
+        except NoResultFound:
+            return []
+
     # Top 10 Cofinanciadores con más caudal (más generosos) excluir usuarios convocadores Y ADMINES
     @hybrid_method
     @cacher
@@ -128,19 +188,19 @@ class Invest(db.Model):
                                         self.STATUS_CHARGED,
                                         self.STATUS_PAID,
                                         self.STATUS_RETURNED]))
-        filters.append(self.user == User.id)
+        filters.append(self.user_id == User.id)
         #exclue convocadores, admines y owners
         admins = db.session.query(UserRole.user_id).filter(UserRole.role_id == 'superadmin').subquery()
         calls = db.session.query(Call.owner).filter(Call.status > Call.STATUS_REVIEWING).subquery()
         owners = db.session.query(Project.owner).filter(Project.status.in_(Project.PUBLISHED_PROJECTS)).subquery()
-        filters.append(~self.user.in_(admins))
-        filters.append(~self.user.in_(calls))
-        filters.append(~self.user.in_(owners))
+        filters.append(~self.user_id.in_(admins))
+        filters.append(~self.user_id.in_(calls))
+        filters.append(~self.user_id.in_(owners))
         try:
-            return db.session.query(self.user, User.name, User.id, User.avatar,
+            return db.session.query(self.user_id, User.name, User.id, User.avatar,
                                     func.count(distinct(self.project)).label('contributions'),
                                     func.sum(self.amount).label('amount')) \
-                             .filter(*filters).group_by(self.user) \
+                             .filter(*filters).group_by(self.user_id) \
                              .order_by(desc('amount'), desc('contributions')) \
                              .offset(page * limit).limit(limit).all()
         except NoResultFound:
@@ -157,23 +217,23 @@ class Invest(db.Model):
         page = kwargs['page'] if 'page' in kwargs else 0
         filters = list(self.get_filters(**kwargs))
 
-        filters.append(Invest.status.in_([Invest.STATUS_PENDING,
-                                          Invest.STATUS_CHARGED,
-                                          Invest.STATUS_PAID,
-                                          Invest.STATUS_RETURNED]))
-        filters.append(Invest.user == User.id)
+        filters.append(self.status.in_([self.STATUS_PENDING,
+                                          self.STATUS_CHARGED,
+                                          self.STATUS_PAID,
+                                          self.STATUS_RETURNED]))
+        filters.append(self.user_id == User.id)
         #exclue convocadores, admines y owners
         admins = db.session.query(UserRole.user_id).filter(UserRole.role_id == 'superadmin').subquery()
         calls = db.session.query(Call.owner).filter(Call.status > Call.STATUS_REVIEWING).subquery()
         owners = db.session.query(Project.owner).filter(Project.status.in_(Project.PUBLISHED_PROJECTS)).subquery()
-        filters.append(~self.user.in_(admins))
-        filters.append(~self.user.in_(calls))
-        filters.append(~self.user.in_(owners))
+        filters.append(~self.user_id.in_(admins))
+        filters.append(~self.user_id.in_(calls))
+        filters.append(~self.user_id.in_(owners))
         try:
-            return db.session.query(Invest.user, User.name, User.id, User.avatar,
+            return db.session.query(self.user_id, User.name, User.id, User.avatar,
                                     func.count(distinct(self.project)).label('contributions'),
-                                    func.sum(Invest.amount).label('amount')) \
-                             .filter(*filters).group_by(Invest.user) \
+                                    func.sum(self.amount).label('amount')) \
+                             .filter(*filters).group_by(self.user_id) \
                              .order_by(desc('contributions'), desc('amount')) \
                              .offset(page * limit).limit(limit).all()
         except NoResultFound:
@@ -185,7 +245,7 @@ class Invest(db.Model):
         """Total number of diferent donors"""
         try:
             filters = list(self.get_filters(**kwargs))
-            total = db.session.query(func.count(distinct(self.user))).filter(*filters).scalar()
+            total = db.session.query(func.count(distinct(self.user_id))).filter(*filters).scalar()
             if total is None:
                 total = 0
             return total
@@ -201,8 +261,8 @@ class Invest(db.Model):
                                         self.STATUS_CHARGED,
                                         self.STATUS_PAID,
                                         self.STATUS_RETURNED]))
-        total = db.session.query(self.user).filter(*filters).group_by(self.user). \
-                                                    having(func.count(self.user) > 1). \
+        total = db.session.query(self.user_id).filter(*filters).group_by(self.user_id). \
+                                                    having(func.count(self.user_id) > 1). \
                                                     having(func.count(self.project) > 1)
         res = total.count()
         if res is None:
@@ -221,8 +281,8 @@ class Invest(db.Model):
                                         self.STATUS_CHARGED,
                                         self.STATUS_PAID,
                                         self.STATUS_RETURNED]))
-        res = db.session.query(func.count(func.distinct(self.user)))\
-                                            .join(Message, Message.user == self.user)\
+        res = db.session.query(func.count(func.distinct(self.user_id)))\
+                                            .join(Message, Message.user == self.user_id)\
                                             .filter(*filters).scalar()
         if res is None:
             res = 0
@@ -237,12 +297,31 @@ class Invest(db.Model):
                                           self.STATUS_RETURNED,
                                           self.STATUS_RELOCATED]))
         filters.append(self.project != Project.id)
-        res = db.session.query(func.count(func.distinct(self.user)))\
-                        .join(Project, and_(Project.owner == self.user, Project.status.in_(Project.PUBLISHED_PROJECTS)))\
+        res = db.session.query(func.count(func.distinct(self.user_id)))\
+                        .join(Project, and_(Project.owner == self.user_id, Project.status.in_(Project.PUBLISHED_PROJECTS)))\
                         .filter(*filters).scalar()
         if res is None:
             res = 0
         return res
+
+    @hybrid_method
+    @cacher
+    def projects_total(self, **kwargs):
+        """Total projects in the invest list Goteo"""
+        try:
+            filters = list(self.get_filters(**kwargs))
+            filters.append(self.project == Project.id)
+            filters.append(Project.status.in_(Project.PUBLISHED_PROJECTS))
+            filters.append(self.status.in_([self.STATUS_PENDING,
+                                            self.STATUS_CHARGED,
+                                            self.STATUS_PAID,
+                                            self.STATUS_RETURNED]))
+            total = db.session.query(func.count(func.distinct(self.project))).filter(*filters).scalar()
+            if total is None:
+                total = 0
+            return total
+        except MultipleResultsFound:
+            return 0
 
     @hybrid_method
     @cacher
@@ -310,7 +389,7 @@ class Invest(db.Model):
         # filters.append(Reward.id != None)
         filters.append(InvestReward.invest == self.id)
         filters.append(InvestReward.reward == Reward.id)
-        filters.append(or_(self.resign == None, self.resign == 0))
+        filters.append(or_(self.resign == None, self.resign == False, self.resign == 0))
 
         if minim == 0 and maxim > 0:
             filters.append(Reward.amount < maxim)
@@ -366,9 +445,9 @@ class Invest(db.Model):
         filters = list(self.get_filters(**kwargs))
         filters.append(Project.status.in_([Project.STATUS_FUNDED,
                                            Project.STATUS_FULFILLED]))
-        sq = db.session.query(func.count(func.distinct(Invest.user)).label("co"))\
-                                    .join(Project, Invest.project == Project.id)\
-                                    .filter(*filters).group_by(Invest.project).subquery()
+        sq = db.session.query(func.count(func.distinct(self.user_id)).label("co"))\
+                                    .join(Project, self.project == Project.id)\
+                                    .filter(*filters).group_by(self.project).subquery()
         res = db.session.query(func.avg(sq.c.co)).scalar()
         if res is None:
             res = 0
@@ -383,7 +462,7 @@ class Invest(db.Model):
         filters.append(Project.status.in_(Project.PUBLISHED_PROJECTS))
         filters.append(self.status > self.STATUS_PENDING)
         sub = db.session.query(func.avg(self.amount).label('amount')).join(Project)\
-                                .filter(*filters).group_by(self.user).subquery()
+                                .filter(*filters).group_by(self.user_id).subquery()
         total = db.session.query(func.avg(sub.c.amount)).scalar()
         total = 0 if total is None else round(total, 2)
         return total

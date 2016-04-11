@@ -115,7 +115,6 @@ class CallsListAPI(BaseList):
             item['description-short'] = p.subtitle
             item['status'] = p.status_string
             item['image-url'] = image_url(p.image, 'medium', False)
-            # item["amount-peers"] =
             location = CallLocation.get(p.id)
             if location:
                 item['latitude'] = location.latitude
