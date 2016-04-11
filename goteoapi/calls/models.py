@@ -151,7 +151,7 @@ class Call(db.Model):
         from ..location.models import CallLocation
         from ..projects.models import Project, ProjectCategory
 
-        filters = self.status.in_(self.PUBLIC_CALLS)
+        filters = [self.status.in_(self.PUBLIC_CALLS)]
 
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
             filters.append(self.opened >= kwargs['from_date'])
