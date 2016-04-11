@@ -8,8 +8,8 @@ from sqlalchemy import or_, and_, distinct
 from ..cacher import cacher
 
 from ..projects.models import Project, ProjectCategory
-from .reward import Reward
-from .message import Message
+from ..models.reward import Reward
+from ..models.message import Message
 
 from .. import db
 

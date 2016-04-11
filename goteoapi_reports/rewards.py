@@ -41,7 +41,7 @@ class RewardsAPI(Base):
     def _get(self):
         """Dirty work for the get() method"""
         from goteoapi.models.reward import Reward
-        from goteoapi.models.invest import Invest
+        from goteoapi.invests.models import Invest
 
         time_start = time.time()
         # remove not used args

@@ -49,7 +49,7 @@ class CommunityAPI(Base):
 
     def _get(self):
         """Get()'s method dirty work"""
-        from goteoapi.models.invest import Invest
+        from goteoapi.invests.models import Invest
         from goteoapi.models.message import Message
         from goteoapi.users.models import User, UserInterest
 

@@ -430,7 +430,7 @@ class Project(db.Model):
     def donated_list(self, **kwargs):
         """Get a list of projects with more donations (by individual contributions)"""
 
-        from ..models.invest import Invest
+        from ..invests.models import Invest
 
         limit = kwargs['limit'] if 'limit' in kwargs else 10
         page = kwargs['page'] if 'page' in kwargs else 0
@@ -478,7 +478,7 @@ class Project(db.Model):
     def received_list(self, **kwargs):
         """Get a list of projects with more donations (by amount)"""
 
-        from ..models.invest import Invest
+        from ..invests.models import Invest
 
         limit = kwargs['limit'] if 'limit' in kwargs else 10
         page = kwargs['page'] if 'page' in kwargs else 0

@@ -26,7 +26,7 @@ class SummaryAPI(Base):
 
     def _get(self):
         """Get()'s method dirty work"""
-        from goteoapi.models.invest import Invest
+        from goteoapi.invests.models import Invest
         from goteoapi.models.reward import Reward
         from goteoapi.projects.models import Project
         from goteoapi.users.models import User, UserInterest

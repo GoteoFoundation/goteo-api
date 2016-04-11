@@ -9,7 +9,7 @@ from ..cacher import cacher
 from ..helpers import image_url, utc_from_local, user_url, get_lang, objectview
 
 from ..categories.models import Category, CategoryLang
-from ..models.invest import Invest
+from ..invests.models import Invest
 from ..models.node import Node
 from ..models.message import Message
 from ..location.models import UserLocation

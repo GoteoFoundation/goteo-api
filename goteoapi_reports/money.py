@@ -42,7 +42,7 @@ class MoneyAPI(BaseList):
         """Get()'s method dirty work"""
         from goteoapi.calls.models import Call
         from goteoapi.projects.models import Project
-        from goteoapi.models.invest import Invest
+        from goteoapi.invests.models import Invest
 
         time_start = time.time()
 

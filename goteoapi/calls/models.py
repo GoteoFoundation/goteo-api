@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-#from flask.ext.sqlalchemy import Pagination
 from sqlalchemy import func, and_, distinct, asc, Integer, String, Text, Date
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm import aliased,relationship
@@ -9,7 +8,7 @@ from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from ..helpers import image_url, utc_from_local
 from ..base_resources import AbstractLang
 from ..cacher import cacher
-from ..models.invest import Invest
+from ..invests.models import Invest
 
 from .. import db
 
