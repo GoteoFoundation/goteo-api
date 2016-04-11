@@ -79,6 +79,7 @@ def index():
 __import__('goteoapi.users.controllers')
 __import__('goteoapi.auth.controllers')
 __import__('goteoapi.projects.controllers')
+__import__('goteoapi.invests.controllers')
 __import__('goteoapi.categories.controllers')
 __import__('goteoapi.licenses.controllers')
 __import__('goteoapi.calls.controllers')

@@ -355,6 +355,7 @@ class Project(db.Model):
     @cacher
     def average_total(self, **kwargs):
         """Average money raised (€) for projects"""
+        print('AVERAGE TOTAL', kwargs)
         filters = self.get_filters(**kwargs)
         total = db.session.query(func.avg(self.amount)).filter(*filters).scalar()
         total = 0 if total is None else round(total, 2)
