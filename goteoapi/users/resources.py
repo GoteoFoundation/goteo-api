@@ -35,9 +35,6 @@ class UsersListAPI(BaseList):
     def get(self):
         res = self._get()
 
-        if res.ret['items'] == []:
-            return bad_request('No users to list', 404)
-
         return res.response()
 
     def _get(self):

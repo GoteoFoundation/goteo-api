@@ -20,7 +20,7 @@ call_resource_fields = {
     "date_opened"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
     "date_published"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
     "date_succeeded"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
-    "matchfund_url"       : fields.String,
+    "call_url"       : fields.String,
     "logo_url" : fields.String,
     "image_url" : fields.String,
     "latitude" : fields.Float,
@@ -55,7 +55,7 @@ call_full_resource_fields = {
     "date_published"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
     "date_succeeded"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
     "date_closed"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
-    "matchfund_url"       : fields.String,
+    "call_url"       : fields.String,
     "logo_url" : fields.String,
     "image_url" : fields.String,
     "image_url_big" : fields.String,
@@ -75,8 +75,7 @@ call_full_resource_fields = {
     "projects_succeeded" : fields.Integer,
     "location" : fields.List(fields.Nested(location_resource_fields)),
     "owner" : fields.String,
-    "owner_name" : fields.String,
-    "matchfund_url"    : fields.String
+    "owner_name" : fields.String
 }
 
 donor_resource_fields = user_resource_fields.copy()
@@ -102,7 +101,7 @@ class CallsListAPI(BaseList):
         items = []
         for p in Call.list(**args):
             item = marshal(p, call_resource_fields)
-            item['matchfund-url'] = call_url(p.id)
+            item['call-url'] = call_url(p.id)
             item['description-short'] = p.subtitle
             item['status'] = p.status_string
             item['image-url'] = image_url(p.image, 'medium', False)
@@ -133,7 +132,7 @@ class CallAPI(BaseItem):
         res = self._get(call_id)
 
         if res.ret['id'] == None:
-            return bad_request('Matchfunding not found', 404)
+            return bad_request('Matchfunding call not found', 404)
 
         return res.response()
 
@@ -144,7 +143,7 @@ class CallAPI(BaseItem):
 
         item = marshal(p, call_full_resource_fields)
         if p != None:
-            item['matchfund-url'] = call_url(p.id)
+            item['call-url'] = call_url(p.id)
             item['description-short'] = p.subtitle
             item['status'] = p.status_string
             item['scope'] = p.scope_string

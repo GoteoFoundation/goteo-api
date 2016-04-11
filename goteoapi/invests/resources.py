@@ -10,8 +10,13 @@ from ..helpers import *
 
 from ..base_resources import BaseItem, BaseList, Response
 from .models import Invest
-from ..users.resources import user_resource_fields
+# from ..users.resources import user_resource_fields
 from ..location.models import InvestLocation, location_resource_fields
+
+def type_sanitizer(type):
+    if type not in ('drop', 'payment', 'pool'):
+        raise Exception("Invalid parameter type. Only types 'drop', 'payment' or 'pool' are allowed")
+    return str(type)
 
 invest_resource_fields = {
     "id"             : fields.Integer,
@@ -19,7 +24,7 @@ invest_resource_fields = {
     # "owner"        : fields.String,
     # "owner_name"        : fields.String,
     # "anonymous"         : fields.Boolean,
-    "method"         : fields.String,
+    "type"         : fields.String,
     "project"        : fields.String,
     "call"        : fields.String,
     "amount"         : fields.Float,
@@ -39,7 +44,7 @@ invest_full_resource_fields = {
     # Privacy concerns here...
     # "user"           : fields.Nested(user_resource_fields),
     # "anonymous"         : fields.Boolean,
-    "method"         : fields.String,
+    "type"         : fields.String,
     "project"        : fields.String,
     "call"        : fields.String,
     "amount"         : fields.Float,
@@ -55,6 +60,13 @@ invest_full_resource_fields = {
 
 class InvestsListAPI(BaseList):
     """Invest list"""
+
+    def __init__(self):
+
+        super().__init__()
+        # Additional filters for this endpoint
+        self.reqparse.add_argument('call', type=str, action='append')
+        self.reqparse.add_argument('type', type=type_sanitizer)
 
     @requires_auth()
     @ratelimit()
@@ -74,8 +86,6 @@ class InvestsListAPI(BaseList):
         for p in Invest.list(**args):
             item = marshal(p, invest_resource_fields)
             item['status'] = p.status_string
-            if 'method' in invest_resource_fields:
-                item['method'] = p.method_simplified
             if 'latitude' in invest_resource_fields:
                 location = InvestLocation.get(p.id)
                 if location and not p.anonymous:
@@ -89,7 +99,8 @@ class InvestsListAPI(BaseList):
                             'extra' : {
                                 'pledged': float(Invest.pledged_total(**args)),
                                 'refunded': float(Invest.refunded_total(**args)),
-                                'projects': Invest.projects_total(**args)
+                                'projects': Invest.projects_total(**args),
+                                'calls': Invest.calls_total(**args)
                             }
                         },
             filters = args.items(),
@@ -122,8 +133,6 @@ class InvestAPI(BaseItem):
         item = marshal(p, invest_full_resource_fields)
         if p != None:
             item['status'] = p.status_string
-            if 'method' in invest_full_resource_fields:
-                item['method'] = p.method_simplified
             if 'user' in invest_full_resource_fields:
                 if p.anonymous:
                     item['user'] = None

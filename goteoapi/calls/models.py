@@ -45,6 +45,8 @@ class Call(db.Model):
     STATUS_EXPIRED    = 6
     STATUS_STR = ('pending', 'editing', 'reviewing', 'applying', 'published', 'succeeded', 'expired')
 
+    PUBLIC_CALLS = [STATUS_REVIEWING, STATUS_APPLYING, STATUS_PUBLISHED, STATUS_SUCCEEDED, STATUS_EXPIRED]
+
     SCOPES_STR = ('', 'local', 'regional', 'national', 'global')
 
     id = db.Column('id', String(50), primary_key=True)
@@ -143,18 +145,14 @@ class Call(db.Model):
     def scope_string(self):
         return self.SCOPES_STR[self.scope]
 
-    #Filters for this table
-    @hybrid_property
-    def filters(self):
-        return [self.status > self.STATUS_EDITING]
-
     # Getting filters for this model
     @hybrid_method
     def get_filters(self, **kwargs):
         from ..location.models import CallLocation
         from ..projects.models import Project, ProjectCategory
 
-        filters = self.filters
+        filters = self.status.in_(self.PUBLIC_CALLS)
+
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
             filters.append(self.opened >= kwargs['from_date'])
         # Filters by "to date"

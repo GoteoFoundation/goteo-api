@@ -3,7 +3,7 @@
 from sqlalchemy import func, desc, Integer, String, Date, Boolean, Float
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
-from sqlalchemy import or_, and_, distinct
+from sqlalchemy import or_, not_, and_, distinct
 
 from ..cacher import cacher
 
@@ -34,6 +34,7 @@ class Invest(db.Model):
 
 
     VALID_INVESTS = [STATUS_PENDING, STATUS_CHARGED, STATUS_PAID, STATUS_RETURNED, STATUS_TO_POOL]
+    NON_FISICAL_INVESTS = ('drop', 'pool')
     STATUS_STR = ('processing', 'pending', 'charged', 'cancelled', 'paid', 'returned', 'relocated', 'pool-returned')
 
     id = db.Column('id', Integer, primary_key=True)
@@ -89,9 +90,9 @@ class Invest(db.Model):
         return self.STATUS_STR[self.status + 1]
 
     @hybrid_property
-    def method_simplified(self):
-        if self.method == 'drop':
-            return 'drop'
+    def type(self):
+        if self.method in self.NON_FISICAL_INVESTS:
+            return self.method
         return 'payment'
 
     # Getting filters for this model
@@ -123,20 +124,48 @@ class Invest(db.Model):
             elif kwargs['call'] is False:
                 filters.append(or_(self.call == None, self.call == ''))
             else:
-                filters.append(self.call == kwargs['call'])
+                filters.append(self.call.in_(kwargs['call']))
+
+        # Can be used to get Invest applying to a Project
+        # or Invests not applying to any Project if None
+        #  project == False   => Invest not applying to any Project
+        #  project == True   => Invest applying to any Project
+        #  project == 'project-id'   => Invest applying to that specific Project
+        if 'project' in kwargs and kwargs['project'] is not None:
+            if kwargs['project'] is True:
+                filters.append(and_(self.project != None, self.project != ''))
+            elif kwargs['project'] is False:
+                filters.append(or_(self.project == None, self.project == ''))
+            else:
+                filters.append(self.project.in_(kwargs['project']))
+
+        # instead of exposing raw payment method
+        # we will show 3 main methods as 'type' property:
+        # - drop (comming from matchunding call)
+        # - pool (comming from virtual wallet)
+        # - payment (fisical payment)
+        if 'type' in kwargs:
+            if kwargs['type'] in self.NON_FISICAL_INVESTS:
+                filters.append(self.method == kwargs['type'])
+            if kwargs['type'] == 'payment':
+                filters.append(not_(self.method.in_(self.NON_FISICAL_INVESTS)))
+
         if 'method' in kwargs and kwargs['method'] is not None:
             filters.append(self.method == kwargs['method'])
+
         if 'not_method' in kwargs and kwargs['not_method'] is not None:
             filters.append(self.method != kwargs['not_method'])
+
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
             filters.append(self.date_invested >= kwargs['from_date'])
+
         if 'to_date' in kwargs and kwargs['to_date'] is not None:
             filters.append(self.date_invested <= kwargs['to_date'])
-        if 'project' in kwargs and kwargs['project'] is not None:
-            filters.append(self.project.in_(kwargs['project']))
+
         if 'node' in kwargs and kwargs['node'] is not None:
             filters.append(self.id == InvestNode.invest_id)
             filters.append(InvestNode.invest_node.in_(kwargs['node']))
+
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(self.project == ProjectCategory.project)
             filters.append(ProjectCategory.category.in_(kwargs['category']))
@@ -197,10 +226,7 @@ class Invest(db.Model):
         limit = kwargs['limit'] if 'limit' in kwargs else 10
         page = kwargs['page'] if 'page' in kwargs else 0
         filters = list(self.get_filters(**kwargs))
-        filters.append(self.status.in_([self.STATUS_PENDING,
-                                        self.STATUS_CHARGED,
-                                        self.STATUS_PAID,
-                                        self.STATUS_RETURNED]))
+        filters.append(self.status.in_(self.VALID_INVESTS))
         filters.append(self.user_id == User.id)
         #exclue convocadores, admines y owners
         admins = db.session.query(UserRole.user_id).filter(UserRole.role_id == 'superadmin').subquery()
@@ -230,10 +256,7 @@ class Invest(db.Model):
         page = kwargs['page'] if 'page' in kwargs else 0
         filters = list(self.get_filters(**kwargs))
 
-        filters.append(self.status.in_([self.STATUS_PENDING,
-                                          self.STATUS_CHARGED,
-                                          self.STATUS_PAID,
-                                          self.STATUS_RETURNED]))
+        filters.append(self.status.in_(self.VALID_INVESTS))
         filters.append(self.user_id == User.id)
         #exclue convocadores, admines y owners
         admins = db.session.query(UserRole.user_id).filter(UserRole.role_id == 'superadmin').subquery()
@@ -270,10 +293,7 @@ class Invest(db.Model):
     def multidonors_total(self, **kwargs):
         """Total number of donors who donates to more than 1 project"""
         filters = list(self.get_filters(**kwargs))
-        filters.append(self.status.in_([self.STATUS_PENDING,
-                                        self.STATUS_CHARGED,
-                                        self.STATUS_PAID,
-                                        self.STATUS_RETURNED]))
+        filters.append(self.status.in_(self.VALID_INVESTS))
         total = db.session.query(self.user_id).filter(*filters).group_by(self.user_id). \
                                                     having(func.count(self.user_id) > 1). \
                                                     having(func.count(self.project) > 1)
@@ -290,10 +310,7 @@ class Invest(db.Model):
         sq_blocked = db.session.query(Message.id).filter(Message.blocked == 1).subquery()
         filters.append(Message.thread > 0)
         filters.append(Message.thread.in_(sq_blocked))
-        filters.append(self.status.in_([self.STATUS_PENDING,
-                                        self.STATUS_CHARGED,
-                                        self.STATUS_PAID,
-                                        self.STATUS_RETURNED]))
+        filters.append(self.status.in_(self.VALID_INVESTS))
         res = db.session.query(func.count(func.distinct(self.user_id)))\
                                             .join(Message, Message.user == self.user_id)\
                                             .filter(*filters).scalar()
@@ -325,11 +342,25 @@ class Invest(db.Model):
             filters = list(self.get_filters(**kwargs))
             filters.append(self.project == Project.id)
             filters.append(Project.status.in_(Project.PUBLISHED_PROJECTS))
-            filters.append(self.status.in_([self.STATUS_PENDING,
-                                            self.STATUS_CHARGED,
-                                            self.STATUS_PAID,
-                                            self.STATUS_RETURNED]))
+            filters.append(self.status.in_(self.VALID_INVESTS))
             total = db.session.query(func.count(func.distinct(self.project))).filter(*filters).scalar()
+            if total is None:
+                total = 0
+            return total
+        except MultipleResultsFound:
+            return 0
+
+    @hybrid_method
+    @cacher
+    def calls_total(self, **kwargs):
+        """Total calls in the invest list Goteo"""
+        from ..calls.models import Call
+        try:
+            filters = list(self.get_filters(**kwargs))
+            filters.append(self.call == Call.id)
+            filters.append(Call.status.in_(Call.PUBLIC_CALLS))
+            filters.append(self.status.in_(self.VALID_INVESTS))
+            total = db.session.query(func.count(func.distinct(self.call))).filter(*filters).scalar()
             if total is None:
                 total = 0
             return total
@@ -344,10 +375,7 @@ class Invest(db.Model):
             filters = list(self.get_filters(**kwargs))
             filters.append(self.project == Project.id)
             filters.append(Project.status.in_(Project.PUBLISHED_PROJECTS))
-            filters.append(self.status.in_([self.STATUS_PENDING,
-                                            self.STATUS_CHARGED,
-                                            self.STATUS_PAID,
-                                            self.STATUS_RETURNED]))
+            filters.append(self.status.in_(self.VALID_INVESTS))
             total = db.session.query(func.sum(self.amount)).filter(*filters).scalar()
             if total is None:
                 total = 0
