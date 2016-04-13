@@ -215,7 +215,7 @@ class Invest(db.Model):
             page = kwargs['page'] if 'page' in kwargs else 0
             filters = self.get_filters(**kwargs)
             return self.query.distinct().filter(*filters) \
-                                        .order_by(desc(self.date_invested)) \
+                                        .order_by(desc(self.date_invested), desc(self.date_updated)) \
                                         .offset(page * limit).limit(limit).all()
         except NoResultFound:
             return []
