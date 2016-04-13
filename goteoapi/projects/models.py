@@ -160,7 +160,9 @@ class Project(db.Model):
 
     @hybrid_property
     def scope_string(self):
-        return self.SCOPES_STR[int(self.scope)]
+        if self.scope:
+            return self.SCOPES_STR[self.scope]
+        return self.SCOPES_STR[0]
 
     # Getting filters for this model
     @hybrid_method
