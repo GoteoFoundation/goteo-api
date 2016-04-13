@@ -83,7 +83,7 @@ class Call(db.Model):
     call_location = db.Column('call_location', String(255))
     translations = relationship("CallLang",
                                 primaryjoin = "and_(Call.id==CallLang.id, CallLang.pending==0)",
-                                back_populates="call")
+                                back_populates="call", lazy='joined') # Eager loading to allow catching
 
     def __repr__(self):
         return '<Call %s: %s>' % (self.id, self.name)

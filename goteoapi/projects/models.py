@@ -112,7 +112,7 @@ class Project(db.Model):
     #
     translations = relationship("ProjectLang",
                                 primaryjoin = "and_(Project.id==ProjectLang.id, ProjectLang.pending==0)",
-                                back_populates="project")
+                                back_populates="project", lazy='joined') # Eager loading to allow catching
 
     def __repr__(self):
         return '<Project %s: %s>' % (self.id, self.name)
