@@ -37,6 +37,7 @@ invest_resource_fields = {
     "date_invested"  : fields.DateTime(dt_format='rfc822'),
     "date_charged"  : fields.DateTime(dt_format='rfc822'),
     "date_returned"  : fields.DateTime(dt_format='rfc822'),
+    "date_updated"  : fields.DateTime(dt_format='rfc822'),
 }
 
 invest_full_resource_fields = {
@@ -55,6 +56,7 @@ invest_full_resource_fields = {
     "date_invested"  : fields.DateTime(dt_format='rfc822'),
     "date_charged"  : fields.DateTime(dt_format='rfc822'),
     "date_returned"  : fields.DateTime(dt_format='rfc822'),
+    "date_updated"  : fields.DateTime(dt_format='rfc822'),
     "location" : fields.List(fields.Nested(location_resource_fields)),
 }
 

@@ -49,6 +49,7 @@ class Invest(db.Model):
     anonymous = db.Column('anonymous', Boolean, nullable=False)
     invested = db.Column('invested', Date)
     charged = db.Column('charged', Date)
+    updated = db.Column('datetime', Date)
     returned = db.Column('returned', Date)
     resign = db.Column('resign', Boolean, nullable=False)
     pool = db.Column('pool', Boolean, nullable=False) # if the invest goes to pool in case of failing
@@ -84,6 +85,10 @@ class Invest(db.Model):
     @hybrid_property
     def date_returned(self):
         return utc_from_local(self.returned)
+
+    @hybrid_property
+    def date_updated(self):
+        return utc_from_local(self.updated)
 
     @hybrid_property
     def status_string(self):
