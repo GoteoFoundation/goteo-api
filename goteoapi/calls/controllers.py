@@ -5,10 +5,11 @@
 
 from .. import api, app
 from flask import url_for, redirect
-from .resources import CallsListAPI, CallAPI
+from .resources import CallsListAPI, CallAPI, CallProjectsListAPI
 
 api.add_resource(CallsListAPI, '/calls/', endpoint='api_calls.calls_list')
 api.add_resource(CallAPI, '/calls/<string:call_id>', endpoint='api_calls.call')
+api.add_resource(CallProjectsListAPI, '/calls/<string:call_id>/projects/', endpoint='api_call_projects.call')
 
 # redirect end trailing slash
 @app.route('/calls/<string:call_id>/', endpoint='redirect.call')

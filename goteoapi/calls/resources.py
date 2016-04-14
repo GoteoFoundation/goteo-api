@@ -11,7 +11,9 @@ from ..helpers import *
 from ..base_resources import BaseItem, BaseList, Response
 from .models import Call, CallLang
 from ..users.resources import user_resource_fields
-from ..location.models import CallLocation, location_resource_fields
+from ..projects.resources import project_resource_fields
+from ..projects.models import Project
+from ..location.models import CallLocation, ProjectLocation, location_resource_fields
 
 call_resource_fields = {
     "id"                : fields.String,
@@ -166,6 +168,53 @@ class CallAPI(BaseItem):
         res = Response(
             starttime = time_start,
             attributes = item
+        )
+
+        return res
+
+class CallProjectsListAPI(BaseList):
+    """Projects list"""
+
+    @requires_auth()
+    @ratelimit()
+    # @swag_from('swagger_specs/call_projects.yml')
+    def get(self, call_id):
+        res = self._get(call_id)
+
+        if res.ret['id'] == None:
+            return bad_request('Call not found', 404)
+
+        return res.response()
+
+    def _get(self, call_id):
+        """Get()'s method dirty work"""
+
+        time_start = time.time()
+        args = self.parse_args(remove=('location', 'project'))
+        args['call'] = call_id
+
+        items = []
+        if Call.get(call_id) == None:
+            return Response(attributes = {'id': None})
+
+        for p in Project.list(**args):
+            item = marshal(p, project_resource_fields)
+            item['project-url'] = project_url(p.id)
+            item['description-short'] = p.subtitle
+            item['status'] = p.status_string
+            item['image-url'] = image_url(p.image, 'medium', False)
+            location = ProjectLocation.get(p.id)
+            if location:
+                item['latitude'] = location.latitude
+                item['longitude'] = location.longitude
+                item['region'] = location.region if location.region != '' else location.country
+            items.append( item )
+
+        res = Response(
+            starttime = time_start,
+            attributes = {'id':call_id, 'items' : items},
+            filters = args.items(),
+            total = Project.total(**args)
         )
 
         return res

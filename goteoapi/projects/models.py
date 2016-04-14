@@ -170,6 +170,7 @@ class Project(db.Model):
         "Return filters to be used"
         from ..models.reward import Reward
         from ..location.models import ProjectLocation
+        from ..calls.models import CallProject
 
         # Filters by default only published projects
         filters = []
@@ -257,6 +258,14 @@ class Project(db.Model):
             subquery = ProjectLocation.location_subquery(**kwargs['location'])
             filters.append(ProjectLocation.id == self.id)
             filters.append(ProjectLocation.id.in_(subquery))
+
+        if 'call' in kwargs and kwargs['call'] is not None:
+            filters.append(self.id == CallProject.project)
+            if isinstance(kwargs['call'], (list, tuple)):
+                filters.append(CallProject.call.in_(kwargs['call']))
+            else:
+                filters.append(CallProject.call == kwargs['call'])
+
 
         return filters
 
