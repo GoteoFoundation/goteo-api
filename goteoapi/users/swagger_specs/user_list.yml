@@ -32,6 +32,9 @@ definitions:
             # longitude:
             #     type: number
             #     description: Longitude coordinate for the user
+            # region:
+            #     type: string
+            #     description: Region location for the user
 parameters:
     - in: query
       type: string

@@ -41,6 +41,9 @@ definitions:
             longitude:
                 type: number
                 description: Longitude coordinate for the project
+            region:
+                type: string
+                description: Region location for the project
             owner:
                 type: string
                 description: Projects owner's user ID
