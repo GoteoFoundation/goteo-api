@@ -21,6 +21,7 @@ user_resource_fields = {
     # privacy concerns here
     # "latitude" : fields.Float,
     # "longitude" : fields.Float
+    # "region" : fields.String
 }
 
 user_full_resource_fields = user_resource_fields.copy()
@@ -52,6 +53,7 @@ class UsersListAPI(BaseList):
                 if location:
                     item['latitude'] = location.latitude
                     item['longitude'] = location.longitude
+                    item['region'] = location.region if location.region != '' else location.country
 
             items.append( item )
 
@@ -105,6 +107,7 @@ class UserAPI(BaseItem):
             if location:
                 item['latitude'] = location.latitude
                 item['longitude'] = location.longitude
+                item['region'] = location.region if location.region != '' else location.country
 
         res = Response(
             starttime = time_start,

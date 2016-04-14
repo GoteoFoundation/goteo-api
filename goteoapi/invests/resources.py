@@ -34,6 +34,7 @@ invest_resource_fields = {
     "resign"         : fields.Boolean,
     "latitude" : fields.Float,
     "longitude" : fields.Float,
+    "region" : fields.String,
     "date_invested"  : fields.DateTime(dt_format='rfc822'),
     "date_charged"  : fields.DateTime(dt_format='rfc822'),
     "date_returned"  : fields.DateTime(dt_format='rfc822'),
@@ -93,6 +94,7 @@ class InvestsListAPI(BaseList):
                 if location and not p.anonymous:
                     item['latitude'] = location.latitude
                     item['longitude'] = location.longitude
+                    item['region'] = location.region if location.region != '' else location.country
             items.append( item )
 
         res = Response(

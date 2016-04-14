@@ -25,6 +25,7 @@ call_resource_fields = {
     "image_url" : fields.String,
     "latitude" : fields.Float,
     "longitude" : fields.Float,
+    "region" : fields.String,
     "call_location" : fields.String,
     "owner" : fields.String,
     "owner_name" : fields.String,
@@ -109,6 +110,7 @@ class CallsListAPI(BaseList):
             if location:
                 item['latitude'] = location.latitude
                 item['longitude'] = location.longitude
+                item['region'] = location.region if location.region != '' else location.country
             items.append( item )
 
         res = Response(

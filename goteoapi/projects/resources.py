@@ -29,6 +29,7 @@ project_resource_fields = {
     "image_url" : fields.String,
     "latitude" : fields.Float,
     "longitude" : fields.Float,
+    "region" : fields.String,
     "owner" : fields.String,
     "owner_name" : fields.String,
     "status" : fields.String,
@@ -131,6 +132,7 @@ class ProjectsListAPI(BaseList):
             if location:
                 item['latitude'] = location.latitude
                 item['longitude'] = location.longitude
+                item['region'] = location.region if location.region != '' else location.country
             items.append( item )
 
         res = Response(
@@ -244,11 +246,12 @@ class ProjectDonorsListAPI(BaseList):
                 item['name'] = 'Anonymous'
                 item['profile-image-url'] = None
                 item['profile-url'] = None
-            else:
+            elif 'latitude' in donor_resource_fields:
                 location = UserLocation.get(u['id'])
                 if location:
                     item['latitude'] = location.latitude
                     item['longitude'] = location.longitude
+                    item['region'] = location.region if location.region != '' else location.country
 
             items.append( item )
         res = Response(
