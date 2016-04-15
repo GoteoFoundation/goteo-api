@@ -129,7 +129,10 @@ class Invest(db.Model):
             elif kwargs['call'] is False:
                 filters.append(or_(self.call == None, self.call == ''))
             else:
-                filters.append(self.call.in_(kwargs['call']))
+                if isinstance(kwargs['call'], (list, tuple)):
+                    filters.append(self.call.in_(kwargs['call']))
+                else:
+                    filters.append(self.call == kwargs['call'])
 
         # Can be used to get Invest applying to a Project
         # or Invests not applying to any Project if None
@@ -142,7 +145,11 @@ class Invest(db.Model):
             elif kwargs['project'] is False:
                 filters.append(or_(self.project == None, self.project == ''))
             else:
-                filters.append(self.project.in_(kwargs['project']))
+                if isinstance(kwargs['project'], (list, tuple)):
+                    filters.append(self.project.in_(kwargs['project']))
+                else:
+                    filters.append(self.project == kwargs['project'])
+
 
         # instead of exposing raw payment method
         # we will show 3 main methods as 'type' property:

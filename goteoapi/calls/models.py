@@ -90,6 +90,7 @@ class Call(db.Model):
 
     @hybrid_property
     def amount_peers(self):
+        print('AMOUNT PEERS')
         return float(Invest.pledged_total(not_method=Invest.METHOD_DROP, call = self.id))
 
     @hybrid_property
