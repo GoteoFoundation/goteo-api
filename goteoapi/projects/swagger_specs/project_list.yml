@@ -53,6 +53,15 @@ definitions:
             status:
                 type: string
                 description: Status of the project
+            minimum:
+                type: number
+                description: Minimum amount to achieve to consider the project succeeded
+            optimum:
+                type: number
+                description: Optimum amount to achieve for the project to achieve all his goals
+            amount:
+                type: number
+                description: Currently achieved amount for the project
 parameters:
     - in: query
       type: string

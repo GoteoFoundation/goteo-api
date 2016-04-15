@@ -33,6 +33,9 @@ project_resource_fields = {
     "owner" : fields.String,
     "owner_name" : fields.String,
     "status" : fields.String,
+    "minimum" : fields.Float,
+    "optimum" : fields.Float,
+    "amount" : fields.Float,
 }
 
 project_gallery_resource_fields = {
