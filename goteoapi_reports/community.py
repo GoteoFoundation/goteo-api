@@ -75,14 +75,14 @@ class CommunityAPI(Base):
         users_categoria2 = categorias[1].users if len(categorias) > 1 else 0
 
         top10_multidonors = []
-        for u in Invest.multidonors_list(**args):
+        for u in Invest.multidonors_list(is_anonymous=False, **args):
             item = marshal(u._asdict(), donation_resource_fields)
             item['profile-image-url'] = image_url(u.avatar)
             item['profile-url'] = user_url(u.id)
             top10_multidonors.append(item)
 
         top10_donors = []
-        for u in Invest.donors_list(**args):
+        for u in Invest.donors_list(is_anonymous=False, **args):
             item = marshal(u._asdict(), donation_resource_fields)
             item['profile-image-url'] = image_url(u.avatar)
             item['profile-url'] = user_url(u.id)
