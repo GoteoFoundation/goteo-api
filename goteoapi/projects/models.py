@@ -415,26 +415,14 @@ class Project(db.Model):
         ret = []
         for u in query.join(Message) \
                       .filter(*filters).group_by(Message.project) \
-                      .order_by(desc('total')).offset(page * limit).limit(limit):
+                      .order_by(desc('total')). \
+                      offset(page * limit).limit(limit):
             u = u._asdict()
             if 'lang' in kwargs and kwargs['lang'] is not None:
                 u['subtitle'] = get_lang(u, 'subtitle', kwargs['lang'])
             ret.append(objectview(u))
 
         return ret
-
-        # try:
-        #     return db.session.query(self.id.label('project'),
-        #                        self.name,
-        #                        self.subtitle,
-        #                        self.image,
-        #                        self.media,
-        #                        self.published,
-        #                        func.count(Message.id).label('total')).join(Message) \
-        #                     .filter(*filters).group_by(Message.project) \
-        #                     .order_by(desc('total')).offset(page * limit).limit(limit).all()
-        # except NoResultFound:
-        #     return []
 
     @hybrid_method
     @cacher

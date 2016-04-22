@@ -111,7 +111,8 @@ class User(db.Model):
         if 'project' in kwargs and kwargs['project'] is not None:
             #TODO: solo usuarios que cuyo pago ha si "exitoso"
             # adding users "invested in"
-            sub_invest = db.session.query(Invest.user_id).filter(Invest.project.in_(kwargs['project']))
+            sub_invest = db.session.query(Invest.user_id).filter(Invest.project.in_(kwargs['project']),
+                                                                 Invest.status.in_(Invest.VALID_INVESTS))
             # adding users "collaborated in"
             sub_message = db.session.query(Message.user).filter(Message.project.in_(kwargs['project']))
             filters.append(or_(self.id.in_(sub_invest), self.id.in_(sub_message)))
@@ -174,6 +175,7 @@ class User(db.Model):
             page = kwargs['page'] if 'page' in kwargs else 0
             del kwargs['project']
             filters = list(self.get_filters(**kwargs))
+            filters.append(Invest.status.in_(Invest.VALID_INVESTS))
             filters.append(Invest.user_id==self.id)
             filters.append(Invest.project==project_id)
             # return self.query.distinct().filter(*filters).order_by(asc(self.id)).offset(page * limit).limit(limit).all()
@@ -187,7 +189,8 @@ class User(db.Model):
                                                                         self.created, \
                                                                         self.updated) \
                                                     .filter(*filters). \
-                                                    order_by(asc(self.id)). \
+                                                    # order_by(asc(self.id)). \
+                                                    group_by(self.id). \
                                                     offset(page * limit). \
                                                     limit(limit)]
         except NoResultFound:
@@ -200,6 +203,7 @@ class User(db.Model):
         try:
             del kwargs['project']
             filters = list(self.get_filters(**kwargs))
+            filters.append(Invest.status.in_(Invest.VALID_INVESTS))
             filters.append(Invest.user_id==self.id)
             filters.append(Invest.project==project_id)
             count = db.session.query(func.count(distinct(self.id))).filter(*filters).scalar()
@@ -249,12 +253,15 @@ class UserInterest(db.Model):
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
             filters.append(Invest.date_invested >= kwargs['from_date'])
             filters.append(Invest.user_id == self.user)
+            filters.append(Invest.status.in_(Invest.VALID_INVESTS))
         if 'to_date' in kwargs and kwargs['to_date'] is not None:
             filters.append(Invest.date_invested <= kwargs['to_date'])
             filters.append(Invest.user_id == self.user)
+            filters.append(Invest.status.in_(Invest.VALID_INVESTS))
         if 'project' in kwargs and kwargs['project'] is not None:
             filters.append(Invest.project.in_(kwargs['project']))
             filters.append(Invest.user_id == self.user)
+            filters.append(Invest.status.in_(Invest.VALID_INVESTS))
         if 'node' in kwargs and kwargs['node'] is not None:
             #TODO: project_node o invest_node?
             filters.append(User.id == self.user)
