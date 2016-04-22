@@ -75,6 +75,6 @@ def test_user():
     eq_(len(set(map(lambda x: str(x), resp.keys())) - set(fields.keys())) >= 0, True)
     eq_(rv.status_code, 200)
     # Swagger test
-    fields = get_swagger(DIR + 'swagger_specs/user_list.yml', 'User')
+    fields = get_swagger(DIR + 'swagger_specs/user_item.yml', 'UserFull')
     eq_(set(resp.keys()) , set(fields.keys()))
 

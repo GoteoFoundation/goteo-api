@@ -53,7 +53,7 @@ class Call(db.Model):
     name = db.Column('name', Text)
     subtitle = db.Column('subtitle', Text)
     description = db.Column('description', Text)
-    owner = db.Column('owner', String(50))
+    user_id = db.Column('owner', String(50), db.ForeignKey('user.id'))
     whom = db.Column('whom', Text)
     applies = db.Column('apply', Text)
     legal = db.Column('legal', Text)
@@ -90,13 +90,16 @@ class Call(db.Model):
 
     @hybrid_property
     def amount_peers(self):
-        print('AMOUNT PEERS')
         return float(Invest.pledged_total(not_method=Invest.METHOD_DROP, call = self.id))
 
     @hybrid_property
     def user(self):
         from ..users.models import User
-        return User.get(self.owner)
+        return User.get(self.user_id)
+
+    @hybrid_property
+    def owner(self):
+        return self.user_id
 
     @hybrid_property
     def owner_name(self):
@@ -161,15 +164,15 @@ class Call(db.Model):
         if 'to_date' in kwargs and kwargs['to_date'] is not None:
             filters.append(self.opened <= kwargs['to_date'])
         if 'project' in kwargs and kwargs['project'] is not None:
-            filters.append(self.id == CallProject.call)
-            filters.append(CallProject.project.in_(kwargs['project']))
+            filters.append(self.id == CallProject.call_id)
+            filters.append(CallProject.project_id.in_(kwargs['project']))
         if 'category' in kwargs and kwargs['category'] is not None:
-            filters.append(self.id == CallProject.call)
-            filters.append(CallProject.project == ProjectCategory.project)
-            filters.append(ProjectCategory.category.in_(kwargs['category']))
+            filters.append(self.id == CallProject.call_id)
+            filters.append(CallProject.project_id == ProjectCategory.project_id)
+            filters.append(ProjectCategory.category_id.in_(kwargs['category']))
         if 'node' in kwargs and kwargs['node'] is not None:
-            filters.append(self.id == CallProject.call)
-            filters.append(CallProject.project == Project.id)
+            filters.append(self.id == CallProject.call_id)
+            filters.append(CallProject.project_id == Project.id)
             filters.append(Project.node.in_(kwargs['node']))
         if 'location' in kwargs and kwargs['location'] is not None:
             subquery = CallLocation.location_subquery(**kwargs['location'])
@@ -242,8 +245,8 @@ class Call(db.Model):
 class CallProject(db.Model):
     __tablename__ = 'call_project'
 
-    call = db.Column('call', String(50), db.ForeignKey('call.id'), primary_key=True)
-    project = db.Column('project', String(50), db.ForeignKey('project.id'), primary_key=True)
+    call_id = db.Column('call', String(50), db.ForeignKey('call.id'), primary_key=True)
+    project_id = db.Column('project', String(50), db.ForeignKey('project.id'), primary_key=True)
 
     def __repr__(self):
-        return '<CallProject from %s to project %s>' % (self.call, self.project)
+        return '<CallProject from %s to project %s>' % (self.call_id, self.project_id)

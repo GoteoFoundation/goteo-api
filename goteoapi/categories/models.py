@@ -51,8 +51,8 @@ class Category(db.Model):
         # Join project table if filters
         for i in ('node', 'from_date', 'to_date', 'project', 'location'):
             if i in kwargs and kwargs[i] is not None:
-                filters.append(self.id == ProjectCategory.category)
-                filters.append(Project.id == ProjectCategory.project)
+                filters.append(self.id == ProjectCategory.category_id)
+                filters.append(Project.id == ProjectCategory.project_id)
                 filters.append(Project.status.in_(Project.PUBLISHED_PROJECTS))
 
         # Filters by goteo node
@@ -75,7 +75,7 @@ class Category(db.Model):
             filters.append(self.id.in_(kwargs['category']))
         #Filter by location
         if 'location' in kwargs and kwargs['location'] is not None:
-            filters.append(ProjectLocation.id == ProjectCategory.project)
+            filters.append(ProjectLocation.id == ProjectCategory.project_id)
             subquery = ProjectLocation.location_subquery(**kwargs['location'])
             filters.append(ProjectLocation.id.in_(subquery))
 

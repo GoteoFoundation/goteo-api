@@ -19,7 +19,7 @@ class Reward(db.Model):
     __tablename__ = 'reward'
 
     id = db.Column('id', Integer, primary_key=True)
-    project = db.Column('project', String(50), db.ForeignKey('project.id'))
+    project_id = db.Column('project', String(50), db.ForeignKey('project.id'))
     reward = db.Column('reward', String(50))
     description = db.Column('description', Text)
     type = db.Column('type', String(50))
@@ -29,7 +29,7 @@ class Reward(db.Model):
     order = db.Column('order', Integer)
 
     def __repr__(self):
-        return '<Reward(%d) %s: %s>' % (self.id, self.project[:10], self.title[:50])
+        return '<Reward(%d) %s: %s>' % (self.id, self.project_id[:10], self.title[:50])
 
     #Filters for this table
     @hybrid_property
@@ -45,7 +45,7 @@ class Reward(db.Model):
         # Join project table if filters
         for i in ('node', 'from_date', 'to_date', 'project', 'category', 'location'):
             if i in kwargs and kwargs[i] is not None:
-                filters.append(Project.id == self.project)
+                filters.append(Project.id == self.project_id)
                 filters.append(Project.status.in_(Project.PUBLISHED_PROJECTS))
         if 'license_type' in kwargs and kwargs['license_type'] is not None:
             filters.append(self.type == kwargs['license_type'])
@@ -56,15 +56,15 @@ class Reward(db.Model):
         if 'to_date' in kwargs and kwargs['to_date'] is not None:
             filters.append(Project.published <= kwargs['to_date'])
         if 'project' in kwargs and kwargs['project'] is not None:
-            filters.append(self.project.in_(kwargs['project']))
+            filters.append(self.project_id.in_(kwargs['project']))
         if 'node' in kwargs and kwargs['node'] is not None:
             filters.append(Project.node.in_(kwargs['node']))
         if 'category' in kwargs and kwargs['category'] is not None:
-            filters.append(Project.id == ProjectCategory.project)
-            filters.append(ProjectCategory.category.in_(kwargs['category']))
+            filters.append(Project.id == ProjectCategory.project_id)
+            filters.append(ProjectCategory.category_id.in_(kwargs['category']))
         if 'location' in kwargs and kwargs['location'] is not None:
             subquery = ProjectLocation.location_subquery(**kwargs['location'])
-            filters.append(ProjectLocation.id == self.project)
+            filters.append(ProjectLocation.id == self.project_id)
             filters.append(ProjectLocation.id.in_(subquery))
 
         return filters
@@ -86,7 +86,7 @@ class Reward(db.Model):
     def list_by_project(self, project_id):
         """Get a list of valid rewards for project"""
         try:
-            return self.query.distinct().filter(self.project==project_id).order_by(asc(self.order), asc(self.amount)).all()
+            return self.query.distinct().filter(self.project_id==project_id).order_by(asc(self.order), asc(self.amount)).all()
         except NoResultFound:
             return []
 
@@ -110,8 +110,8 @@ class Reward(db.Model):
 
         filters = list(self.get_filters(**kwargs))
 
-        cols = [self.icon, Icon.svg_url.label('svg-url'), Icon.name, Icon.description, func.count(self.project).label('total')]
-        injoins = [(Project, and_(Project.id == self.project, Project.status.in_(Project.SUCCESSFUL_PROJECTS))),
+        cols = [self.icon, Icon.svg_url.label('svg-url'), Icon.name, Icon.description, func.count(self.project_id).label('total')]
+        injoins = [(Project, and_(Project.id == self.project_id, Project.status.in_(Project.SUCCESSFUL_PROJECTS))),
                    (Icon, Icon.id == self.icon)]
 
         if 'lang' in kwargs and kwargs['lang'] is not None:

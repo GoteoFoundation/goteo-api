@@ -19,14 +19,14 @@ class Cost(db.Model):
     cost = db.Column('cost', Text)
     description = db.Column('description', Text)
     type = db.Column('type', String(50))
-    project = db.Column('project', String(50), db.ForeignKey('project.id'))
+    project_id = db.Column('project', String(50), db.ForeignKey('project.id'))
     amount = db.Column('amount', Integer)
     required = db.Column('required', Boolean)
     from_date = db.Column('from', Date)
     to_date = db.Column('until', Date)
 
     def __repr__(self):
-        return '<Cost(%d) %s of project %s>' % (self.id, self.cost[:50], self.project)
+        return '<Cost(%d) %s of project %s>' % (self.id, self.cost[:50], self.project_id)
 
     @hybrid_property
     def date_from(self):
@@ -41,6 +41,6 @@ class Cost(db.Model):
     def list_by_project(self, project_id):
         """Get a list of valid costs for project"""
         try:
-            return self.query.distinct().filter(self.project==project_id).order_by(asc(self.from_date)).all()
+            return self.query.distinct().filter(self.project_id==project_id).order_by(asc(self.from_date)).all()
         except NoResultFound:
             return []

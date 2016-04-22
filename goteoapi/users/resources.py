@@ -25,7 +25,13 @@ user_resource_fields = {
 }
 
 user_full_resource_fields = user_resource_fields.copy()
-# user_full_resource_fields["date_updated"] = fields.DateTime(dt_format='rfc822')
+user_full_resource_fields['amount_public_invested'] = fields.Float
+user_full_resource_fields['projects_public_invested'] = fields.Integer
+user_full_resource_fields['projects_published'] = fields.Integer
+user_full_resource_fields['projects_collaborated'] = fields.Integer
+# TODO: extra field for Oauth Auth only with enough privileges
+# user_full_resource_fields['amount_private_invested'] = fields.Float
+# user_full_resource_fields['projects_private_invested'] = fields.Integer
 
 class UsersListAPI(BaseList):
     """User list"""

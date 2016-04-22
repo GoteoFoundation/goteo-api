@@ -11,11 +11,11 @@ class Blog(db.Model):
 
     id = db.Column('id', Integer, primary_key=True)
     type = db.Column('type', String(10))
-    owner = db.Column('owner', String(50))
+    user_id = db.Column('owner', String(50), db.ForeignKey('user.id'))
     active = db.Column('active', Boolean)
 
     def __repr__(self):
-        return '<Blog(%d) %s %s>' % (self.id, self.type, self.owner)
+        return '<Blog(%d) %s %s>' % (self.id, self.type, self.user_id)
 
 
 class Post(db.Model):
@@ -25,7 +25,7 @@ class Post(db.Model):
     blog = db.Column('blog', Integer, db.ForeignKey('blog.id'))
     title = db.Column('title', Text)
     date_publish = db.Column('date', Date)
-    author = db.Column('author', String(50), db.ForeignKey('user.id'))
+    user_id = db.Column('author', String(50), db.ForeignKey('user.id'))
     publish = db.Column('publish', Integer)
 
     def __repr__(self):

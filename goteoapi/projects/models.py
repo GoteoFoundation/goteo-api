@@ -74,7 +74,7 @@ class Project(db.Model):
     SCOPES_STR = ('', 'local', 'regional', 'national', 'global')
 
     id = db.Column('id', String(50), primary_key=True)
-    owner = db.Column('owner', String(50), db.ForeignKey('user.id'))
+    user_id = db.Column('owner', String(50), db.ForeignKey('user.id'))
     name = db.Column('name', Text)
     subtitle = db.Column('subtitle', Text)
     description = db.Column('description', Text)
@@ -120,7 +120,11 @@ class Project(db.Model):
     @hybrid_property
     def user(self):
         from ..users.models import User
-        return User.get(self.owner)
+        return User.get(self.user_id)
+
+    @hybrid_property
+    def owner(self):
+        return self.user_id
 
     @hybrid_property
     def owner_name(self):
@@ -169,6 +173,7 @@ class Project(db.Model):
     def get_filters(self, **kwargs):
         "Return filters to be used"
         from ..models.reward import Reward
+        from ..invests.models import Invest
         from ..location.models import ProjectLocation
         from ..calls.models import CallProject
 
@@ -209,7 +214,7 @@ class Project(db.Model):
         # # Join project table if filters
         for i in ('license', 'license_type'):
             if i in kwargs and kwargs[i] is not None:
-                filters.append(self.id == Reward.project)
+                filters.append(self.id == Reward.project_id)
         if 'license_type' in kwargs and kwargs['license_type'] is not None:
             filters.append(Reward.type == kwargs['license_type'])
         if 'license' in kwargs and kwargs['license'] is not None:
@@ -244,15 +249,47 @@ class Project(db.Model):
             else:
                 filters.append(self.published <= kwargs['to_date'])
 
+        # Search by owner
+        if 'owner' in kwargs and kwargs['owner'] is not None:
+            if isinstance(kwargs['owner'], (list, tuple)):
+                filters.append(self.user_id.in_(kwargs['owner']))
+            else:
+                filters.append(self.user_id == kwargs['owner'])
+
+        # Search by user invested in the project
+        if 'user' in kwargs and kwargs['user'] is not None:
+            filters.append(Invest.project_id == self.id)
+            filters.append(Invest.status.in_(Invest.VALID_INVESTS))
+            if isinstance(kwargs['user'], (list, tuple)):
+                filters.append(Invest.user_id.in_(kwargs['user']))
+            else:
+                filters.append(Invest.user_id == kwargs['user'])
+            # Filter by anonymous only has sense in case of user defined
+            #  is_anonymous == False   => Not anonymous Invests
+            #  is_anonymous == True   => Anonymous Invests
+            #  is_anonymous == None  => all Invests
+            if 'is_anonymous' in kwargs and kwargs['is_anonymous'] is not None:
+                if kwargs['is_anonymous'] is True:
+                    filters.append(Invest.anonymous == True)
+                elif kwargs['is_anonymous'] is False:
+                    filters.append(or_(Invest.anonymous == None, Invest.anonymous == False))
+
+
         if 'project' in kwargs and kwargs['project'] is not None:
-            filters.append(self.id.in_(kwargs['project']))
+            if isinstance(kwargs['project'], (list, tuple)):
+                filters.append(self.id.in_(kwargs['project']))
+            else:
+                filters.append(self.id == kwargs['project'])
 
         if 'node' in kwargs and kwargs['node'] is not None:
-            filters.append(self.node.in_(kwargs['node']))
+            if isinstance(kwargs['node'], (list, tuple)):
+                filters.append(self.node.in_(kwargs['node']))
+            else:
+                filters.append(self.node == kwargs['node'])
 
         if 'category' in kwargs and kwargs['category'] is not None:
-            filters.append(self.id == ProjectCategory.project)
-            filters.append(ProjectCategory.category.in_(kwargs['category']))
+            filters.append(self.id == ProjectCategory.project_id)
+            filters.append(ProjectCategory.category_id.in_(kwargs['category']))
 
         if 'location' in kwargs and kwargs['location'] is not None:
             subquery = ProjectLocation.location_subquery(**kwargs['location'])
@@ -260,11 +297,11 @@ class Project(db.Model):
             filters.append(ProjectLocation.id.in_(subquery))
 
         if 'call' in kwargs and kwargs['call'] is not None:
-            filters.append(self.id == CallProject.project)
+            filters.append(self.id == CallProject.project_id)
             if isinstance(kwargs['call'], (list, tuple)):
-                filters.append(CallProject.call.in_(kwargs['call']))
+                filters.append(CallProject.call_id.in_(kwargs['call']))
             else:
-                filters.append(CallProject.call == kwargs['call'])
+                filters.append(CallProject.call_id == kwargs['call'])
 
 
         return filters
@@ -379,7 +416,7 @@ class Project(db.Model):
         filters.append(Post.publish == 1)
         sq1 = db.session.query(func.count(self.id).label('posts')).select_from(Post) \
                             .join(Blog, and_(Blog.id == Post.blog, Blog.type == 'project')) \
-                            .join(self, self.id == Blog.owner) \
+                            .join(self, self.id == Blog.user_id) \
                             .filter(*filters).group_by(Post.blog).subquery()
         total = db.session.query(func.avg(sq1.c.posts)).scalar()
         total = 0 if total is None else round(total, 2)
@@ -414,7 +451,7 @@ class Project(db.Model):
 
         ret = []
         for u in query.join(Message) \
-                      .filter(*filters).group_by(Message.project) \
+                      .filter(*filters).group_by(Message.project_id) \
                       .order_by(desc('total')). \
                       offset(page * limit).limit(limit):
             u = u._asdict()
@@ -455,7 +492,7 @@ class Project(db.Model):
 
         ret = []
         for u in query.join(Invest) \
-                      .filter(*filters).group_by(Invest.project) \
+                      .filter(*filters).group_by(Invest.project_id) \
                       .order_by(desc('total')).offset(page * limit).limit(limit):
             u = u._asdict()
             if 'lang' in kwargs and kwargs['lang'] is not None:
@@ -467,7 +504,7 @@ class Project(db.Model):
 
         # try:
         #     return db.session.query(*cols).join(Invest) \
-        #                     .filter(*filters).group_by(Invest.project) \
+        #                     .filter(*filters).group_by(Invest.project_id) \
         #                     .order_by(desc('total')).offset(page * limit).limit(limit).all()
 
         # except NoResultFound:
@@ -505,7 +542,7 @@ class Project(db.Model):
 
         ret = []
         for u in query.join(Invest) \
-                      .filter(*filters).group_by(Invest.project) \
+                      .filter(*filters).group_by(Invest.project_id) \
                       .order_by(desc('amount')).offset(page * limit).limit(limit):
             u = u._asdict()
             if 'lang' in kwargs and kwargs['lang'] is not None:
@@ -518,24 +555,24 @@ class Project(db.Model):
 class ProjectCategory(db.Model):
     __tablename__ = 'project_category'
 
-    project = db.Column('project', String(50), db.ForeignKey('project.id'), primary_key=True)
-    category = db.Column('category', Integer, db.ForeignKey('category.id'), primary_key=True)
+    project_id = db.Column('project', String(50), db.ForeignKey('project.id'), primary_key=True)
+    category_id = db.Column('category', Integer, db.ForeignKey('category.id'), primary_key=True)
 
     def __repr__(self):
-        return '<ProjectCategory %s-%s>' % (self.project, self.category)
+        return '<ProjectCategory %s-%s>' % (self.project_id, self.category_id)
 
 
 class ProjectImage(db.Model):
     __tablename__ = 'project_image'
 
-    project = db.Column('project', String(50), db.ForeignKey('project.id'), primary_key=True)
+    project_id = db.Column('project', String(50), db.ForeignKey('project.id'), primary_key=True)
     image = db.Column('image', String(255), primary_key=True)
     section = db.Column('section', String(50))
     url = db.Column('url', Text)
     order = db.Column('order', Integer)
 
     def __repr__(self):
-        return '<ProjectImage %s-%s>' % (self.project, self.image)
+        return '<ProjectImage %s-%s>' % (self.project_id, self.image)
 
     @hybrid_method
     @cacher
@@ -544,7 +581,7 @@ class ProjectImage(db.Model):
         try:
             if section is None:
                 return self.query.get(id)
-            return self.query.filter(self.project == id, self.section == section).order_by(asc(self.order)).all()
+            return self.query.filter(self.project_id == id, self.section == section).order_by(asc(self.order)).all()
         except:
             pass
         return []

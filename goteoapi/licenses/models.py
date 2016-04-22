@@ -61,7 +61,7 @@ class License(db.Model):
         for i in ('node', 'from_date', 'to_date', 'project', 'category', 'location'):
             if i in kwargs and kwargs[i] is not None:
                 filters.append(Reward.license == self.id)
-                filters.append(Project.id == Reward.project)
+                filters.append(Project.id == Reward.project_id)
                 filters.append(Project.status.in_(Project.PUBLISHED_PROJECTS))
         # Filters by goteo node
         if 'node' in kwargs and kwargs['node'] is not None:
@@ -80,11 +80,11 @@ class License(db.Model):
             filters.append(Project.id.in_(kwargs['project']))
         # filter by license interests
         if 'category' in kwargs and kwargs['category'] is not None:
-            filters.append(ProjectCategory.project == Reward.project)
-            filters.append(ProjectCategory.category.in_(kwargs['category']))
+            filters.append(ProjectCategory.project_id == Reward.project_id)
+            filters.append(ProjectCategory.category_id.in_(kwargs['category']))
         #Filter by location
         if 'location' in kwargs and kwargs['location'] is not None:
-            filters.append(ProjectLocation.id == Reward.project)
+            filters.append(ProjectLocation.id == Reward.project_id)
             subquery = ProjectLocation.location_subquery(**kwargs['location'])
             filters.append(ProjectLocation.id.in_(subquery))
 

@@ -10,6 +10,7 @@ from ..helpers import image_url, utc_from_local, user_url, get_lang, objectview
 
 from ..categories.models import Category, CategoryLang
 from ..invests.models import Invest
+from ..projects.models import Project
 from ..models.node import Node
 from ..models.message import Message
 from ..location.models import UserLocation
@@ -54,6 +55,27 @@ class User(db.Model):
     @hybrid_property
     def date_updated(self):
         return utc_from_local(self.updated)
+
+    @hybrid_property
+    def amount_public_invested(self):
+        return float(Invest.pledged_total(user=self.id, is_anonymous=False))
+
+    @hybrid_property
+    def amount_private_invested(self):
+        return float(Invest.pledged_total(user=self.id, is_anonymous=True))
+
+    @hybrid_property
+    def projects_public_invested(self):
+        return Project.total(user=self.id, is_anonymous=False)
+
+    @hybrid_property
+    def projects_published(self):
+        return Project.total(owner=self.id)
+
+    @hybrid_property
+    def projects_collaborated(self):
+        return Message.projects_total(user=self.id)
+
 
     @hybrid_method
     def get_context(self):
@@ -111,14 +133,14 @@ class User(db.Model):
         if 'project' in kwargs and kwargs['project'] is not None:
             #TODO: solo usuarios que cuyo pago ha si "exitoso"
             # adding users "invested in"
-            sub_invest = db.session.query(Invest.user_id).filter(Invest.project.in_(kwargs['project']),
+            sub_invest = db.session.query(Invest.user_id).filter(Invest.project_id.in_(kwargs['project']),
                                                                  Invest.status.in_(Invest.VALID_INVESTS))
             # adding users "collaborated in"
-            sub_message = db.session.query(Message.user).filter(Message.project.in_(kwargs['project']))
+            sub_message = db.session.query(Message.user_id).filter(Message.project_id.in_(kwargs['project']))
             filters.append(or_(self.id.in_(sub_invest), self.id.in_(sub_message)))
         # filter by user interests
         if 'category' in kwargs and kwargs['category'] is not None:
-            sub_interest = db.session.query(UserInterest.user).filter(UserInterest.interest.in_(kwargs['category']))
+            sub_interest = db.session.query(UserInterest.user_id).filter(UserInterest.category_id.in_(kwargs['category']))
             filters.append(self.id.in_(sub_interest))
         #Filter by location
         if 'location' in kwargs and kwargs['location'] is not None:
@@ -177,7 +199,7 @@ class User(db.Model):
             filters = list(self.get_filters(**kwargs))
             filters.append(Invest.status.in_(Invest.VALID_INVESTS))
             filters.append(Invest.user_id==self.id)
-            filters.append(Invest.project==project_id)
+            filters.append(Invest.project_id==project_id)
             # return self.query.distinct().filter(*filters).order_by(asc(self.id)).offset(page * limit).limit(limit).all()
             return [d._asdict() for d in db.session.query(Invest.anonymous, \
                                                                         self.id, \
@@ -205,7 +227,7 @@ class User(db.Model):
             filters = list(self.get_filters(**kwargs))
             filters.append(Invest.status.in_(Invest.VALID_INVESTS))
             filters.append(Invest.user_id==self.id)
-            filters.append(Invest.project==project_id)
+            filters.append(Invest.project_id==project_id)
             count = db.session.query(func.count(distinct(self.id))).filter(*filters).scalar()
             if count is None:
                 count = 0
@@ -229,22 +251,22 @@ class UserRole(db.Model):
 class UserApi(db.Model):
     __tablename__ = 'user_api'
 
-    user = db.Column('user_id', String(50), db.ForeignKey('user.id'), primary_key=True)
+    user_id = db.Column('user_id', String(50), db.ForeignKey('user.id'), primary_key=True)
     key = db.Column('key', String(50))
     expiration_date = db.Column('expiration_date', DateTime)
 
     def __repr__(self):
-        return '<UserApi: %s %s (%s)>' % (self.user, self.key, self.expiration_date)
+        return '<UserApi: %s %s (%s)>' % (self.user_id, self.key, self.expiration_date)
 
 # User interest
 class UserInterest(db.Model):
     __tablename__ = 'user_interest'
 
-    user = db.Column('user', String(50), db.ForeignKey('user.id'), primary_key=True)
-    interest = db.Column('interest', Integer, db.ForeignKey('category.id'), primary_key=True)
+    user_id = db.Column('user', String(50), db.ForeignKey('user.id'), primary_key=True)
+    category_id = db.Column('interest', Integer, db.ForeignKey('category.id'), primary_key=True)
 
     def __repr__(self):
-        return '<UserInterest from %s to category %s>' % (self.user, self.interest)
+        return '<UserInterest from %s to category %s>' % (self.user_id, self.category_id)
 
     # Getting filters for this model
     @hybrid_method
@@ -252,26 +274,26 @@ class UserInterest(db.Model):
         filters = [Category.name != '']  # para categorias
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
             filters.append(Invest.date_invested >= kwargs['from_date'])
-            filters.append(Invest.user_id == self.user)
+            filters.append(Invest.user_id == self.user_id)
             filters.append(Invest.status.in_(Invest.VALID_INVESTS))
         if 'to_date' in kwargs and kwargs['to_date'] is not None:
             filters.append(Invest.date_invested <= kwargs['to_date'])
-            filters.append(Invest.user_id == self.user)
+            filters.append(Invest.user_id == self.user_id)
             filters.append(Invest.status.in_(Invest.VALID_INVESTS))
         if 'project' in kwargs and kwargs['project'] is not None:
-            filters.append(Invest.project.in_(kwargs['project']))
-            filters.append(Invest.user_id == self.user)
+            filters.append(Invest.project_id.in_(kwargs['project']))
+            filters.append(Invest.user_id == self.user_id)
             filters.append(Invest.status.in_(Invest.VALID_INVESTS))
         if 'node' in kwargs and kwargs['node'] is not None:
             #TODO: project_node o invest_node?
-            filters.append(User.id == self.user)
+            filters.append(User.id == self.user_id)
             filters.append(User.node.in_(kwargs['node']))
         if 'category' in kwargs and kwargs['category'] is not None:
-            filters.append(self.interest.in_(kwargs['category']))
+            filters.append(self.category_id.in_(kwargs['category']))
         if 'location' in kwargs and kwargs['location'] is not None:
             # Filtra por la localización del usuario
             subquery = UserLocation.location_subquery(**kwargs['location'])
-            filters.append(self.user == UserLocation.id)
+            filters.append(self.user_id == UserLocation.id)
             filters.append(UserLocation.id.in_(subquery))
         return filters
 
@@ -280,7 +302,7 @@ class UserInterest(db.Model):
     @cacher
     def categories(self, **kwargs):
         # In case of requiring languages, a LEFT JOIN must be generated
-        cols = [func.count(self.user).label('users'), Category.id, Category.name]
+        cols = [func.count(self.user_id).label('users'), Category.id, Category.name]
         filters = list(self.get_filters(**kwargs))
         # In case of requiring languages, a LEFT JOIN must be generated
         if 'lang' in kwargs and kwargs['lang'] is not None:
@@ -289,13 +311,13 @@ class UserInterest(db.Model):
                 alias = aliased(CategoryLang)
                 cols.append(alias.name.label('name_' + l))
                 joins.append((alias, and_(alias.id == Category.id, alias.lang == l)))
-            query = db.session.query(*cols).join(Category, Category.id == self.interest).outerjoin(*joins)
+            query = db.session.query(*cols).join(Category, Category.id == self.category_id).outerjoin(*joins)
         else:
-            query = db.session.query(*cols).join(Category, Category.id == self.interest)
+            query = db.session.query(*cols).join(Category, Category.id == self.category_id)
         ret = []
 
-        for u in query.filter(*filters).group_by(self.interest)\
-                      .order_by(desc(func.count(self.user))):
+        for u in query.filter(*filters).group_by(self.category_id)\
+                      .order_by(desc(func.count(self.user_id))):
             u = u._asdict()
             if 'lang' in kwargs and kwargs['lang'] is not None:
                 u['name'] = get_lang(u, 'name', kwargs['lang'])

@@ -99,11 +99,11 @@ def check_apikey_auth(username, password):
 
     # Try the user-id-key values in sql
     try:
-        userapi = UserApi.query.filter(UserApi.user == username, UserApi.key == password).one()
+        userapi = UserApi.query.filter(UserApi.user_id == username, UserApi.key == password).one()
 
         if userapi.expiration_date is not None and userapi.expiration_date <= dtdatetime.today():
             return 'API Key expired'
-        user = User.query.filter(User.id == userapi.user).one()
+        user = User.query.filter(User.id == userapi.user_id).one()
     except NoResultFound:
         return 'Invalid API Key or secret'
     g.loginId = user.id
