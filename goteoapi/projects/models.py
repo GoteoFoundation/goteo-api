@@ -446,7 +446,7 @@ class Project(db.Model):
         limit = kwargs['limit'] if 'limit' in kwargs else 10
         page = kwargs['page'] if 'page' in kwargs else 0
         filters = self.get_filters(**kwargs)
-        filters.append(Invest.status.in_(Invest.project.VALID_INVESTS))
+        filters.append(Invest.status.in_(Invest.VALID_INVESTS))
         cols = [self.id,
                 self.name,
                 self.subtitle,
@@ -503,9 +503,7 @@ class Project(db.Model):
                 self.lang,
                 self.published,
                 func.sum(Invest.amount).label('amount')]
-        filters.append(Invest.status.in_([Invest.STATUS_PENDING,
-                                          Invest.STATUS_CHARGED,
-                                          Invest.STATUS_PAID]))
+        filters.append(Invest.status.in_(Invest.VALID_INVESTS))
 
         if 'lang' in kwargs and kwargs['lang'] is not None:
             joins = []
