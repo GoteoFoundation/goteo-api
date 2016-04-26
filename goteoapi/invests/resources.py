@@ -89,6 +89,7 @@ class InvestsListAPI(BaseList):
         for p in Invest.list(**args):
             item = marshal(p, invest_resource_fields)
             item['status'] = p.status_string
+            item['project'] = p.project_id
             if 'latitude' in invest_resource_fields:
                 location = InvestLocation.get(p.id)
                 if location and not p.anonymous:
@@ -137,6 +138,7 @@ class InvestAPI(BaseItem):
         item = marshal(p, invest_full_resource_fields)
         if p != None:
             item['status'] = p.status_string
+            item['project'] = p.project_id
             if 'user' in invest_full_resource_fields:
                 if p.anonymous:
                     item['user'] = None
