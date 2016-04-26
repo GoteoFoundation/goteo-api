@@ -45,7 +45,7 @@ class Call(db.Model):
     STATUS_EXPIRED    = 6
     STATUS_STR = ('pending', 'editing', 'reviewing', 'applying', 'published', 'succeeded', 'expired')
 
-    PUBLIC_CALLS = [STATUS_REVIEWING, STATUS_APPLYING, STATUS_PUBLISHED, STATUS_SUCCEEDED, STATUS_EXPIRED]
+    PUBLIC_CALLS = [STATUS_APPLYING, STATUS_PUBLISHED, STATUS_SUCCEEDED, STATUS_EXPIRED]
 
     SCOPES_STR = ('', 'local', 'regional', 'national', 'global')
 
