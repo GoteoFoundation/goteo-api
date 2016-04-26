@@ -71,8 +71,8 @@ class CommunityAPI(Base):
         # paypal_multidonors = Invest.multidonors_total(**dict(args, **{'method' : Invest.METHOD_PAYPAL}))
 
         categorias = UserInterest.categories(**args)
-        users_categoria1 = categorias[0].users if len(categorias) > 0 else 0
-        users_categoria2 = categorias[1].users if len(categorias) > 1 else 0
+        users_categoria1 = categorias[0].total if len(categorias) > 0 else 0
+        users_categoria2 = categorias[1].total if len(categorias) > 1 else 0
 
         top10_multidonors = []
         for u in Invest.multidonors_list(is_anonymous=False, **args):
@@ -115,10 +115,10 @@ class CommunityAPI(Base):
                 'creators-donors'                   : Invest.donors_creators_total(**args),
                 'creators-collaborators'            : Message.collaborators_creators_total(**args),
                 'categories'                        : list(map(lambda t: {t.id:
-                                                                        {'users': t.users,
+                                                                        {'users': t.total,
                                                                          'id': t.id,
                                                                          'name': t.name,
-                                                                         'percentage-users': percent(t.users, users)}
+                                                                         'percentage-users': percent(t.total, users)}
                                                                         }, categorias)),
                 'leading-category'                  : categorias[0].id if len(categorias) > 0 else None,
                 'users-leading-category'            : users_categoria1,

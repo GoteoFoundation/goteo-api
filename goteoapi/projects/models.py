@@ -471,6 +471,8 @@ class Project(db.Model):
             u = u._asdict()
             if 'lang' in kwargs and kwargs['lang'] is not None:
                 u['subtitle'] = get_lang(u, 'subtitle', kwargs['lang'])
+                for l in kwargs['lang']:
+                    u.pop('subtitle_' + l)
             # Return an instance of the Project class
             ret.append(self(**u))
 
@@ -514,6 +516,8 @@ class Project(db.Model):
             u = u._asdict()
             if 'lang' in kwargs and kwargs['lang'] is not None:
                 u['subtitle'] = get_lang(u, 'subtitle', kwargs['lang'])
+                for l in kwargs['lang']:
+                    u.pop('subtitle_' + l)
             # Return an instance of the Project class
             ret.append(self(**u))
 
@@ -566,6 +570,8 @@ class Project(db.Model):
             u = u._asdict()
             if 'lang' in kwargs and kwargs['lang'] is not None:
                 u['subtitle'] = get_lang(u, 'subtitle', kwargs['lang'])
+                for l in kwargs['lang']:
+                    u.pop('subtitle_' + l)
             # Return an instance of the Project class
             ret.append(self(**u))
 

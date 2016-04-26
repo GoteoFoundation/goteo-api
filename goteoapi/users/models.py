@@ -302,7 +302,7 @@ class UserInterest(db.Model):
     @cacher
     def categories(self, **kwargs):
         # In case of requiring languages, a LEFT JOIN must be generated
-        cols = [func.count(self.user_id).label('users'), Category.id, Category.name]
+        cols = [func.count(self.user_id).label('total'), Category.id, Category.name]
         filters = list(self.get_filters(**kwargs))
         # In case of requiring languages, a LEFT JOIN must be generated
         if 'lang' in kwargs and kwargs['lang'] is not None:
@@ -321,6 +321,8 @@ class UserInterest(db.Model):
             u = u._asdict()
             if 'lang' in kwargs and kwargs['lang'] is not None:
                 u['name'] = get_lang(u, 'name', kwargs['lang'])
-            ret.append(objectview(u))
+                for l in kwargs['lang']:
+                    u.pop('name_' + l)
+            ret.append(Category(**u))
 
         return ret

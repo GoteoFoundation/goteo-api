@@ -3,13 +3,10 @@
 from sqlalchemy import func, Integer, String, Text
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
-from sqlalchemy.orm import aliased
-from sqlalchemy import asc,desc,and_, distinct
+from sqlalchemy import asc, distinct
 
-from ..helpers import get_lang, svg_image_url
 from ..cacher import cacher
 
-from .icon import Icon, IconLang
 from ..projects.models import Project, ProjectCategory
 
 from .. import db

@@ -27,7 +27,7 @@ class SummaryAPI(Base):
     def _get(self):
         """Get()'s method dirty work"""
         from goteoapi.invests.models import Invest
-        from goteoapi.models.reward import Reward
+        from goteoapi.models.icon import Icon
         from goteoapi.projects.models import Project
         from goteoapi.users.models import User, UserInterest
         from goteoapi.calls.models import Call
@@ -60,7 +60,7 @@ class SummaryAPI(Base):
         categorias = UserInterest.categories(**args)
 
         favorites = []
-        for u in Reward.favorite_reward(**args):
+        for u in Icon.list(**args):
             item = marshal(u, favorite_resource_fields)
             favorites.append(item)
 
@@ -78,10 +78,10 @@ class SummaryAPI(Base):
                 'projects-successful'     : Project.total(successful=True, **args),
                 'projects-failed'         : Project.total(failed=True, **args),
                 'categories'              : list(map(lambda t: {t.id:
-                                                    {'users': t.users,
+                                                    {'users': t.total,
                                                      'id': t.id,
                                                      'name': t.name,
-                                                     'percentage-users': percent(t.users, users)}
+                                                     'percentage-users': percent(t.total, users)}
                                                     }, categorias)),
                 'top10-collaborations'    : top10_collaborations,
                 'top10-donations'         : top10_donations,

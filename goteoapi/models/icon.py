@@ -3,7 +3,7 @@
 from sqlalchemy import Integer, String, Text, func
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm import aliased
-from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
+from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy import and_, desc, distinct
 
 from ..helpers import svg_image_url, get_lang
