@@ -57,7 +57,7 @@ class Category(db.Model):
 
         # Filters by goteo node
         if 'node' in kwargs and kwargs['node'] is not None:
-            filters.append(Project.node.in_(kwargs['node']))
+            filters.append(Project.node_id.in_(kwargs['node']))
         # Filters by "from date"
         # counting category created after this date
         if 'from_date' in kwargs and kwargs['from_date'] is not None:

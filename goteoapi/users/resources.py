@@ -5,6 +5,7 @@ from flask import g
 from flask.ext.restful import fields
 from flasgger.utils import swag_from
 from ..ratelimit import ratelimit
+from ..helpers import *
 from ..auth.decorators import requires_auth
 from ..helpers import marshal, bad_request
 from ..base_resources import BaseItem, BaseList, Response
@@ -15,7 +16,7 @@ user_resource_fields = {
     "id"                : fields.String,
     "name"              : fields.String,
     "node"              : fields.String,
-    "date_created"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
+    "date_created"      : DateTime,
     "profile_url"       : fields.String,
     "profile_image_url" : fields.String,
     # privacy concerns here

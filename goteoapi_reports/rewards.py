@@ -2,18 +2,18 @@
 
 import time
 
-from flask.ext.restful import fields, marshal
+from flask.ext.restful import fields
 from flasgger.utils import swag_from
 from goteoapi.ratelimit import ratelimit
 from goteoapi.auth.decorators import requires_auth
-from goteoapi.helpers import percent
+from goteoapi.helpers import percent, marshal
 from goteoapi.base_resources import BaseList as Base, Response
 
 favorite_resource_fields = {
     "icon"    : fields.String,
     "name"    : fields.String,
     "description"    : fields.String,
-    "svg-url"    : fields.String,
+    "svg_url"    : fields.String,
     "total"   : fields.Integer,
 }
 
@@ -40,7 +40,8 @@ class RewardsAPI(Base):
 
     def _get(self):
         """Dirty work for the get() method"""
-        from goteoapi.models.reward import Reward
+        # from goteoapi.models.reward import Reward
+        from goteoapi.models.icon import Icon
         from goteoapi.invests.models import Invest
 
         time_start = time.time()
@@ -50,7 +51,8 @@ class RewardsAPI(Base):
         cofinanciadores = Invest.donors_total(**args);
         renuncias = Invest.total(is_refusal=True, **args);
         favorites = []
-        for u in Reward.favorite_reward(**args):
+
+        for u in Icon.list(**args):
             item = marshal(u, favorite_resource_fields)
             favorites.append(item)
 

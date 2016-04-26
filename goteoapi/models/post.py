@@ -22,11 +22,11 @@ class Post(db.Model):
     __tablename__ = 'post'
 
     id = db.Column('id', Integer, primary_key=True)
-    blog = db.Column('blog', Integer, db.ForeignKey('blog.id'))
+    blog_id = db.Column('blog', Integer, db.ForeignKey('blog.id'))
     title = db.Column('title', Text)
     date_publish = db.Column('date', Date)
     user_id = db.Column('author', String(50), db.ForeignKey('user.id'))
     publish = db.Column('publish', Integer)
 
     def __repr__(self):
-        return '<Post(%d) %s: %s>' % (self.id, self.blog, self.title[:50])
+        return '<Post(%d) %s: %s>' % (self.id, self.blog_id, self.title[:50])

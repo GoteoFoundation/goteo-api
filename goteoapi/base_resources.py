@@ -77,14 +77,14 @@ class AbstractLang():
             for k in cls.get_translate_keys():
                 cols.append(getattr(alias, k ).label(k + '_' + l))
             joins.append((alias, and_(alias.id == sub_class.id, alias.lang == l)))
-            print(joins)
+            # print(joins)
         return db.session.query(*cols).distinct().outerjoin(*joins);
 
-    def list_translations(self, primary_key = 'id'):
-        """Returns a list of available translations for an instance"""
+    # def list_translations(self, primary_key = 'id'):
+    #     """Returns a list of available translations for an instance"""
 
-        sub_class = self.get_sub_class()
-        print('ASUB_CLASS', sub_class)
+    #     sub_class = self.get_sub_class()
+    #     # print('ASUB_CLASS', sub_class)
 
 class Response():
     """Base response for Reports Endpoints"""

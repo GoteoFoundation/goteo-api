@@ -173,7 +173,7 @@ class Call(db.Model):
         if 'node' in kwargs and kwargs['node'] is not None:
             filters.append(self.id == CallProject.call_id)
             filters.append(CallProject.project_id == Project.id)
-            filters.append(Project.node.in_(kwargs['node']))
+            filters.append(Project.node_id.in_(kwargs['node']))
         if 'location' in kwargs and kwargs['location'] is not None:
             subquery = CallLocation.location_subquery(**kwargs['location'])
             filters.append(CallLocation.id == self.id)

@@ -39,7 +39,7 @@ class Message(db.Model):
             filters.append(self.project_id.in_(kwargs['project']))
         if 'node' in kwargs and kwargs['node'] is not None:
             filters.append(self.user_id == User.id)
-            filters.append(User.node.in_(kwargs['node']))
+            filters.append(User.node_id.in_(kwargs['node']))
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(self.project_id == ProjectCategory.project_id)
             filters.append(ProjectCategory.category_id.in_(kwargs['category']))

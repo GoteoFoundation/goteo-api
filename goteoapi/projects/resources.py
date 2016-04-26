@@ -23,8 +23,8 @@ project_resource_fields = {
     "description_short" : fields.String,
     "lang" : fields.String,
     "node"              : fields.String,
-    "date_created"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
-    "date_published"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
+    "date_created"      : DateTime,
+    "date_published"    : DateTime,
     "project_url"       : fields.String,
     "image_url" : fields.String,
     "latitude" : fields.Float,
@@ -57,8 +57,8 @@ project_cost_resource_fields = {
     "type"              : fields.String,
     "amount"              : fields.Float,
     "required"              : fields.String,
-    "date_from"              : fields.DateTime(dt_format='rfc822'),
-    "date_to"              : fields.DateTime(dt_format='rfc822'),
+    "date_from"              : DateTime,
+    "date_to"              : DateTime,
 }
 
 project_need_resource_fields = {
@@ -84,12 +84,12 @@ project_full_resource_fields = {
     "status" : fields.String,
     "scope" : fields.String,
     "node"              : fields.String,
-    "date_created"      : fields.DateTime(dt_format='rfc822'),
-    "date_published"    : fields.DateTime(dt_format='rfc822'),
-    "date_updated"    : fields.DateTime(dt_format='rfc822'),
-    "date_succeeded"    : fields.DateTime(dt_format='rfc822'),
-    "date_closed"    : fields.DateTime(dt_format='rfc822'),
-    "date_passed"    : fields.DateTime(dt_format='rfc822'),
+    "date_created"      : DateTime,
+    "date_published"    : DateTime,
+    "date_updated"    : DateTime,
+    "date_succeeded"    : DateTime,
+    "date_closed"    : DateTime,
+    "date_passed"    : DateTime,
     "location" : fields.List(fields.Nested(location_resource_fields)),
     "owner" : fields.String,
     "user" : fields.Nested(user_resource_fields),

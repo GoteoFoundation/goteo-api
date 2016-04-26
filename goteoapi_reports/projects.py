@@ -1,34 +1,28 @@
     # -*- coding: utf-8 -*-
 
 import time
-from flask.ext.restful import fields, marshal
+from flask.ext.restful import fields
 from flasgger.utils import swag_from
 from goteoapi.ratelimit import ratelimit
 from goteoapi.auth.decorators import requires_auth
-from goteoapi.helpers import utc_from_local, image_url, project_url, percent
+from goteoapi.helpers import *
 from goteoapi.base_resources import BaseList as Base, Response
 
 contribution_resource_fields = {
     'project'  : fields.String,
     'name'  : fields.String,
-    'project-url'  : fields.String,
-    'description-short'  : fields.String,
-    'image-url'  : fields.String,
-    'video-url'  : fields.String,
-    'date-published'  : fields.DateTime(dt_format='rfc822'),
+    'project_url'  : fields.String,
+    'description_short'  : fields.String,
+    'image_url'  : fields.String,
+    'video_url'  : fields.String,
+    'date_published'  : DateTime,
     'total' : fields.Integer
 }
 
-amount_resource_fields = {
-    'project'   : fields.String,
-    'name'   : fields.String,
-    'project-url'   : fields.String,
-    'description-short'  : fields.String,
-    'image-url'  : fields.String,
-    'video-url'  : fields.String,
-    'date-published'  : fields.DateTime(dt_format='rfc822'),
-    'amount' : fields.Float
-}
+amount_resource_fields = contribution_resource_fields.copy()
+amount_resource_fields.pop("total", None)
+amount_resource_fields['amount'] = fields.Float
+
 
 class ProjectsAPI(Base):
     """Projects Statistics"""
@@ -60,33 +54,21 @@ class ProjectsAPI(Base):
         for u in Project.collaborated_list(**args):
             item = marshal(u, contribution_resource_fields)
             item['project'] = u.id
-            item['description-short'] = u.subtitle
-            item['video-url'] = u.media
-            item['date-published'] = utc_from_local(u.published)
-            item['image-url'] = image_url(u.image, 'medium', False)
-            item['project-url'] = project_url(u.id)
+            item['status'] = u.status_string
             top10_collaborations.append(item)
 
         top10_donations = []
         for u in Project.donated_list(**args):
             item = marshal(u, contribution_resource_fields)
             item['project'] = u.id
-            item['description-short'] = u.subtitle
-            item['video-url'] = u.media
-            item['date-published'] = utc_from_local(u.published)
-            item['image-url'] = image_url(u.image, 'medium', False)
-            item['project-url'] = project_url(u.id)
+            item['status'] = u.status_string
             top10_donations.append(item)
 
         top10_receipts = []
         for u in Project.received_list(finished=True, **args):
             item = marshal(u, amount_resource_fields)
             item['project'] = u.id
-            item['description-short'] = u.subtitle
-            item['video-url'] = u.media
-            item['date-published'] = utc_from_local(u.published)
-            item['image-url'] = image_url(u.image, 'medium', False)
-            item['project-url'] = project_url(u.id)
+            item['status'] = u.status_string
             top10_receipts.append(item)
 
         res = Response(

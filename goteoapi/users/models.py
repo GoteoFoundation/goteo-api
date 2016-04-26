@@ -31,7 +31,7 @@ class User(db.Model):
     email = db.Column('email', String(255))
     active = db.Column('active', Boolean)
     hide = db.Column('hide', Boolean)
-    node = db.Column('node', String(50), db.ForeignKey(Node.id))
+    node_id = db.Column('node', String(50), db.ForeignKey(Node.id))
     created = db.Column('created', Date)
     updated = db.Column('modified', Date)
 
@@ -119,7 +119,7 @@ class User(db.Model):
 
         # Filters by goteo node
         if 'node' in kwargs and kwargs['node'] is not None:
-            filters.append(self.node.in_(kwargs['node']))
+            filters.append(self.node_id.in_(kwargs['node']))
         # Filters by "from date"
         # counting users created after this date
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
@@ -287,7 +287,7 @@ class UserInterest(db.Model):
         if 'node' in kwargs and kwargs['node'] is not None:
             #TODO: project_node o invest_node?
             filters.append(User.id == self.user_id)
-            filters.append(User.node.in_(kwargs['node']))
+            filters.append(User.node_id.in_(kwargs['node']))
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(self.category_id.in_(kwargs['category']))
         if 'location' in kwargs and kwargs['location'] is not None:

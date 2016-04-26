@@ -6,7 +6,7 @@ from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from sqlalchemy.orm import aliased
 from sqlalchemy import asc,desc,and_, distinct
 
-from ..helpers import get_lang, objectview
+from ..helpers import get_lang, svg_image_url
 from ..cacher import cacher
 
 from .icon import Icon, IconLang
@@ -24,12 +24,16 @@ class Reward(db.Model):
     description = db.Column('description', Text)
     type = db.Column('type', String(50))
     amount = db.Column('amount', Integer)
-    icon = db.Column('icon', String(50), db.ForeignKey('icon.id'))
-    license = db.Column('license', String(50), db.ForeignKey('license.id'))
+    icon_id = db.Column('icon', String(50), db.ForeignKey('icon.id'))
+    license_id = db.Column('license', String(50), db.ForeignKey('license.id'))
     order = db.Column('order', Integer)
 
     def __repr__(self):
         return '<Reward(%d) %s: %s>' % (self.id, self.project_id[:10], self.title[:50])
+
+    @hybrid_property
+    def name(self):
+        return self.reward
 
     #Filters for this table
     @hybrid_property
@@ -47,10 +51,12 @@ class Reward(db.Model):
             if i in kwargs and kwargs[i] is not None:
                 filters.append(Project.id == self.project_id)
                 filters.append(Project.status.in_(Project.PUBLISHED_PROJECTS))
+        if 'icon' in kwargs and kwargs['icon'] is not None:
+            filters.append(self.icon_id == kwargs['icon'])
         if 'license_type' in kwargs and kwargs['license_type'] is not None:
             filters.append(self.type == kwargs['license_type'])
         if 'license' in kwargs and kwargs['license'] is not None:
-            filters.append(self.license.in_(kwargs['license']))
+            filters.append(self.license_id.in_(kwargs['license']))
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
             filters.append(Project.published >= kwargs['from_date'])
         if 'to_date' in kwargs and kwargs['to_date'] is not None:
@@ -58,7 +64,7 @@ class Reward(db.Model):
         if 'project' in kwargs and kwargs['project'] is not None:
             filters.append(self.project_id.in_(kwargs['project']))
         if 'node' in kwargs and kwargs['node'] is not None:
-            filters.append(Project.node.in_(kwargs['node']))
+            filters.append(Project.node_id.in_(kwargs['node']))
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(Project.id == ProjectCategory.project_id)
             filters.append(ProjectCategory.category_id.in_(kwargs['category']))
@@ -102,37 +108,3 @@ class Reward(db.Model):
             return total
         except MultipleResultsFound:
             return 0
-
-    @hybrid_method
-    @cacher
-    def favorite_reward(self, **kwargs):
-        """Reward type used in successful projects"""
-
-        filters = list(self.get_filters(**kwargs))
-
-        cols = [self.icon, Icon.svg_url.label('svg-url'), Icon.name, Icon.description, func.count(self.project_id).label('total')]
-        injoins = [(Project, and_(Project.id == self.project_id, Project.status.in_(Project.SUCCESSFUL_PROJECTS))),
-                   (Icon, Icon.id == self.icon)]
-
-        if 'lang' in kwargs and kwargs['lang'] is not None:
-            # In case of requiring languages, a LEFT JOIN must be generated
-            joins = []
-            for l in kwargs['lang']:
-                alias = aliased(IconLang)
-                cols.append(alias.name.label('name_' + l))
-                cols.append(alias.description.label('description_' + l))
-                joins.append((alias, and_(alias.id == Icon.id, alias.lang == l)))
-            query = db.session.query(*cols).join(*injoins).outerjoin(*joins)
-        else:
-            query = db.session.query(*cols).join(*injoins)
-
-        ret = []
-        for u in query.filter(*filters).group_by(self.icon).order_by(desc('total')):
-            u = u._asdict()
-            if 'lang' in kwargs and kwargs['lang'] is not None:
-                u['name'] = get_lang(u, 'name', kwargs['lang'])
-                u['description'] = get_lang(u, 'description', kwargs['lang'])
-            ret.append(objectview(u))
-        if ret is None:
-            ret = []
-        return ret

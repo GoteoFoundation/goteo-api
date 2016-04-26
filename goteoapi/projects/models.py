@@ -6,7 +6,7 @@ from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.orm import aliased, relationship
 
-from ..helpers import image_url, utc_from_local, get_lang, objectview
+from ..helpers import image_url, project_url, utc_from_local, get_lang, objectview
 from ..cacher import cacher
 from ..base_resources import AbstractLang
 from ..models.post import Post, Blog
@@ -103,7 +103,7 @@ class Project(db.Model):
     published = db.Column('published', Date) # fecha de publicacion de proyecto
     closed = db.Column('closed', Date) # fecha de cierre de proyecto
     success = db.Column('success', Date) # fecha de éxito de proyecto
-    node = db.Column('node', String(50), db.ForeignKey('node.id'))
+    node_id = db.Column('node', String(50), db.ForeignKey('node.id'))
     # total_funding
     # active_date
     # rewards
@@ -131,8 +131,20 @@ class Project(db.Model):
         return self.user.name
 
     @hybrid_property
+    def description_short(self):
+        return self.subtitle
+
+    @hybrid_property
     def image_url(self):
         return image_url(self.image, size="big")
+
+    @hybrid_property
+    def video_url(self):
+        return self.media
+
+    @hybrid_property
+    def project_url(self):
+        return project_url(self.id)
 
     @hybrid_property
     def date_created(self):
@@ -218,7 +230,7 @@ class Project(db.Model):
         if 'license_type' in kwargs and kwargs['license_type'] is not None:
             filters.append(Reward.type == kwargs['license_type'])
         if 'license' in kwargs and kwargs['license'] is not None:
-            filters.append(Reward.license.in_(kwargs['license']))
+            filters.append(Reward.license_id.in_(kwargs['license']))
 
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
             if 'received' in kwargs:
@@ -283,9 +295,9 @@ class Project(db.Model):
 
         if 'node' in kwargs and kwargs['node'] is not None:
             if isinstance(kwargs['node'], (list, tuple)):
-                filters.append(self.node.in_(kwargs['node']))
+                filters.append(self.node_id.in_(kwargs['node']))
             else:
-                filters.append(self.node == kwargs['node'])
+                filters.append(self.node_id == kwargs['node'])
 
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(self.id == ProjectCategory.project_id)
@@ -415,9 +427,9 @@ class Project(db.Model):
         filters = self.get_filters(**kwargs)
         filters.append(Post.publish == 1)
         sq1 = db.session.query(func.count(self.id).label('posts')).select_from(Post) \
-                            .join(Blog, and_(Blog.id == Post.blog, Blog.type == 'project')) \
+                            .join(Blog, and_(Blog.id == Post.blog_id, Blog.type == 'project')) \
                             .join(self, self.id == Blog.user_id) \
-                            .filter(*filters).group_by(Post.blog).subquery()
+                            .filter(*filters).group_by(Post.blog_id).subquery()
         total = db.session.query(func.avg(sq1.c.posts)).scalar()
         total = 0 if total is None else round(total, 2)
         return total
@@ -436,6 +448,8 @@ class Project(db.Model):
                 self.subtitle,
                 self.image,
                 self.media,
+                self.lang,
+                self.status,
                 self.published,
                 func.count(Message.id).label('total')]
 
@@ -457,7 +471,8 @@ class Project(db.Model):
             u = u._asdict()
             if 'lang' in kwargs and kwargs['lang'] is not None:
                 u['subtitle'] = get_lang(u, 'subtitle', kwargs['lang'])
-            ret.append(objectview(u))
+            # Return an instance of the Project class
+            ret.append(self(**u))
 
         return ret
 
@@ -477,6 +492,8 @@ class Project(db.Model):
                 self.subtitle,
                 self.image,
                 self.media,
+                self.lang,
+                self.status,
                 self.published,
                 func.count(Invest.id).label('total')]
 
@@ -497,7 +514,8 @@ class Project(db.Model):
             u = u._asdict()
             if 'lang' in kwargs and kwargs['lang'] is not None:
                 u['subtitle'] = get_lang(u, 'subtitle', kwargs['lang'])
-            ret.append(objectview(u))
+            # Return an instance of the Project class
+            ret.append(self(**u))
 
         return ret
 
@@ -526,6 +544,7 @@ class Project(db.Model):
                 self.image,
                 self.media,
                 self.lang,
+                self.status,
                 self.published,
                 func.sum(Invest.amount).label('amount')]
         filters.append(Invest.status.in_(Invest.VALID_INVESTS))
@@ -547,7 +566,8 @@ class Project(db.Model):
             u = u._asdict()
             if 'lang' in kwargs and kwargs['lang'] is not None:
                 u['subtitle'] = get_lang(u, 'subtitle', kwargs['lang'])
-            ret.append(objectview(u))
+            # Return an instance of the Project class
+            ret.append(self(**u))
 
         return ret
 

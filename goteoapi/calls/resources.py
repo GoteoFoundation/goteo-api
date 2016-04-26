@@ -19,9 +19,9 @@ call_resource_fields = {
     "id"                : fields.String,
     "name"              : fields.String,
     "description_short" : fields.String,
-    "date_opened"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
-    "date_published"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
-    "date_succeeded"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
+    "date_opened"      : DateTime,
+    "date_published"    : DateTime,
+    "date_succeeded"    : DateTime,
     "call_url"       : fields.String,
     "logo_url" : fields.String,
     "image_url" : fields.String,
@@ -54,10 +54,10 @@ call_full_resource_fields = {
     "dossier"              : fields.String,
     "tweet"              : fields.String,
     "resources"              : fields.String,
-    "date_opened"      : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
-    "date_published"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
-    "date_succeeded"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
-    "date_closed"    : fields.DateTime(dt_format='rfc822'), # iso8601 maybe?
+    "date_opened"      : DateTime,
+    "date_published"    : DateTime,
+    "date_succeeded"    : DateTime,
+    "date_closed"    : DateTime,
     "call_url"       : fields.String,
     "logo_url" : fields.String,
     "image_url" : fields.String,

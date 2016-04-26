@@ -462,8 +462,8 @@ class Invest(db.Model):
         """Num. of users choosing rewards from {minim} € to {maxim} € """
         filters = list(self.get_filters(**kwargs))
         # filters.append(Reward.id != None)
-        filters.append(InvestReward.invest == self.id)
-        filters.append(InvestReward.reward == Reward.id)
+        filters.append(InvestReward.invest_id == self.id)
+        filters.append(InvestReward.reward_id == Reward.id)
         filters.append(or_(self.resign == None, self.resign == False, self.resign == 0))
 
         if minim == 0 and maxim > 0:
@@ -571,8 +571,8 @@ class InvestNode(db.Model):
 class InvestReward(db.Model):
     __tablename__ = 'invest_reward'
 
-    invest = db.Column('invest', Integer, db.ForeignKey('invest.id'), primary_key=True)
-    reward = db.Column('reward', Integer, db.ForeignKey('reward.id'), primary_key=True)
+    invest_id = db.Column('invest', Integer, db.ForeignKey('invest.id'), primary_key=True)
+    reward_id = db.Column('reward', Integer, db.ForeignKey('reward.id'), primary_key=True)
 
     def __repr__(self):
         return '<InvestReward(%d) - Reward(%d)>' % (self.invest, self.reward)

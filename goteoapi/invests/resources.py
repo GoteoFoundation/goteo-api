@@ -35,10 +35,10 @@ invest_resource_fields = {
     "latitude" : fields.Float,
     "longitude" : fields.Float,
     "region" : fields.String,
-    "date_invested"  : fields.DateTime(dt_format='rfc822'),
-    "date_charged"  : fields.DateTime(dt_format='rfc822'),
-    "date_returned"  : fields.DateTime(dt_format='rfc822'),
-    "date_updated"  : fields.DateTime(dt_format='rfc822'),
+    "date_invested"  : DateTime,
+    "date_charged"  : DateTime,
+    "date_returned"  : DateTime,
+    "date_updated"  : DateTime,
 }
 
 invest_full_resource_fields = {
@@ -54,10 +54,10 @@ invest_full_resource_fields = {
     "currency"         : fields.String,
     "conversion_ratio"         : fields.Float,
     "resign"         : fields.Boolean,
-    "date_invested"  : fields.DateTime(dt_format='rfc822'),
-    "date_charged"  : fields.DateTime(dt_format='rfc822'),
-    "date_returned"  : fields.DateTime(dt_format='rfc822'),
-    "date_updated"  : fields.DateTime(dt_format='rfc822'),
+    "date_invested"  : DateTime,
+    "date_charged"  : DateTime,
+    "date_returned"  : DateTime,
+    "date_updated"  : DateTime,
     "location" : fields.List(fields.Nested(location_resource_fields)),
 }
 

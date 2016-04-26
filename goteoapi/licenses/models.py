@@ -60,12 +60,12 @@ class License(db.Model):
         # Join project table if filters
         for i in ('node', 'from_date', 'to_date', 'project', 'category', 'location'):
             if i in kwargs and kwargs[i] is not None:
-                filters.append(Reward.license == self.id)
+                filters.append(Reward.license_id == self.id)
                 filters.append(Project.id == Reward.project_id)
                 filters.append(Project.status.in_(Project.PUBLISHED_PROJECTS))
         # Filters by goteo node
         if 'node' in kwargs and kwargs['node'] is not None:
-            filters.append(Project.node.in_(kwargs['node']))
+            filters.append(Project.node_id.in_(kwargs['node']))
         # Filters by "from date"
         # counting license created after this date
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
