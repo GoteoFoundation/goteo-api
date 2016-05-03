@@ -42,44 +42,24 @@ call_resource_fields = {
     "status" : fields.String,
 }
 
-call_full_resource_fields = {
-    "id"                : fields.String,
-    "name"              : fields.String,
-    "lang"              : fields.String,
-    "description_short" : fields.String,
-    "description"              : fields.String,
-    "legal"              : fields.String,
-    "whom"              : fields.String,
-    "applies"              : fields.String,
-    "dossier"              : fields.String,
-    "tweet"              : fields.String,
-    "resources"              : fields.String,
-    "date_opened"      : DateTime,
-    "date_published"    : DateTime,
-    "date_succeeded"    : DateTime,
-    "date_closed"    : DateTime,
-    "call_url"       : fields.String,
-    "logo_url" : fields.String,
-    "image_url" : fields.String,
-    "image_url_big" : fields.String,
-    "image_background" : fields.String,
-    "facebook-url" : fields.String,
-    "call_location" : fields.String,
-    "owner" : fields.String,
-    "user" : fields.Nested(user_resource_fields),
-    "status" : fields.String,
-    "amount_available" : fields.Float,
-    "amount_peers" : fields.Float,
-    "amount_committed" : fields.Float,
-    "amount_remaining" : fields.Float,
-    "projects_total" : fields.Integer,
-    "projects_applied" : fields.Integer,
-    "projects_active" : fields.Integer,
-    "projects_succeeded" : fields.Integer,
-    "location" : fields.List(fields.Nested(location_resource_fields)),
-    "owner" : fields.String,
-    "owner_name" : fields.String
-}
+call_full_resource_fields = call_resource_fields.copy()
+call_full_resource_fields.pop('latitude')
+call_full_resource_fields.pop('region')
+call_full_resource_fields.pop('longitude')
+call_full_resource_fields["description"]      = fields.String
+call_full_resource_fields["legal"]            = fields.String
+call_full_resource_fields["whom"]             = fields.String
+call_full_resource_fields["applies"]          = fields.String
+call_full_resource_fields["dossier"]          = fields.String
+call_full_resource_fields["tweet"]            = fields.String
+call_full_resource_fields["resources"]        = fields.String
+call_full_resource_fields["date_closed"]      = DateTime
+call_full_resource_fields["image_url_big"]    = fields.String
+call_full_resource_fields["image_background_url"] = fields.String
+call_full_resource_fields["facebook_url"]     = fields.String
+call_full_resource_fields["user"]             = fields.Nested(user_resource_fields)
+call_full_resource_fields["location"]         = fields.List(fields.Nested(location_resource_fields))
+
 
 donor_resource_fields = user_resource_fields.copy()
 donor_resource_fields['anonymous'] = fields.Boolean
@@ -89,7 +69,7 @@ class CallsListAPI(BaseList):
 
     @requires_auth()
     @ratelimit()
-    # @swag_from('swagger_specs/call_list.yml')
+    @swag_from('swagger_specs/call_list.yml')
     def get(self):
         res = self._get()
 
@@ -104,10 +84,7 @@ class CallsListAPI(BaseList):
         items = []
         for p in Call.list(**args):
             item = marshal(p, call_resource_fields)
-            item['call-url'] = call_url(p.id)
-            item['description-short'] = p.subtitle
             item['status'] = p.status_string
-            item['image-url'] = image_url(p.image, 'medium', False)
             location = CallLocation.get(p.id)
             if location:
                 item['latitude'] = location.latitude
@@ -131,7 +108,7 @@ class CallAPI(BaseItem):
 
     @requires_auth()
     @ratelimit()
-    # @swag_from('swagger_specs/call_item.yml')
+    @swag_from('swagger_specs/call_item.yml')
     def get(self, call_id):
         res = self._get(call_id)
 
@@ -147,14 +124,8 @@ class CallAPI(BaseItem):
 
         item = marshal(p, call_full_resource_fields)
         if p != None:
-            item['call-url'] = call_url(p.id)
-            item['description-short'] = p.subtitle
             item['status'] = p.status_string
             item['scope'] = p.scope_string
-            item['facebook-url'] = p.facebook
-            item['image-url'] = image_url(p.image, 'medium', False)
-            item['image-url-big'] = image_url(p.image, 'big', False)
-            item['image-background'] = image_url(p.backimage, 'big', False)
             location = CallLocation.get(p.id)
             if location:
                 item['location'] = [marshal(location, location_resource_fields)]
@@ -199,8 +170,6 @@ class CallProjectsListAPI(BaseList):
 
         for p in Project.list(**args):
             item = marshal(p, project_resource_fields)
-            item['project-url'] = project_url(p.id)
-            item['description-short'] = p.subtitle
             item['status'] = p.status_string
             item['image-url'] = image_url(p.image, 'medium', False)
             location = ProjectLocation.get(p.id)

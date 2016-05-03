@@ -1,0 +1,173 @@
+Call API
+This resource returns call information.
+<a href="http://developers.goteo.org/calls#call">developers.goteo.org/calls#call</a>
+---
+tags:
+    - calls
+definitions:
+    - schema:
+        id: CallFull
+        properties:
+            id:
+                type: string
+                description: Id of the matchfunding call
+            name:
+                type: string
+                description: Name of the matchfunding call
+            description-short:
+                type: string
+                description: Short description for the matchfunding call
+            description:
+                type: string
+                description: Full description for the matchfunding call
+            applies:
+                type: string
+                description: Text description about which kind of projects will be selected for the matchfunding call
+            dossier:
+                type: string
+                description: External links for the matchfunding call
+            legal:
+                type: string
+                description: Some particular legal or conditions for the matchfunding call
+            resources:
+                type: string
+                description: Text description of the available resources for the matchfunding call
+            tweet:
+                type: string
+                description: Text used to make an automatic tweet to share the the matchfunding call
+            whom:
+                type: string
+                description: Target of the matchfunding call
+            date-opened:
+                type: string
+                description: Date when the matchfunding call was opened
+            date-published:
+                type: string
+                description: Date when the matchfunding call was published
+            date-succeeded:
+                type: string
+                description: Date when the matchfunding call was succeeded
+            date-closed:
+                type: string
+                description: Date when the matchfunding call was closed
+            call-url:
+                type: string
+                description: URL where to visualize the matchfunding call
+            facebook-url:
+                type: string
+                description: URL of the Facebook page for the matchfunding call
+            logo-url:
+                type: string
+                description: URL for the call's logo
+            image-url:
+                type: string
+                description: URL for the main call image
+            image-url-big:
+                type: string
+                description: URL for the main call image (big size)
+            image-background-url:
+                type: string
+                description: URL for the main call image
+            call-location:
+                type: string
+                description: Custom location value for the call
+            scope:
+                type: string
+                description: Scope of the matchfunding call, one of 'local', 'regional', 'national', 'global' (or empty)
+            owner:
+                type: string
+                description: User ID of the call's owner
+            owner-name:
+                type: string
+                description: User name of the call's owner
+            user:
+                type: string
+                description: Call owner's user Object
+            amount-available:
+                type: float
+                description: Available amount of cash to distribute among projects
+            amount-peers:
+                type: float
+                description: Amount of cash already distribute among projects
+            amount-committed:
+                type: float
+                description:
+            amount-remaining:
+                type: float
+                description: Amount of cash still available for distribute among projects
+            projects-total:
+                type: integer
+                description: Total number of projects included into this matchfunding call
+            projects-applied:
+                type: integer
+                description: Total number of projects effectively applicating to this matchfunding call
+            projects-active:
+                type: integer
+                description: Active projects (still with a running campaign) in this matchfunding call
+            projects-succeeded:
+                type: integer
+                description: Projects funded in this matchfunding call
+            status:
+                type: string
+                description: Status of the call, one of 'pending', 'editing', 'reviewing', 'applying', 'published', 'succeeded', 'expired'
+            location:
+                type: array
+                description: Location of the call
+                items:
+                    $ref: '#/definitions/api_calls_call_get_CallLocation'
+            translations:
+                type: array
+                description: All available translations in a list by language
+                items:
+                    $ref: '#/definitions/api_calls_call_get_CallTranslation'
+
+    - schema:
+        id: CallLocation
+        properties:
+            city:
+                type: string
+            region:
+                type: string
+            country:
+                type: string
+            country-code:
+                type: string
+            latitude:
+                type: number
+            longitude:
+                type: number
+    - schema:
+        id: CallTranslation
+        properties:
+            description-short:
+                type: string
+            description:
+                type: string
+            applies:
+                type: string
+            dossier:
+                type: string
+            legal:
+                type: string
+            name:
+                type: string
+            resources:
+                type: string
+            tweet:
+                type: string
+            whom:
+                type: string
+
+parameters:
+    - in: path
+      type: integer
+      name: call_id
+      description: Unique ID for the call
+      required: true
+responses:
+    200:
+        description: Call data
+        schema:
+            $ref: '#/definitions/api_calls_calls_list_get_CallFull'
+    404:
+        description: Resource not found

@@ -85,10 +85,10 @@ definitions:
                 description: Date when the project was updated RFC822 format
             owner:
                 type: string
-                description: Projects owner's user ID
+                description: Project owner's user ID
             user:
                 type: string
-                description: Projects owner's user Object
+                description: Project owner's user Object
             status:
                 type: string
                 description: Status of the project

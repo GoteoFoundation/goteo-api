@@ -34,19 +34,19 @@ definitions:
                 description: Date & Time when the invest was last updated in RFC822 format
             latitude:
                 type: number
-                description: Latitude coordinate for the project
+                description: Latitude coordinate for the invest
             longitude:
                 type: number
-                description: Longitude coordinate for the project
+                description: Longitude coordinate for the invest
             region:
                 type: string
-                description: Region location for the project
+                description: Region location for the invest
             project:
                 type: string
-                description: Id of the project where applies the invests
+                description: Id of the invest where applies the invests
             call:
                 type: string
-                description: Id of the matchfunding call if this invest belongs to a project in selected
+                description: Id of the matchfunding call if this invest belongs to a invest in selected
             type:
                 type: string
                 description: Type of the payment, one of 'payment', 'drop', 'pool'

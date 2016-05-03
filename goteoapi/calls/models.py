@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import func, and_, distinct, asc, Integer, String, Text, Date
+from sqlalchemy import func, distinct, asc, Integer, String, Text, Date
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
-from sqlalchemy.orm import aliased,relationship
+from sqlalchemy.orm import relationship
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 
-from ..helpers import image_url, utc_from_local
+from ..helpers import image_url, utc_from_local, call_url
 from ..base_resources import AbstractLang
 from ..cacher import cacher
 from ..invests.models import Invest
@@ -106,11 +106,27 @@ class Call(db.Model):
         return self.user.name
 
     @hybrid_property
+    def description_short(self):
+        return self.subtitle
+
+    @hybrid_property
+    def call_url(self):
+        return call_url(self.id)
+
+    @hybrid_property
+    def facebook_url(self):
+        return self.facebook
+
+    @hybrid_property
     def image_url(self):
+        return image_url(self.image, size="medium")
+
+    @hybrid_property
+    def image_url_big(self):
         return image_url(self.image, size="big")
 
     @hybrid_property
-    def backimage_url(self):
+    def image_background_url(self):
         return image_url(self.backimage, size="big")
 
     @hybrid_property
