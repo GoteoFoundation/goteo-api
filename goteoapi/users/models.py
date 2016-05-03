@@ -237,7 +237,7 @@ class User(db.Model):
                                                                         self.avatar, \
                                                                         self.active, \
                                                                         self.hide, \
-                                                                        self.node, \
+                                                                        self.node_id, \
                                                                         self.created, \
                                                                         self.updated) \
                                                     .filter(*filters). \

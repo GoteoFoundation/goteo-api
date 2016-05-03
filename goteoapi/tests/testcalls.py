@@ -6,6 +6,7 @@ from nose.tools import *
 import os
 from . import test_app, get_json, get_swagger
 from ..calls.resources import call_resource_fields, call_full_resource_fields
+from ..projects.resources import project_resource_fields
 
 DIR = os.path.dirname(__file__) + '/../calls/'
 
@@ -78,3 +79,19 @@ def test_call():
     fields = get_swagger(DIR + 'swagger_specs/call_item.yml', 'CallFull')
     eq_(set(resp.keys()) , set(fields.keys()))
 
+def test_call_projects():
+    fields_swagger = get_swagger(DIR + '../projects/swagger_specs/project_list.yml', 'Project')
+    rv = test_app.get('/calls/crowdsasuna/projects')
+    eq_(rv.status_code, 301)
+    rv = test_app.get('/calls/crowdsasuna/projects/')
+    eq_(rv.status_code, 200)
+    eq_(rv.headers['Content-Type'], 'application/json')
+    resp = get_json(rv)
+    fields = project_resource_fields
+    if 'time-elapsed' in resp:
+        del resp['time-elapsed']
+
+    eq_(len(set(map(lambda x: str(x), resp.keys())) - set(fields.keys())) >= 0, True)
+
+    # Swagger test
+    eq_(set(resp['items'][0].keys()) , set(fields_swagger.keys()))

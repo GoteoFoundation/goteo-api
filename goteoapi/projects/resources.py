@@ -67,42 +67,33 @@ project_need_resource_fields = {
     "type"              : fields.String,
 }
 
-project_full_resource_fields = {
-    "id"                : fields.String,
-    "name"              : fields.String,
-    "description_short" : fields.String,
-    "description" : fields.String,
-    "motivation" : fields.String,
-    "goal" : fields.String,
-    "about" : fields.String,
-    "lang" : fields.String,
-    "currency" : fields.String,
-    "currency_rate" : fields.Float,
-    "minimum" : fields.Float,
-    "optimum" : fields.Float,
-    "amount" : fields.Float,
-    "status" : fields.String,
-    "scope" : fields.String,
-    "node"              : fields.String,
-    "date_created"      : DateTime,
-    "date_published"    : DateTime,
-    "date_updated"    : DateTime,
-    "date_succeeded"    : DateTime,
-    "date_closed"    : DateTime,
-    "date_passed"    : DateTime,
-    "location" : fields.List(fields.Nested(location_resource_fields)),
-    "owner" : fields.String,
-    "user" : fields.Nested(user_resource_fields),
-    "project_url"       : fields.String,
-    "widget_url"       : fields.String,
-    "image_url" : fields.String,
-    "image_url_big" : fields.String,
-    "image_gallery" : fields.List(fields.Nested(project_gallery_resource_fields)),
-    "video_url" : fields.String,
-    "rewards" : fields.List(fields.Nested(project_reward_resource_fields)),
-    "costs" : fields.List(fields.Nested(project_cost_resource_fields)),
-    "needs" : fields.List(fields.Nested(project_need_resource_fields))
-}
+project_full_resource_fields = project_resource_fields.copy()
+project_full_resource_fields.pop('latitude')
+project_full_resource_fields.pop('longitude')
+project_full_resource_fields.pop('region')
+project_full_resource_fields["description"]    = fields.String
+project_full_resource_fields["motivation"]     = fields.String
+project_full_resource_fields["goal"]           = fields.String
+project_full_resource_fields["about"]          = fields.String
+project_full_resource_fields["currency"]       = fields.String
+project_full_resource_fields["currency_rate"]  = fields.Float
+project_full_resource_fields["scope"]          = fields.String
+project_full_resource_fields["date_created"]   = DateTime
+project_full_resource_fields["date_published"] = DateTime
+project_full_resource_fields["date_updated"]   = DateTime
+project_full_resource_fields["date_succeeded"] = DateTime
+project_full_resource_fields["date_closed"]    = DateTime
+project_full_resource_fields["date_passed"]    = DateTime
+project_full_resource_fields["location"]       = fields.List(fields.Nested(location_resource_fields))
+project_full_resource_fields["user"]           = fields.Nested(user_resource_fields)
+project_full_resource_fields["widget_url"]     = fields.String
+project_full_resource_fields["image_url_big"]  = fields.String
+project_full_resource_fields["image_gallery"]  = fields.List(fields.Nested(project_gallery_resource_fields))
+project_full_resource_fields["video_url"]      = fields.String
+project_full_resource_fields["rewards"]        = fields.List(fields.Nested(project_reward_resource_fields))
+project_full_resource_fields["costs"]          = fields.List(fields.Nested(project_cost_resource_fields))
+project_full_resource_fields["needs"]          = fields.List(fields.Nested(project_need_resource_fields))
+
 
 donor_resource_fields = user_resource_fields.copy()
 donor_resource_fields['anonymous'] = fields.Boolean
@@ -242,6 +233,9 @@ class ProjectDonorsListAPI(BaseList):
 
         for u in User.donors_by_project(project_id, **args):
             item = marshal(u, donor_resource_fields)
+            item['anonymous'] = bool(u['anonymous'])
+            item['node'] = u['node_id']
+            item['date-created'] = u['created']
             item['profile-image-url'] = image_url(u['avatar'])
             item['profile-url'] = user_url(u['id'])
             if u['anonymous']:

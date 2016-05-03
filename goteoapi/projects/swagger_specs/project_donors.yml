@@ -4,6 +4,40 @@ This resource returns user donors information.
 ---
 tags:
     - projects
+definitions:
+    - schema:
+        id: ProjectDonor
+        properties:
+            id:
+                type: string
+                description: User unique identifier
+            anonymous:
+                type: boolean
+                description: If the contributor is anonymous
+            name:
+                type: string
+                description: Name of the user
+            node:
+                type: string
+                description: Node where the user was created originally
+            profile-image-url:
+                type: string
+                description:  URL with the avatar (image) of the user
+            profile-url:
+                type: string
+                description: URL for the user profile
+            date-created:
+                type: string
+                description: Date when the user was created RFC822 format
+            # latitude:
+            #     type: number
+            #     description: Latitude coordinate for the user
+            # longitude:
+            #     type: number
+            #     description: Longitude coordinate for the user
+            # region:
+            #     type: string
+            #     description: Region location for the user
 parameters:
     - in: path
       type: string
@@ -43,6 +77,6 @@ responses:
         schema:
             type: array
             items:
-                $ref: '#/definitions/api_users_users_list_get_User'
+                $ref: '#/definitions/api_projects_projects_list_get_ProjectDonor'
     404:
         description: Resource not found

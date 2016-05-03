@@ -78,3 +78,19 @@ def test_project():
     fields = get_swagger(DIR + 'swagger_specs/project_item.yml', 'ProjectFull')
     eq_(set(resp.keys()) , set(fields.keys()))
 
+def test_call_projects():
+    fields_swagger = get_swagger(DIR + 'swagger_specs/project_donors.yml', 'ProjectDonor')
+    rv = test_app.get('/projects/160metros/donors')
+    eq_(rv.status_code, 301)
+    rv = test_app.get('/projects/160metros/donors/')
+    eq_(rv.status_code, 200)
+    eq_(rv.headers['Content-Type'], 'application/json')
+    resp = get_json(rv)
+    fields = project_resource_fields
+    if 'time-elapsed' in resp:
+        del resp['time-elapsed']
+
+    eq_(len(set(map(lambda x: str(x), resp.keys())) - set(fields.keys())) >= 0, True)
+
+    # Swagger test
+    eq_(set(resp['items'][0].keys()) , set(fields_swagger.keys()))

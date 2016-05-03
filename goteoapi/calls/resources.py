@@ -148,7 +148,7 @@ class CallProjectsListAPI(BaseList):
 
     @requires_auth()
     @ratelimit()
-    # @swag_from('swagger_specs/call_projects.yml')
+    @swag_from('swagger_specs/call_projects.yml')
     def get(self, call_id):
         res = self._get(call_id)
 
