@@ -20,6 +20,9 @@ definitions:
             node:
                 type: string
                 description: Node where the user was created originally
+            lang:
+                type: string
+                description: Language for the user's texts description
             profile-image-url:
                 type: string
                 description:  URL with the avatar (image) of the user
@@ -41,6 +44,19 @@ definitions:
             projects-collaborated:
                 type: number
                 description: Number of project the user has interacted
+            translations:
+                type: array
+                description: All available translations in a list by language
+                items:
+                    $ref: '#/definitions/api_users_user_get_UserTranslation'
+    - schema:
+        id: UserTranslation
+        properties:
+            name:
+                type: string
+            about:
+                type: string
+
 parameters:
     - in: path
       type: string

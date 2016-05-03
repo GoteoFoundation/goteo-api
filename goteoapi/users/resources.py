@@ -111,18 +111,19 @@ class UserAPI(BaseItem):
         u = User.get(user_id)
 
         item = marshal(u, user_full_resource_fields)
-        if u != None and 'latitude' in user_full_resource_fields:
-            location = UserLocation.get(u.id)
-            if location:
-                item['latitude'] = location.latitude
-                item['longitude'] = location.longitude
-                item['region'] = location.region if location.region != '' else location.country
+        if u != None:
+            if 'latitude' in user_full_resource_fields:
+                location = UserLocation.get(u.id)
+                if location:
+                    item['latitude'] = location.latitude
+                    item['longitude'] = location.longitude
+                    item['region'] = location.region if location.region != '' else location.country
 
-        translations = {}
-        translate_keys = {k: v for k, v in user_full_resource_fields.items() if k in UserLang.get_translate_keys()}
-        for k in u.translations:
-            translations[k.lang] = marshal(k, translate_keys)
-        item['translations'] = translations
+            translations = {}
+            translate_keys = {k: v for k, v in user_full_resource_fields.items() if k in UserLang.get_translate_keys()}
+            for k in u.translations:
+                translations[k.lang] = marshal(k, translate_keys)
+            item['translations'] = translations
 
         res = Response(
             starttime = time_start,
