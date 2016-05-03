@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
-from sqlalchemy import func, Integer, String, Date, DateTime, Boolean
+from sqlalchemy import func, Integer, String, Date, DateTime, Boolean, Text
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy import asc, desc, and_, or_, distinct
-from sqlalchemy.orm import aliased
+from sqlalchemy.orm import aliased, relationship
 
 from ..cacher import cacher
-from ..helpers import image_url, utc_from_local, user_url, get_lang, objectview
+from ..helpers import image_url, utc_from_local, user_url, get_lang
+from ..base_resources import AbstractLang
 
 from ..categories.models import Category, CategoryLang
 from ..invests.models import Invest
@@ -14,11 +15,23 @@ from ..projects.models import Project
 from ..models.node import Node
 from ..models.message import Message
 from ..location.models import UserLocation
-
+from .. import config
 from hashlib import sha1
 from passlib.context import CryptContext
 
 from .. import db
+
+
+class UserLang(AbstractLang, db.Model):
+    __tablename__ = 'user_lang'
+
+    id = db.Column('id', String(50), db.ForeignKey('user.id'), primary_key=True)
+    lang = db.Column('lang', String(2), primary_key=True)
+    name = db.Column('name', String(100))
+    user = relationship('User', back_populates='translations')
+
+    def __repr__(self):
+        return '<UserLang %s(%s): %r>' % (self.id, self.lang, self.name)
 
 # User stuff
 class User(db.Model):
@@ -27,6 +40,7 @@ class User(db.Model):
     id = db.Column('id', String(50), primary_key=True)
     password_hash = db.Column('password', String(255))
     name = db.Column('name', String(100))
+    about = db.Column('about', Text)
     avatar = db.Column('avatar', String(255))
     email = db.Column('email', String(255))
     active = db.Column('active', Boolean)
@@ -34,6 +48,10 @@ class User(db.Model):
     node_id = db.Column('node', String(50), db.ForeignKey(Node.id))
     created = db.Column('created', Date)
     updated = db.Column('modified', Date)
+    lang = config.DEFAULT_DB_LANG
+    translations = relationship("UserLang",
+                                primaryjoin = "and_(User.id==UserLang.id)",
+                                back_populates="user", lazy='joined') # Eager loading to allow catching
 
 
     def __repr__(self):
@@ -171,7 +189,19 @@ class User(db.Model):
             limit = kwargs['limit'] if 'limit' in kwargs else 10
             page = kwargs['page'] if 'page' in kwargs else 0
             filters = list(self.get_filters(**kwargs))
-            return self.query.distinct().filter(*filters).order_by(asc(self.id)).offset(page * limit).limit(limit).all()
+            # In case of requiring languages, a LEFT JOIN must be generated
+            if 'lang' in kwargs and kwargs['lang'] is not None:
+                ret = []
+                for u in UserLang.get_query(kwargs['lang']) \
+                                 .filter(*filters).order_by(asc(self.id)) \
+                                 .offset(page * limit).limit(limit):
+                    ret.append(UserLang.get_translated_object(u._asdict(), kwargs['lang']))
+                return ret
+
+            # No langs, normal query
+            return self.query.distinct().filter(*filters) \
+                                        .order_by(asc(self.id)) \
+                                        .offset(page * limit).limit(limit).all()
         except NoResultFound:
             return []
 

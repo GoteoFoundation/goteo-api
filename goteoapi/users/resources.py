@@ -10,7 +10,7 @@ from ..auth.decorators import requires_auth
 from ..helpers import marshal, bad_request
 from ..base_resources import BaseItem, BaseList, Response
 from ..location.models import UserLocation
-from .models import User
+from .models import User, UserLang
 
 user_resource_fields = {
     "id"                : fields.String,
@@ -26,6 +26,8 @@ user_resource_fields = {
 }
 
 user_full_resource_fields = user_resource_fields.copy()
+user_full_resource_fields['about'] = fields.String
+user_full_resource_fields['lang'] = fields.String
 user_full_resource_fields['amount_public_invested'] = fields.Float
 user_full_resource_fields['projects_public_invested'] = fields.Integer
 user_full_resource_fields['projects_published'] = fields.Integer
@@ -115,6 +117,12 @@ class UserAPI(BaseItem):
                 item['latitude'] = location.latitude
                 item['longitude'] = location.longitude
                 item['region'] = location.region if location.region != '' else location.country
+
+        translations = {}
+        translate_keys = {k: v for k, v in user_full_resource_fields.items() if k in UserLang.get_translate_keys()}
+        for k in u.translations:
+            translations[k.lang] = marshal(k, translate_keys)
+        item['translations'] = translations
 
         res = Response(
             starttime = time_start,

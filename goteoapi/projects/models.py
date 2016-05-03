@@ -6,7 +6,7 @@ from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.orm import aliased, relationship
 
-from ..helpers import image_url, project_url, utc_from_local, get_lang, objectview
+from ..helpers import image_url, project_url, utc_from_local, get_lang
 from ..cacher import cacher
 from ..base_resources import AbstractLang
 from ..models.post import Post, Blog

@@ -14,6 +14,9 @@ definitions:
             name:
                 type: string
                 description: Name of the user
+            about:
+                type: text
+                description: User's about text
             node:
                 type: string
                 description: Node where the user was created originally
