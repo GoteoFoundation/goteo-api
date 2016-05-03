@@ -47,7 +47,7 @@ class Invest(db.Model):
     currency = db.Column('currency', String(3))
     conversion_ratio = db.Column('currency_rate', Float)
     anonymous = db.Column('anonymous', Boolean, nullable=False)
-    invested = db.Column('invested', Date)
+    created = db.Column('invested', Date)
     charged = db.Column('charged', Date)
     updated = db.Column('datetime', Date)
     returned = db.Column('returned', Date)
@@ -75,8 +75,8 @@ class Invest(db.Model):
         return self.user.name
 
     @hybrid_property
-    def date_invested(self):
-        return utc_from_local(self.invested)
+    def date_created(self):
+        return utc_from_local(self.created)
 
     @hybrid_property
     def date_charged(self):
@@ -191,10 +191,10 @@ class Invest(db.Model):
             filters.append(self.method != kwargs['not_method'])
 
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
-            filters.append(self.date_invested >= kwargs['from_date'])
+            filters.append(self.date_created >= kwargs['from_date'])
 
         if 'to_date' in kwargs and kwargs['to_date'] is not None:
-            filters.append(self.date_invested <= kwargs['to_date'])
+            filters.append(self.date_created <= kwargs['to_date'])
 
         if 'node' in kwargs and kwargs['node'] is not None:
             filters.append(self.id == InvestNode.invest_id)
@@ -547,7 +547,7 @@ class Invest(db.Model):
     def average_second_round(self, **kwargs):
         """Average money raised (€) for successful projects (those which reached the minimum) """
         filters = list(self.get_filters(**kwargs))
-        filters.append(self.date_invested >= Project.date_passed)
+        filters.append(self.date_created >= Project.date_passed)
         sub = db.session.query(func.sum(self.amount).label('amount')).join(Project)\
                                             .filter(*filters).group_by(Project.id).subquery()
         total = db.session.query(func.avg(sub.c.amount)).scalar()

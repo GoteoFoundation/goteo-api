@@ -35,31 +35,17 @@ invest_resource_fields = {
     "latitude" : fields.Float,
     "longitude" : fields.Float,
     "region" : fields.String,
-    "date_invested"  : DateTime,
+    "date_created"  : DateTime,
     "date_charged"  : DateTime,
     "date_returned"  : DateTime,
     "date_updated"  : DateTime,
 }
 
-invest_full_resource_fields = {
-    "id"             : fields.Integer,
-    # Privacy concerns here...
-    # "user"           : fields.Nested(user_resource_fields),
-    # "anonymous"         : fields.Boolean,
-    "type"         : fields.String,
-    "project"        : fields.String,
-    "call"        : fields.String,
-    "amount"         : fields.Float,
-    "status"         : fields.String,
-    "currency"         : fields.String,
-    "conversion_ratio"         : fields.Float,
-    "resign"         : fields.Boolean,
-    "date_invested"  : DateTime,
-    "date_charged"  : DateTime,
-    "date_returned"  : DateTime,
-    "date_updated"  : DateTime,
-    "location" : fields.List(fields.Nested(location_resource_fields)),
-}
+invest_full_resource_fields = invest_resource_fields.copy()
+invest_full_resource_fields.pop('latitude')
+invest_full_resource_fields.pop('longitude')
+invest_full_resource_fields["location"] = fields.List(fields.Nested(location_resource_fields))
+
 
 class InvestsListAPI(BaseList):
     """Invest list"""
@@ -73,7 +59,7 @@ class InvestsListAPI(BaseList):
 
     @requires_auth()
     @ratelimit()
-    # @swag_from('swagger_specs/invest_list.yml')
+    @swag_from('swagger_specs/invest_list.yml')
     def get(self):
         res = self._get()
 
@@ -121,12 +107,12 @@ class InvestAPI(BaseItem):
 
     @requires_auth()
     @ratelimit()
-    # @swag_from('swagger_specs/invest_item.yml')
+    @swag_from('swagger_specs/invest_item.yml')
     def get(self, invest_id):
         res = self._get(invest_id)
 
-        if res.ret['id'] == None:
-            return bad_request('Matchfunding not found', 404)
+        if not res.ret['id']:
+            return bad_request('Invest not found', 404)
 
         return res.response()
 

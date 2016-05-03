@@ -1,0 +1,86 @@
+Invest API
+This resource returns invest information.
+<a href="http://developers.goteo.org/invests#invest">developers.goteo.org/invests#invest</a>
+---
+tags:
+    - invests
+definitions:
+    - schema:
+        id: InvestFull
+        properties:
+            id:
+                type: integer
+                description: Invest unique identifier
+            amount:
+                type: float
+                description: Amount of the contribution
+            currency:
+                type: string
+                description: Currency of the contribution (currently one of EUR, GBP or USD)
+            conversion-ratio:
+                type: float
+                description: Currency rate at the moment of the payment (relative to EUR)
+            date-charged:
+                type: string
+                description: Date-only when the invest was charged in RFC822 format
+            date-created:
+                type: string
+                description: Date-only when the invest was created in RFC822 format
+            date-returned:
+                type: string
+                description: Date-only when the invest was returned (if applicable) in RFC822 format
+            date-updated:
+                type: string
+                description: Date & Time when the invest was last updated in RFC822 format
+            region:
+                type: string
+                description: Region location for the project
+            project:
+                type: string
+                description: Id of the project where applies the invests
+            call:
+                type: string
+                description: Id of the matchfunding call if this invest belongs to a project in selected
+            type:
+                type: string
+                description: Type of the payment, one of 'payment', 'drop', 'pool'
+            status:
+                type: string
+                description: Status of the payment, one of 'processing', 'pending', 'charged', 'cancelled', 'paid', 'returned', 'relocated', 'pool-returned'
+            resign:
+                type: boolean
+                description: True if the user does not want any reward in exchango of the contribution
+            location:
+                type: array
+                description: Location of the invest
+                items:
+                    $ref: '#/definitions/api_invests_invest_get_InvestLocation'
+    - schema:
+        id: InvestLocation
+        properties:
+            city:
+                type: string
+            region:
+                type: string
+            country:
+                type: string
+            country-code:
+                type: string
+            latitude:
+                type: number
+            longitude:
+                type: number
+
+parameters:
+    - in: path
+      type: integer
+      name: invest_id
+      description: Unique ID for the invest
+      required: true
+responses:
+    200:
+        description: Invest data
+        schema:
+            $ref: '#/definitions/api_invests_invests_list_get_InvestFull'
+    404:
+        description: Resource not found

@@ -303,11 +303,11 @@ class UserInterest(db.Model):
     def get_filters(self, **kwargs):
         filters = [Category.name != '']  # para categorias
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
-            filters.append(Invest.date_invested >= kwargs['from_date'])
+            filters.append(Invest.date_created >= kwargs['from_date'])
             filters.append(Invest.user_id == self.user_id)
             filters.append(Invest.status.in_(Invest.VALID_INVESTS))
         if 'to_date' in kwargs and kwargs['to_date'] is not None:
-            filters.append(Invest.date_invested <= kwargs['to_date'])
+            filters.append(Invest.date_created <= kwargs['to_date'])
             filters.append(Invest.user_id == self.user_id)
             filters.append(Invest.status.in_(Invest.VALID_INVESTS))
         if 'project' in kwargs and kwargs['project'] is not None:
