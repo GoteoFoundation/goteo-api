@@ -13,6 +13,7 @@ from .models import Call, CallLang
 from ..users.resources import user_resource_fields
 from ..projects.resources import project_resource_fields
 from ..projects.models import Project
+from ..invests.models import Invest
 from ..location.models import CallLocation, ProjectLocation, location_resource_fields
 
 call_resource_fields = {
@@ -61,8 +62,8 @@ call_full_resource_fields["user"]             = fields.Nested(user_resource_fiel
 call_full_resource_fields["location"]         = fields.List(fields.Nested(location_resource_fields))
 
 
-donor_resource_fields = user_resource_fields.copy()
-donor_resource_fields['anonymous'] = fields.Boolean
+call_project_resource_fields = project_resource_fields.copy()
+call_project_resource_fields['amount_call'] = fields.Float
 
 class CallsListAPI(BaseList):
     """Call list"""
@@ -169,8 +170,9 @@ class CallProjectsListAPI(BaseList):
             return Response(attributes = {'id': None})
 
         for p in Project.list(**args):
-            item = marshal(p, project_resource_fields)
+            item = marshal(p, call_project_resource_fields)
             item['status'] = p.status_string
+            item['amount-call'] = float(Invest.pledged_total(project=p.id, call=call_id))
             item['image-url'] = image_url(p.image, 'medium', False)
             location = ProjectLocation.get(p.id)
             if location:

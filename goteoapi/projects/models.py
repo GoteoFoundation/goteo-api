@@ -372,7 +372,7 @@ class Project(db.Model):
         """Total amount of money (€) raised by Goteo"""
         try:
             filters = self.get_filters(**kwargs)
-            total = db.session.query(func.sum(distinct(self.amount))).filter(*filters).scalar()
+            total = db.session.query(func.sum(self.amount)).filter(*filters).scalar()
             if total is None:
                 total = 0
             return total
@@ -385,7 +385,7 @@ class Project(db.Model):
         """Refunded money (€) on projects """
         try:
             filters = self.get_filters(**kwargs)
-            total = db.session.query(func.sum(distinct(self.amount))).filter(*filters).scalar()
+            total = db.session.query(func.sum(self.amount)).filter(*filters).scalar()
             if total is None:
                 total = 0
             return total
