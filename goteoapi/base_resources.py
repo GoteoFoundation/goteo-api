@@ -35,6 +35,12 @@ def location_sanitizer(data):
         raise Exception("Radius must be a value between 0 and 500 Km")
     return {'latitude':location[0], 'longitude':location[1], 'radius':radius}
 
+def loc_status_sanitizer(data):
+    d = str(data)
+    if d not in ('located', 'unlocated'):
+        raise Exception("Invalid parameter loc_status. Must be one of 'located', 'unlocated'")
+    return d
+
 def limit_sanitizer(limit):
     l = int(limit)
     if(l > 50):
@@ -139,6 +145,7 @@ class BaseList(Resource):
         self.reqparse.add_argument('project', type=str, action='append')
         self.reqparse.add_argument('category', type=int, action='append')
         self.reqparse.add_argument('location', type=location_sanitizer)
+        self.reqparse.add_argument('loc_status', type=loc_status_sanitizer)
         self.reqparse.add_argument('page', type=int, default=0)
         self.reqparse.add_argument('limit', type=limit_sanitizer, default=10)
         self.reqparse.add_argument('lang', type=lang_sanitizer, action='append')

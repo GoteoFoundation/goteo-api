@@ -162,7 +162,7 @@ class CallProjectsListAPI(BaseList):
         """Get()'s method dirty work"""
 
         time_start = time.time()
-        args = self.parse_args(remove=('location', 'project'))
+        args = self.parse_args()
         args['call'] = call_id
 
         items = []

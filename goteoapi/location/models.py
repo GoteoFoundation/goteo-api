@@ -59,7 +59,7 @@ class ItemLocation(object):
     #  @Cacher cannot be applied here, this only returns a subquery to be executed
     #  from the calling entity
     @hybrid_method
-    def location_subquery(self, latitude, longitude, radius, fields=['id'], locable_only=True):
+    def location_subquery(self, latitude, longitude, radius, locable_only=True, fields=['id']):
         from math import degrees, radians, cos
 
         R = 6371 # earth's mean radius, km
@@ -118,6 +118,7 @@ class ItemLocation(object):
         location_ids = map(lambda l: int(l.id), locations)
 
         return location_ids
+
 
 #####################
 ## IMPLEMENTATIONS

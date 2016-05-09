@@ -303,7 +303,15 @@ class Project(db.Model):
             filters.append(self.id == ProjectCategory.project_id)
             filters.append(ProjectCategory.category_id.in_(kwargs['category']))
 
+        if 'loc_status' in kwargs and kwargs['loc_status'] is not None:
+            if kwargs['loc_status'] == 'located':
+                filters.append(self.id.in_(db.session.query(ProjectLocation.id).subquery()))
+            if kwargs['loc_status'] == 'unlocated':
+                filters.append(~self.id.in_(db.session.query(ProjectLocation.id).subquery()))
+
+
         if 'location' in kwargs and kwargs['location'] is not None:
+            subquery = ProjectLocation.location_subquery(**kwargs['location'])
             subquery = ProjectLocation.location_subquery(**kwargs['location'])
             filters.append(ProjectLocation.id == self.id)
             filters.append(ProjectLocation.id.in_(subquery))
