@@ -194,6 +194,11 @@ class Call(db.Model):
             subquery = CallLocation.location_subquery(**kwargs['location'])
             filters.append(CallLocation.id == self.id)
             filters.append(CallLocation.id.in_(subquery))
+        if 'loc_status' in kwargs and kwargs['loc_status'] is not None:
+            if kwargs['loc_status'] == 'located':
+                filters.append(self.id.in_(db.session.query(CallLocation.id).subquery()))
+            if kwargs['loc_status'] == 'unlocated':
+                filters.append(~self.id.in_(db.session.query(CallLocation.id).subquery()))
 
         return filters
 

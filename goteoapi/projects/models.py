@@ -312,7 +312,6 @@ class Project(db.Model):
 
         if 'location' in kwargs and kwargs['location'] is not None:
             subquery = ProjectLocation.location_subquery(**kwargs['location'])
-            subquery = ProjectLocation.location_subquery(**kwargs['location'])
             filters.append(ProjectLocation.id == self.id)
             filters.append(ProjectLocation.id.in_(subquery))
 

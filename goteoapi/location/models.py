@@ -39,10 +39,10 @@ class ItemLocation(object):
 
     @hybrid_method
     @cacher
-    def get(self, id, locable=True):
+    def get(self, id, locable=False):
         """Get a valid Location Item from id"""
         try:
-            if locable is None:
+            if not locable:
                 return self.query.get(id)
             return self.query.filter(self.id == id, self.locable == locable).one()
         except NoResultFound:
@@ -59,7 +59,7 @@ class ItemLocation(object):
     #  @Cacher cannot be applied here, this only returns a subquery to be executed
     #  from the calling entity
     @hybrid_method
-    def location_subquery(self, latitude, longitude, radius, locable_only=True, fields=['id']):
+    def location_subquery(self, latitude, longitude, radius, locable_only=False, fields=['id']):
         from math import degrees, radians, cos
 
         R = 6371 # earth's mean radius, km
@@ -94,7 +94,7 @@ class ItemLocation(object):
     # Vincenty Method, slightly better precision, high cost on querying database
     @hybrid_method
     @cacher
-    def location_ids(self, latitude, longitude, radius, locable_only = True):
+    def location_ids(self, latitude, longitude, radius, locable_only = False):
         from geopy.distance import VincentyDistance
         from math import degrees, radians, cos
 
@@ -133,6 +133,12 @@ class UserLocation(db.Model, ItemLocation):
     def __repr__(self):
         return '<UserLocation: (%s) in %f,%f>' % (self.id, self.latitude, self.longitude)
 
+    #Overide use to set default locable = True
+    @hybrid_method
+    @cacher
+    def get(self, id, locable=True):
+        """Get a valid Location Item from id"""
+        return super().get(id, locable)
 
 class ProjectLocation(db.Model, ItemLocation):
     """Project location particular case"""

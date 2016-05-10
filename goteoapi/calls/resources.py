@@ -166,13 +166,14 @@ class CallProjectsListAPI(BaseList):
         args['call'] = call_id
 
         items = []
-        if Call.get(call_id) == None:
+        call = Call.get(call_id)
+        if call == None:
             return Response(attributes = {'id': None})
 
         for p in Project.list(**args):
             item = marshal(p, call_project_resource_fields)
             item['status'] = p.status_string
-            item['amount-call'] = float(Invest.pledged_total(project=p.id, call=call_id))
+            item['amount-call'] = float(Invest.pledged_total(project=p.id, user=call.owner))
             item['image-url'] = image_url(p.image, 'medium', False)
             location = ProjectLocation.get(p.id)
             if location:

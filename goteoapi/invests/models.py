@@ -209,6 +209,12 @@ class Invest(db.Model):
             subquery = InvestLocation.location_subquery(**kwargs['location'])
             filters.append(InvestLocation.id.in_(subquery))
 
+        if 'loc_status' in kwargs and kwargs['loc_status'] is not None:
+            if kwargs['loc_status'] == 'located':
+                filters.append(self.id.in_(db.session.query(InvestLocation.id).subquery()))
+            if kwargs['loc_status'] == 'unlocated':
+                filters.append(~self.id.in_(db.session.query(InvestLocation.id).subquery()))
+
         return filters
 
     @hybrid_method

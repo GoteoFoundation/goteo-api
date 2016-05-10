@@ -80,7 +80,7 @@ def test_call():
     eq_(set(resp.keys()) , set(fields.keys()))
 
 def test_call_projects():
-    fields_swagger = get_swagger(DIR + '../projects/swagger_specs/project_list.yml', 'Project')
+    fields_swagger = get_swagger(DIR + 'swagger_specs/call_projects.yml', 'ProjectCall')
     rv = test_app.get('/calls/crowdsasuna/projects')
     eq_(rv.status_code, 301)
     rv = test_app.get('/calls/crowdsasuna/projects/')
