@@ -25,10 +25,10 @@ definitions:
                 description: Main language of the project
             project-url:
                 type: string
-                description: URL where for the project
+                description: Project's original URL (crowd-funding web page)
             image-url:
                 type: string
-                description:  URL with the main image of the project
+                description: URL with the main image of the project
             date-created:
                 type: string
                 description: Date when the project was created RFC822 format
@@ -37,19 +37,19 @@ definitions:
                 description: Date when the project was published RFC822 format
             latitude:
                 type: number
-                description: Latitude coordinate for the project
+                description: Latitude coordinate for the project (if available)
             longitude:
                 type: number
-                description: Longitude coordinate for the project
+                description: Longitude coordinate for the project (if available)
             region:
                 type: string
                 description: Region location for the project
             owner:
                 type: string
-                description: Projects owner's user ID
+                description: Project owner's user ID
             owner-name:
                 type: string
-                description: Projects owner's user name
+                description: Project owner's user name
             status:
                 type: string
                 description: Status of the project

@@ -91,26 +91,26 @@ app.config['SWAGGER'] = {
         # ('Access-Control-Max-Age', 60 * 60 * 24 * 20),
     ],
     # another optional settings
-    # "url_prefix": "swaggerdocs",
+    # "url_prefix": "/swaggerdocs",
     # "subdomain": "docs.mysite,com",
     # specs are also optional if not set /spec is registered exposing all views
-    "specs": [
-        {
-            "version": app.config['VERSION'],
-            "title": app.config['DESCRIPTION'],
-            "description": app.config['DESCRIPTION'],
-            "endpoint": 'spec',
-            "route": '/apidocs/spec.json',
+    # "specs": [
+    #     {
+    #         "version": app.config['VERSION'],
+    #         "title": app.config['DESCRIPTION'],
+    #         "description": app.config['DESCRIPTION'],
+    #         "endpoint": 'spec',
+    #         # "route": '/apidocs/spec.json',
 
-            # rule_filter is optional
-            # it is a callable to filter the views to extract
+    #         # rule_filter is optional
+    #         # it is a callable to filter the views to extract
 
-            # "rule_filter": lambda rule: rule.endpoint.startswith(
-            #    'should_be_v1_only'
-            # )
-        }
-    ],
-    "static_url_path": "/apidocs"
+    #         # "rule_filter": lambda rule: rule.endpoint.startswith(
+    #         #    'should_be_v1_only'
+    #         # )
+    #     }
+    # ],
+    # "static_url_path": "/apidocs"
 }
 
 Swagger(app)

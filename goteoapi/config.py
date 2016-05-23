@@ -69,7 +69,7 @@ DEFAULT_DB_LANG = 'es'
 
 # Some usefull links
 LINKS = {
-    'Swagger Interface' : '/apidocs/spec.json',
+    'Swagger Interface' : '/spec',
     'Swagger Documentation' : '/apidocs/index.html'
 }
 

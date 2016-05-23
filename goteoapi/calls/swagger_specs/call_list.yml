@@ -61,7 +61,7 @@ definitions:
                 description: Amount of cash already distribute among projects
             amount-committed:
                 type: float
-                description:
+                description: Maximum total amount of cash that was available to distribute among projects
             amount-remaining:
                 type: float
                 description: Amount of cash still available for distribute among projects
