@@ -3,7 +3,7 @@ This resource returns invest information.
 <a href="http://developers.goteo.org/invests#invest">developers.goteo.org/invests#invest</a>
 ---
 tags:
-    - invests
+    - invest
 definitions:
     - schema:
         id: InvestFull
@@ -81,6 +81,6 @@ responses:
     200:
         description: Invest data
         schema:
-            $ref: '#/definitions/api_invests_invests_list_get_InvestFull'
+            $ref: '#/definitions/api_invests_invest_get_InvestFull'
     404:
         description: Resource not found

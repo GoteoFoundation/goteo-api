@@ -3,7 +3,7 @@ Community Stats API
 This resource returns statistics about the community in Goteo.
 ---
 tags:
-    - community_reports
+    - community
 definitions:
     - schema:
         id: Category

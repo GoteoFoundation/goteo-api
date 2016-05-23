@@ -3,7 +3,7 @@ Project API
 This resource returns project detailed information.
 ---
 tags:
-    - projects
+    - project
 definitions:
     - schema:
         id: ProjectFull

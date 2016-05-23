@@ -3,7 +3,7 @@ Digest Stats API
 This resource returns grouped statistics
 ---
 tags:
-    - digests_reports
+    - digests
 definitions:
     - schema:
         id: Group

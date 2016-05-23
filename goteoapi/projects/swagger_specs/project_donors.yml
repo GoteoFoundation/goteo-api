@@ -3,7 +3,7 @@ This resource returns user donors information.
 <a href="http://developers.goteo.org/projects#donors">developers.goteo.org/projects#donors</a>
 ---
 tags:
-    - projects
+    - project_donors
 definitions:
     - schema:
         id: ProjectDonor
@@ -77,6 +77,6 @@ responses:
         schema:
             type: array
             items:
-                $ref: '#/definitions/api_projects_projects_list_get_ProjectDonor'
+                $ref: '#/definitions/api_projects_project_donors_get_ProjectDonor'
     404:
         description: Resource not found

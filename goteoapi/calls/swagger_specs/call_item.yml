@@ -3,7 +3,7 @@ This resource returns call information.
 <a href="http://developers.goteo.org/calls#call">developers.goteo.org/calls#call</a>
 ---
 tags:
-    - calls
+    - call
 definitions:
     - schema:
         id: CallFull
@@ -168,6 +168,6 @@ responses:
     200:
         description: Call data
         schema:
-            $ref: '#/definitions/api_calls_calls_list_get_CallFull'
+            $ref: '#/definitions/api_calls_call_get_CallFull'
     404:
         description: Resource not found

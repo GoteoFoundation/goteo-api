@@ -3,7 +3,7 @@ This resource returns user projects information.
 <a href="http://developers.goteo.org/calls#projects">developers.goteo.org/calls#projects</a>
 ---
 tags:
-    - calls
+    - call_projects
 definitions:
     - schema:
         id: ProjectCall
@@ -105,6 +105,6 @@ responses:
         schema:
             type: array
             items:
-                $ref: '#/definitions/api_calls_calls_list_get_ProjectCall'
+                $ref: '#/definitions/api_calls_call_projects_get_ProjectCall'
     404:
         description: Resource not found

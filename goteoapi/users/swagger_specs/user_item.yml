@@ -3,7 +3,7 @@ This resource returns user information.
 <a href="http://developers.goteo.org/users#user">developers.goteo.org/users#user</a>
 ---
 tags:
-    - users
+    - user
 definitions:
     - schema:
         id: UserFull
@@ -67,6 +67,6 @@ responses:
     200:
         description: User data
         schema:
-            $ref: '#/definitions/api_users_users_list_get_UserFull'
+            $ref: '#/definitions/api_users_user_get_UserFull'
     404:
         description: Resource not found

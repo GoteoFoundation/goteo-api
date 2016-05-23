@@ -73,7 +73,7 @@ responses:
             type: array
             id: categories
             items:
-                $ref: '#/definitions/api_categories_categories_list_get_Category'
+                $ref: '#/definitions/api_categories_categories_get_Category'
     400:
         description: Invalid parameters format
     # 404:

@@ -125,7 +125,7 @@ responses:
             type: array
             id: calls
             items:
-                $ref: '#/definitions/api_calls_calls_list_get_Call'
+                $ref: '#/definitions/api_calls_calls_get_Call'
     400:
         description: Invalid parameters format
     # 404:

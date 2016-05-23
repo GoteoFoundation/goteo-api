@@ -3,7 +3,7 @@ Reward Stats API
 This resource returns statistics about rewards in Goteo.
 ---
 tags:
-    - reward_reports
+    - rewards
 definitions:
     - schema:
         id: Favourite

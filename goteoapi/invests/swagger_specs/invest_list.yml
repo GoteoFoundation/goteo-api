@@ -101,7 +101,7 @@ responses:
             type: array
             id: invests
             items:
-                $ref: '#/definitions/api_invests_invests_list_get_Invest'
+                $ref: '#/definitions/api_invests_invests_get_Invest'
     400:
         description: Invalid parameters format
     # 404:

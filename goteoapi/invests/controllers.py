@@ -7,7 +7,7 @@ from .. import api, app
 from flask import url_for, redirect
 from .resources import InvestsListAPI, InvestAPI
 
-api.add_resource(InvestsListAPI, '/invests/', endpoint='api_invests.invests_list')
+api.add_resource(InvestsListAPI, '/invests/', endpoint='api_invests.invests')
 api.add_resource(InvestAPI, '/invests/<int:invest_id>', endpoint='api_invests.invest')
 
 # redirect end trailing slash

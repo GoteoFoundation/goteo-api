@@ -80,7 +80,7 @@ responses:
             type: array
             id: users
             items:
-                $ref: '#/definitions/api_users_users_list_get_User'
+                $ref: '#/definitions/api_users_users_get_User'
     400:
         description: Invalid parameters format
     # 404:

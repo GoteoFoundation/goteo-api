@@ -79,7 +79,7 @@ responses:
             type: array
             id: licenses
             items:
-                $ref: '#/definitions/api_licenses_licenses_list_get_License'
+                $ref: '#/definitions/api_licenses_licenses_get_License'
     400:
         description: Invalid parameters format
     # 404:

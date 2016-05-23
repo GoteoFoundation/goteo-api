@@ -3,7 +3,7 @@ Money Stats API
 This resource returns statistics about money in Goteo.
 ---
 tags:
-    - money_reports
+    - money
 definitions:
     - schema:
         id: Money

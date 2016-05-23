@@ -107,6 +107,6 @@ responses:
             type: array
             id: projects
             items:
-                $ref: '#/definitions/api_projects_projects_list_get_Project'
+                $ref: '#/definitions/api_projects_projects_get_Project'
     400:
         description: Invalid parameters format

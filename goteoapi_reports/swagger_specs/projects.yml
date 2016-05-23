@@ -3,7 +3,7 @@ Projects Stats API
 This resource returns statistics about projects in Goteo.
 ---
 tags:
-    - project_reports
+    - projects
 definitions:
     - schema:
         id: ProjectContribution

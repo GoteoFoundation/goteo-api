@@ -3,7 +3,7 @@ Summary Stats API
 This resource returns statistics about the summary in Goteo.
 ---
 tags:
-    - summary_reports
+    - summary
 definitions:
     - schema:
         id: Summary
