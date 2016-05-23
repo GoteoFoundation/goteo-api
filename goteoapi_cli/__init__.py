@@ -73,4 +73,3 @@ def crontab(install=False, remove=False):
         cron.write()
 
     print("{0}\n{1}".format(colored('CURRENT CRONTAB:', 'green'), cron))
-
