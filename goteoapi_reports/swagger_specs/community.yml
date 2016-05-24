@@ -3,7 +3,7 @@ Community Stats API
 This resource returns statistics about the community in Goteo.
 ---
 tags:
-    - community
+    - reports_community
 
 security:
     - basic: []
@@ -98,19 +98,19 @@ definitions:
             categories:
                 type: array
                 items:
-                    $ref: '#/definitions/api_reports_community_get_Category'
+                    $ref: '#/definitions/api_reports_reports_community_get_Category'
             top10-donors:
                 type: array
                 items:
-                    $ref: '#/definitions/api_reports_community_get_Donation'
+                    $ref: '#/definitions/api_reports_reports_community_get_Donation'
             top10-multidonors:
                 type: array
                 items:
-                    $ref: '#/definitions/api_reports_community_get_Donation'
+                    $ref: '#/definitions/api_reports_reports_community_get_Donation'
             top10-collaborators:
                 type: array
                 items:
-                    $ref: '#/definitions/api_reports_community_get_Collaboration'
+                    $ref: '#/definitions/api_reports_reports_community_get_Collaboration'
 parameters:
     - in: query
       type: string
@@ -153,6 +153,6 @@ responses:
     200:
         description: Community object
         schema:
-            $ref: '#/definitions/api_reports_community_get_Community'
+            $ref: '#/definitions/api_reports_reports_community_get_Community'
     400:
         description: Invalid parameters format

@@ -3,7 +3,7 @@ Summary Stats API
 This resource returns statistics about the summary in Goteo.
 ---
 tags:
-    - summary
+    - reports_summary
 
 security:
     - basic: []
@@ -89,6 +89,6 @@ responses:
     200:
         description: List of available projects
         schema:
-            $ref: '#/definitions/api_reports_summary_get_Summary'
+            $ref: '#/definitions/api_reports_reports_summary_get_Summary'
     400:
         description: Invalid parameters format

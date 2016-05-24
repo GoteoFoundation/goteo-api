@@ -3,7 +3,7 @@ Projects Stats API
 This resource returns statistics about projects in Goteo.
 ---
 tags:
-    - projects
+    - reports_projects
 
 security:
     - basic: []
@@ -69,15 +69,15 @@ definitions:
             top10-collaborations:
                 type: array
                 items:
-                    $ref: '#/definitions/api_reports_projects_get_ProjectContribution'
+                    $ref: '#/definitions/api_reports_reports_projects_get_ProjectContribution'
             top10-donations:
                 type: array
                 items:
-                    $ref: '#/definitions/api_reports_projects_get_ProjectContribution'
+                    $ref: '#/definitions/api_reports_reports_projects_get_ProjectContribution'
             top10-receipts:
                 type: array
                 items:
-                    $ref: '#/definitions/api_reports_projects_get_ProjectAmount'
+                    $ref: '#/definitions/api_reports_reports_projects_get_ProjectAmount'
             average-posts-successful:
                 type: number
 parameters:
@@ -122,6 +122,6 @@ responses:
     200:
         description: List of available projects
         schema:
-            $ref: '#/definitions/api_reports_projects_get_Project'
+            $ref: '#/definitions/api_reports_reports_projects_get_Project'
     400:
         description: Invalid parameters format

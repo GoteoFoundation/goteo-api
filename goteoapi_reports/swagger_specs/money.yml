@@ -3,7 +3,7 @@ Money Stats API
 This resource returns statistics about money in Goteo.
 ---
 tags:
-    - money
+    - reports_money
 
 security:
     - basic: []
@@ -87,6 +87,6 @@ responses:
     200:
         description: List of available projects
         schema:
-            $ref: '#/definitions/api_reports_money_get_Money'
+            $ref: '#/definitions/api_reports_reports_money_get_Money'
     400:
         description: Invalid parameters format

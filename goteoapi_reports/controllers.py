@@ -27,8 +27,8 @@ def reports():
     return jsonify(message='Collected Statistics of Goteo.org', endpoints=func_list)
 
 # All resources for reports
-api.add_resource(MoneyAPI, '/reports/money/', endpoint='api_reports.money')
-api.add_resource(ProjectsAPI, '/reports/projects/', endpoint='api_reports.projects')
-api.add_resource(CommunityAPI, '/reports/community/', endpoint='api_reports.community')
-api.add_resource(RewardsAPI, '/reports/rewards/', endpoint='api_reports.rewards')
-api.add_resource(SummaryAPI, '/reports/summary/', endpoint='api_reports.summary')
+api.add_resource(MoneyAPI, '/reports/money/', endpoint='api_reports.reports_money')
+api.add_resource(ProjectsAPI, '/reports/projects/', endpoint='api_reports.reports_projects')
+api.add_resource(CommunityAPI, '/reports/community/', endpoint='api_reports.reports_community')
+api.add_resource(RewardsAPI, '/reports/rewards/', endpoint='api_reports.reports_rewards')
+api.add_resource(SummaryAPI, '/reports/summary/', endpoint='api_reports.reports_summary')

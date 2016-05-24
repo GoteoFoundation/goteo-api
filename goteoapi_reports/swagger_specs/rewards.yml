@@ -3,7 +3,7 @@ Reward Stats API
 This resource returns statistics about rewards in Goteo.
 ---
 tags:
-    - rewards
+    - reports_rewards
 
 security:
     - basic: []
@@ -43,13 +43,13 @@ definitions:
             favorite-rewards:
                 type: array
                 items:
-                    $ref: '#/definitions/api_reports_rewards_get_Favourite'
+                    $ref: '#/definitions/api_reports_reports_rewards_get_Favourite'
             percentage-reward-refusal:
                 type: number
             rewards-per-amount:
                 type: array
                 items:
-                    $ref: '#/definitions/api_reports_rewards_get_PerAmount'
+                    $ref: '#/definitions/api_reports_reports_rewards_get_PerAmount'
 
 parameters:
     - in: query
@@ -93,6 +93,6 @@ responses:
     200:
         description: List of available projects
         schema:
-            $ref: '#/definitions/api_reports_rewards_get_Reward'
+            $ref: '#/definitions/api_reports_reports_rewards_get_Reward'
     400:
         description: Invalid parameters format
