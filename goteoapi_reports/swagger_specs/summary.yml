@@ -14,36 +14,49 @@ definitions:
         properties:
             pledged:
                 type: integer
+                description: Total amount of money (€) raised by Goteo
             matchfund-amount:
                 type: integer
+                description: Amount of money raised in calls (Capital riego distribuido + crowdfunding money)
             matchfundpledge-amount:
                 type: integer
+                description: "*Capital Riego de Goteo* (funds from institutions and companies added to the [Capital Riego](https://goteo.org/service/resources))"
             average-donation:
                 type: number
+                description: Average amount of money (€) given by a donor
             users:
                 type: integer
+                description: Total number of registered users
             projects-received:
                 type: integer
+                description: Number of received projects (accepted for review by Goteo administrators).<br>**Date filters** here uses the date where the project was sent to revision
             projects-published:
                 type: integer
+                description: Number of published projects.<br>**Date filters** here uses the date where the project started its campaign
             projects-successful:
                 type: integer
+                description: Number of successful projects (which have achieved the minimum required amount).<br>**Date filters** here uses the date where the had achieved the minimum amount
             projects-failed:
                 type: integer
+                description: Number of failed projects (unsuccessful crowdfunding campaigns)
             categories:
                 type: array
+                description: Array of categories
                 items:
                     $ref: '#/definitions/api_reports_reports_community_get_Category'
             favorite-rewards:
                 type: array
+                description: Reward type used in successful projects
                 items:
                     $ref: '#/definitions/api_reports_reports_rewards_get_Favourite'
             top10-collaborations:
                 type: array
+                description: The 10 campaigns with the most collaborations
                 items:
                     $ref: '#/definitions/api_reports_reports_projects_get_ProjectContribution'
             top10-donations:
                 type: array
+                description: The 10 campaigns with the most donors (individual contributions)
                 items:
                     $ref: '#/definitions/api_reports_reports_projects_get_ProjectContribution'
 
@@ -70,21 +83,13 @@ parameters:
       format: date
     - in: query
       name: category
-      description: Filter by project category. Multiple projects can be specified
+      description: Filter by project category. Multiple categories can be specified
       type: integer
     - in: query
       name: location
       description: Filter by project location (Latitude,longitude,Radius in Km)
       type: number
       collectionFormat: csv
-    - in: query
-      name: page
-      description: Page number (starting at 1) if the result can be paginated
-      type: integer
-    - in: query
-      name: limit
-      description: Page limit (maximum 50 results, defaults to 10) if the result can be paginated
-      type: integer
 responses:
     200:
         description: List of available projects

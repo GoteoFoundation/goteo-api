@@ -54,6 +54,11 @@ parameters:
       description: Filter by individual node(s). Multiple nodes can be specified. Restricts the list to the users originally created in that node(s)
       collectionFormat: multi
     - in: query
+      name: lang
+      description: Get results by specified lang. Multiple langs can be specified
+      type: string
+      collectionFormat: multi
+    - in: query
       name: from_date
       description: Filter from date. Ex. "2013-01-01". Restricts the list to the users created in that range
       type: string

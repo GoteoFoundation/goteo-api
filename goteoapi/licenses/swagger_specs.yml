@@ -45,6 +45,11 @@ parameters:
       type: string
       collectionFormat: multi
     - in: query
+      name: lang
+      description: Get results by specified lang. Multiple langs can be specified
+      type: string
+      collectionFormat: multi
+    - in: query
       name: from_date
       description: Filter from date. Ex. "2013-01-01". Restricts the list to the licenses used in the project rewards where the project was published after that date (included)
       type: string

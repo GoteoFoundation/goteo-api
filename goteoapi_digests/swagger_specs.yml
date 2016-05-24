@@ -10,18 +10,24 @@ security:
 
 definitions:
     - schema:
-        id: Group
-    - schema:
         id: Digest
         properties:
             global:
-                $ref: '#/definitions/api_digests_get_Group'
+                $ref: '#/definitions/api_digests_get_Bucket'
+                description: The content of the endpoint with the summarized data for all the buckets together
             buckets:
                 type: array
+                description: An associative array where the key is an identifier of the period and the value is the content of the endpoint.<br>A digest generated for a whole year will return 12 buckets correspondig to each month of the year.<br>A digest generated without a year will return one buecket per each year of the Goteo's history
                 items:
-                    $ref: '#/definitions/api_digests_get_Group'
+                    $ref: '#/definitions/api_digests_get_Bucket'
             endpoint:
                 type: string
+                description: The name of the endpoint used to digest
+    - schema:
+        id: Bucket
+        properties:
+          "*month/year*":
+            description: The name of this field depends on the type of buckets generated, could be a month number or a year. The value will be the same object of the endpoint being requested
 parameters:
     - in: query
       type: string
@@ -34,32 +40,24 @@ parameters:
       type: string
       collectionFormat: multi
     - in: query
-      name: from_date
-      description: Filter from date. Ex. "2013-01-01"
-      type: string
-      format: date
-    - in: query
-      name: to_date
-      description: Filter until date.. Ex. "2014-01-01"
-      type: string
-      format: date
-    - in: query
       name: category
-      description: Filter by project category. Multiple projects can be specified
+      description: Filter by project category. Multiple categories can be specified
       type: integer
+    - in: query
+      name: lang
+      description: Get results by specified lang. Multiple langs can be specified
+      type: string
+      collectionFormat: multi
     - in: query
       name: location
       description: Filter by project location (Latitude,longitude,Radius in Km)
       type: number
       collectionFormat: csv
     - in: query
-      name: page
-      description: Page number (starting at 1) if the result can be paginated
+      name: year
+      description: Groups the buckets in 12 months for the specified year
       type: integer
-    - in: query
-      name: limit
-      description: Page limit (maximum 50 results, defaults to 10) if the result can be paginated
-      type: integer
+
 responses:
     200:
         description: List of available projects

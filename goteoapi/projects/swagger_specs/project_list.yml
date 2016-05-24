@@ -78,6 +78,11 @@ parameters:
       type: string
       collectionFormat: multi
     - in: query
+      name: lang
+      description: Get results by specified lang. Multiple langs can be specified
+      type: string
+      collectionFormat: multi
+    - in: query
       name: from_date
       description: Filter from date. Ex. "2013-01-01". Restricts the list to the projects created in that range
       type: string
@@ -89,7 +94,7 @@ parameters:
       format: date
     - in: query
       name: category
-      description: Filter by project category. Multiple projects can be specified. Restricts the list to the projects that have interests in that category(ies)
+      description: Filter by project category. Multiple categories can be specified. Restricts the list to the projects that have interests in that category(ies)
       type: integer
     - in: query
       name: location

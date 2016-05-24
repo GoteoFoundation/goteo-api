@@ -96,6 +96,11 @@ parameters:
       type: string
       collectionFormat: multi
     - in: query
+      name: lang
+      description: Get results by specified lang. Multiple langs can be specified
+      type: string
+      collectionFormat: multi
+    - in: query
       name: from_date
       description: Filter from date. Ex. "2013-01-01". Restricts the list to the invests created in that range
       type: string

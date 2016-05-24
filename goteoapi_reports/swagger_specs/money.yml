@@ -14,36 +14,52 @@ definitions:
         properties:
             average-failed:
                 type: number
+                description: Average money raised for failed projects (which haven't reached the minimum required amount)
             average-donation:
                 type: number
+                description: Average amount of money (€) given by a donor
             average-donation-paypal:
                 type: number
+                description: Average amount of money (€) given by a donor using Paypal
             average-minimum:
                 type: number
+                description: Average minimum cost (€) for successful projects
             average-received:
                 type: number
+                description: Average money raised (€) for successful projects (those which reached the minimum)
             average-second-round:
                 type: number
+                description: Average money raised only in the second round (€)
             matchfund-amount:
                 type: integer
+                description: Amount of money raised in calls (*Capital riego distribuido* + crowdfunding money)
             matchfundpledge-amount:
                 type: integer
+                description: "*Capital Riego de Goteo* (funds from institutions and companies added to the [Capital Riego](https://goteo.org/service/resources))"
             cash-amount:
                 type: integer
+                description: Total amount of money (€) collected by direct bank transfer
             pledged:
                 type: integer
+                description: Total amount of money (€) raised by Goteo
             percentage-pledged-failed:
                 type: number
+                description: Percentage of money raised over the minimum on failed projects
             percentage-pledged-successful:
                 type: number
+                description: Percentage of money raised over the minimum on successful projects
             refunded:
                 type: integer
+                description: Refunded money (€) on failed projects
             fee-amount:
                 type: number
+                description: Total fee keeped by Goteo
             paypal-amount:
                 type: integer
+                description: Total amount of money (€) raised using PayPal transactions
             creditcard-amount:
                 type: integer
+                description: Total amount of money (€) raised using Credit Card transactions
 
 parameters:
     - in: query
@@ -68,21 +84,13 @@ parameters:
       format: date
     - in: query
       name: category
-      description: Filter by project category. Multiple projects can be specified
+      description: Filter by project category. Multiple categories can be specified
       type: integer
     - in: query
       name: location
       description: Filter by project location (Latitude,longitude,Radius in Km)
       type: number
       collectionFormat: csv
-    - in: query
-      name: page
-      description: Page number (starting at 1) if the result can be paginated
-      type: integer
-    - in: query
-      name: limit
-      description: Page limit (maximum 50 results, defaults to 10) if the result can be paginated
-      type: integer
 responses:
     200:
         description: List of available projects
