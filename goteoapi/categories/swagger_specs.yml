@@ -23,10 +23,10 @@ definitions:
                 description: Category short description
             total-users:
                 type: integer
-                description: Number of users using this license
+                description: Number of users interested in the category
             total-projects:
                 type: integer
-                description: Number of projects using this license
+                description: Number of published projects in the category
 parameters:
     - in: query
       type: string

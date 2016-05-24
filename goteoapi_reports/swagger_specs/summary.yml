@@ -33,19 +33,19 @@ definitions:
             categories:
                 type: array
                 items:
-                    $ref: '#/definitions/api_reports_community_get_Category'
+                    $ref: '#/definitions/api_reports_reports_community_get_Category'
             favorite-rewards:
                 type: array
                 items:
-                    $ref: '#/definitions/api_reports_rewards_get_Favourite'
+                    $ref: '#/definitions/api_reports_reports_rewards_get_Favourite'
             top10-collaborations:
                 type: array
                 items:
-                    $ref: '#/definitions/api_reports_projects_get_ProjectContribution'
+                    $ref: '#/definitions/api_reports_reports_projects_get_ProjectContribution'
             top10-donations:
                 type: array
                 items:
-                    $ref: '#/definitions/api_reports_projects_get_ProjectContribution'
+                    $ref: '#/definitions/api_reports_reports_projects_get_ProjectContribution'
 
 parameters:
     - in: query
