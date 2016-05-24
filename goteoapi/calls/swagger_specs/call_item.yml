@@ -4,6 +4,10 @@ This resource returns call information.
 ---
 tags:
     - call
+
+security:
+    - basic: []
+
 definitions:
     - schema:
         id: CallFull

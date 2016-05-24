@@ -4,6 +4,10 @@ This resource returns user donors information.
 ---
 tags:
     - project_donors
+
+security:
+    - basic: []
+
 definitions:
     - schema:
         id: ProjectDonor

@@ -4,6 +4,10 @@ This resource returns license information.
 ---
 tags:
     - licenses
+
+security:
+    - basic: []
+
 definitions:
     - schema:
         id: License

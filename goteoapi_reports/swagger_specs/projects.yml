@@ -4,6 +4,10 @@ This resource returns statistics about projects in Goteo.
 ---
 tags:
     - projects
+
+security:
+    - basic: []
+
 definitions:
     - schema:
         id: ProjectContribution

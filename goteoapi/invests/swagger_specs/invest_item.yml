@@ -4,6 +4,10 @@ This resource returns invest information.
 ---
 tags:
     - invest
+
+security:
+    - basic: []
+
 definitions:
     - schema:
         id: InvestFull

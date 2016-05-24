@@ -4,6 +4,10 @@ This resource returns statistics about the summary in Goteo.
 ---
 tags:
     - summary
+
+security:
+    - basic: []
+
 definitions:
     - schema:
         id: Summary

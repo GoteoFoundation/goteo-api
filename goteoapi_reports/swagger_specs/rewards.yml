@@ -4,6 +4,10 @@ This resource returns statistics about rewards in Goteo.
 ---
 tags:
     - rewards
+
+security:
+    - basic: []
+
 definitions:
     - schema:
         id: Favourite

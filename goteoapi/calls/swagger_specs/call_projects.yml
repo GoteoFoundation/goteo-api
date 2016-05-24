@@ -4,6 +4,10 @@ This resource returns user projects information.
 ---
 tags:
     - call_projects
+
+security:
+    - basic: []
+
 definitions:
     - schema:
         id: ProjectCall

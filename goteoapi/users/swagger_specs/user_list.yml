@@ -5,6 +5,9 @@ This resource returns user information.
 tags:
     - users
 
+security:
+    - basic: []
+
 definitions:
     - schema:
         id: User
@@ -36,8 +39,6 @@ definitions:
             # region:
             #     type: string
             #     description: Region location for the user
-security:
-    - basic: []
 
 parameters:
     - in: query

@@ -4,6 +4,10 @@ This resource returns categories information.
 ---
 tags:
     - categories
+
+security:
+    - basic: []
+
 definitions:
     - schema:
         id: Category

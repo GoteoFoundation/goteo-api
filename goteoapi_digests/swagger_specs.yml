@@ -4,6 +4,10 @@ This resource returns grouped statistics
 ---
 tags:
     - digests
+
+security:
+    - basic: []
+
 definitions:
     - schema:
         id: Group

@@ -4,6 +4,10 @@ This resource returns statistics about the community in Goteo.
 ---
 tags:
     - community
+
+security:
+    - basic: []
+
 definitions:
     - schema:
         id: Category

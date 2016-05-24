@@ -4,6 +4,10 @@ This resource returns project detailed information.
 ---
 tags:
     - project
+
+security:
+    - basic: []
+
 definitions:
     - schema:
         id: ProjectFull

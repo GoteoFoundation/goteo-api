@@ -4,6 +4,10 @@ This resource returns user information.
 ---
 tags:
     - user
+
+security:
+    - basic: []
+
 definitions:
     - schema:
         id: UserFull

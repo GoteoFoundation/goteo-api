@@ -4,6 +4,10 @@ This resource returns statistics about money in Goteo.
 ---
 tags:
     - money
+
+security:
+    - basic: []
+
 definitions:
     - schema:
         id: Money
