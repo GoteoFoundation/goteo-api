@@ -84,16 +84,16 @@ definitions:
                 type: string
                 description: Call owner's user Object
             amount-available:
-                type: float
+                type: number
                 description: Available amount of cash to distribute among projects
             amount-peers:
-                type: float
+                type: number
                 description: Amount of cash already distribute among projects
             amount-committed:
-                type: float
+                type: number
                 description: Maximum total amount of cash that was available to distribute among projects
             amount-remaining:
-                type: float
+                type: number
                 description: Amount of cash still available for distribute among projects
             projects-total:
                 type: integer

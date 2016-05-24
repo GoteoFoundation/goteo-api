@@ -33,7 +33,7 @@ definitions:
                 type: string
                 description: Date when the user was created RFC822 format
             amount-public-invested:
-                type: float
+                type: number
                 description: Amount of money invested in any project (excluding anonymous investions)
             projects-public-invested:
                 type: number

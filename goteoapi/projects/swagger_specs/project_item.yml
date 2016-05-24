@@ -173,7 +173,7 @@ definitions:
             type:
                 type: string
             amount:
-                type: float
+                type: number
             required:
                 type: string
             date-from:

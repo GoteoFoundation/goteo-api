@@ -17,7 +17,7 @@ definitions:
                 items:
                     $ref: '#/definitions/api_digests_get_Group'
             endpoint:
-                type:  string
+                type: string
 parameters:
     - in: query
       type: string
