@@ -19,7 +19,7 @@ definitions:
                 type: string
                 description: Name of the user
             about:
-                type: text
+                type: string
                 description: User's about text
             node:
                 type: string
