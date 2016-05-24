@@ -56,6 +56,8 @@ INITIAL_YEAR = 2011
 
 #Api description
 DESCRIPTION = 'Goteo.org Api'
+#Api base path (useful for swagger-ui) in case is prefixed
+BASE_PATH = ''
 
 #Timezone used in Goteo database
 # timezone = 'US/Eastern'
