@@ -2,7 +2,7 @@ aniso8601==1.1.0
 bcrypt==2.0.0
 cffi==1.6.0
 coverage==4.1
-flasgger==0.5.12
+https://github.com/microstudi/flasgger/archive/0.5.12.tar.gz
 Flask==0.10.1
 Flask-Cache==0.13.1
 Flask-Redis==0.1.0

@@ -2,7 +2,7 @@ aniso8601
 bcrypt
 cffi
 coverage
-flasgger
+https://github.com/microstudi/flasgger/archive/0.5.12.tar.gz
 Flask
 Flask-Cache
 Flask-Redis

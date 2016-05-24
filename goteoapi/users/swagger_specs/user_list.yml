@@ -4,6 +4,7 @@ This resource returns user information.
 ---
 tags:
     - users
+
 definitions:
     - schema:
         id: User
@@ -35,6 +36,9 @@ definitions:
             # region:
             #     type: string
             #     description: Region location for the user
+security:
+    - basic: []
+
 parameters:
     - in: query
       type: string
@@ -73,6 +77,7 @@ parameters:
       name: limit
       description: Page limit (maximum 50 results, defaults to 10) if the result can be paginated
       type: integer
+
 responses:
     200:
         description: List of available users

@@ -110,7 +110,22 @@ app.config['SWAGGER'] = {
             # )
         }
     ],
-    # "static_url_path": "/apidocs"
+    # "static_url_path": "/apidocs",
+    "test" : 'text',
+    "securityDefinitions": {
+        # TODO: include oauth specification (login html screen must be generated)
+        # "petstore_auth": {
+        #     "type": "oauth2",
+        #     "authorizationUrl": "/oauth/dialog",
+        #     "flow": "implicit",
+        #     "scopes": {
+        #         "read:public": "Public content"
+        #     }
+        # },
+        "basic": {
+            "type": "basic"
+        }
+    }
 }
 
 Swagger(app)
