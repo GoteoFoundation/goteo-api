@@ -29,7 +29,7 @@ definitions:
                 description: Language for the user's texts description
             profile-image-url:
                 type: string
-                description:  URL with the avatar (image) of the user
+                description: URL with the avatar (image) of the user
             profile-url:
                 type: string
                 description: URL for the user profile
@@ -50,7 +50,7 @@ definitions:
                 description: Number of project the user has interacted
             translations:
                 type: array
-                description: All available translations in a list by language
+                description: All available translations in a list indexed by language in [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) format
                 items:
                     $ref: '#/definitions/api_users_user_get_UserTranslation'
     - schema:
@@ -58,8 +58,10 @@ definitions:
         properties:
             name:
                 type: string
+                description: Name of the user translated (if any)
             about:
                 type: string
+                description: User's about text translated (if any)
 
 parameters:
     - in: path

@@ -28,7 +28,7 @@ class UserLang(AbstractLang, db.Model):
     id = db.Column('id', String(50), db.ForeignKey('user.id'), primary_key=True)
     lang = db.Column('lang', String(2), primary_key=True)
     name = db.Column('name', String(100))
-    user = relationship('User', back_populates='translations')
+    User = relationship('User', back_populates='Translations')
 
     def __repr__(self):
         return '<UserLang %s(%s): %r>' % (self.id, self.lang, self.name)
@@ -49,14 +49,17 @@ class User(db.Model):
     created = db.Column('created', Date)
     updated = db.Column('modified', Date)
     lang = config.DEFAULT_DB_LANG
-    translations = relationship("UserLang",
-                                primaryjoin = "and_(User.id==UserLang.id)",
-                                back_populates="user", lazy='joined') # Eager loading to allow catching
+    Translations = relationship("UserLang",
+                                back_populates="User", lazy='joined') # Eager loading to allow catching
 
 
     def __repr__(self):
         return '<User %s: %r>' % (self.id, self.name)
 
+
+    @hybrid_property
+    def node(self):
+        return self.node_id
 
     @hybrid_property
     def profile_image_url(self):

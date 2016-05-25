@@ -9,6 +9,8 @@ from flask.ext.restful import Resource, reqparse
 from sqlalchemy import and_
 from sqlalchemy.orm import aliased
 from sqlalchemy.inspection import inspect
+from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.ext.hybrid import hybrid_method
 
 from .helpers import *
 from . import app, db
@@ -85,6 +87,15 @@ class AbstractLang():
             joins.append((alias, and_(alias.id == sub_class.id, alias.lang == l)))
             # print(joins)
         return db.session.query(*cols).distinct().outerjoin(*joins);
+
+    @hybrid_method
+    def get(self, id, lang):
+        """Get a generic entry for the ObjectLang (assuming uses id as primary key)"""
+        try:
+            return self.query.filter(self.id==id, self.lang==lang).one()
+        except NoResultFound:
+            return None
+        pass
 
     # def list_translations(self, primary_key = 'id'):
     #     """Returns a list of available translations for an instance"""

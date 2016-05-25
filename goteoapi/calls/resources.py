@@ -132,7 +132,7 @@ class CallAPI(BaseItem):
                 item['location'] = [marshal(location, location_resource_fields)]
             translations = {}
             translate_keys = {k: v for k, v in call_full_resource_fields.items() if k in CallLang.get_translate_keys()}
-            for k in p.translations:
+            for k in p.Translations:
                 translations[k.lang] = marshal(k, translate_keys)
                 translations[k.lang]['description-short'] = k.subtitle
             item['translations'] = translations

@@ -121,7 +121,7 @@ class UserAPI(BaseItem):
 
             translations = {}
             translate_keys = {k: v for k, v in user_full_resource_fields.items() if k in UserLang.get_translate_keys()}
-            for k in u.translations:
+            for k in u.Translations:
                 translations[k.lang] = marshal(k, translate_keys)
             item['translations'] = translations
 

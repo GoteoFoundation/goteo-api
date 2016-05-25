@@ -1,15 +1,53 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import func, Integer, String, Text
+from sqlalchemy import func, Integer, String, Text, Boolean
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from sqlalchemy import asc, distinct
+from sqlalchemy.orm import relationship
 
 from ..cacher import cacher
-
+from ..helpers import svg_image_url
 from ..projects.models import Project, ProjectCategory
+from ..licenses.models import License, LicenseLang
+from ..models.icon import Icon
+from ..base_resources import AbstractLang
 
 from .. import db
+
+class RewardLang(AbstractLang, db.Model):
+    __tablename__ = 'reward_lang'
+
+    id = db.Column('id', Integer, db.ForeignKey('reward.id'), primary_key=True)
+    lang = db.Column('lang', String(2), primary_key=True)
+    name = db.Column('reward', Text)
+    description = db.Column('description', Text)
+    other = db.Column('other', String(255))
+    pending = db.Column('pending', Integer)
+    Reward = relationship('Reward', back_populates='Translations')
+
+    def __repr__(self):
+        return '<RewardLang %s(%s): %r>' % (self.id, self.lang, self.name)
+
+    @hybrid_property
+    def License(self):
+        return LicenseLang.get(self.Reward.license_id, lang=self.lang)
+
+    @hybrid_property
+    def license(self):
+        return self.License.id
+
+    @hybrid_property
+    def license_name(self):
+        return self.License.name
+
+    @hybrid_property
+    def license_description(self):
+        return self.License.description
+
+    @hybrid_property
+    def license_url(self):
+        return self.License.url
 
 # Reward stuff
 class Reward(db.Model):
@@ -17,32 +55,56 @@ class Reward(db.Model):
 
     id = db.Column('id', Integer, primary_key=True)
     project_id = db.Column('project', String(50), db.ForeignKey('project.id'))
-    reward = db.Column('reward', String(50))
+    name = db.Column('reward', String(50))
     description = db.Column('description', Text)
     type = db.Column('type', String(50))
+    other = db.Column('other', String(255))
     amount = db.Column('amount', Integer)
+    units = db.Column('units', Integer)
+    fulsocial = db.Column('fulsocial', Boolean)
+    url = db.Column('url', String(255))
     icon_id = db.Column('icon', String(50), db.ForeignKey('icon.id'))
     license_id = db.Column('license', String(50), db.ForeignKey('license.id'))
     order = db.Column('order', Integer)
+    License = relationship("License")
+    Icon = relationship("Icon")
+    Translations = relationship("RewardLang",
+                                primaryjoin = "and_(Reward.id==RewardLang.id, RewardLang.pending==0)",
+                                back_populates="Reward", lazy='joined') # Eager loading to allow catching
 
     def __repr__(self):
-        return '<Reward(%d) %s: %s>' % (self.id, self.project_id[:10], self.title[:50])
+        return '<Reward(%d) %s: %s>' % (self.id, self.project_id, self.name)
 
     @hybrid_property
-    def name(self):
-        return self.reward
+    def icon_url(self):
+        return svg_image_url(self.icon_id + '.svg', 'icons')
 
-    #Filters for this table
     @hybrid_property
-    def filters(self):
-        return []
+    def license(self):
+        return self.License.id
+
+    @hybrid_property
+    def license_name(self):
+        return self.License.name
+
+    @hybrid_property
+    def license_description(self):
+        return self.License.description
+
+    @hybrid_property
+    def license_url(self):
+        return self.License.url
+
+    @hybrid_property
+    def license_svg_url(self):
+        return self.License.svg_url
 
     # Getting filters for this model
     @hybrid_method
     def get_filters(self, **kwargs):
         from ..location.models import ProjectLocation
 
-        filters = self.filters
+        filters = []
         # Join project table if filters
         for i in ('node', 'from_date', 'to_date', 'project', 'category', 'location'):
             if i in kwargs and kwargs[i] is not None:
@@ -86,10 +148,15 @@ class Reward(db.Model):
 
     @hybrid_method
     @cacher
-    def list_by_project(self, project_id):
+    def list_by_project(self, project_id, lang=None):
         """Get a list of valid rewards for project"""
         try:
-            return self.query.distinct().filter(self.project_id==project_id).order_by(asc(self.order), asc(self.amount)).all()
+            filters = [self.project_id==project_id]
+            if lang:
+                filters.append(RewardLang.id==self.id)
+                filters.append(RewardLang.lang==lang)
+                return RewardLang.query.distinct().filter(*filters).order_by(asc(self.order), asc(self.amount)).all()
+            return self.query.distinct().filter(*filters).order_by(asc(self.order), asc(self.amount)).all()
         except NoResultFound:
             return []
 

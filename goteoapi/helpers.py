@@ -124,7 +124,7 @@ def percent(number, base=None):
     perc = float(number) / base * 100
     return round(perc, 2)
 
-def marshal(data, fields, envelope=None):
+def marshal(data, fields, envelope=None, remove_null=False):
     """
     Processes a dictionary with values as described in
     http://flask-restful-cn.readthedocs.org/en/latest/api.html#flask_restful.marshal
@@ -132,10 +132,10 @@ def marshal(data, fields, envelope=None):
     and changes all underscore symbol (_) to hyphen symbol (-)
     """
     if isinstance(data, (list, tuple)):
-        return [marshal(d, fields, envelope) for d in data]
+        return [marshal(d, fields, envelope, remove_null) for d in data]
     m = s_marshal(data, fields, envelope)
     if isinstance(m, dict):
-        return { k.replace("_", "-"): v for k, v in m.items() }
+        return { k.replace("_", "-"): v for k, v in m.items() if not remove_null or v is not None }
     return m
 
 # Customized filelds for the API

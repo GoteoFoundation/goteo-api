@@ -43,11 +43,6 @@ class License(db.Model):
     def svg_url(self):
     	return svg_image_url(self.id + '.svg')
 
-    #Filters for table license
-    @hybrid_property
-    def filters(self):
-        return []
-
     # Getting filters for this model
     @hybrid_method
     def get_filters(self, **kwargs):
@@ -56,7 +51,7 @@ class License(db.Model):
         from ..projects.models import Project, ProjectCategory
         from ..location.models import ProjectLocation
 
-        filters = self.filters
+        filters = []
         # Join project table if filters
         for i in ('node', 'from_date', 'to_date', 'project', 'category', 'location'):
             if i in kwargs and kwargs[i] is not None:
@@ -92,11 +87,10 @@ class License(db.Model):
 
     @hybrid_method
     @cacher
-    def get(self, id):
+    def get(self, id, lang=None):
         """Get a valid license form id"""
         try:
-            filters = list(self.filters)
-            filters.append(License.id == id)
+            filters = [self.id==id]
             return self.query.filter(*filters).one()
         except NoResultFound:
             return None

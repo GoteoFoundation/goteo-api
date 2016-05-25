@@ -129,7 +129,7 @@ definitions:
                     $ref: '#/definitions/api_projects_project_get_ProjectNeed'
             translations:
                 type: array
-                description: All available translations in a list by language
+                description: All available translations in a list indexed by language in [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) format
                 items:
                     $ref: '#/definitions/api_projects_project_get_ProjectTranslation'
     - schema:
@@ -137,83 +137,115 @@ definitions:
         properties:
             city:
                 type: string
+                description: City location of the project (language may vary)
             region:
                 type: string
+                description: Region location of the project (language may vary)
             country:
                 type: string
+                description: Country name of the project (language may vary)
             country-code:
                 type: string
+                description: Country code of the project in [ISO 3166-1](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) format
             latitude:
                 type: number
+                description: Project's location latitude coordinate
             longitude:
                 type: number
+                description: Project's location longitude coordinate
     - schema:
         id: ProjectGallery
         properties:
             image-url:
                 type: string
+                description: URL image gallery item
             resource-url:
                 type: string
+                description: URL resource (link) associated with the gallery item (if any)
     - schema:
         id: ProjectReward
         properties:
             reward:
                 type: string
+                description: Reward's item name
             description:
                 type: string
+                description: Reward's item description
             license:
                 type: string
+                description: Reward's item license
             type:
                 type: string
+                description: Reward's item type (social or individual)
             icon:
                 type: string
+                description: Reward's item URL icon
     - schema:
         id: ProjectCost
         properties:
             cost:
                 type: string
+                description:
             description:
                 type: string
+                description:
             type:
                 type: string
+                description:
             amount:
                 type: number
+                description:
             required:
                 type: string
+                description:
             date-from:
                 type: string
+                description:
             date-to:
                 type: string
+                description:
     - schema:
         id: ProjectNeed
         properties:
             support:
                 type: string
+                description:
             description:
                 type: string
+                description:
             type:
                 type: string
+                description:
     - schema:
         id: ProjectTranslation
         properties:
             subtitle:
                 type: string
+                description:
             description:
                 type: string
+                description:
             motivation:
                 type: string
+                description:
             about:
                 type: string
+                description:
             related:
                 type: string
+                description:
             reward:
                 type: string
+                description:
             keywords:
                 type: string
+                description:
             video:
                 type: string
+                description:
             media:
                 type: string
+                description:
 
 parameters:
     - in: path

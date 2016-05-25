@@ -27,7 +27,7 @@ class CallLang(AbstractLang, db.Model):
     tweet = db.Column('tweet', Text)
     resources = db.Column('resources', Text)
     pending = db.Column('pending', Integer)
-    call = relationship('Call', back_populates='translations')
+    Call = relationship('Call', back_populates='Translations')
 
     def __repr__(self):
         return '<CallLang %s(%s): %r>' % (self.id, self.lang, self.name)
@@ -54,6 +54,7 @@ class Call(db.Model):
     subtitle = db.Column('subtitle', Text)
     description = db.Column('description', Text)
     user_id = db.Column('owner', String(50), db.ForeignKey('user.id'))
+    User = relationship("User")
     whom = db.Column('whom', Text)
     applies = db.Column('apply', Text)
     legal = db.Column('legal', Text)
@@ -81,9 +82,9 @@ class Call(db.Model):
     backimage = db.Column('backimage', String(255))
     facebook = db.Column('fbappid', String(255))
     call_location = db.Column('call_location', String(255))
-    translations = relationship("CallLang",
+    Translations = relationship("CallLang",
                                 primaryjoin = "and_(Call.id==CallLang.id, CallLang.pending==0)",
-                                back_populates="call", lazy='joined') # Eager loading to allow catching
+                                back_populates="Call", lazy='joined') # Eager loading to allow catching
 
     def __repr__(self):
         return '<Call %s: %s>' % (self.id, self.name)
@@ -93,17 +94,12 @@ class Call(db.Model):
         return float(Invest.pledged_total(not_method=Invest.METHOD_DROP, call = self.id))
 
     @hybrid_property
-    def user(self):
-        from ..users.models import User
-        return User.get(self.user_id)
-
-    @hybrid_property
     def owner(self):
         return self.user_id
 
     @hybrid_property
     def owner_name(self):
-        return self.user.name
+        return self.User.name
 
     @hybrid_property
     def description_short(self):

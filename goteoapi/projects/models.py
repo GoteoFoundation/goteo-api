@@ -6,7 +6,7 @@ from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.orm import aliased, relationship
 
-from ..helpers import image_url, project_url, utc_from_local, get_lang
+from ..helpers import image_url, project_url, project_widget_url, utc_from_local, get_lang
 from ..cacher import cacher
 from ..base_resources import AbstractLang
 from ..models.post import Post, Blog
@@ -29,10 +29,14 @@ class ProjectLang(AbstractLang, db.Model):
     video = db.Column('video', String(255))
     media = db.Column('media', String(255))
     pending = db.Column('pending', Integer)
-    project = relationship('Project', back_populates='translations')
+    Project = relationship('Project', back_populates='Translations')
 
     def __repr__(self):
         return '<ProjectLang %s(%s): %r>' % (self.id, self.lang, self.subtitle)
+
+    @hybrid_property
+    def description_short(self):
+        return self.subtitle
 
 class Project(db.Model):
     """
@@ -75,6 +79,7 @@ class Project(db.Model):
 
     id = db.Column('id', String(50), primary_key=True)
     user_id = db.Column('owner', String(50), db.ForeignKey('user.id'))
+    User = relationship("User")
     name = db.Column('name', Text)
     subtitle = db.Column('subtitle', Text)
     description = db.Column('description', Text)
@@ -104,23 +109,13 @@ class Project(db.Model):
     closed = db.Column('closed', Date) # fecha de cierre de proyecto
     success = db.Column('success', Date) # fecha de éxito de proyecto
     node_id = db.Column('node', String(50), db.ForeignKey('node.id'))
-    # total_funding
-    # active_date
-    # rewards
-    # platform
-    #aportes = db.relationship('Invest', backref='project')
     #
-    translations = relationship("ProjectLang",
+    Translations = relationship("ProjectLang",
                                 primaryjoin = "and_(Project.id==ProjectLang.id, ProjectLang.pending==0)",
-                                back_populates="project", lazy='joined') # Eager loading to allow catching
+                                back_populates="Project", lazy='joined') # Eager loading to allow catching
 
     def __repr__(self):
         return '<Project %s: %s>' % (self.id, self.name)
-
-    @hybrid_property
-    def user(self):
-        from ..users.models import User
-        return User.get(self.user_id)
 
     @hybrid_property
     def owner(self):
@@ -128,7 +123,7 @@ class Project(db.Model):
 
     @hybrid_property
     def owner_name(self):
-        return self.user.name
+        return self.User.name
 
     @hybrid_property
     def description_short(self):
@@ -136,6 +131,10 @@ class Project(db.Model):
 
     @hybrid_property
     def image_url(self):
+        return image_url(self.image, size="medium")
+
+    @hybrid_property
+    def image_url_big(self):
         return image_url(self.image, size="big")
 
     @hybrid_property
@@ -145,6 +144,10 @@ class Project(db.Model):
     @hybrid_property
     def project_url(self):
         return project_url(self.id)
+
+    @hybrid_property
+    def widget_url(self):
+        return project_widget_url(self.id)
 
     @hybrid_property
     def date_created(self):

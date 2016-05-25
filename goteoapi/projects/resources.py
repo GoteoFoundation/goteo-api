@@ -14,6 +14,7 @@ from ..users.models import User
 from ..users.resources import user_resource_fields
 from ..location.models import ProjectLocation, UserLocation, location_resource_fields
 from ..models.reward import Reward
+from ..licenses.resources import license_resource_fields
 from ..models.cost import Cost
 from ..models.support import Support
 
@@ -44,15 +45,29 @@ project_gallery_resource_fields = {
 }
 
 project_reward_resource_fields = {
-    "reward" : fields.String,
+    "id" : fields.Integer,
+    "name" : fields.String,
     "description"              : fields.String,
-    "license"              : fields.String,
     "type"              : fields.String,
-    "icon"              : fields.String,
+    "amount"              : fields.Integer,
+    "icon_url"              : fields.String,
+    "license"              : fields.String,
+    "license_description"              : fields.String,
+    "license_name"              : fields.String,
+    "license_url"              : fields.String,
+    "license_svg_url"              : fields.String,
 }
+project_reward_translate_resource_fields = project_reward_resource_fields.copy()
+project_reward_translate_resource_fields.pop('type')
+project_reward_translate_resource_fields.pop('icon_url')
+project_reward_translate_resource_fields.pop('license_svg_url')
+project_reward_translate_resource_fields.pop('license')
+project_reward_translate_resource_fields.pop('id')
+project_reward_translate_resource_fields.pop('amount')
 
 project_cost_resource_fields = {
-    "cost" : fields.String,
+    "id" : fields.Integer,
+    "name" : fields.String,
     "description"              : fields.String,
     "type"              : fields.String,
     "amount"              : fields.Float,
@@ -60,11 +75,20 @@ project_cost_resource_fields = {
     "date_from"              : DateTime,
     "date_to"              : DateTime,
 }
+project_cost_translate_resource_fields = {
+    "name" : fields.String,
+    "description"              : fields.String,
+}
 
 project_need_resource_fields = {
-    "support" : fields.String,
+    "id" : fields.Integer,
+    "name" : fields.String,
     "description"              : fields.String,
     "type"              : fields.String,
+}
+project_need_translate_resource_fields = {
+    "name" : fields.String,
+    "description"              : fields.String,
 }
 
 project_full_resource_fields = project_resource_fields.copy()
@@ -94,7 +118,8 @@ project_full_resource_fields["rewards"]        = fields.List(fields.Nested(proje
 project_full_resource_fields["costs"]          = fields.List(fields.Nested(project_cost_resource_fields))
 project_full_resource_fields["needs"]          = fields.List(fields.Nested(project_need_resource_fields))
 
-
+project_full_translate_resource_fields = {k: v for k, v in project_full_resource_fields.items() if k in ProjectLang.get_translate_keys()}
+project_full_translate_resource_fields['description_short'] = fields.String
 donor_resource_fields = user_resource_fields.copy()
 donor_resource_fields['anonymous'] = fields.Boolean
 
@@ -118,10 +143,7 @@ class ProjectsListAPI(BaseList):
         items = []
         for p in Project.list(**args):
             item = marshal(p, project_resource_fields)
-            item['project-url'] = project_url(p.id)
-            item['description-short'] = p.subtitle
             item['status'] = p.status_string
-            item['image-url'] = image_url(p.image, 'medium', False)
             location = ProjectLocation.get(p.id)
             if location:
                 item['latitude'] = location.latitude
@@ -161,14 +183,9 @@ class ProjectAPI(BaseItem):
 
         item = marshal(p, project_full_resource_fields)
         if p != None:
-            item['description-short'] = p.subtitle
-            item['video-url'] = p.media
-            item['image-url'] = image_url(p.image, 'medium', False)
-            item['image-url-big'] = image_url(p.image, 'big', False)
-            item['project-url'] = project_url(p.id)
-            item['widget-url'] = project_widget_url(p.id)
             item['status'] = p.status_string
             item['scope'] = p.scope_string
+            item['user'] = marshal(p.User, user_resource_fields)
             location = ProjectLocation.get(p.id)
             if location:
                 item['location'] = [marshal(location, location_resource_fields)]
@@ -183,20 +200,37 @@ class ProjectAPI(BaseItem):
                 #     i['image-url'] = gallery.image
             rewards = Reward.list_by_project(p.id)
             if rewards:
-                item['rewards'] = marshal(rewards, project_reward_resource_fields)
+                item['rewards'] = marshal(rewards, project_reward_resource_fields, remove_null=True)
+
             costs = Cost.list_by_project(p.id)
             if costs:
-                item['costs'] = marshal(costs, project_cost_resource_fields)
+                item['costs'] = marshal(costs, project_cost_resource_fields, remove_null=True)
+
             needs = Support.list_by_project(p.id)
             if needs:
-                item['needs'] = marshal(needs, project_need_resource_fields)
+                item['needs'] = marshal(needs, project_need_resource_fields, remove_null=True)
 
             translations = {}
-            translate_keys = {k: v for k, v in project_full_resource_fields.items() if k in ProjectLang.get_translate_keys()}
-            for k in p.translations:
-                translations[k.lang] = marshal(k, translate_keys)
-                translations[k.lang]['description-short'] = k.subtitle
-                translations[k.lang]['video-url'] = k.media
+            for k in p.Translations:
+                translations[k.lang] = marshal(k, project_full_translate_resource_fields)
+                rewards = Reward.list_by_project(p.id, lang=k.lang)
+                if rewards:
+                    translations[k.lang]['rewards'] = {}
+                    for r in rewards:
+                        translations[k.lang]['rewards'][r.id] = marshal(r, project_reward_translate_resource_fields, remove_null=True)
+
+                costs = Cost.list_by_project(p.id, lang=k.lang)
+                if costs:
+                    translations[k.lang]['costs'] = {}
+                    for r in costs:
+                        translations[k.lang]['costs'][r.id] = marshal(r, project_cost_translate_resource_fields, remove_null=True)
+
+                needs = Support.list_by_project(p.id, lang=k.lang)
+                if needs:
+                    translations[k.lang]['needs'] = {}
+                    for r in needs:
+                        translations[k.lang]['needs'][r.id] = marshal(r, project_need_translate_resource_fields, remove_null=True)
+
             item['translations'] = translations
 
         res = Response(
