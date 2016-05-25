@@ -55,14 +55,17 @@ definitions:
             node:
                 type: array
                 description: Only if filtering by node
-                items: []
+                items:
+                    type: string
             project:
                 type: array
-                items: []
+                items:
+                    type: string
                 description: Only if filtering by project
             lang:
                 type: array
-                items: []
+                items:
+                    type: string
                 description: Only if filtering by lang
             from_date:
                 type: string
@@ -72,11 +75,13 @@ definitions:
                 description: Only if filtering by to_date
             category:
                 type: array
-                items: []
+                items:
+                    type: number
                 description: Only if filtering by category
             # location:
             #     type: array
-            #     items: []
+            #     items:
+            #         type: number
             #     description: Only if filtering by location
 
     - schema:
