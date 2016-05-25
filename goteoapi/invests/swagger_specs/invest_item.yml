@@ -47,10 +47,10 @@ definitions:
                 description: Id of the matchfunding call if this invest belongs to a invest in selected
             type:
                 type: string
-                description: Type of the payment, one of 'payment', 'drop', 'pool'
+                description: Type of the payment, one of `payment`, `drop`, `pool`
             status:
                 type: string
-                description: Status of the payment, one of 'processing', 'pending', 'charged', 'cancelled', 'paid', 'returned', 'relocated', 'pool-returned'
+                description: Status of the payment, one of `processing`, `pending`, `charged`, `cancelled`, `paid`, `returned`, `relocated`, `pool-returned`
             resign:
                 type: boolean
                 description: True if the user does not want any reward in exchango of the contribution

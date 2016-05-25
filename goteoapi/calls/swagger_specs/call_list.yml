@@ -83,7 +83,7 @@ definitions:
                 description: Projects funded in this matchfunding call
             status:
                 type: string
-                description: Status of the call, one of 'pending', 'editing', 'reviewing', 'applying', 'published', 'succeeded', 'expired'
+                description: Status of the call, one of `pending`, `editing`, `reviewing`, `applying`, `published`, `succeeded`, `expired`
 parameters:
     - in: query
       type: string

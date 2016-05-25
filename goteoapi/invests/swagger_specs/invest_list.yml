@@ -20,7 +20,7 @@ definitions:
                 description: Amount of the contribution
             currency:
                 type: string
-                description: Currency of the contribution (currently one of EUR, GBP or USD)
+                description: Currency of the contribution (currently one of `EUR`, `GBP`, `USD`) in [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) format
             conversion-ratio:
                 type: number
                 description: Currency rate at the moment of the payment (relative to EUR)
@@ -53,10 +53,10 @@ definitions:
                 description: Id of the matchfunding call if this invest belongs to a invest in selected
             type:
                 type: string
-                description: Type of the payment, one of 'payment', 'drop', 'pool'
+                description: Type of the payment, one of `payment`, `drop`, `pool`
             status:
                 type: string
-                description: Status of the payment, one of 'processing', 'pending', 'charged', 'cancelled', 'paid', 'returned', 'relocated', 'pool-returned'
+                description: Status of the payment, one of `processing`, `pending`, `charged`, `cancelled`, `paid`, `returned`, `relocated`, `pool-returned`
             resign:
                 type: boolean
                 description: True if the user does not want any reward in exchango of the contribution
