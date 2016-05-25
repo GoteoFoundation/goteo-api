@@ -1,6 +1,6 @@
 Money Stats API
-<a href="http://developers.goteo.org/doc/reports#money">developers.goteo.org/doc/reports#money</a>
 This resource returns statistics about money in Goteo.
+http://developers.goteo.org/doc/reports#money
 ---
 tags:
     - reports_money

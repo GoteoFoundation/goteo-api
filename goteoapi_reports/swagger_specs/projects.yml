@@ -1,6 +1,6 @@
 Projects Stats API
-<a href="http://developers.goteo.org/doc/reports#projects">developers.goteo.org/doc/reports#projects</a>
 This resource returns statistics about projects in Goteo.
+http://developers.goteo.org/doc/reports#projects
 ---
 tags:
     - reports_projects

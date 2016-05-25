@@ -1,6 +1,6 @@
 Project API
 This resource returns user donors information.
-<a href="http://developers.goteo.org/projects#donors">developers.goteo.org/projects#donors</a>
+http://developers.goteo.org/projects#donors
 ---
 tags:
     - project_donors

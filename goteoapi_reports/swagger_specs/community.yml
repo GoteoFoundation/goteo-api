@@ -1,6 +1,6 @@
 Community Stats API
-<a href="http://developers.goteo.org/doc/reports#community">developers.goteo.org/doc/reports#community</a>
 This resource returns statistics about the community in Goteo.
+http://developers.goteo.org/doc/reports#community
 ---
 tags:
     - reports_community

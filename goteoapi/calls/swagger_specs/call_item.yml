@@ -1,6 +1,6 @@
 Call API
 This resource returns call information.
-<a href="http://developers.goteo.org/calls#call">developers.goteo.org/calls#call</a>
+http://developers.goteo.org/calls#call
 ---
 tags:
     - call

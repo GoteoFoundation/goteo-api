@@ -1,6 +1,6 @@
 Summary Stats API
-<a href="http://developers.goteo.org/doc/reports#summary">developers.goteo.org/doc/reports#summary</a>
 This resource returns statistics about the summary in Goteo.
+http://developers.goteo.org/doc/reports#summary
 ---
 tags:
     - reports_summary

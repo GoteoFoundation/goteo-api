@@ -1,6 +1,6 @@
 User API
 This resource returns user information.
-<a href="http://developers.goteo.org/users#user">developers.goteo.org/users#user</a>
+http://developers.goteo.org/users#user
 ---
 tags:
     - user

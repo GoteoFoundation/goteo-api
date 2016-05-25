@@ -1,6 +1,6 @@
 Digest Stats API
-<a href="http://developers.goteo.org/doc/digests">developers.goteo.org/doc/digests</a>
 This resource returns grouped statistics
+http://developers.goteo.org/doc/digests
 ---
 tags:
     - digests

@@ -1,6 +1,6 @@
 Project API
-<a href="http://developers.goteo.org/projects#project">developers.goteo.org/projects#project</a>
 This resource returns project detailed information.
+http://developers.goteo.org/projects#project
 ---
 tags:
     - project

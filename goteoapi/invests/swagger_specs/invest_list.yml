@@ -1,6 +1,6 @@
 Invest API
 This resource returns invest information.
-<a href="http://developers.goteo.org/doc/invests">developers.goteo.org/doc/invests</a>
+http://developers.goteo.org/doc/invests
 ---
 tags:
     - invests

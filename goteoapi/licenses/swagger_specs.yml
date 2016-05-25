@@ -1,6 +1,6 @@
 License API
 This resource returns license information.
-<a href="http://developers.goteo.org/doc/licenses">developers.goteo.org/doc/licenses</a>
+http://developers.goteo.org/doc/licenses
 ---
 tags:
     - licenses

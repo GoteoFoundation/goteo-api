@@ -1,6 +1,6 @@
 Reward Stats API
-<a href="http://developers.goteo.org/doc/reports#rewards">developers.goteo.org/doc/reports#rewards</a>
 This resource returns statistics about rewards in Goteo.
+http://developers.goteo.org/doc/reports#rewards
 ---
 tags:
     - reports_rewards

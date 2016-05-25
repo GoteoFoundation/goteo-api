@@ -1,6 +1,6 @@
 Category API
 This resource returns categories information.
-<a href="http://developers.goteo.org/doc/categories">developers.goteo.org/doc/categories</a>
+http://developers.goteo.org/doc/categories
 ---
 tags:
     - categories

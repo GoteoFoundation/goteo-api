@@ -1,6 +1,6 @@
 Call API
 This resource returns user projects information.
-<a href="http://developers.goteo.org/calls#projects">developers.goteo.org/calls#projects</a>
+http://developers.goteo.org/calls#projects
 ---
 tags:
     - call_projects
