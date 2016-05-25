@@ -64,11 +64,6 @@ parameters:
       description: Filter by project category. Multiple categories can be specified. Restricts the list to the licenses used in project rewards in that categories
       type: integer
     - in: query
-      name: lang
-      description: Get results by specified lang. Multiple langs can be specified
-      type: string
-      collectionFormat: multi
-    - in: query
       name: location
       description: Filter by project location (Latitude,longitude,Radius in Km). Restricts the list to the licenses used in project rewards where the project is geolocated in that area.
       type: number
