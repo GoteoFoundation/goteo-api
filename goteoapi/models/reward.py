@@ -24,7 +24,7 @@ class RewardLang(AbstractLang, db.Model):
     description = db.Column('description', Text)
     other = db.Column('other', String(255))
     pending = db.Column('pending', Integer)
-    Reward = relationship('Reward', back_populates='Translations')
+    Reward = relationship('Reward', back_populates='Translations', lazy='joined') # Eager loading to allow catching
 
     def __repr__(self):
         return '<RewardLang %s(%s): %r>' % (self.id, self.lang, self.name)
@@ -66,14 +66,14 @@ class Reward(db.Model):
     icon_id = db.Column('icon', String(50), db.ForeignKey('icon.id'))
     license_id = db.Column('license', String(50), db.ForeignKey('license.id'))
     order = db.Column('order', Integer)
-    License = relationship("License")
-    Icon = relationship("Icon")
+    License = relationship("License", lazy="joined") # Eager loading to allow catching
+    Icon = relationship("Icon", lazy="joined") # Eager loading to allow catching
     Translations = relationship("RewardLang",
                                 primaryjoin = "and_(Reward.id==RewardLang.id, RewardLang.pending==0)",
                                 back_populates="Reward", lazy='joined') # Eager loading to allow catching
 
     def __repr__(self):
-        return '<Reward(%d) %s: %s>' % (self.id, self.project_id, self.name)
+        return '<Reward(%d) %s[%s]: %s>' % (self.id, self.project_id, self.type, self.name)
 
     @hybrid_property
     def icon_url(self):

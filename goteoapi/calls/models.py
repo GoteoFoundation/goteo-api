@@ -54,7 +54,7 @@ class Call(db.Model):
     subtitle = db.Column('subtitle', Text)
     description = db.Column('description', Text)
     user_id = db.Column('owner', String(50), db.ForeignKey('user.id'))
-    User = relationship("User")
+    User = relationship("User", lazy='joined') # Eager loading to allow catching
     whom = db.Column('whom', Text)
     applies = db.Column('apply', Text)
     legal = db.Column('legal', Text)

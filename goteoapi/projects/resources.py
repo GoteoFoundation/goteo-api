@@ -199,6 +199,7 @@ class ProjectAPI(BaseItem):
                         })
                 #     i['image-url'] = gallery.image
             rewards = Reward.list_by_project(p.id)
+            print(rewards)
             if rewards:
                 item['rewards'] = marshal(rewards, project_reward_resource_fields, remove_null=True)
 

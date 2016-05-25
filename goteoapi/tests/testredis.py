@@ -14,8 +14,8 @@ from nose import SkipTest
 import warnings
 
 redis_url = app.config['REDIS_URL']
-old_cache_min_timeout = app.config['CACHE_MIN_TIMEOUT'] = 1
-old_cache_type = app.config['CACHE']['CACHE_TYPE'] = 'redis'
+old_cache_min_timeout = app.config['CACHE_MIN_TIMEOUT']
+old_cache_type = app.config['CACHE']['CACHE_TYPE']
 
 def setup():
     app.config['CACHE_MIN_TIMEOUT'] = 1

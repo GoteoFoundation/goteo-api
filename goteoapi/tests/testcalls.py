@@ -4,9 +4,29 @@
 #
 from nose.tools import *
 import os
-from . import test_app, get_json, get_swagger
+from . import app,test_app, get_json, get_swagger
 from ..calls.resources import call_resource_fields, call_full_resource_fields
 from ..projects.resources import project_resource_fields
+from ..cacher import cache
+
+old_redis_url = app.config['REDIS_URL']
+old_cache_min_timeout = app.config['CACHE_MIN_TIMEOUT']
+old_cache_type = app.config['CACHE']['CACHE_TYPE']
+
+def setup():
+    cache.clear()
+    app.config['CACHING'] = True
+    app.config['REDIS_URL'] = None
+    app.config['CACHE_MIN_TIMEOUT'] = 5
+    app.config['CACHE']['CACHE_TYPE'] = 'simple'
+    cache.init_app(app, config=app.config['CACHE'])
+
+def teardown():
+    cache.clear()
+    app.config['CACHING'] = False
+    app.config['REDIS_URL'] = old_redis_url
+    app.config['CACHE_MIN_TIMEOUT'] = old_cache_min_timeout
+    app.config['CACHE']['CACHE_TYPE'] = old_cache_type
 
 DIR = os.path.dirname(__file__) + '/../calls/'
 
@@ -40,6 +60,8 @@ def test_calls():
         # Swagger test
         eq_(set(resp['items'][0].keys()) , set(fields_swagger.keys()))
 
+def test_calls_cached():
+    test_calls()
 
 def test_call_no_calls():
     rv = test_app.get('/calls/--i-dont-exits--')
@@ -78,6 +100,9 @@ def test_call():
     # Swagger test
     fields = get_swagger(DIR + 'swagger_specs/call_item.yml', 'CallFull')
     eq_(set(resp.keys()) , set(fields.keys()))
+
+def test_call_cached():
+    test_call()
 
 def test_call_projects():
     fields_swagger = get_swagger(DIR + 'swagger_specs/call_projects.yml', 'ProjectCall')
