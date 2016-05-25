@@ -2,6 +2,10 @@
 #
 # Minimal tests for main routes
 #
+# #########
+# !!!!TODO:
+# Create custom entries to SQL table in order to do tests!
+#
 from nose.tools import *
 import os
 from . import test_app, get_json, get_swagger
@@ -63,9 +67,9 @@ def test_project_trailing_slash():
 
 def test_project():
     # TODO: generic project here
-    rv = test_app.get('/projects/160metros/')
+    rv = test_app.get('/projects/move-commons/')
     eq_(rv.status_code, 301)
-    rv = test_app.get('/projects/160metros')
+    rv = test_app.get('/projects/move-commons')
     eq_(rv.headers['Content-Type'], 'application/json')
     resp = get_json(rv)
     fields = project_full_resource_fields
@@ -77,12 +81,19 @@ def test_project():
     # Swagger test
     fields = get_swagger(DIR + 'swagger_specs/project_item.yml', 'ProjectFull')
     eq_(set(resp.keys()) , set(fields.keys()))
+    # Swagger subobjects test
+    fields = get_swagger(DIR + 'swagger_specs/project_item.yml', 'ProjectReward')
+    eq_(set(resp['rewards'].pop(0).keys()) , set(fields.keys()))
+    fields = get_swagger(DIR + 'swagger_specs/project_item.yml', 'ProjectCost')
+    eq_(set(resp['costs'].pop(0).keys()) , set(fields.keys()))
+    fields = get_swagger(DIR + 'swagger_specs/project_item.yml', 'ProjectNeed')
+    eq_(set(resp['needs'].pop(0).keys()) , set(fields.keys()))
 
 def test_call_projects():
     fields_swagger = get_swagger(DIR + 'swagger_specs/project_donors.yml', 'ProjectDonor')
-    rv = test_app.get('/projects/160metros/donors')
+    rv = test_app.get('/projects/move-commons/donors')
     eq_(rv.status_code, 301)
-    rv = test_app.get('/projects/160metros/donors/')
+    rv = test_app.get('/projects/move-commons/donors/')
     eq_(rv.status_code, 200)
     eq_(rv.headers['Content-Type'], 'application/json')
     resp = get_json(rv)

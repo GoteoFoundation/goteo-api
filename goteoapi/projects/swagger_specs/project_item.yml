@@ -165,7 +165,10 @@ definitions:
     - schema:
         id: ProjectReward
         properties:
-            reward:
+            id:
+                type: integer
+                description: Reward's unique identifier
+            name:
                 type: string
                 description: Reward's item name
             description:
@@ -176,76 +179,76 @@ definitions:
                 description: Reward's item license
             type:
                 type: string
-                description: Reward's item type (social or individual)
-            icon:
+                description: Reward's item type (one of `social`, `individual`)
+            icon-url:
                 type: string
                 description: Reward's item URL icon
+            amount:
+                type: number
+                description: Minimum amount required for a invest to apply this reward
+            license:
+                type: string
+                description: Reward's associated license ID (if any, only for `type=social`)
+            license-name:
+                type: string
+                description: Reward's associated license name (if any, only for `type=social`)
+            license-description:
+                type: string
+                description: Reward's associated license description (if any, only for `type=social`)
+            license-svg-url:
+                type: string
+                description: Reward's associated license SVG image URL resource (if any, only for `type=social`)
+            license-url:
+                type: string
+                description: Reward's associated license URL containing its terms (if any, only for `type=social`)
     - schema:
         id: ProjectCost
         properties:
-            cost:
+            id:
+                type: integer
+                description: Cost's unique identifier
+            name:
                 type: string
-                description:
+                description: Cost's title
             description:
                 type: string
-                description:
+                description: Cost's description
             type:
                 type: string
-                description:
+                description: Cost's type (one of `task`, `structure`, `material`)
             amount:
                 type: number
-                description:
+                description: Cost's budget amount
             required:
                 type: string
-                description:
+                description: Whether is an optional or not cost (optional costs count for the optimum project's amount)
             date-from:
                 type: string
-                description:
+                description: Date when to start the task associated with the cost (if any)
             date-to:
                 type: string
-                description:
+                description: Date when to finish the task associated with the cost (if any)
     - schema:
         id: ProjectNeed
         properties:
-            support:
+            id:
+                type: integer
+                description: Non-economical desired contribution unique identifier
+            name:
                 type: string
-                description:
+                description: Name for the non-economical desired project's contribution
             description:
                 type: string
-                description:
+                description: Description for the non-economical desired project's contribution
             type:
                 type: string
-                description:
+                description: Type fot the non-economical necessity (one of `lend`, `task`)
     - schema:
         id: ProjectTranslation
         properties:
-            subtitle:
+            "*misc*":
                 type: string
-                description:
-            description:
-                type: string
-                description:
-            motivation:
-                type: string
-                description:
-            about:
-                type: string
-                description:
-            related:
-                type: string
-                description:
-            reward:
-                type: string
-                description:
-            keywords:
-                type: string
-                description:
-            video:
-                type: string
-                description:
-            media:
-                type: string
-                description:
+                description: Every item of a translation will have the same structure as the parent object with the same fields (**and those fields only**) translated. Non translated items won't be displayed at all.<br>**costs**, **rewards** and **needs** may be translated as well (in this case the translated array generated will use the ID as a key).
 
 parameters:
     - in: path

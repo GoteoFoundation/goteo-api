@@ -79,7 +79,7 @@ class Project(db.Model):
 
     id = db.Column('id', String(50), primary_key=True)
     user_id = db.Column('owner', String(50), db.ForeignKey('user.id'))
-    User = relationship("User")
+    User = relationship("User", lazy='joined') # Eager loading to allow catching
     name = db.Column('name', Text)
     subtitle = db.Column('subtitle', Text)
     description = db.Column('description', Text)
