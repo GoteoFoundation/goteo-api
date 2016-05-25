@@ -92,32 +92,32 @@ class ItemLocation(object):
         return sub
 
     # Vincenty Method, slightly better precision, high cost on querying database
-    @hybrid_method
-    @cacher
-    def location_ids(self, latitude, longitude, radius, locable_only = False):
-        from geopy.distance import VincentyDistance
-        from math import degrees, radians, cos
+    # @hybrid_method
+    # @cacher
+    # def location_ids(self, latitude, longitude, radius, locable_only = False):
+    #     from geopy.distance import VincentyDistance
+    #     from math import degrees, radians, cos
 
-        R = 6371 # earth's mean radius, km
-        latitude = float(latitude)
-        longitude = float(longitude)
-        radius = float(radius)
-        # first-cut bounding box (in degrees)
-        maxLat = latitude + degrees(radius/R)
-        minLat = longitude - degrees(radius/R)
-        # compensate for degrees longitude getting smaller with increasing latitude
-        maxLon = longitude + degrees(radius/R/cos(radians(latitude)))
-        minLon = longitude - degrees(radius/R/cos(radians(latitude)))
-        filters = [self.latitude.between(minLat, maxLat), self.longitude.between(minLon, maxLon)]
-        if locable_only:
-            filters.append(self.locable == True)
+    #     R = 6371 # earth's mean radius, km
+    #     latitude = float(latitude)
+    #     longitude = float(longitude)
+    #     radius = float(radius)
+    #     # first-cut bounding box (in degrees)
+    #     maxLat = latitude + degrees(radius/R)
+    #     minLat = longitude - degrees(radius/R)
+    #     # compensate for degrees longitude getting smaller with increasing latitude
+    #     maxLon = longitude + degrees(radius/R/cos(radians(latitude)))
+    #     minLon = longitude - degrees(radius/R/cos(radians(latitude)))
+    #     filters = [self.latitude.between(minLat, maxLat), self.longitude.between(minLon, maxLon)]
+    #     if locable_only:
+    #         filters.append(self.locable == True)
 
-        locations = self.query.filter(*filters).all()
+    #     locations = self.query.filter(*filters).all()
 
-        locations = filter(lambda l: VincentyDistance((latitude, longitude), (l.latitude, l.longitude)).km <= radius, locations)
-        location_ids = map(lambda l: int(l.id), locations)
+    #     locations = filter(lambda l: VincentyDistance((latitude, longitude), (l.latitude, l.longitude)).km <= radius, locations)
+    #     location_ids = map(lambda l: int(l.id), locations)
 
-        return location_ids
+    #     return location_ids
 
 
 #####################

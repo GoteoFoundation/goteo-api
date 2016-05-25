@@ -17,8 +17,8 @@ class TokenAPI(BaseItem):
     """Obtain token"""
 
     @requires_auth(scope='access_token')
-    # @swag_from(...)
     @ratelimit()
+    @swag_from('swagger_specs.yml')
     def get(self):
         duration = int(app.config['ACCESS_TOKEN_DURATION'])
         token = generate_auth_token(g.loginId, duration)

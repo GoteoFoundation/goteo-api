@@ -20,7 +20,7 @@ definitions:
                 description: Amount of the contribution
             currency:
                 type: string
-                description: Currency of the contribution (currently one of EUR, GBP or USD)
+                description: Currency of the contribution (currently one of `EUR`, `GBP`, `USD`) in [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) format
             conversion-ratio:
                 type: number
                 description: Currency rate at the moment of the payment (relative to EUR)
@@ -64,16 +64,22 @@ definitions:
         properties:
             city:
                 type: string
+                description: City location of the invest (language may vary)
             region:
                 type: string
+                description: Region location of the invest (language may vary)
             country:
                 type: string
+                description: Country name of the invest (language may vary)
             country-code:
                 type: string
+                description: Country code of the invest in [ISO 3166-1](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) format
             latitude:
                 type: number
+                description: Project's location latitude coordinate
             longitude:
                 type: number
+                description: Project's location longitude coordinate
 
 parameters:
     - in: path
@@ -86,5 +92,7 @@ responses:
         description: Invest data
         schema:
             $ref: '#/definitions/api_invests_invest_get_InvestFull'
+    401:
+        description: Resource requires authorization
     404:
         description: Resource not found

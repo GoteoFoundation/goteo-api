@@ -91,10 +91,13 @@ parameters:
       description: Filter by project location (Latitude,longitude,Radius in Km)
       type: number
       collectionFormat: csv
+
 responses:
     200:
         description: List of available projects
         schema:
             $ref: '#/definitions/api_reports_reports_money_get_Money'
+    401:
+        description: Resource requires authorization
     400:
         description: Invalid parameters format

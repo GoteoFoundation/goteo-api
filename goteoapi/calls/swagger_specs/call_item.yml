@@ -77,7 +77,7 @@ definitions:
                 description: Custom location value for the call
             scope:
                 type: string
-                description: Scope of the matchfunding call, one of 'local', 'regional', 'national', 'global' (or empty)
+                description: Scope of the matchfunding call, one of `local`, `regional`, `national`, `global` (or `null`)
             owner:
                 type: string
                 description: User ID of the call's owner
@@ -113,7 +113,7 @@ definitions:
                 description: Projects funded in this matchfunding call
             status:
                 type: string
-                description: Status of the call, one of 'pending', 'editing', 'reviewing', 'applying', 'published', 'succeeded', 'expired'
+                description: Status of the call, one of `pending`, `editing`, `reviewing`, `applying`, `published`, `succeeded`, `expired`
             location:
                 type: array
                 description: Location of the call
@@ -130,37 +130,30 @@ definitions:
         properties:
             city:
                 type: string
+                description: City location of the matchfunding call (language may vary)
             region:
                 type: string
+                description: Region location of the matchfunding call (language may vary)
             country:
                 type: string
+                description: Country name of the matchfunding call (language may vary)
             country-code:
                 type: string
+                description: Country code of the matchfunding call in [ISO 3166-1](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) format
             latitude:
                 type: number
+                description: Project's location latitude coordinate
             longitude:
                 type: number
+                description: Project's location longitude coordinate
+
     - schema:
         id: CallTranslation
         properties:
-            description-short:
+            "*misc*":
                 type: string
-            description:
-                type: string
-            applies:
-                type: string
-            dossier:
-                type: string
-            legal:
-                type: string
-            name:
-                type: string
-            resources:
-                type: string
-            tweet:
-                type: string
-            whom:
-                type: string
+                description: Every item of a translation will have the same structure as the parent object with the same fields (**and those fields only**) translated. Non translated items won't be displayed at all
+
 
 parameters:
     - in: path
@@ -173,5 +166,8 @@ responses:
         description: Call data
         schema:
             $ref: '#/definitions/api_calls_call_get_CallFull'
+    401:
+        description: Resource requires authorization
     404:
         description: Resource not found
+

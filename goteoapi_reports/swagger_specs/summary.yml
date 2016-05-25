@@ -95,5 +95,7 @@ responses:
         description: List of available projects
         schema:
             $ref: '#/definitions/api_reports_reports_summary_get_Summary'
+    401:
+        description: Resource requires authorization
     400:
         description: Invalid parameters format

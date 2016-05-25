@@ -115,5 +115,7 @@ responses:
             type: array
             items:
                 $ref: '#/definitions/api_calls_call_projects_get_ProjectCall'
+    401:
+        description: Resource requires authorization
     404:
         description: Resource not found

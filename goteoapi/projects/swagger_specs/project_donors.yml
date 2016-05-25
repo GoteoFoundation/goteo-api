@@ -87,5 +87,7 @@ responses:
             type: array
             items:
                 $ref: '#/definitions/api_projects_project_donors_get_ProjectDonor'
+    401:
+        description: Resource requires authorization
     404:
         description: Resource not found

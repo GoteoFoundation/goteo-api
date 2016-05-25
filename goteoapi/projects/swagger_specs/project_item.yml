@@ -261,5 +261,7 @@ responses:
         description: Project data
         schema:
             $ref: '#/definitions/api_projects_project_get_ProjectFull'
+    401:
+        description: Resource requires authorization
     404:
         description: Resource not found

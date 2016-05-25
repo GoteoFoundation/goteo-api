@@ -106,7 +106,7 @@ responses:
             id: invests
             items:
                 $ref: '#/definitions/api_invests_invests_get_Invest'
+    401:
+        description: Resource requires authorization
     400:
         description: Invalid parameters format
-    # 404:
-    #     description: Resource not found

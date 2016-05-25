@@ -26,10 +26,10 @@ definitions:
                 description: Percentage of unsubscribed users (over the  total number of users)
             donors-collaborators:
                 type: integer
-                description: Number of donors who collaborate
+                description: Number of donors who collaborate with others creators
             multidonors:
                 type: integer
-                description:
+                description: Number of donors who donate to more than 1 project
             percentage-multidonor-donors:
                 type: number
                 description: "Percentage of multidonors (over total donors: *100 * multidonors / donors*)"
@@ -192,5 +192,7 @@ responses:
         description: Community object
         schema:
             $ref: '#/definitions/api_reports_reports_community_get_Community'
+    401:
+        description: Resource requires authorization
     400:
         description: Invalid parameters format

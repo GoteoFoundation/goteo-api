@@ -117,5 +117,7 @@ responses:
             id: projects
             items:
                 $ref: '#/definitions/api_projects_projects_get_Project'
+    401:
+        description: Resource requires authorization
     400:
         description: Invalid parameters format

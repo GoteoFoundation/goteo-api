@@ -135,7 +135,7 @@ responses:
             id: calls
             items:
                 $ref: '#/definitions/api_calls_calls_get_Call'
+    401:
+        description: Resource requires authorization
     400:
         description: Invalid parameters format
-    # 404:
-    #     description: Resource not found
