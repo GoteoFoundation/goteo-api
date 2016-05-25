@@ -27,6 +27,47 @@ definitions:
             total-projects:
                 type: integer
                 description: Number of published projects in the category
+
+    - schema:
+        id: MetaCategory
+        properties:
+            total:
+                type: integer
+                description: Total elements available for the collection
+            node:
+                type: array
+                description: Only if filtering by node
+                items: []
+            project:
+                type: array
+                items: []
+                description: Only if filtering by project
+            lang:
+                type: array
+                items: []
+                description: Only if filtering by lang
+            from_date:
+                type: string
+                description: Only if filtering by from_date
+            to_date:
+                type: string
+                description: Only if filtering by to_date
+            location:
+                type: array
+                items: []
+                description: Only if filtering by location
+
+
+    - schema:
+        id: ResponseCategory
+        properties:
+            items:
+                type: array
+                items:
+                    $ref: '#/definitions/api_categories_categories_get_Category'
+            meta:
+                $ref: '#/definitions/api_categories_categories_get_MetaCategory'
+
 parameters:
     - in: query
       type: string
@@ -70,14 +111,12 @@ parameters:
     #   name: limit
     #   description: Page limit (maximum 50 results, defaults to 10) if the result can be paginated
     #   type: integer
+
 responses:
     200:
         description: List of available categories
         schema:
-            type: array
-            id: categories
-            items:
-                $ref: '#/definitions/api_categories_categories_get_Category'
+            $ref: '#/definitions/api_categories_categories_get_ResponseCategory'
     401:
         description: Resource requires authorization
     400:

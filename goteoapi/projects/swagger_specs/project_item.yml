@@ -256,6 +256,7 @@ parameters:
       name: project_id
       description: Unique ID for the project
       required: true
+
 responses:
     200:
         description: Project data

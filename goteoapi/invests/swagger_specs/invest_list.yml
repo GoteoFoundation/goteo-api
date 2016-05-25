@@ -60,6 +60,34 @@ definitions:
             resign:
                 type: boolean
                 description: True if the user does not want any reward in exchango of the contribution
+    - schema:
+        id: ExtraInvest
+        properties:
+            calls:
+                type: integer
+                description: Number of matchfunding calls applying in the current query
+            pledged:
+                type: number
+                description: Total sum pledged amount for the current query
+            projects:
+                type: integer
+                description: Total sum of projects applying in the current query
+            refunded:
+                type: number
+                description: Total sum of refunded amount for the current query
+
+    - schema:
+        id: ResponseInvest
+        properties:
+            items:
+                type: array
+                items:
+                    $ref: '#/definitions/api_invests_invests_get_Invest'
+            meta:
+                $ref: '#/definitions/api_projects_projects_get_MetaProject'
+            extra:
+                $ref: '#/definitions/api_invests_invests_get_ExtraInvest'
+
 parameters:
     - in: query
       type: string
@@ -85,6 +113,7 @@ parameters:
       name: category
       description: Filter by project category. Multiple categories can be specified. Restricts the list to the invests that have interests in that category(ies)
       type: integer
+      collectionFormat: multi
     - in: query
       name: location
       description: Filter by project location (Latitude,longitude,Radius in Km). Restricts the list to the invests used in projects geolocated in that area
@@ -102,10 +131,7 @@ responses:
     200:
         description: List of available invests
         schema:
-            type: array
-            id: invests
-            items:
-                $ref: '#/definitions/api_invests_invests_get_Invest'
+            $ref: '#/definitions/api_invests_invests_get_ResponseInvest'
     401:
         description: Resource requires authorization
     400:

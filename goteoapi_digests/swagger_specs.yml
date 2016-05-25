@@ -26,9 +26,14 @@ definitions:
     - schema:
         id: Bucket
         properties:
-          "*month/year*":
-            description: The name of this field depends on the type of buckets generated, could be a month number or a year. The value will be the same object of the endpoint being requested
+            "*month/year*":
+                description: The name of this field depends on the type of buckets generated, could be a month number or a year. The value will be the same object of the endpoint being requested
 parameters:
+    - in: path
+      type: string
+      name: endpoint
+      description: Endpoint to digest. Not all endpoints may be available to digest
+      required: true
     - in: query
       type: string
       name: node

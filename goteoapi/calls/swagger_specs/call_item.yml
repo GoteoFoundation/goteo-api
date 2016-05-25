@@ -161,6 +161,7 @@ parameters:
       name: call_id
       description: Unique ID for the call
       required: true
+
 responses:
     200:
         description: Call data

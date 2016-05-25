@@ -40,6 +40,55 @@ definitions:
             #     type: string
             #     description: Region location for the user
 
+    - schema:
+        id: MetaUser
+        properties:
+            limit:
+                type: integer
+                description: Limit of results per page when retrieving a collection
+            page:
+                type: integer
+                description: Current page, `0` based (first page is zero)
+            total:
+                type: integer
+                description: Total elements available for the collection
+            node:
+                type: array
+                description: Only if filtering by node
+                items: []
+            project:
+                type: array
+                items: []
+                description: Only if filtering by project
+            lang:
+                type: array
+                items: []
+                description: Only if filtering by lang
+            from_date:
+                type: string
+                description: Only if filtering by from_date
+            to_date:
+                type: string
+                description: Only if filtering by to_date
+            category:
+                type: array
+                items: []
+                description: Only if filtering by category
+            # location:
+            #     type: array
+            #     items: []
+            #     description: Only if filtering by location
+
+    - schema:
+        id: ResponseUser
+        properties:
+            items:
+                type: array
+                items:
+                    $ref: '#/definitions/api_users_users_get_User'
+            meta:
+                $ref: '#/definitions/api_users_users_get_MetaUser'
+
 parameters:
     - in: query
       type: string
@@ -70,6 +119,7 @@ parameters:
       name: category
       description: Filter by user categories. Multiple categories can be specified. Restricts the list to the users that have interests in that category(ies)
       type: integer
+      collectionFormat: multi
     # - in: query
     #   name: location
     #   description: Filter by project location (Latitude,longitude,Radius in Km). Restricts the list to the users used in projects geolocated in that area
@@ -88,10 +138,7 @@ responses:
     200:
         description: List of available users
         schema:
-            type: array
-            id: users
-            items:
-                $ref: '#/definitions/api_users_users_get_User'
+            $ref: '#/definitions/api_users_users_get_ResponseUser'
     401:
         description: Resource requires authorization
     400:

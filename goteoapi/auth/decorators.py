@@ -149,7 +149,7 @@ def requires_auth(scope='public'):
                 auth = request.authorization
                 msg = 'This resource requires authorization. More info in http://developers.goteo.org/'
                 if auth:
-                    msg = 'Invalid access method or credentials'
+                    msg = 'Invalid access method or wrong credentials'
                     # normal user/password can only be used to obtain access_tokens
                     if scope == 'access_token':
                         ok = check_user_auth(auth.username, auth.password)

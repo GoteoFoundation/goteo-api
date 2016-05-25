@@ -42,6 +42,17 @@ definitions:
             # region:
             #     type: string
             #     description: Region location for the user
+
+    - schema:
+        id: ResponseDonor
+        properties:
+            items:
+                type: array
+                items:
+                    $ref: '#/definitions/api_projects_project_donors_get_ProjectDonor'
+            meta:
+                $ref: '#/definitions/api_users_users_get_MetaUser'
+
 parameters:
     - in: path
       type: string
@@ -82,11 +93,9 @@ parameters:
       type: integer
 responses:
     200:
-        description: User data
+        description: Donor's data
         schema:
-            type: array
-            items:
-                $ref: '#/definitions/api_projects_project_donors_get_ProjectDonor'
+            $ref: '#/definitions/api_projects_project_donors_get_ResponseDonor'
     401:
         description: Resource requires authorization
     404:

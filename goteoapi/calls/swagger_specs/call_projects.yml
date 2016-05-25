@@ -100,6 +100,7 @@ parameters:
       name: category
       description: Filter by call category. Multiple users can be specified. Restricts the list to the users that have interests in that category(ies)
       type: integer
+      collectionFormat: multi
     - in: query
       name: page
       description: Page number (starting at 1) if the result can be paginated
@@ -108,13 +109,14 @@ parameters:
       name: limit
       description: Page limit (maximum 50 results, defaults to 10) if the result can be paginated
       type: integer
+
 responses:
     200:
         description: Project data
         schema:
             type: array
             items:
-                $ref: '#/definitions/api_calls_call_projects_get_ProjectCall'
+                $ref: '#/definitions/api_projects_projects_get_ResponseProject'
     401:
         description: Resource requires authorization
     404:

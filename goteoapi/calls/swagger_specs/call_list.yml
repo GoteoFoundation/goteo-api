@@ -84,6 +84,17 @@ definitions:
             status:
                 type: string
                 description: Status of the call, one of `pending`, `editing`, `reviewing`, `applying`, `published`, `succeeded`, `expired`
+
+    - schema:
+        id: ResponseCall
+        properties:
+            items:
+                type: array
+                items:
+                    $ref: '#/definitions/api_calls_calls_get_Call'
+            meta:
+                $ref: '#/definitions/api_projects_projects_get_MetaProject'
+
 parameters:
     - in: query
       type: string
@@ -114,6 +125,7 @@ parameters:
       name: category
       description: Filter by project category. Multiple categories can be specified. Restricts the list to the calls containing project with interests in that category(ies)
       type: integer
+      collectionFormat: multi
     - in: query
       name: location
       description: Filter by project location (Latitude,longitude,Radius in Km). Restricts the list to the calls with projects geolocated in that area
@@ -127,14 +139,12 @@ parameters:
       name: limit
       description: Page limit (maximum 50 results, defaults to 10) if the result can be paginated
       type: integer
+
 responses:
     200:
         description: List of available calls
         schema:
-            type: array
-            id: calls
-            items:
-                $ref: '#/definitions/api_calls_calls_get_Call'
+            $ref: '#/definitions/api_calls_calls_get_ResponseCall'
     401:
         description: Resource requires authorization
     400:

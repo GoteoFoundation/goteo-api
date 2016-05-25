@@ -33,6 +33,50 @@ definitions:
             total-projects:
                 type: integer
                 description: Number of rewards using the license for all published projects
+
+    - schema:
+        id: MetaLicense
+        properties:
+            total:
+                type: integer
+                description: Total elements available for the collection
+            node:
+                type: array
+                description: Only if filtering by node
+                items: []
+            project:
+                type: array
+                items: []
+                description: Only if filtering by project
+            lang:
+                type: array
+                items: []
+                description: Only if filtering by lang
+            from_date:
+                type: string
+                description: Only if filtering by from_date
+            to_date:
+                type: string
+                description: Only if filtering by to_date
+            category:
+                type: array
+                items: []
+                description: Only if filtering by category
+            location:
+                type: array
+                items: []
+                description: Only if filtering by location
+
+    - schema:
+        id: ResponseLicense
+        properties:
+            items:
+                type: array
+                items:
+                    $ref: '#/definitions/api_licenses_licenses_get_License'
+            meta:
+                $ref: '#/definitions/api_licenses_licenses_get_MetaLicense'
+
 parameters:
     - in: query
       type: string
@@ -80,10 +124,7 @@ responses:
     200:
         description: List of available licenses
         schema:
-            type: array
-            id: licenses
-            items:
-                $ref: '#/definitions/api_licenses_licenses_get_License'
+            $ref: '#/definitions/api_licenses_licenses_get_ResponseLicense'
     401:
         description: Resource requires authorization
     400:

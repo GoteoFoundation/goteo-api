@@ -74,5 +74,7 @@ responses:
         description: User data
         schema:
             $ref: '#/definitions/api_users_user_get_UserFull'
+    401:
+        description: Resource requires authorization
     404:
         description: Resource not found
