@@ -1,6 +1,8 @@
 GOTEO API
 =========
 
+[![Build Status](https://travis-ci.org/GoteoFoundation/goteo-api.svg?branch=master)](https://travis-ci.org/GoteoFoundation/goteo-api)
+
 This is the code for the [goteo api](http://api.goteo.org/).
 
 Please referer to the INSTALL.md file for info about installing this API.
