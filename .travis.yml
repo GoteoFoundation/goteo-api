@@ -14,5 +14,5 @@ install:
     - pip install -r requirements.txt
     - pip install -r goteoapi_*/requirements.txt
 env:
-    - GOTEO_API_CONFIG_FILE=$(realpath config_test.py.dist)
+    - GOTEO_API_CONFIG_FILE="$TRAVIS_BUILD_DIR/config_test.py.dist"
 script: nosetests
