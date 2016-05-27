@@ -1,6 +1,5 @@
 language: python
 python:
-  - "3.2"
   - "3.3"
   - "3.4"
   - "3.5"
@@ -9,8 +8,8 @@ services:
     - redis-server
 before_script:
   - mysql -e 'create database `goteo-test`;'
-  - mysql < goteoapi/tests/sql/schema_mysql.sql
-  - mysql < goteoapi/tests/sql/data_mysql.sql
+  - mysql goteo-test < goteoapi/tests/sql/schema_mysql.sql
+  - mysql goteo-test < goteoapi/tests/sql/data_mysql.sql
 install:
     - pip install -r requirements.txt
     - pip install -r goteoapi_*/requirements.txt
