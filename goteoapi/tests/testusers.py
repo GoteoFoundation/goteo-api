@@ -4,6 +4,7 @@
 #
 from nose.tools import *
 import os
+from datetime import date, timedelta
 from . import app,test_app, get_json, get_swagger
 from ..users.resources import user_resource_fields
 from ..cacher import cache
@@ -16,7 +17,7 @@ def setup():
     cache.clear()
     app.config['CACHING'] = True
     app.config['REDIS_URL'] = None
-    app.config['CACHE_MIN_TIMEOUT'] = 5
+    app.config['CACHE_MIN_TIMEOUT'] = 2
     app.config['CACHE']['CACHE_TYPE'] = 'simple'
     cache.init_app(app, config=app.config['CACHE'])
 
@@ -29,24 +30,28 @@ def teardown():
 
 DIR = os.path.dirname(__file__) + '/../users/'
 
+from_date = (date.today() - timedelta(days=60)).isoformat()
+to_date = (date.today() - timedelta(days=20)).isoformat()
+
 FILTERS = [
 'page=0',
 'limit=1',
 'page=1&limit=1',
 'lang=ca&lang=fr',
 'category=2',
-'node=barcelona&lang=en&lang=ca',
-'from_date=2014-01-01',
-'to_date=2014-12-31',
-'from_date=2014-01-01&to_date=2014-12-31',
+'node=goteo&lang=en&lang=ca',
+'from_date=' + from_date,
+'to_date=' + to_date,
+'from_date=' + from_date + '&to_date=' + to_date,
 # 'location=41.38879,2.15899,50',
-# 'location=41.38879,2.15899,50&from_date=2014-01-01',
-# 'location=41.38879,2.15899,50&to_date=2014-12-31',
-# 'location=41.38879,2.15899,50&from_date=2014-01-01&to_date=2014-12-31'
+# 'location=41.38879,2.15899,50&from_date=' + from_date,
+# 'location=41.38879,2.15899,50&to_date=' + to_date,
+# 'location=41.38879,2.15899,50&from_date=' + from_date + '&to_date=' + to_date
 ]
 def test_users():
     fields_swagger = get_swagger(DIR + 'swagger_specs/user_list.yml', 'User')
     for f in FILTERS:
+        print(f)
         rv = test_app.get('/users/' , query_string=f)
         eq_(rv.headers['Content-Type'], 'application/json')
         resp = get_json(rv)
@@ -77,15 +82,15 @@ def test_user_trailing_slash():
     assert 'text/html' in rv.headers['Content-Type']
     assert 'location' in rv.headers, "%r not in %r" % ('location', rv.headers)
     assert '/users/' in rv.headers['Location'], "%r not in %r" % ('/users/', rv.headers['Location'])
-    rv = test_app.get('/users/goteo/')
+    rv = test_app.get('/users/owner-project-passing/')
     eq_(rv.status_code, 301)
     assert 'text/html' in rv.headers['Content-Type']
     assert 'location' in rv.headers, "%r not in %r" % ('location', rv.headers)
-    assert '/users/goteo' in rv.headers['Location'], "%r not in %r" % ('/users/goteo', rv.headers['Location'])
+    assert '/users/owner-project-passing' in rv.headers['Location'], "%r not in %r" % ('/users/owner-project-passing', rv.headers['Location'])
 
 def test_user():
     # TODO: generic user
-    rv = test_app.get('/users/goteo')
+    rv = test_app.get('/users/owner-project-passing')
     eq_(rv.headers['Content-Type'], 'application/json')
     resp = get_json(rv)
     fields = user_resource_fields

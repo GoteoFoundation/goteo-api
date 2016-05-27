@@ -55,6 +55,13 @@ You should create a properly configured settings file, just copy the example con
 cp config.py.example config.py
 ```
 
+Alternatively, a config file can be readed from the env var `GOTEO_API_CONFIG_FILE`. This configuration file will be parsed **after** the normal `config.py` file;
+
+```bash
+export GOTEO_API_CONFIG_FILE=/path/to/config/file.py
+```
+
+
 ### Running the local server
 
 By default, local server listens to http://0.0.0.0:5000/

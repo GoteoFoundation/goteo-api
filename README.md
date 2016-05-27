@@ -33,6 +33,16 @@ Remove crontab install:
 
 ## Running tests:
 
+**NOTE:** Testing with the argument `--reset-database` will remove all tables in the test database!
+
+Configure a proper `config_test.py` before testing
+
+First time you may want to reste the test database:
+
+```bash
+./run-tests --reset-database
+```
+
 All tests at once (verbose):
 
 ```bash
@@ -42,7 +52,7 @@ All tests at once (verbose):
 Specific tests: (verbose, with echoes):
 
 ```bash
-./run-tests goteoapi -v -s
+./run-tests goteoapi -v -s goteoapi/tests/testprojects.py
 ```
 
 Running code coverage tests:

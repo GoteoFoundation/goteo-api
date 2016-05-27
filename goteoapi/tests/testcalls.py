@@ -4,6 +4,7 @@
 #
 from nose.tools import *
 import os
+from datetime import date, timedelta
 from . import app,test_app, get_json, get_swagger
 from ..calls.resources import call_resource_fields, call_full_resource_fields
 from ..projects.resources import project_resource_fields
@@ -17,7 +18,7 @@ def setup():
     cache.clear()
     app.config['CACHING'] = True
     app.config['REDIS_URL'] = None
-    app.config['CACHE_MIN_TIMEOUT'] = 5
+    app.config['CACHE_MIN_TIMEOUT'] = 2
     app.config['CACHE']['CACHE_TYPE'] = 'simple'
     cache.init_app(app, config=app.config['CACHE'])
 
@@ -30,24 +31,28 @@ def teardown():
 
 DIR = os.path.dirname(__file__) + '/../calls/'
 
+from_date = (date.today() - timedelta(days=140)).isoformat()
+to_date = (date.today() - timedelta(days=20)).isoformat()
+
 FILTERS = [
 'page=0',
 'limit=1',
 'page=1&limit=1',
 'lang=ca&lang=fr',
 'category=2',
-'node=barcelona&lang=en&lang=ca',
-'from_date=2014-01-01',
-'to_date=2014-12-31',
-'from_date=2014-01-01&to_date=2014-12-31',
+'node=goteo&lang=en&lang=ca',
+'from_date=' + from_date,
+'to_date=' + to_date,
+'from_date=' + from_date + '&to_date=' + to_date,
 'location=42.9,-2.6,50',
-'location=42.9,-2.6,50&from_date=2014-01-01',
-'location=42.9,-2.6,50&to_date=2014-12-31',
-'location=42.9,-2.6,50&from_date=2014-01-01&to_date=2014-12-31'
+'location=42.9,-2.6,50&from_date=' + from_date,
+'location=42.9,-2.6,50&to_date=' + to_date,
+'location=42.9,-2.6,50&from_date=' + from_date + '&to_date=' + to_date
 ]
 def test_calls():
     fields_swagger = get_swagger(DIR + 'swagger_specs/call_list.yml', 'Call')
     for f in FILTERS:
+        print(f)
         rv = test_app.get('/calls/' , query_string=f)
         eq_(rv.headers['Content-Type'], 'application/json')
         resp = get_json(rv)
@@ -86,9 +91,9 @@ def test_call_trailing_slash():
 
 def test_call():
     # TODO: generic call here
-    rv = test_app.get('/calls/crowdsasuna/')
+    rv = test_app.get('/calls/test-call/')
     eq_(rv.status_code, 301)
-    rv = test_app.get('/calls/crowdsasuna')
+    rv = test_app.get('/calls/test-call')
     eq_(rv.headers['Content-Type'], 'application/json')
     resp = get_json(rv)
     fields = call_full_resource_fields
@@ -106,9 +111,9 @@ def test_call_cached():
 
 def test_call_projects():
     fields_swagger = get_swagger(DIR + 'swagger_specs/call_projects.yml', 'ProjectCall')
-    rv = test_app.get('/calls/crowdsasuna/projects')
+    rv = test_app.get('/calls/test-call/projects')
     eq_(rv.status_code, 301)
-    rv = test_app.get('/calls/crowdsasuna/projects/')
+    rv = test_app.get('/calls/test-call/projects/')
     eq_(rv.status_code, 200)
     eq_(rv.headers['Content-Type'], 'application/json')
     resp = get_json(rv)

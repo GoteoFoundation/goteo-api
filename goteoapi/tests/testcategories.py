@@ -4,6 +4,7 @@
 #
 from nose.tools import *
 import os
+from datetime import date,timedelta
 from . import app,test_app, get_json, get_swagger
 from ..categories.resources import category_resource_fields
 from ..cacher import cache
@@ -16,7 +17,7 @@ def setup():
     cache.clear()
     app.config['CACHING'] = True
     app.config['REDIS_URL'] = None
-    app.config['CACHE_MIN_TIMEOUT'] = 5
+    app.config['CACHE_MIN_TIMEOUT'] = 2
     app.config['CACHE']['CACHE_TYPE'] = 'simple'
     cache.init_app(app, config=app.config['CACHE'])
 
@@ -30,18 +31,21 @@ def teardown():
 
 DIR = os.path.dirname(__file__) + '/../categories/'
 
+from_date = (date.today() - timedelta(days=40)).isoformat()
+to_date = (date.today() - timedelta(days=20)).isoformat()
+
 FILTERS = [
 '',
 'lang=ca&lang=fr',
 'category=2',
-'node=barcelona',
-'from_date=2014-01-01',
-'to_date=2014-12-31',
-'from_date=2014-01-01&to_date=2014-12-31',
+'node=goteo',
+'from_date=' + from_date ,
+'to_date=' + to_date,
+'from_date=' + from_date + '&to_date=' + to_date,
 'location=41.38879,2.15899,50',
-'location=41.38879,2.15899,50&from_date=2014-01-01',
-'location=41.38879,2.15899,50&to_date=2014-12-31',
-'location=41.38879,2.15899,50&from_date=2014-01-01&to_date=2014-12-31'
+'location=41.38879,2.15899,50&from_date=' + from_date ,
+'location=41.38879,2.15899,50&to_date=' + to_date,
+'location=41.38879,2.15899,50&from_date=' + from_date + '&to_date=' + to_date
 ]
 def test_categories():
     fields_swagger = get_swagger(DIR + 'swagger_specs.yml', 'Category')

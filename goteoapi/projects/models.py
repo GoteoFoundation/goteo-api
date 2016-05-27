@@ -118,6 +118,10 @@ class Project(db.Model):
         return '<Project %s: %s>' % (self.id, self.name)
 
     @hybrid_property
+    def node(self):
+        return self.node_id
+
+    @hybrid_property
     def owner(self):
         return self.user_id
 

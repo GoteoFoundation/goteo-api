@@ -1,0 +1,26 @@
+#
+# USE THIS FILE AS REFERENCE TO CONFIGURE THE GOTEO-API
+# Create or rename this file to config.py
+# Override vars for custom needs
+# (check the full config specs in api/config.py)
+#
+
+# Mysql Goteo Database (mandatory)
+# ================================
+# Relative to the goteoapi folder
+DB_URI = 'mysql://goteo:goteo@localhost/goteo-test'
+
+TESTING = True
+DEBUG = False
+SQLALCHEMY_ECHO = False
+CACHING = False
+CACHE_TYPE = 'null'
+CACHE_TIMEOUT = 300
+CACHE_KEY_PREFIX = 'Test/'
+AUTH_ENABLED = False
+
+REQUESTS_LIMIT = 300
+REQUESTS_TIME = 60 * 15
+
+# Disable REDIS by default
+REDIS_URL = ""

@@ -17,7 +17,7 @@ def setup():
     cache.clear()
     app.config['CACHING'] = True
     app.config['REDIS_URL'] = None
-    app.config['CACHE_MIN_TIMEOUT'] = 5
+    app.config['CACHE_MIN_TIMEOUT'] = 2
     app.config['CACHE']['CACHE_TYPE'] = 'simple'
     cache.init_app(app, config=app.config['CACHE'])
 

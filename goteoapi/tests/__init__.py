@@ -1,24 +1,15 @@
 import sys
+import os
 import json
 from .. import app
-
-
-# TODO: from config
-app.config['TESTING'] = True
-app.debug = False
-app.config['DEBUG'] = False
-app.config['SQLALCHEMY_ECHO'] = False
-app.config['CACHING'] = False
-app.config['CACHE_TYPE'] = 'null'
-app.config['CACHE_TIMEOUT'] = 300
-app.config['CACHE_KEY_PREFIX'] = 'Test/'
-app.config['AUTH_ENABLED'] = False
 
 if '-v' in sys.argv:
     app.debug = True
     app.config['DEBUG'] = True
 
 test_app = app.test_client()
+
+# Import database
 
 __import__('goteoapi.controllers')
 

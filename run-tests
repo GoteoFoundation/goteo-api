@@ -4,4 +4,50 @@ CURR=$(dirname $(readlink -f $0))
 
 cd $CURR
 source virtualenv/bin/activate
-nosetests --cover-package=goteoapi $@
+
+CONFIG="config_test.py"
+if [ ! -z "$CONFIG" ]; then
+    echo "Custom [$CONFIG] file not found"
+    CONFIG="config_test.py.dist"
+fi
+
+
+
+echo "Using [$CONFIG] file for testing"
+
+export GOTEO_API_CONFIG_FILE=$(realpath $CONFIG)
+
+ARGS=()
+for var in "$@"; do
+    # Remove --reset argument
+    if [ "$var" == '--reset-database' ] || [ "$var" == '-r' ]; then
+        RESET_DATABASE=1
+    else
+        ARGS+=("$var")
+    fi
+done
+
+if [ "$RESET_DATABASE" != "" ]; then
+    echo "Removing database"
+    DB_URI=$(cat $CONFIG | grep DB_URI)
+    #remove spaces
+    DB_URI=${DB_URI// /}
+    DB_URI=${DB_URI//DB_URI=/}
+    DB_URI=${DB_URI//\'/}
+    DB_URI=${DB_URI//\"/}
+    DB_URI=${DB_URI//mysql:\/\//}
+    PARAMS=($(echo $DB_URI | tr ":@/" "\n"))
+    USER=${PARAMS[0]}
+    PASS=${PARAMS[1]}
+    HOST=${PARAMS[2]}
+    DATABASE=${PARAMS[3]}
+    mysql -h"$HOST" -u"$USER" -p"$PASS" "$DATABASE" < goteoapi/tests/sql/schema_mysql.sql
+    mysql -h"$HOST" -u"$USER" -p"$PASS" "$DATABASE" < goteoapi/tests/sql/data_mysql.sql
+    if [ "$?" != '0' ]; then
+        echo "Error reseting and importing data"
+        exit 2
+    fi
+    echo "Done, now testing"
+fi
+
+nosetests --cover-package=goteoapi "${ARGS[@]}"

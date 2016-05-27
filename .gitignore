@@ -6,5 +6,6 @@ __pycache__
 *~
 virtualenv
 config.py
+config_test.py
 !goteoapi/config.py
 
