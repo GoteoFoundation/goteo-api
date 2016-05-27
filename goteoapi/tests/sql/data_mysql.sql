@@ -606,8 +606,7 @@ INSERT  INTO `worthcracy_lang`(`id`,`lang`,`name`,`pending`) VALUES (5,'fr','Pio
 INSERT  INTO `worthcracy_lang`(`id`,`lang`,`name`,`pending`) VALUES (5,'gl','Visionario/a',0);
 
 /* PAGES */
-
--- pages
+/* pages */
 INSERT INTO `page` (`id`, `name`, `description`, `url`) VALUES('about', 'About', 'About', '/about');
 INSERT INTO `page` (`id`, `name`, `description`, `url`) VALUES('big-error', 'BIG error', 'Internal server error and so on', '/about/fail');
 INSERT INTO `page` (`id`, `name`, `description`, `url`) VALUES('contact', 'Contact', 'Contact form', '/contact');
@@ -617,8 +616,7 @@ INSERT INTO `page` (`id`, `name`, `description`, `url`) VALUES('legal', 'Legal',
 INSERT INTO `page` (`id`, `name`, `description`, `url`) VALUES('maintenance', 'Maintenance', 'Maintenance', '/about/maintenance');
 INSERT INTO `page` (`id`, `name`, `description`, `url`) VALUES('privacy', 'Privacy', 'Privacy', '/legal/privacy');
 INSERT INTO `page` (`id`, `name`, `description`, `url`) VALUES('terms', 'Terms and conditions', 'Terms and conditions', '/legal/terms');
-
--- page content
+/* page content */
 INSERT INTO `page_node` (`page`, `node`, `lang`, `content`) VALUES('about', 'goteo', 'en', '<p>\r\n    SiteName is a social network for collective financing (monetary donations) and distributed cooperations (services, infrastructures, etc). A platform for investments in projects that cointribute to the common good and are open source and open knowledge. A community for the development of autonomous, creative and innovative projects in the socia, cultural, technical or educational area, and that create new opportunities for the whole of society.</p>\r\n<p>\r\n  &nbsp;</p>\r\n');
 INSERT INTO `page_node` (`page`, `node`, `lang`, `content`) VALUES('about', 'goteo', 'es', '<p>\r\n    SiteName es una red social de financiaci&oacute;n colectiva (aportaciones monetarias) y colaboraci&oacute;n distribuida (servicios, infraestructuras, microtareas y otros recursos). Una plataforma para la inversi&oacute;n de &ldquo;capital riego&rdquo; en proyectos que contribuyan al desarrollo del procom&uacute;n, el c&oacute;digo abierto y/o el conocimiento libre. Una comunidad para apoyar el desarrollo aut&oacute;nomo de iniciativas creativas e innovadoras cuyos fines sean de car&aacute;cter social, cultural, cient&iacute;fico, educativo, tecnol&oacute;gico o ecol&oacute;gico, que generen nuevas oportunidades para la mejora constante de la sociedad.</p>\r\n<p>\r\n  &nbsp;</p>\r\n');
 INSERT INTO `page_node` (`page`, `node`, `lang`, `content`) VALUES('contact', 'goteo', 'en', '<div class="contact-info" style="color: #58595b; width: 360px; font-size: 12px;  padding: 5px; line-height: 16px;">\r\n  <span class="intro-tit" style="font-size: 21px; font-weight: bold; line-height: 24px;">Use these links to quickly find what you are looking for: </span>\r\n    <ul style="margin-left: 0;  padding-left: 0;">\r\n      <li style="color: #38b5b1;  margin-left: 0; padding-left: 0; list-style-position: inside; padding-top: 2px; padding-bottom: 2px;">\r\n          <a href="/faq" style="color: #38b5b1; text-decoration: none;" target="_blank">FAQ - Preguntas frecuentes</a></li>\r\n       <li style="color: #38b5b1;  margin-left: 0; padding-left: 0; list-style-position: inside; padding-top: 2px; padding-bottom: 2px;">\r\n          <a href="/glossary" style="color: #38b5b1; text-decoration: none;" target="_blank">El Glosario de la microfinanciaci&oacute;n</a></li>\r\n      <li style="color: #38b5b1;  margin-left: 0; padding-left: 0; list-style-position: inside; padding-top: 2px; padding-bottom: 2px;">\r\n          <a href="/press" style="color: #38b5b1; text-decoration: none;" target="_blank">Kit de prensa SiteName</a></li>\r\n     <li style="color: #38b5b1;  margin-left: 0; padding-left: 0; list-style-position: inside; padding-top: 2px; padding-bottom: 2px;">\r\n          <a href="/service/workshop" style="color: #38b5b1; text-decoration: none;" target="_blank">Talleres</a></li>\r\n    </ul>\r\n   SiteName is a social network for collective financing (monetary donations) and distributed cooperations (services, infrastructures, etc). A platform for investments in projects that cointribute to the common good and are open source and open content. </div>\r\n');
@@ -633,19 +631,15 @@ INSERT INTO `page_node` (`page`, `node`, `lang`, `content`) VALUES('privacy', 'g
 
 /* Project test */
 
+/* Project passing first today */
 
--- Project passing first today
-
-
--- Owner
+/* Owner */
 
 INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `created`, `modified`,`node`) VALUES
 ('owner-project-passing', 'Owner project passing', 'owner-project-passing@example.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Owner project passing', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, NOW()-INTERVAL 50 DAY , NOW()-INTERVAL 50 DAY,'goteo');
-
--- categories
+/* categories */
 INSERT INTO `user_interest` (`user`, `interest`) VALUES ('owner-project-passing', '2');
-
--- Backers
+/* Backers */
 
 INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `created`, `modified`) VALUES
 ('backer-1-passing-project', 'Backer 1 passing project', 'backer-1-passing-project@example.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Backer 1 passing project', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, NOW()-INTERVAL 50 DAY , NOW()-INTERVAL 50 DAY);
@@ -660,8 +654,7 @@ INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `act
 ('backer-4-passing-project', 'Backer 4 passing project', 'backer-4-passing-project@example.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Backer 4 passing project', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, NOW()-INTERVAL 50 DAY , NOW()-INTERVAL 50 DAY);
 
 
-
--- Project
+/* Project */
 INSERT INTO `project` (`id`,
   `name`,
   `subtitle`,
@@ -737,50 +730,36 @@ INSERT INTO `project` (`id`,
  'Testing project',
  'https://www.youtube.com/watch?v=3On4rAJdeKg',
  'City, country');
-
--- translation
+/* translation */
 INSERT INTO `project_lang` (`id`, `lang`, `description`, `subtitle`) VALUES ('project-plassing-today', 'en', 'English test', 'English short desc');
-
--- rewards
+/* rewards */
 INSERT INTO `reward` (`project`, `reward`,`description`,`type`,`icon`, `license`,`order`) VALUES ('project-passing-today', 'Test reward 1', 'reward description', 'social', 'code', 'agpl', '1');
-INSERT INTO `reward` (`project`, `reward`,`description`,`type`,`icon`, `amount`, `units`,`order`) VALUES ('project-passing-today', 'Test reward 2', 'reward description', 'individual', 'thanks', '100', '100', '2');
--- messages
+INSERT INTO `reward` (`project`, `reward`,`description`,`type`,`icon`, `amount`, `units`,`order`) VALUES ('project-passing-today', 'Test reward 2', 'reward description', 'individual', 'thanks', '100', '100', '2');/* messages */
 INSERT INTO `message` (`user`, `project`, `message`) VALUES ('owner-project-passing', 'project-passing-today', 'Test message');
-
--- support
+/* support */
 INSERT INTO `support` (`project`, `support`,`description`, `type`, `thread`) VALUES ('project-passing-today', 'test support','Test description', 'task', '1');
-
--- costs
+/* costs */
 INSERT INTO `cost` (`project`,`cost`, `description`, `type`, `amount`, `required`,`from`,`until`) VALUES ('project-passing-today','Cost name', 'Test description', 'task', '100', '1',NOW()-INTERVAL 35 DAY,NOW());
-
--- Invests
+/* Invests */
 
 INSERT INTO `invest` (`user`, `project`, `account`, `amount`, `amount_original`, `currency`, `currency_rate`, `status`, `anonymous`, `resign`, `invested`, `charged`, `returned`, `preapproval`, `payment`, `transaction`, `method`, `admin`, `campaign`, `datetime`, `drops`, `droped`, `call`, `issue`, `pool`) VALUES
 ('backer-1-passing-project', 'project-passing-today', '', 200, 200, 'EUR', 1.00000, 1, NULL, 1, NOW()-INTERVAL 35 DAY, NOW()-INTERVAL 35 DAY, NULL, NULL, '', NULL, 'dummy', NULL, NULL, NOW()-INTERVAL 60 DAY, NULL, NULL, NULL, NULL, 1),
 ('backer-2-passing-project', 'project-passing-today', '', 40, 40, 'EUR', 1.00000, 1, NULL, NULL, NOW()-INTERVAL 30 DAY, NOW()-INTERVAL 30 DAY, NULL, '', NULL, NULL, 'dummy', NULL, NULL, NOW()-INTERVAL 70 DAY, NULL, NULL, NULL, NULL, NULL);
-
--- invest node
+/* invest node */
 INSERT INTO `invest_node` (`user_id`, `user_node`, `project_id`, `project_node`, `invest_id`, `invest_node`) VALUES ('backer-1-passing-project', 'goteo', 'project-passing-today', 'goteo', '1', 'goteo');
-
--- promote this project
+/* promote this project */
 INSERT INTO `promote` (`node`, `project`, `active`) VALUES ('goteo', 'project-passing-today', 1);
-
--- category
+/* category */
 INSERT INTO `project_category` (`project`, `category`) VALUES ('project-passing-today', '2');
-
--- location
+/* location */
 INSERT INTO `project_location` (`id`, `latitude`, `longitude`, `locable`, `city`, `country`, `country_code`) VALUES ('project-passing-today', '41.3', '2.1', '1', 'Barcelona', 'Spain', 'ES');
+/* another project/* Project finishing today */
 
--- another project
--- Project finishing today
-
-
--- Owner
+/* Owner */
 
 INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `created`, `modified`) VALUES
 ('owner-project-finishing', 'Owner project finishing', 'owner-project-finishing@goteo.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Owner project finishing', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, NOW()-INTERVAL 50 DAY , NOW()-INTERVAL 50 DAY);
-
--- Backers
+/* Backers */
 
 INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `created`, `modified`) VALUES
 ('backer-1-finishing-project', 'Backer 1 finishing project', 'backer-1-finishing-project@goteo.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Backer 1 finishing project', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, NOW()-INTERVAL 50 DAY , NOW()-INTERVAL 50 DAY);
@@ -794,8 +773,7 @@ INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `act
 INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `created`, `modified`) VALUES
 ('backer-4-finishing-project', 'Backer 4 finishing project', 'backer-4-finishing-project@goteo.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Backer 4 finishing project', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, NOW()-INTERVAL 50 DAY , NOW()-INTERVAL 50 DAY);
 
-
--- Project
+/* Project */
 INSERT INTO `project` (`id`,
   `name`,
   `subtitle`,
@@ -872,8 +850,7 @@ INSERT INTO `project` (`id`,
  'https://vimeo.com/81621213',
  'City, country');
 
-
--- costs
+/* costs */
 INSERT INTO `cost` (`project`, `cost`, `description`, `type`, `amount`, `required`, `from`, `until`) values
     ('project-finishing-today','Cost 1','Description cost 1','task','50','1','2016-05-03','2016-05-16');
 
@@ -882,8 +859,7 @@ INSERT INTO `cost` (`project`, `cost`, `description`, `type`, `amount`, `require
 
 INSERT INTO `cost` (`project`, `cost`, `description`, `type`, `amount`, `required`, `from`, `until`) values
     ('project-finishing-today','Cost 3','Description cost 3','task','200','0','2016-05-03','2016-05-16');
-
--- Invests
+/* Invests */
 
 INSERT INTO `invest` (`user`, `project`, `account`, `amount`, `amount_original`, `currency`, `currency_rate`, `status`, `anonymous`, `resign`, `invested`, `charged`, `returned`, `preapproval`, `payment`, `transaction`, `method`, `admin`, `campaign`, `datetime`, `drops`, `droped`, `call`, `issue`, `pool`) VALUES
 ('backer-1-finishing-project', 'project-finishing-today', '', 200, 200, 'EUR', 1.00000, 1, NULL, 1, NOW()-INTERVAL 60 DAY, NOW()-INTERVAL 60 DAY, NULL, '727025821', '1200387012150822204948007100', '', 'dummy', NULL, NULL, NOW()-INTERVAL 60 DAY, NULL, NULL, NULL, NULL, NULL),
@@ -893,16 +869,13 @@ INSERT INTO `invest` (`user`, `project`, `account`, `amount`, `amount_original`,
 
 
 
---- test call
+/* test call */
 INSERT INTO `call` (`id`, `name`, `subtitle`, `status`, `owner`, `amount`, `created`, `updated`, `opened`, `published`, `scope`, `maxproj`, `num_projects`, `running_projects`, `success_projects`) VALUES ('test-call', 'Test call', 'Description test call', '3', 'owner-project-passing', '1000', NOW()-INTERVAL 50 day, NOW()-INTERVAL 50 day, NOW()-INTERVAL 50 day, NOW()-INTERVAL 50 day, 'global', '10', '1', '1', '0');
-
--- project appying
+/* project appying */
 INSERT INTO `call_project` (`call`, `project`) VALUES ('test-call', 'project-passing-today');
-
--- call location
+/* call location */
 INSERT INTO `call_location` (`id`, `latitude`, `longitude`, `method`, `locable`, `city`, `region`, `country`, `country_code`) VALUES ('test-call', '42.9', '-2.6', 'manual', '1', 'Bilbo', 'Euskadi', 'Spain', 'ES');
-
--- second call
+/* second call */
 INSERT INTO `call` (`id`, `name`, `subtitle`, `status`, `owner`, `amount`, `created`, `updated`, `opened`, `published`, `closed`, `scope`, `maxproj`, `num_projects`, `running_projects`, `success_projects`) VALUES ('test-call-2', 'Test call', 'Description test call', '3', 'owner-project-passing', '1000', NOW()-INTERVAL 100 day, NOW()-INTERVAL 100 day, NOW()-INTERVAL 100 day, NOW()-INTERVAL 100 day, NOW()-INTERVAL 30 day, 'global', '10', '1', '1', '0');
 
 INSERT INTO `call_location` (`id`, `latitude`, `longitude`, `method`, `locable`, `city`, `region`, `country`, `country_code`) VALUES ('test-call-2', '42.91', '-2.61', 'manual', '1', 'Bilbo', 'Euskadi', 'Spain', 'ES');
