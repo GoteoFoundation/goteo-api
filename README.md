@@ -1,4 +1,5 @@
-# GOTEO API
+GOTEO API
+=========
 
 This is the code for the [goteo api](http://api.goteo.org/).
 
@@ -6,7 +7,8 @@ Please referer to the INSTALL.md file for info about installing this API.
 
 Full documentation to use the official api can be found here: https://developers.goteo.org/doc/
 
-## Flask command line order:
+Flask command line order:
+----------
 
 Cache clearing:
 
@@ -31,7 +33,8 @@ Remove crontab install:
 ./console crontab -r
 ```
 
-## Running tests:
+Running tests:
+----------
 
 **NOTE:** Testing with the argument `--reset-database` will remove all tables in the test database!
 
@@ -69,13 +72,15 @@ Running code coverage tests with all packages:
 
 Tests uses [nosetests](https://nose.readthedocs.org). Same nosetests command arguments applies to `run-tests` script
 
-## Install/update dependencies:
+Install/update dependencies:
+----------
 
 ```bash
 ./deployer
 ```
 
-## Run a test server on localhost:
+Run a test server on localhost:
+----------
 
 ```bash
 ./run
@@ -96,7 +101,8 @@ MODULES = {
 ...
 ```
 
-## Examples
+Examples
+----------
 
 Obtain a list of active projects:
 
@@ -143,3 +149,17 @@ Date: Mon, 01 Feb 2016 13:36:53 GMT
 ```
 
 Check the full documentation here: https://developers.goteo.org/doc/
+
+License
+-------
+
+The code licensed here under the **GNU Affero General Public License**, version 3 AGPL-3.0 has been developed by the Goteo team led by Platoniq and subseque
+ntly transferred to the Fundación Goteo, as detailed in http://www.goteo.org/about#info6
+
+This is a web tool that allows the receipt, review and publishing of collective campaigns for their collective funding and the receiving of collaborations a
+s well as the dynamic visualization of the support received, classification of initiatives and campaign tracking. The system also permits secure and distrib
+uted communication with users and between users, administration of highlighted projects on the home page and the creation of periodical publications such as
+ blogs, a FAQ section and static pages.
+
+
+
