@@ -8,10 +8,10 @@ Made with python with [flask](http://flask.pocoo.org/), [sqlalchemy](http://www.
 
 #### Requirements
 
-    - Python 3.4
-    - MySQL with a valid [Goteo database](https://github.com/GoteoFoundation/goteo)
-    - Other python requirements can be installed using [pip](https://pip.pypa.io).
-    - (Optional) REDIS server
+- Python 3.4
+- MySQL with a valid [Goteo database](https://github.com/GoteoFoundation/goteo)
+- Other python requirements can be installed using [pip](https://pip.pypa.io).
+- (Optional) REDIS server
 
 This API uses [Redis](http://redis.io/) as a cache backend for complex SQL calculations and user/ratio management.
 
