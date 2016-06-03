@@ -5,9 +5,34 @@ GOTEO API
 
 This is the code for the [goteo api](http://api.goteo.org/).
 
-Please referer to the INSTALL.md file for info about installing this API.
+Please refer to the INSTALL.md file for info about installing this API.
 
 Full documentation to use the official api can be found here: https://developers.goteo.org/doc/
+
+Easy install using Vagrant:
+----------
+
+The included `Vagrantfile` is ready to provision a ready-to-go system with a test database and all the required dependencies installed:
+
+```bash
+vagrant up
+vagrant ssh
+./run
+```
+
+Install/update dependencies:
+----------
+
+```bash
+./deployer
+```
+
+Run a test server on localhost:
+----------
+
+```bash
+./run
+```
 
 Flask command line order:
 ----------
@@ -42,7 +67,7 @@ Running tests:
 
 Configure a proper `config_test.py` before testing
 
-First time you may want to reste the test database:
+First time you may want to reset the test database:
 
 ```bash
 ./run-tests --reset-database
@@ -74,19 +99,8 @@ Running code coverage tests with all packages:
 
 Tests uses [nosetests](https://nose.readthedocs.org). Same nosetests command arguments applies to `run-tests` script
 
-Install/update dependencies:
+Extending the API
 ----------
-
-```bash
-./deployer
-```
-
-Run a test server on localhost:
-----------
-
-```bash
-./run
-```
 
 To run the API with extra packages you must configure the variable `MODULES` int the file `config.py` (extra packages such as: goteoapi_reports, goteoapi_digests)
 
