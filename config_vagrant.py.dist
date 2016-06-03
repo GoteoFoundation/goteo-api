@@ -1,0 +1,70 @@
+#
+# USE THIS FILE AS REFERENCE TO CONFIGURE THE GOTEO-API
+# Create or rename this file to config.py
+# Override vars for custom needs
+# (check the full config specs in api/config.py)
+#
+
+# Mysql Goteo Database (mandatory)
+# ================================
+DB_URI = 'mysql://root:root@localhost/goteodev'
+# A unique secret key for this application
+SECRET_KEY = 'no-a-very-secret-and-random-key'
+
+# Optional config:
+# ================
+# Number of seconds to auto-expire access tokens
+ACCESS_TOKEN_DURATION = 600
+
+# api requests rate limit
+# Users are allowed 300 requests in 15 minutes
+REQUESTS_LIMIT = 300
+REQUESTS_TIME = 60 * 15
+
+# redis (mandatory if requests_limit activated)
+REDIS_URL = "redis://localhost:6379/0"
+
+# Use Http Authentication for public scopes
+AUTH_ENABLED = True
+
+# Extend the API functionality by enabling additional modules/plugins
+MODULES = {
+    # reports endpoints
+    #'goteoapi_reports.controllers',
+    # digests endpoints
+    #'goteoapi_digests.controllers'
+}
+
+# debug (False by default)
+DEBUG = True
+
+# Use cache type (null by default)
+# View http://pythonhosted.org/Flask-Cache/#configuring-flask-cache
+# for types and configuration options
+CACHE_TYPE = 'null'
+# Minimun timeout for function caching
+CACHE_MIN_TIMEOUT = 30
+CACHE_KEY_PREFIX='Test/'
+
+# Opcional description for general messages
+DESCRIPTION = 'Goteo.org API'
+
+# Usefull links for general messages
+LINKS = {
+	'Developers Documentation' : 'http://developers.goteo.org',
+    'Swagger Interface' : '/spec',
+    'Swagger Documentation' : '/apidocs/index.html'
+}
+
+# Built-in Users Authentication
+# Users can be bind to a ip or a ip range using a mask (eg: ip/mask)
+# cors referes to the "Access-Control-Allow-Origin" header directive
+USERS = {
+    # username (optional)
+	'goteo' : {
+        'password':'goteo',
+        # Optional fields:
+        # 'remotes' : ['127.0.0.0/16', '192.168.0.0/24'],
+        # 'cors': ['http://stats.goteo.org', 'https://stats.goteo.org']
+    }
+}
