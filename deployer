@@ -4,14 +4,17 @@
 # a self-contained environment for the pytohn app
 #
 
-PYEXE=$(env which python3)
+if [ -z "$WORKON_HOME" ]; then
+    PYEXE=$(env which python3)
 
-/usr/bin/virtualenv -p $PYEXE virtualenv
-source virtualenv/bin/activate
+    /usr/bin/virtualenv -p $PYEXE virtualenv
+    source virtualenv/bin/activate
+fi
+
 pip install -r requirements.txt
 pip install -r goteoapi_*/requirements.txt
 
 if [ $? == "0" ]; then
-	echo -e "\e[32mDone, if you want to execute the Flask application manually please run this commands:\e[0m"
+	echo -e "\e[32mDone, if you want to execute the Flask application manually please run this command:\e[0m"
 	echo "./run"
 fi

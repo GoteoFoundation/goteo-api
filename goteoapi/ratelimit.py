@@ -50,7 +50,7 @@ def ratelimit(limit=app.config['REQUESTS_LIMIT'], per=app.config['REQUESTS_TIME'
                 key = 'rate-limit/%s/' % request.authorization.username
             else:
                 remote_ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
-                key = 'rate-limit/%s' % remote_ip
+                key = 'rate-limit/%s/' % remote_ip
 
             rlimit = RateLimit(key, limit, per)
             g._view_rate_limit = rlimit

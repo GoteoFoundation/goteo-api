@@ -2,5 +2,15 @@
 
 CURR=$(dirname $(readlink -f $0))
 
-source "$CURR/"virtualenv/bin/activate
+if [ ! -z "$GOTEO_API_CONFIG_FILE" ]; then
+    echo "Using config file defined in GOTEO_API_CONFIG_FILE: [$GOTEO_API_CONFIG_FILE]"
+else
+    echo "Using default config file [config.py]"
+fi
+
+# compatible with "workon ..."
+if [ -z "$WORKON_HOME" ]; then
+    source "$CURR/"virtualenv/bin/activate
+fi
+
 python "$CURR/"run.py

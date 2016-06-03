@@ -1,6 +1,7 @@
 /cover
 __pycache__
 .coverage
+.vagrant
 *.pyc
 *.log
 *~
