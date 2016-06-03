@@ -29,6 +29,9 @@ REQUESTS_TIME = 60 * 15
 # redis (mandatory if requests_limit activated)
 REDIS_URL = "redis://localhost:6379/0"
 
+# Use Http Authentication for public scopes
+AUTH_ENABLED = True
+
 # Extend the API functionality by enabling additional modules/plugins
 MODULES = {
     # reports endpoints
@@ -37,16 +40,13 @@ MODULES = {
     #'goteoapi_digests.controllers'
 }
 
-# Use Http Authentication for public scopes
-AUTH_ENABLED = True
-
 # debug (False by default)
 DEBUG = True
 
 # Use cache type (null by default)
 # View http://pythonhosted.org/Flask-Cache/#configuring-flask-cache
 # for types and configuration options
-CACHE = { 'CACHE_TYPE' : 'simple' }
+CACHE_TYPE = 'null'
 # Minimun timeout for function caching
 CACHE_MIN_TIMEOUT = 30
 
@@ -56,7 +56,7 @@ DESCRIPTION = 'Goteo.org API'
 # Usefull links for general messages
 LINKS = {
 	'Developers Documentation' : 'http://developers.goteo.org',
-    'Swagger Interface' : '/apidocs/spec.json',
+    'Swagger Interface' : '/spec',
     'Swagger Documentation' : '/apidocs/index.html'
 }
 

@@ -38,19 +38,22 @@ if app.debug:
     app.config['SQLALCHEMY_ECHO'] = True
 
 if 'CACHE' not in app.config:
-    app.config['CACHE_'] = {}
+    app.config['CACHE'] = {}
 
-app.config['CACHING'] = False
-if 'CACHE_TYPE' in app.config['CACHE']:
-    if app.config['CACHE']['CACHE_TYPE'] != 'null':
-        app.config['CACHING'] = True
-
-for i in app.config['CACHE']:
+for i in app.config:
     if i.startswith('CACHE_'):
-        app.config[i] = app.config['CACHE'][i]
+        app.config['CACHE'][i] = app.config[i]
 
 if 'REDIS_URL' in app.config and 'CACHE_KEY_PREFIX' not in app.config['CACHE']:
     app.config['CACHE']['CACHE_KEY_PREFIX'] = 'Cacher/'
+
+if 'CACHING' not in app.config:
+    app.config['CACHING'] = False
+    if 'CACHE_TYPE' in app.config['CACHE']:
+        if app.config['CACHE']['CACHE_TYPE'] != 'null':
+            app.config['CACHING'] = True
+
+# print(app.config['CACHE'])
 
 # Secret key
 app.secret_key = app.config['SECRET_KEY']
