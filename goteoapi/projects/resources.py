@@ -161,7 +161,6 @@ class ProjectsListAPI(BaseList):
         return res
 
 
-
 class ProjectAPI(BaseItem):
     """Project Details"""
 

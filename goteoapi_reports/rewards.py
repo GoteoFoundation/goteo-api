@@ -25,6 +25,7 @@ per_amount_resource_fields = {
     "rewards-more-than-400"   : fields.Integer
 }
 
+
 class RewardsAPI(Base):
     """Get Rewards Statistics"""
 
@@ -48,8 +49,8 @@ class RewardsAPI(Base):
         # remove not used args
         args = self.parse_args(remove=('page','limit'))
 
-        cofinanciadores = Invest.donors_total(**args);
-        renuncias = Invest.total(is_refusal=True, **args);
+        cofinanciadores = Invest.donors_total(**args)
+        renuncias = Invest.total(is_refusal=True, **args)
         favorites = []
 
         for u in Icon.list(**args):

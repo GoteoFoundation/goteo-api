@@ -34,6 +34,7 @@ collaboration_resource_fields = {
     'interactions'      : fields.Integer
 }
 
+
 class CommunityAPI(Base):
     """Get Community Statistics"""
 
@@ -53,14 +54,13 @@ class CommunityAPI(Base):
         from goteoapi.models.message import Message
         from goteoapi.users.models import User, UserInterest
 
-
         time_start = time.time()
         # remove not used args
         args = self.parse_args(remove=('page','limit'))
 
         users = User.total(**args)
-        nargs = args.copy();
-        nargs['unsubscribed'] = 1;
+        nargs = args.copy()
+        nargs['unsubscribed'] = 1
         bajas = User.total(**nargs)
         donors = Invest.donors_total(**args)
         multidonors = Invest.multidonors_total(**args)

@@ -10,7 +10,6 @@ from sqlalchemy.orm import relationship
 from ..cacher import cacher
 from ..base_resources import AbstractLang
 
-
 from .. import db
 
 class SupportLang(AbstractLang, db.Model):
@@ -25,7 +24,6 @@ class SupportLang(AbstractLang, db.Model):
 
     def __repr__(self):
         return '<SupportLang %s(%s): %r>' % (self.id, self.lang, self.name)
-
 
 
 class Support(db.Model):
@@ -43,7 +41,6 @@ class Support(db.Model):
 
     def __repr__(self):
         return '<Support(%d) %s of project %s>' % (self.id, self.support, self.project_id)
-
 
     @hybrid_method
     @cacher

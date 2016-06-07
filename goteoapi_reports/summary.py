@@ -11,6 +11,7 @@ from goteoapi.base_resources import BaseList as Base, Response
 from .projects import contribution_resource_fields
 from .rewards import favorite_resource_fields
 
+
 class SummaryAPI(Base):
     """Get sumarized Statistics"""
 
@@ -63,7 +64,6 @@ class SummaryAPI(Base):
         for u in Icon.list(**args):
             item = marshal(u, favorite_resource_fields)
             favorites.append(item)
-
 
         res = Response(
             starttime = time_start,

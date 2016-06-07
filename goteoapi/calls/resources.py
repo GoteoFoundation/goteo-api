@@ -61,7 +61,6 @@ call_full_resource_fields["facebook_url"]     = fields.String
 call_full_resource_fields["user"]             = fields.Nested(user_resource_fields)
 call_full_resource_fields["location"]         = fields.List(fields.Nested(location_resource_fields))
 
-
 call_project_resource_fields = project_resource_fields.copy()
 call_project_resource_fields['amount_call'] = fields.Float
 
@@ -101,7 +100,6 @@ class CallsListAPI(BaseList):
         )
 
         return res
-
 
 
 class CallAPI(BaseItem):

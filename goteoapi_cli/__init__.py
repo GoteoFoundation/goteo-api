@@ -19,6 +19,7 @@ from goteoapi.cacher import cache, get_key_list, renew_key_list, get_key_functio
 
 manager = Manager(app)
 
+
 @manager.command
 def clearcache():
     """Clears all cache keys"""
@@ -48,6 +49,7 @@ def renewcache(execute=False, force=False):
         cprint("No keys to be renewed", 'red')
     if not force:
         cprint("Run with option --force (-f) to force renew of non close-to-expire keys", 'yellow')
+
 
 @manager.command
 def crontab(install=False, remove=False):

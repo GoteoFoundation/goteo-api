@@ -101,7 +101,6 @@ class InvestsListAPI(BaseList):
         return res
 
 
-
 class InvestAPI(BaseItem):
     """Invest Details"""
 

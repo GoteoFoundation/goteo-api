@@ -11,6 +11,7 @@ __import__('goteoapi_reports.controllers')
 
 DIR = os.path.dirname(__file__) + '/'
 
+
 def test_money():
     rv = test_app.get('/reports/money/')
     eq_(rv.headers['Content-Type'], 'application/json')
@@ -24,6 +25,7 @@ def test_money():
     eq_(set(resp.keys()) , set(fields.keys()))
     eq_(rv.status_code, 200)
 
+
 def test_projects():
     rv = test_app.get('/reports/projects/')
     eq_(rv.headers['Content-Type'], 'application/json')
@@ -34,6 +36,7 @@ def test_projects():
     eq_(set(resp.keys()) , set(fields.keys()))
     eq_(rv.status_code, 200)
 
+
 def test_community():
     rv = test_app.get('/reports/community/')
     eq_(rv.headers['Content-Type'], 'application/json')
@@ -43,6 +46,7 @@ def test_community():
     fields = get_swagger(DIR + 'swagger_specs/community.yml', 'Community')
     eq_(set(resp.keys()) , set(fields.keys()))
     eq_(rv.status_code, 200)
+
 
 def test_rewards():
     rv = test_app.get('/reports/rewards/')
@@ -55,6 +59,7 @@ def test_rewards():
     eq_(set(resp.keys()) , set(fields.keys()))
     eq_(rv.status_code, 200)
 
+
 def test_summary():
     rv = test_app.get('/reports/summary/')
     eq_(rv.headers['Content-Type'], 'application/json')
@@ -65,4 +70,3 @@ def test_summary():
     fields = get_swagger(DIR + 'swagger_specs/summary.yml', 'Summary')
     eq_(set(resp.keys()) , set(fields.keys()))
     eq_(rv.status_code, 200)
-

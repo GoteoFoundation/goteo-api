@@ -52,10 +52,8 @@ class User(db.Model):
     Translations = relationship("UserLang",
                                 back_populates="User", lazy='joined') # Eager loading to allow catching
 
-
     def __repr__(self):
         return '<User %s: %r>' % (self.id, self.name)
-
 
     @hybrid_property
     def node(self):
@@ -96,7 +94,6 @@ class User(db.Model):
     @hybrid_property
     def projects_collaborated(self):
         return Message.projects_total(user=self.id)
-
 
     @hybrid_method
     def get_context(self):

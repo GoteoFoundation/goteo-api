@@ -42,7 +42,6 @@ class Cost(db.Model):
                                 primaryjoin = "and_(Cost.id==CostLang.id, CostLang.pending==0)",
                                 back_populates="Cost", lazy='joined') # Eager loading to allow catching
 
-
     def __repr__(self):
         return '<Cost(%d) %s of project %s>' % (self.id, self.cost[:50], self.project_id)
 

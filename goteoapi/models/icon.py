@@ -46,7 +46,6 @@ class Icon(db.Model):
     def icon(self):
         return self.id
 
-
     # Getting filters for this model
     @hybrid_method
     def get_filters(self, **kwargs):
@@ -76,8 +75,7 @@ class Icon(db.Model):
             subquery = ProjectLocation.location_subquery(**kwargs['location'])
             filters.append(ProjectLocation.id == Reward.project_id)
             filters.append(ProjectLocation.id.in_(subquery))
-        return filters;
-
+        return filters
 
     @hybrid_method
     @cacher

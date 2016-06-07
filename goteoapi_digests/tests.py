@@ -11,6 +11,7 @@ __import__('goteoapi_digests.controllers')
 
 DIR = os.path.dirname(__file__) + '/'
 
+
 def test_non_existing():
     rv = test_app.get('/digests/i-dont-exists')
     eq_(rv.headers['Content-Type'], 'application/json')
@@ -19,6 +20,7 @@ def test_non_existing():
     eq_(rv.status_code, 400)
     eq_(resp['error'], 400)
     assert 'message' in resp
+
 
 def test_categories():
     rv = test_app.get('/digests/categories/')

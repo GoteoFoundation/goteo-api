@@ -32,7 +32,6 @@ class Invest(db.Model):
     STATUS_RELOCATED  = 5   # deprecated status
     STATUS_TO_POOL    = 6   # refunded to user's pool
 
-
     VALID_INVESTS = [STATUS_PENDING, STATUS_CHARGED, STATUS_PAID, STATUS_RETURNED, STATUS_TO_POOL]
     NON_FISICAL_INVESTS = ('drop', 'pool')
     STATUS_STR = ('processing', 'pending', 'charged', 'cancelled', 'paid', 'returned', 'relocated', 'pool-returned')
@@ -104,7 +103,6 @@ class Invest(db.Model):
     @hybrid_method
     def get_filters(self, **kwargs):
 
-
         filters = []
 
         if 'status' in kwargs and kwargs['status'] is not None:
@@ -171,7 +169,6 @@ class Invest(db.Model):
                     filters.append(self.project_id.in_(kwargs['project']))
                 else:
                     filters.append(self.project_id == kwargs['project'])
-
 
         # instead of exposing raw payment method
         # we will show 3 main methods as 'type' property:
@@ -458,7 +455,6 @@ class Invest(db.Model):
             return total
         except MultipleResultsFound:
             return 0
-
 
     # OJO: Como en reporting.php, no filtra por proyectos publicados
     # TODO: confirmar si hay que filtrar por Invest_node(ahora) o por project_node Se filtra

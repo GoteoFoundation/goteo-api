@@ -79,11 +79,11 @@ class ItemLocation(object):
         rlng = radians(longitude)
         distance = (
             func.acos(
-                  func.sin(rlat)
-                * func.sin(func.radians(column('latitude')))
-                + func.cos(rlat)
-                * func.cos(func.radians(column('latitude')))
-                * func.cos(func.radians(column('longitude')) - rlng)
+                  func.sin(rlat) *
+                  func.sin(func.radians(column('latitude'))) +
+                  func.cos(rlat) *
+                  func.cos(func.radians(column('latitude'))) *
+                  func.cos(func.radians(column('longitude')) - rlng)
             ) * R
         ).label('distance')
         subquery = db.session.query(self.id,self.latitude,self.longitude,self.method,self.city,self.country,self.country_code,self.modified,distance).filter(*filters).subquery('FirstCut')

@@ -86,7 +86,7 @@ class AbstractLang():
                 cols.append(getattr(alias, k ).label(k + '_' + l))
             joins.append((alias, and_(alias.id == sub_class.id, alias.lang == l)))
             # print(joins)
-        return db.session.query(*cols).distinct().outerjoin(*joins);
+        return db.session.query(*cols).distinct().outerjoin(*joins)
 
     @hybrid_method
     def get(self, id, lang):
@@ -127,7 +127,7 @@ class Response():
         # self.ret['date'] = utc_from_local( dtdatetime.utcnow() )
 
     def set(self, var, value):
-        self.ret[var] = value;
+        self.ret[var] = value
 
     def response(self, as_json = True):
         if self.time_start != 0:

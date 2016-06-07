@@ -14,11 +14,13 @@ from goteoapi.auth.decorators import requires_auth
 from goteoapi.base_resources import BaseList, Response
 from goteoapi import app
 
+
 def year_sanitizer(data):
     d = parse(data)
     if d > dtdatetime.now():
         raise Exception("Invalid parameter year")
     return str(d.year)
+
 
 class DigestsListAPI(BaseList):
     """Get Digest list"""

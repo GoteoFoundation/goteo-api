@@ -76,7 +76,6 @@ class UsersListAPI(BaseList):
         return res
 
 
-
 class UserOwnerAPI(BaseItem):
     """Authenticated User Details"""
     @requires_auth(scope='private')

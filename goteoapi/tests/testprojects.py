@@ -17,6 +17,7 @@ old_redis_url = app.config['REDIS_URL']
 old_cache_min_timeout = app.config['CACHE_MIN_TIMEOUT']
 old_cache_type = app.config['CACHE']['CACHE_TYPE']
 
+
 def setup():
     cache.clear()
     app.config['CACHING'] = True
@@ -24,6 +25,7 @@ def setup():
     app.config['CACHE_MIN_TIMEOUT'] = 2
     app.config['CACHE']['CACHE_TYPE'] = 'simple'
     cache.init_app(app, config=app.config['CACHE'])
+
 
 def teardown():
     cache.clear()
@@ -38,25 +40,28 @@ from_date = (date.today() - timedelta(days=40)).isoformat()
 to_date = (date.today() - timedelta(days=20)).isoformat()
 
 FILTERS = [
-'page=0',
-'limit=1',
-'page=1&limit=1',
-'lang=ca&lang=fr',
-'category=2',
-'node=goteo&lang=en&lang=ca',
-'from_date=' + from_date,
-'to_date=' + to_date,
-'from_date=' + from_date + '&to_date=' + to_date,
-'location=41.38879,2.15899,50',
-'location=41.38879,2.15899,50&from_date=' + from_date,
-'location=41.38879,2.15899,50&to_date=' + to_date,
-'location=41.38879,2.15899,50&from_date=' + from_date + '&to_date=' + to_date
+    'page=0',
+    'limit=1',
+    'page=1&limit=1',
+    'lang=ca&lang=fr',
+    'category=2',
+    'node=goteo&lang=en&lang=ca',
+    'from_date=' + from_date,
+    'to_date=' + to_date,
+    'from_date=' + from_date + '&to_date=' + to_date,
+    'location=41.38879,2.15899,50',
+    'location=41.38879,2.15899,50&from_date=' + from_date,
+    'location=41.38879,2.15899,50&to_date=' + to_date,
+    'location=41.38879,2.15899,50&from_date=' + from_date + '&to_date=' + to_date
 ]
+
+
 def test_projects():
-    fields_swagger = get_swagger(DIR + 'swagger_specs/project_list.yml', 'Project')
+    fields_swagger = get_swagger(
+        DIR + 'swagger_specs/project_list.yml', 'Project')
     for f in FILTERS:
         print(f)
-        rv = test_app.get('/projects/' , query_string=f)
+        rv = test_app.get('/projects/', query_string=f)
         eq_(rv.headers['Content-Type'], 'application/json')
         resp = get_json(rv)
         fields = project_resource_fields
@@ -67,10 +72,12 @@ def test_projects():
         eq_(len(resp['items']) >= 1, True)
         eq_(rv.status_code, 200)
         # Swagger test
-        eq_(set(resp['items'][0].keys()) , set(fields_swagger.keys()))
+        eq_(set(resp['items'][0].keys()), set(fields_swagger.keys()))
+
 
 def test_projects_cached():
     test_projects()
+
 
 def test_project_no_projects():
     rv = test_app.get('/projects/--i-dont-exits--')
@@ -81,17 +88,21 @@ def test_project_no_projects():
     assert 'items' in resp
     eq_(resp['items'], [])
 
+
 def test_project_trailing_slash():
     rv = test_app.get('/projects')
     eq_(rv.status_code, 301)
     assert 'text/html' in rv.headers['Content-Type']
     assert 'location' in rv.headers, "%r not in %r" % ('location', rv.headers)
-    assert '/projects/' in rv.headers['Location'], "%r not in %r" % ('/projects/', rv.headers['Location'])
+    assert '/projects/' in rv.headers['Location'], "%r not in %r" % (
+        '/projects/', rv.headers['Location'])
     rv = test_app.get('/projects/test-project/')
     eq_(rv.status_code, 301)
     assert 'text/html' in rv.headers['Content-Type']
     assert 'location' in rv.headers, "%r not in %r" % ('location', rv.headers)
-    assert '/projects/test-project' in rv.headers['Location'], "%r not in %r" % ('/projects/test-project', rv.headers['Location'])
+    assert '/projects/test-project' in rv.headers['Location'], "%r not in %r" % (
+        '/projects/test-project', rv.headers['Location'])
+
 
 def test_project():
     # TODO: generic project here
@@ -108,17 +119,20 @@ def test_project():
     eq_(len(set(map(lambda x: str(x), resp.keys())) - set(fields.keys())) >= 0, True)
     # Swagger test
     fields = get_swagger(DIR + 'swagger_specs/project_item.yml', 'ProjectFull')
-    eq_(set(resp.keys()) , set(fields.keys()))
+    eq_(set(resp.keys()), set(fields.keys()))
     # # Swagger subobjects test
-    fields = get_swagger(DIR + 'swagger_specs/project_item.yml', 'ProjectReward')
-    eq_(set(resp['rewards'].pop(0).keys()) , set(fields.keys()))
+    fields = get_swagger(
+        DIR + 'swagger_specs/project_item.yml', 'ProjectReward')
+    eq_(set(resp['rewards'].pop(0).keys()), set(fields.keys()))
     fields = get_swagger(DIR + 'swagger_specs/project_item.yml', 'ProjectCost')
-    eq_(set(resp['costs'].pop(0).keys()) , set(fields.keys()))
+    eq_(set(resp['costs'].pop(0).keys()), set(fields.keys()))
     fields = get_swagger(DIR + 'swagger_specs/project_item.yml', 'ProjectNeed')
-    eq_(set(resp['needs'].pop(0).keys()) , set(fields.keys()))
+    eq_(set(resp['needs'].pop(0).keys()), set(fields.keys()))
+
 
 def test_project_cached():
     test_project()
+
 
 def test_call_projects():
     rv = test_app.get('/projects/project-passing-today/donors')
@@ -134,9 +148,10 @@ def test_call_projects():
     eq_(len(set(map(lambda x: str(x), resp.keys())) - set(fields.keys())) >= 0, True)
 
     # Swagger test
-    fields_swagger = get_swagger(DIR + 'swagger_specs/project_donors.yml', 'ProjectDonor')
-    eq_(set(resp['items'][0].keys()) , set(fields_swagger.keys()))
+    fields_swagger = get_swagger(
+        DIR + 'swagger_specs/project_donors.yml', 'ProjectDonor')
+    eq_(set(resp['items'][0].keys()), set(fields_swagger.keys()))
+
 
 def test_call_projects_cached():
     test_call_projects()
-

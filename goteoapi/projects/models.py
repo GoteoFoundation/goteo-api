@@ -57,7 +57,6 @@ class Project(db.Model):
         status = 5 : Fulfilled, after funded an editor can decide to put this status meaning "Outstanding project"
         status = 6 : Project failed after an unsuccessful campaign
 
-
         """
     __tablename__ = 'project'
 
@@ -293,7 +292,6 @@ class Project(db.Model):
                 elif kwargs['is_anonymous'] is False:
                     filters.append(or_(Invest.anonymous == None, Invest.anonymous == False))
 
-
         if 'project' in kwargs and kwargs['project'] is not None:
             if isinstance(kwargs['project'], (list, tuple)):
                 filters.append(self.id.in_(kwargs['project']))
@@ -316,7 +314,6 @@ class Project(db.Model):
             if kwargs['loc_status'] == 'unlocated':
                 filters.append(~self.id.in_(db.session.query(ProjectLocation.id).subquery()))
 
-
         if 'location' in kwargs and kwargs['location'] is not None:
             subquery = ProjectLocation.location_subquery(**kwargs['location'])
             filters.append(ProjectLocation.id == self.id)
@@ -329,9 +326,7 @@ class Project(db.Model):
             else:
                 filters.append(CallProject.call_id == kwargs['call'])
 
-
         return filters
-
 
     @hybrid_method
     @cacher
@@ -536,15 +531,6 @@ class Project(db.Model):
             ret.append(self(**u))
 
         return ret
-
-
-        # try:
-        #     return db.session.query(*cols).join(Invest) \
-        #                     .filter(*filters).group_by(Invest.project_id) \
-        #                     .order_by(desc('total')).offset(page * limit).limit(limit).all()
-
-        # except NoResultFound:
-        #     return []
 
     @hybrid_method
     @cacher
