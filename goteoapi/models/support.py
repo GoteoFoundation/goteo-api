@@ -48,10 +48,10 @@ class Support(db.Model):
     def list_by_project(self, project_id, lang=None):
         """Get a list of valid supports (non-economic needs) for project"""
         try:
-            filters = [self.project_id==project_id]
+            filters = [self.project_id == project_id]
             if lang:
-                filters.append(SupportLang.id==self.id)
-                filters.append(SupportLang.lang==lang)
+                filters.append(SupportLang.id == self.id)
+                filters.append(SupportLang.lang == lang)
                 return SupportLang.query.distinct().filter(*filters).order_by(asc(self.id)).all()
 
             return self.query.distinct().filter(*filters).order_by(asc(self.id)).all()

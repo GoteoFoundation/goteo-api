@@ -38,13 +38,13 @@ class Call(db.Model):
     __tablename__ = 'call'
 
     #CALL STATUS IDs
-    STATUS_PENDING   = 0
-    STATUS_EDITING    = 1
-    STATUS_REVIEWING  = 2
-    STATUS_APPLYING   = 3
-    STATUS_PUBLISHED  = 4
-    STATUS_SUCCEEDED  = 5
-    STATUS_EXPIRED    = 6
+    STATUS_PENDING = 0
+    STATUS_EDITING = 1
+    STATUS_REVIEWING = 2
+    STATUS_APPLYING = 3
+    STATUS_PUBLISHED = 4
+    STATUS_SUCCEEDED = 5
+    STATUS_EXPIRED = 6
     STATUS_STR = ('pending', 'editing', 'reviewing', 'applying', 'published', 'succeeded', 'expired')
 
     PUBLIC_CALLS = [STATUS_APPLYING, STATUS_PUBLISHED, STATUS_SUCCEEDED, STATUS_EXPIRED]

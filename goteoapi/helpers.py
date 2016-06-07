@@ -148,7 +148,7 @@ def marshal(data, fields, envelope=None, remove_null=False):
         return [marshal(d, fields, envelope, remove_null) for d in data]
     m = s_marshal(data, fields, envelope)
     if isinstance(m, dict):
-        return { k.replace("_", "-"): v for k, v in m.items() if not remove_null or v is not None }
+        return {k.replace("_", "-"): v for k, v in m.items() if not remove_null or v is not None}
     return m
 
 

@@ -62,13 +62,13 @@ class Project(db.Model):
     __tablename__ = 'project'
 
     #PROJECT STATUS IDs
-    STATUS_REJECTED    = 0
-    STATUS_EDITING     = 1 #
-    STATUS_REVIEWING   = 2 # reviewing
+    STATUS_REJECTED = 0
+    STATUS_EDITING = 1 #
+    STATUS_REVIEWING = 2 # reviewing
     STATUS_IN_CAMPAIGN = 3
-    STATUS_FUNDED      = 4
-    STATUS_FULFILLED   = 5 # 'Caso de exito'
-    STATUS_UNFUNDED    = 6 # proyecto fallido
+    STATUS_FUNDED = 4
+    STATUS_FULFILLED = 5 # 'Caso de exito'
+    STATUS_UNFUNDED = 6 # proyecto fallido
     STATUS_STR = ('rejected', 'editing', 'reviewing', 'in_campaign', 'funded', 'fulfilled', 'unfunded')
 
     RECEIVED_PROJECTS = [STATUS_REVIEWING, STATUS_IN_CAMPAIGN, STATUS_FUNDED, STATUS_FULFILLED, STATUS_UNFUNDED]
@@ -438,8 +438,8 @@ class Project(db.Model):
         """Average number of posts by projects"""
         filters = self.get_filters(**kwargs)
         filters.append(Post.publish == 1)
-        sq1 = db.session.query(func.count(self.id) \
-                        .label('posts')).select_from(Post) \
+        sq1 = db.session.query(func.count(self.id).label('posts')) \
+                        .select_from(Post) \
                         .join(Blog, and_(Blog.id == Post.blog_id, Blog.type == 'project')) \
                         .join(self, self.id == Blog.user_id) \
                         .filter(*filters).group_by(Post.blog_id) \

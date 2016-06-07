@@ -91,7 +91,7 @@ class License(db.Model):
     def get(self, id, lang=None):
         """Get a valid license form id"""
         try:
-            filters = [self.id==id]
+            filters = [self.id == id]
             return self.query.filter(*filters).one()
         except NoResultFound:
             return None

@@ -113,7 +113,7 @@ class DigestsListAPI(BaseList):
 
         res = Response(
             starttime = time_start,
-            attributes = {'global' : global_, 'buckets' : buckets, 'endpoint' : endpoint },
+            attributes = {'global' : global_, 'buckets' : buckets, 'endpoint' : endpoint},
             filters = args.items()
         )
 
@@ -130,10 +130,10 @@ class DigestsListAPI(BaseList):
 
     def max_min(self, year, month=None):
         """Returns a lower date and a upper date from year or month"""
-        start_month=month
+        start_month = month
         if month is None:
-            start_month=1
-            month=12
+            start_month = 1
+            month = 12
 
         d_min = dtdate(int(year), int(start_month), 1)
         d_max = dtdate(int(year), int(month), calendar.monthrange(int(year), int(month))[1])

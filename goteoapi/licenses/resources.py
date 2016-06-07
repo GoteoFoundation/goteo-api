@@ -50,7 +50,7 @@ class LicensesListAPI(BaseList):
             reward_filter['license'] = [item['id']]
             item['total-rewards'] = Reward.total(**reward_filter)
             item['total-projects'] = Project.total(**reward_filter)
-            items.append( item )
+            items.append(item)
 
         res = Response(
             starttime = time_start,

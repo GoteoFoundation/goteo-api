@@ -23,17 +23,17 @@ location_resource_fields = {
 class ItemLocation(object):
     """This class can be used as base for the implementing SQL tables"""
 
-    id           = db.Column('id', String(50), primary_key=True)
-    latitude     = db.Column('latitude', Float)
-    longitude    = db.Column('longitude', Float)
-    method       = db.Column('method', String(50))
-    locable      = db.Column('locable', Boolean)
-    city         = db.Column('city', String(255))
-    region       = db.Column('region', String(255))
-    country      = db.Column('country', String(255))
+    id = db.Column('id', String(50), primary_key=True)
+    latitude = db.Column('latitude', Float)
+    longitude = db.Column('longitude', Float)
+    method = db.Column('method', String(50))
+    locable = db.Column('locable', Boolean)
+    city = db.Column('city', String(255))
+    region = db.Column('region', String(255))
+    country = db.Column('country', String(255))
     country_code = db.Column('country_code', String(2))
-    info         = db.Column('info', String(255))
-    modified     = db.Column('modified', DateTime)
+    info = db.Column('info', String(255))
+    modified = db.Column('modified', DateTime)
 
     def __repr__(self):
         return '<ItemLocation: (%s) in %f,%f>' % (self.id, self.latitude, self.longitude)

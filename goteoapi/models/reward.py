@@ -153,10 +153,10 @@ class Reward(db.Model):
     def list_by_project(self, project_id, lang=None):
         """Get a list of valid rewards for project"""
         try:
-            filters = [self.project_id==project_id]
+            filters = [self.project_id == project_id]
             if lang:
-                filters.append(RewardLang.id==self.id)
-                filters.append(RewardLang.lang==lang)
+                filters.append(RewardLang.id == self.id)
+                filters.append(RewardLang.lang == lang)
                 return RewardLang.query.distinct().filter(*filters).order_by(asc(self.order), asc(self.amount)).all()
             return self.query.distinct().filter(*filters).order_by(asc(self.order), asc(self.amount)).all()
         except NoResultFound:

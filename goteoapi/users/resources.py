@@ -65,7 +65,7 @@ class UsersListAPI(BaseList):
                     item['longitude'] = location.longitude
                     item['region'] = location.region if location.region != '' else location.country
 
-            items.append( item )
+            items.append(item)
 
         res = Response(
             starttime = time_start,

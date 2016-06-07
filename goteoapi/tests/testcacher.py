@@ -69,33 +69,33 @@ class Dummy():
 def test_non_cacher():
     app.config['CACHING'] = False
     eq_(get_random() == get_random(), False)
-    eq_( get_alt() , 0)
-    eq_( get_alt() , 1)
+    eq_(get_alt() , 0)
+    eq_(get_alt() , 1)
 
 
 def test_cacher():
     app.config['CACHING'] = True
-    eq_( get_random() , get_random())
-    eq_( get_simple() , get_simple(0))
-    eq_( get_simple(num=1) , get_simple(1))
+    eq_(get_random() , get_random())
+    eq_(get_simple() , get_simple(0))
+    eq_(get_simple(num=1) , get_simple(1))
     get_alt(0)
-    eq_( get_alt() , 0)
-    eq_( get_alt() , 0)
+    eq_(get_alt() , 0)
+    eq_(get_alt() , 0)
     sleep(1.1)
-    eq_( get_alt() , 1)
+    eq_(get_alt() , 1)
     assert len(get_key_list()) > 0
 
 
 def test_class_non_cacher():
     app.config['CACHING'] = False
-    eq_( 0 == Dummy.get_simple(0), True)
-    eq_( Dummy.get_random() == Dummy.get_random(), False)
+    eq_(0 == Dummy.get_simple(0), True)
+    eq_(Dummy.get_random() == Dummy.get_random(), False)
 
 
 def test_class_cacher():
     app.config['CACHING'] = True
-    eq_( 1 == Dummy.get_simple(1), True)
-    eq_( Dummy.get_random() , Dummy.get_random())
+    eq_(1 == Dummy.get_simple(1), True)
+    eq_(Dummy.get_random() , Dummy.get_random())
 
 
 def test_renew_cacher():
@@ -120,7 +120,7 @@ def test_static_methods():
                 f = locals()[f]
             elif f in globals():
                 f = globals()[f]
-        eq_( 0, int(f(*args, **kargs)))
+        eq_(0, int(f(*args, **kargs)))
 
 
 def test_invalid_keys():
@@ -129,7 +129,7 @@ def test_invalid_keys():
         "Cacher/total|<class 'goteoapi.users.models.User'>|node=None|category=[u'16']|lang=None|project=None|from_date=2013-01-01|location=None|year=None|to_date=2013-12-31":(50, datetime.datetime.now()),
     }
     key_list = get_key_functions(keys)
-    eq_( len(key_list) , 0)
+    eq_(len(key_list) , 0)
 
 # TODO...
 # def test_instance_methods():
@@ -137,4 +137,4 @@ def test_invalid_keys():
 #     key_list = get_key_functions(keys)
 #     assert len(key_list) == 1
 #     for f, args, kargs in key_list:
-#         eq_( "1" == f(*args, **kargs), True)
+#         eq_("1" == f(*args, **kargs), True)

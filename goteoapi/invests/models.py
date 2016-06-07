@@ -19,19 +19,19 @@ class Invest(db.Model):
     __tablename__ = 'invest'
 
     METHOD_PAYPAL = 'paypal'
-    METHOD_TPV    = 'tpv'
-    METHOD_CASH   = 'cash'
-    METHOD_DROP   = 'drop'
+    METHOD_TPV = 'tpv'
+    METHOD_CASH = 'cash'
+    METHOD_DROP = 'drop'
 
     #INVEST STATUS IDs
     STATUS_PROCESSING = -1  # payment gateway not reached yet or just a failed payment
-    STATUS_PENDING    = 0   # In a status that requires post-processing (former paypal preapprovals)
-    STATUS_CHARGED    = 1   # charged by the platform
-    STATUS_CANCELLED  = 2   # refunded to the user by some admin manual action, won't be added to any total
-    STATUS_PAID       = 3   # paid to the project (successful project) NOT REALLY USED
-    STATUS_RETURNED   = 4   # automatically refunded to the user due a failed project
-    STATUS_RELOCATED  = 5   # deprecated status
-    STATUS_TO_POOL    = 6   # refunded to user's pool
+    STATUS_PENDING = 0   # In a status that requires post-processing (former paypal preapprovals)
+    STATUS_CHARGED = 1   # charged by the platform
+    STATUS_CANCELLED = 2   # refunded to the user by some admin manual action, won't be added to any total
+    STATUS_PAID = 3   # paid to the project (successful project) NOT REALLY USED
+    STATUS_RETURNED = 4   # automatically refunded to the user due a failed project
+    STATUS_RELOCATED = 5   # deprecated status
+    STATUS_TO_POOL = 6   # refunded to user's pool
 
     VALID_INVESTS = [STATUS_PENDING, STATUS_CHARGED, STATUS_PAID, STATUS_RETURNED, STATUS_TO_POOL]
     NON_FISICAL_INVESTS = ('drop', 'pool')
@@ -480,8 +480,7 @@ class Invest(db.Model):
         else:
             return 0
 
-        recomp_dinero = db.session.query(func.count(self.id) \
-                                  .label("amourew")) \
+        recomp_dinero = db.session.query(func.count(self.id).label("amourew")) \
                                   .filter(*filters) \
                                   .group_by(Reward.id) \
                                   .subquery()
@@ -500,8 +499,7 @@ class Invest(db.Model):
                                         self.STATUS_PAID]))
         filters.append(Project.status.in_([Project.STATUS_FUNDED,
                                            Project.STATUS_FULFILLED]))
-        sub = db.session.query((func.sum(self.amount) / Project.minimum * 100 - 100) \
-                        .label('percent')) \
+        sub = db.session.query((func.sum(self.amount) / Project.minimum * 100 - 100).label('percent')) \
                         .filter(*filters) \
                         .group_by(self.project_id) \
                         .subquery()
@@ -518,8 +516,7 @@ class Invest(db.Model):
         filters.append(self.status.in_([self.STATUS_PENDING,
                                         self.STATUS_RETURNED]))
         filters.append(Project.status == Project.STATUS_UNFUNDED)
-        sub = db.session.query((func.sum(self.amount) / Project.minimum * 100) \
-                        .label('percent')) \
+        sub = db.session.query((func.sum(self.amount) / Project.minimum * 100).label('percent')) \
                         .filter(*filters) \
                         .group_by(self.project_id) \
                         .subquery()
@@ -534,8 +531,7 @@ class Invest(db.Model):
         filters = list(self.get_filters(**kwargs))
         filters.append(Project.status.in_([Project.STATUS_FUNDED,
                                            Project.STATUS_FULFILLED]))
-        sq = db.session.query(func.count(func.distinct(self.user_id)) \
-                       .label("co")) \
+        sq = db.session.query(func.count(func.distinct(self.user_id)).label("co")) \
                        .join(Project, self.project_id == Project.id) \
                        .filter(*filters) \
                        .group_by(self.project_id) \

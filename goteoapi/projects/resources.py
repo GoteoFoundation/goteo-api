@@ -95,28 +95,28 @@ project_full_resource_fields = project_resource_fields.copy()
 project_full_resource_fields.pop('latitude')
 project_full_resource_fields.pop('longitude')
 project_full_resource_fields.pop('region')
-project_full_resource_fields["description"]    = fields.String
-project_full_resource_fields["motivation"]     = fields.String
-project_full_resource_fields["goal"]           = fields.String
-project_full_resource_fields["about"]          = fields.String
-project_full_resource_fields["currency"]       = fields.String
-project_full_resource_fields["currency_rate"]  = fields.Float
-project_full_resource_fields["scope"]          = fields.String
-project_full_resource_fields["date_created"]   = DateTime
+project_full_resource_fields["description"] = fields.String
+project_full_resource_fields["motivation"] = fields.String
+project_full_resource_fields["goal"] = fields.String
+project_full_resource_fields["about"] = fields.String
+project_full_resource_fields["currency"] = fields.String
+project_full_resource_fields["currency_rate"] = fields.Float
+project_full_resource_fields["scope"] = fields.String
+project_full_resource_fields["date_created"] = DateTime
 project_full_resource_fields["date_published"] = DateTime
-project_full_resource_fields["date_updated"]   = DateTime
+project_full_resource_fields["date_updated"] = DateTime
 project_full_resource_fields["date_succeeded"] = DateTime
-project_full_resource_fields["date_closed"]    = DateTime
-project_full_resource_fields["date_passed"]    = DateTime
-project_full_resource_fields["location"]       = fields.List(fields.Nested(location_resource_fields))
-project_full_resource_fields["user"]           = fields.Nested(user_resource_fields)
-project_full_resource_fields["widget_url"]     = fields.String
-project_full_resource_fields["image_url_big"]  = fields.String
-project_full_resource_fields["image_gallery"]  = fields.List(fields.Nested(project_gallery_resource_fields))
-project_full_resource_fields["video_url"]      = fields.String
-project_full_resource_fields["rewards"]        = fields.List(fields.Nested(project_reward_resource_fields))
-project_full_resource_fields["costs"]          = fields.List(fields.Nested(project_cost_resource_fields))
-project_full_resource_fields["needs"]          = fields.List(fields.Nested(project_need_resource_fields))
+project_full_resource_fields["date_closed"] = DateTime
+project_full_resource_fields["date_passed"] = DateTime
+project_full_resource_fields["location"] = fields.List(fields.Nested(location_resource_fields))
+project_full_resource_fields["user"] = fields.Nested(user_resource_fields)
+project_full_resource_fields["widget_url"] = fields.String
+project_full_resource_fields["image_url_big"] = fields.String
+project_full_resource_fields["image_gallery"] = fields.List(fields.Nested(project_gallery_resource_fields))
+project_full_resource_fields["video_url"] = fields.String
+project_full_resource_fields["rewards"] = fields.List(fields.Nested(project_reward_resource_fields))
+project_full_resource_fields["costs"] = fields.List(fields.Nested(project_cost_resource_fields))
+project_full_resource_fields["needs"] = fields.List(fields.Nested(project_need_resource_fields))
 
 project_full_translate_resource_fields = {k: v for k, v in project_full_resource_fields.items() if k in ProjectLang.get_translate_keys()}
 project_full_translate_resource_fields['description_short'] = fields.String
@@ -150,7 +150,7 @@ class ProjectsListAPI(BaseList):
                 item['latitude'] = location.latitude
                 item['longitude'] = location.longitude
                 item['region'] = location.region if location.region != '' else location.country
-            items.append( item )
+            items.append(item)
 
         res = Response(
             starttime = time_start,
@@ -285,7 +285,7 @@ class ProjectDonorsListAPI(BaseList):
                     item['longitude'] = location.longitude
                     item['region'] = location.region if location.region != '' else location.country
 
-            items.append( item )
+            items.append(item)
         res = Response(
             starttime = time_start,
             attributes = {'id':project_id, 'items' : items},

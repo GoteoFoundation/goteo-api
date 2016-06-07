@@ -60,10 +60,10 @@ class Cost(db.Model):
     def list_by_project(self, project_id, lang=None):
         """Get a list of valid costs for project"""
         try:
-            filters = [self.project_id==project_id]
+            filters = [self.project_id == project_id]
             if lang:
-                filters.append(CostLang.id==self.id)
-                filters.append(CostLang.lang==lang)
+                filters.append(CostLang.id == self.id)
+                filters.append(CostLang.lang == lang)
                 return CostLang.query.distinct().filter(*filters).order_by(asc(self.from_date)).all()
             return self.query.distinct().filter(*filters).order_by(asc(self.from_date)).all()
         except NoResultFound:

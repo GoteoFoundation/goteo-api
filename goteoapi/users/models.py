@@ -229,10 +229,11 @@ class User(db.Model):
             del kwargs['project']
             filters = list(self.get_filters(**kwargs))
             filters.append(Invest.status.in_(Invest.VALID_INVESTS))
-            filters.append(Invest.user_id==self.id)
-            filters.append(Invest.project_id==project_id)
+            filters.append(Invest.user_id == self.id)
+            filters.append(Invest.project_id == project_id)
             # return self.query.distinct().filter(*filters).order_by(asc(self.id)).offset(page * limit).limit(limit).all()
-            return [d._asdict() for d in db.session.query(Invest.anonymous,
+            return [d._asdict() for d in db.session.query(
+                        Invest.anonymous,
                         self.id,
                         self.name,
                         self.avatar,
@@ -258,8 +259,8 @@ class User(db.Model):
             del kwargs['project']
             filters = list(self.get_filters(**kwargs))
             filters.append(Invest.status.in_(Invest.VALID_INVESTS))
-            filters.append(Invest.user_id==self.id)
-            filters.append(Invest.project_id==project_id)
+            filters.append(Invest.user_id == self.id)
+            filters.append(Invest.project_id == project_id)
             count = db.session.query(func.count(distinct(self.id))).filter(*filters).scalar()
             if count is None:
                 count = 0

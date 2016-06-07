@@ -45,7 +45,7 @@ class CategoriesListAPI(BaseList):
             project_filter['category'] = [item['id']]
             item['total-projects'] = Project.total(**project_filter)
             item['total-users'] = User.total(**project_filter)
-            items.append( item )
+            items.append(item)
 
         res = Response(
             starttime = time_start,

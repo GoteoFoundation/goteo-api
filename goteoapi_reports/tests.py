@@ -22,7 +22,7 @@ def test_money():
     if 'time-elapsed' in resp:
         del resp['time-elapsed']
     fields = get_swagger(DIR + 'swagger_specs/money.yml', 'Money')
-    eq_(set(resp.keys()) , set(fields.keys()))
+    eq_(set(resp.keys()), set(fields.keys()))
     eq_(rv.status_code, 200)
 
 
@@ -33,7 +33,7 @@ def test_projects():
     if 'time-elapsed' in resp:
         del resp['time-elapsed']
     fields = get_swagger(DIR + 'swagger_specs/projects.yml', 'Project')
-    eq_(set(resp.keys()) , set(fields.keys()))
+    eq_(set(resp.keys()), set(fields.keys()))
     eq_(rv.status_code, 200)
 
 
@@ -44,7 +44,7 @@ def test_community():
     if 'time-elapsed' in resp:
         del resp['time-elapsed']
     fields = get_swagger(DIR + 'swagger_specs/community.yml', 'Community')
-    eq_(set(resp.keys()) , set(fields.keys()))
+    eq_(set(resp.keys()), set(fields.keys()))
     eq_(rv.status_code, 200)
 
 
@@ -56,7 +56,7 @@ def test_rewards():
     if 'time-elapsed' in resp:
         del resp['time-elapsed']
     fields = get_swagger(DIR + 'swagger_specs/rewards.yml', 'Reward')
-    eq_(set(resp.keys()) , set(fields.keys()))
+    eq_(set(resp.keys()), set(fields.keys()))
     eq_(rv.status_code, 200)
 
 
@@ -68,5 +68,5 @@ def test_summary():
     if 'time-elapsed' in resp:
         del resp['time-elapsed']
     fields = get_swagger(DIR + 'swagger_specs/summary.yml', 'Summary')
-    eq_(set(resp.keys()) , set(fields.keys()))
+    eq_(set(resp.keys()), set(fields.keys()))
     eq_(rv.status_code, 200)

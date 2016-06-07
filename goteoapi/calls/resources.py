@@ -47,19 +47,19 @@ call_full_resource_fields = call_resource_fields.copy()
 call_full_resource_fields.pop('latitude')
 call_full_resource_fields.pop('region')
 call_full_resource_fields.pop('longitude')
-call_full_resource_fields["description"]      = fields.String
-call_full_resource_fields["legal"]            = fields.String
-call_full_resource_fields["whom"]             = fields.String
-call_full_resource_fields["applies"]          = fields.String
-call_full_resource_fields["dossier"]          = fields.String
-call_full_resource_fields["tweet"]            = fields.String
-call_full_resource_fields["resources"]        = fields.String
-call_full_resource_fields["date_closed"]      = DateTime
-call_full_resource_fields["image_url_big"]    = fields.String
+call_full_resource_fields["description"] = fields.String
+call_full_resource_fields["legal"] = fields.String
+call_full_resource_fields["whom"] = fields.String
+call_full_resource_fields["applies"] = fields.String
+call_full_resource_fields["dossier"] = fields.String
+call_full_resource_fields["tweet"] = fields.String
+call_full_resource_fields["resources"] = fields.String
+call_full_resource_fields["date_closed"] = DateTime
+call_full_resource_fields["image_url_big"] = fields.String
 call_full_resource_fields["image_background_url"] = fields.String
-call_full_resource_fields["facebook_url"]     = fields.String
-call_full_resource_fields["user"]             = fields.Nested(user_resource_fields)
-call_full_resource_fields["location"]         = fields.List(fields.Nested(location_resource_fields))
+call_full_resource_fields["facebook_url"] = fields.String
+call_full_resource_fields["user"] = fields.Nested(user_resource_fields)
+call_full_resource_fields["location"] = fields.List(fields.Nested(location_resource_fields))
 
 call_project_resource_fields = project_resource_fields.copy()
 call_project_resource_fields['amount_call'] = fields.Float
@@ -91,7 +91,7 @@ class CallsListAPI(BaseList):
                 item['latitude'] = location.latitude
                 item['longitude'] = location.longitude
                 item['region'] = location.region if location.region != '' else location.country
-            items.append( item )
+            items.append(item)
 
         res = Response(
             starttime = time_start,
@@ -180,7 +180,7 @@ class CallProjectsListAPI(BaseList):
                 item['latitude'] = location.latitude
                 item['longitude'] = location.longitude
                 item['region'] = location.region if location.region != '' else location.country
-            items.append( item )
+            items.append(item)
 
         res = Response(
             starttime = time_start,

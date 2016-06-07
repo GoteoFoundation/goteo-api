@@ -70,10 +70,10 @@ def index():
         # Filter out rules non Goteo-api rules
         if "GET" in rule.methods and rule.endpoint.startswith('api_'):
             func_list[rule.rule] = app.view_functions[rule.endpoint].__doc__
-    return jsonify( version=app.config['VERSION'],
-                    message=app.config['DESCRIPTION'] + ' v' + str(app.config['VERSION']),
-                    endpoints=func_list,
-                    links=app.config['LINKS'])
+    return jsonify(version=app.config['VERSION'],
+                   message=app.config['DESCRIPTION'] + ' v' + str(app.config['VERSION']),
+                   endpoints=func_list,
+                   links=app.config['LINKS'])
 
 
 #

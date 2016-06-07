@@ -89,7 +89,7 @@ class AbstractLang():
         for l in search_langs:
             alias = aliased(cls)
             for k in cls.get_translate_keys():
-                cols.append(getattr(alias, k ).label(k + '_' + l))
+                cols.append(getattr(alias, k).label(k + '_' + l))
             joins.append((alias, and_(alias.id == sub_class.id, alias.lang == l)))
             # print(joins)
         return db.session.query(*cols).distinct().outerjoin(*joins)
@@ -98,7 +98,7 @@ class AbstractLang():
     def get(self, id, lang):
         """Get a generic entry for the ObjectLang (assuming uses id as primary key)"""
         try:
-            return self.query.filter(self.id==id, self.lang==lang).one()
+            return self.query.filter(self.id == id, self.lang == lang).one()
         except NoResultFound:
             return None
         pass
@@ -131,7 +131,7 @@ class Response():
 
         self.time_start = starttime
         # If debug?
-        # self.ret['date'] = utc_from_local( dtdatetime.utcnow() )
+        # self.ret['date'] = utc_from_local( dtdatetime.utcnow())
 
     def set(self, var, value):
         self.ret[var] = value
