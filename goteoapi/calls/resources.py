@@ -94,10 +94,10 @@ class CallsListAPI(BaseList):
             items.append(item)
 
         res = Response(
-            starttime = time_start,
-            attributes = {'items': items},
-            filters = args.items(),
-            total = Call.total(**args)
+            starttime=time_start,
+            attributes={'items': items},
+            filters=args.items(),
+            total=Call.total(**args)
         )
 
         return res
@@ -137,8 +137,8 @@ class CallAPI(BaseItem):
             item['translations'] = translations
 
         res = Response(
-            starttime = time_start,
-            attributes = item
+            starttime=time_start,
+            attributes=item
         )
 
         return res
@@ -168,7 +168,7 @@ class CallProjectsListAPI(BaseList):
         items = []
         call = Call.get(call_id)
         if call == None:
-            return Response(attributes = {'id': None})
+            return Response(attributes={'id': None})
 
         for p in Project.list(**args):
             item = marshal(p, call_project_resource_fields)
@@ -183,10 +183,10 @@ class CallProjectsListAPI(BaseList):
             items.append(item)
 
         res = Response(
-            starttime = time_start,
-            attributes = {'id': call_id, 'items': items},
-            filters = args.items(),
-            total = Project.total(**args)
+            starttime=time_start,
+            attributes={'id': call_id, 'items': items},
+            filters=args.items(),
+            total=Project.total(**args)
         )
 
         return res

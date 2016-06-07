@@ -335,7 +335,7 @@ class Invest(db.Model):
         total = db.session.query(self.user_id) \
                           .filter(*filters) \
                           .group_by(self.user_id) \
-                          .having(func.count(self.user_id) > 1). \
+                          .having(func.count(self.user_id) > 1) \
                           .having(func.count(self.project_id) > 1)
         res = total.count()
         if res is None:
@@ -463,7 +463,7 @@ class Invest(db.Model):
     # TODO: confirmar si hay que filtrar por Invest_node(ahora) o por project_node Se filtra
     @hybrid_method
     @cacher
-    def rewards_per_amount(self, minim = 0, maxim = 0, **kwargs):
+    def rewards_per_amount(self, minim=0, maxim=0, **kwargs):
         """Num. of users choosing rewards from {minim} € to {maxim} € """
         filters = list(self.get_filters(**kwargs))
         # filters.append(Reward.id != None)

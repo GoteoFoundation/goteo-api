@@ -66,8 +66,8 @@ class SummaryAPI(Base):
             favorites.append(item)
 
         res = Response(
-            starttime = time_start,
-            attributes = {
+            starttime=time_start,
+            attributes={
                 'pledged': Invest.pledged_total(**args),
                 'matchfund-amount': Invest.pledged_total(method=Invest.METHOD_DROP, **args),
                 'matchfundpledge-amount': Call.pledged_total(**args),
@@ -90,6 +90,6 @@ class SummaryAPI(Base):
                 'top10-donations': top10_donations,
                 'favorite-rewards': favorites
             },
-            filters = args.items()
+            filters=args.items()
         )
         return res

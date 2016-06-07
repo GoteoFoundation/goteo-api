@@ -119,9 +119,9 @@ def utc_from_local(date_time, local_tz=None):
 # ##################
 
 
-def bad_request(message, code = 400):
+def bad_request(message, code=400):
     """Error handling json response"""
-    resp = jsonify(message=str(message), error = code)
+    resp = jsonify(message=str(message), error=code)
     resp.status_code = code
     return resp
 

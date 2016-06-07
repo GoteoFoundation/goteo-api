@@ -68,10 +68,10 @@ class UsersListAPI(BaseList):
             items.append(item)
 
         res = Response(
-            starttime = time_start,
-            attributes = {'items': items},
-            filters = args.items(),
-            total = User.total(**args)
+            starttime=time_start,
+            attributes={'items': items},
+            filters=args.items(),
+            total=User.total(**args)
         )
 
         return res
@@ -126,8 +126,8 @@ class UserAPI(BaseItem):
             item['translations'] = translations
 
         res = Response(
-            starttime = time_start,
-            attributes = item
+            starttime=time_start,
+            attributes=item
         )
 
         return res

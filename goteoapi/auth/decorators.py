@@ -54,8 +54,8 @@ from .. import app
 from ..users.models import User, UserApi
 
 
-def generate_auth_token(authid, expiration = app.config['ACCESS_TOKEN_DURATION']):
-    s = Serializer(app.secret_key, expires_in = expiration)
+def generate_auth_token(authid, expiration=app.config['ACCESS_TOKEN_DURATION']):
+    s = Serializer(app.secret_key, expires_in=expiration)
     return s.dumps({'id': authid})
 
 

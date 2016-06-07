@@ -50,8 +50,8 @@ class MoneyAPI(BaseList):
         args = self.parse_args(remove=('page', 'limit'))
 
         res = Response(
-            starttime = time_start,
-            attributes = {
+            starttime=time_start,
+            attributes={
                 # Dinero comprometido: Suma recaudada por la plataforma
                 "pledged": Invest.pledged_total(**args),
                 # "pledged": Project.pledged_total(finished=True, **args),
@@ -97,7 +97,7 @@ class MoneyAPI(BaseList):
                 "average-failed": Project.average_total(failed=True, **args),
                 # - Perc. dinero compr. medio (dinero recaudado de media) sobre mínimo (número del dato anterior)
             },
-            filters = args.items()
+            filters=args.items()
         )
 
         return res

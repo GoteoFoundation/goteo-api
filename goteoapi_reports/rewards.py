@@ -58,8 +58,8 @@ class RewardsAPI(Base):
             favorites.append(item)
 
         res = Response(
-            starttime = time_start,
-            attributes = {
+            starttime=time_start,
+            attributes={
                 'reward-refusal': renuncias,
                 'percentage-reward-refusal': percent(renuncias, cofinanciadores),
                 'rewards-per-amount': {
@@ -71,6 +71,6 @@ class RewardsAPI(Base):
                 },
                 'favorite-rewards': favorites
             },
-            filters = args.items()
+            filters=args.items()
         )
         return res

@@ -71,7 +71,7 @@ class Reward(db.Model):
     License = relationship("License", lazy="joined") # Eager loading to allow catching
     Icon = relationship("Icon", lazy="joined") # Eager loading to allow catching
     Translations = relationship("RewardLang",
-                                primaryjoin = "and_(Reward.id==RewardLang.id, RewardLang.pending==0)",
+                                primaryjoin="and_(Reward.id==RewardLang.id, RewardLang.pending==0)",
                                 back_populates="Reward", lazy='joined') # Eager loading to allow catching
 
     def __repr__(self):

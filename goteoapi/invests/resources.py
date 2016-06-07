@@ -86,8 +86,8 @@ class InvestsListAPI(BaseList):
             items.append(item)
 
         res = Response(
-            starttime = time_start,
-            attributes = {
+            starttime=time_start,
+            attributes={
                 'items': items,
                 'extra': {
                     'pledged': float(Invest.pledged_total(**args)),
@@ -96,8 +96,8 @@ class InvestsListAPI(BaseList):
                     'calls': Invest.calls_total(**args)
                 }
             },
-            filters = args.items(),
-            total = Invest.total(**args)
+            filters=args.items(),
+            total=Invest.total(**args)
         )
 
         return res
@@ -135,8 +135,8 @@ class InvestAPI(BaseItem):
                     item['location'] = [marshal(location, location_resource_fields)]
 
         res = Response(
-            starttime = time_start,
-            attributes = item
+            starttime=time_start,
+            attributes=item
         )
 
         return res

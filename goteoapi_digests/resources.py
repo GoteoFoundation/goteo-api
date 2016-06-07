@@ -112,9 +112,9 @@ class DigestsListAPI(BaseList):
             return bad_request('No digests to list.', 404)
 
         res = Response(
-            starttime = time_start,
-            attributes = {'global': global_, 'buckets': buckets, 'endpoint': endpoint},
-            filters = args.items()
+            starttime=time_start,
+            attributes={'global': global_, 'buckets': buckets, 'endpoint': endpoint},
+            filters=args.items()
         )
 
         return res.response()

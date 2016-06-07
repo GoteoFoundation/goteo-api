@@ -37,7 +37,7 @@ class Support(db.Model):
     project_id = db.Column('project', String(50), db.ForeignKey('project.id'))
     thread = db.Column('thread', Integer)
     Translations = relationship("SupportLang",
-                                primaryjoin = "and_(Support.id==SupportLang.id, SupportLang.pending==0)",
+                                primaryjoin="and_(Support.id==SupportLang.id, SupportLang.pending==0)",
                                 back_populates="Support", lazy='joined') # Eager loading to allow catching
 
     def __repr__(self):

@@ -72,8 +72,8 @@ class ProjectsAPI(Base):
             top10_receipts.append(item)
 
         res = Response(
-            starttime = time_start,
-            attributes = {
+            starttime=time_start,
+            attributes={
                 'received': Project.total(received=True, **args),
                 'published': Project.total(**args),
                 'failed': fail_projects,
@@ -87,6 +87,6 @@ class ProjectsAPI(Base):
                 'top10-donations': top10_donations,
                 'top10-receipts': top10_receipts,
             },
-            filters = args.items()
+            filters=args.items()
         )
         return res

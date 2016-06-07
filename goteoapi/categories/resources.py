@@ -48,10 +48,10 @@ class CategoriesListAPI(BaseList):
             items.append(item)
 
         res = Response(
-            starttime = time_start,
-            attributes = {'items': items},
-            filters = args.items(),
-            total = Category.total(**args)
+            starttime=time_start,
+            attributes={'items': items},
+            filters=args.items(),
+            total=Category.total(**args)
         )
 
         return res

@@ -85,7 +85,7 @@ class Call(db.Model):
     facebook = db.Column('fbappid', String(255))
     call_location = db.Column('call_location', String(255))
     Translations = relationship("CallLang",
-                                primaryjoin = "and_(Call.id==CallLang.id, CallLang.pending==0)",
+                                primaryjoin="and_(Call.id==CallLang.id, CallLang.pending==0)",
                                 back_populates="Call", lazy='joined') # Eager loading to allow catching
 
     def __repr__(self):
@@ -93,7 +93,7 @@ class Call(db.Model):
 
     @hybrid_property
     def amount_peers(self):
-        return float(Invest.pledged_total(not_method=Invest.METHOD_DROP, call = self.id))
+        return float(Invest.pledged_total(not_method=Invest.METHOD_DROP, call=self.id))
 
     @hybrid_property
     def owner(self):

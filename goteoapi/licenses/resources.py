@@ -53,10 +53,10 @@ class LicensesListAPI(BaseList):
             items.append(item)
 
         res = Response(
-            starttime = time_start,
-            attributes = {'items': items},
-            filters = args.items(),
-            total = License.total(**args)
+            starttime=time_start,
+            attributes={'items': items},
+            filters=args.items(),
+            total=License.total(**args)
         )
 
         return res

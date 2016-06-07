@@ -14,7 +14,6 @@ from ..users.models import User
 from ..users.resources import user_resource_fields
 from ..location.models import ProjectLocation, UserLocation, location_resource_fields
 from ..models.reward import Reward
-from ..licenses.resources import license_resource_fields
 from ..models.cost import Cost
 from ..models.support import Support
 
@@ -153,10 +152,10 @@ class ProjectsListAPI(BaseList):
             items.append(item)
 
         res = Response(
-            starttime = time_start,
-            attributes = {'items': items},
-            filters = args.items(),
-            total = Project.total(**args)
+            starttime=time_start,
+            attributes={'items': items},
+            filters=args.items(),
+            total=Project.total(**args)
         )
 
         return res
@@ -235,8 +234,8 @@ class ProjectAPI(BaseItem):
             item['translations'] = translations
 
         res = Response(
-            starttime = time_start,
-            attributes = item
+            starttime=time_start,
+            attributes=item
         )
 
         return res
@@ -264,7 +263,7 @@ class ProjectDonorsListAPI(BaseList):
 
         items = []
         if Project.get(project_id) == None:
-            return Response(attributes = {'id': None})
+            return Response(attributes={'id': None})
 
         for u in User.donors_by_project(project_id, **args):
             item = marshal(u, donor_resource_fields)
@@ -287,10 +286,10 @@ class ProjectDonorsListAPI(BaseList):
 
             items.append(item)
         res = Response(
-            starttime = time_start,
-            attributes = {'id': project_id, 'items': items},
-            filters = args.items(),
-            total = User.donors_by_project_total(project_id, **args)
+            starttime=time_start,
+            attributes={'id': project_id, 'items': items},
+            filters=args.items(),
+            total=User.donors_by_project_total(project_id, **args)
         )
 
         return res

@@ -96,8 +96,8 @@ class CommunityAPI(Base):
             top10_collaborations.append(item)
 
         res = Response(
-            starttime = time_start,
-            attributes = {
+            starttime=time_start,
+            attributes={
                 'users': users,
                 'donors': donors,
                 'multidonors': multidonors,
@@ -135,6 +135,6 @@ class CommunityAPI(Base):
                 'top10-donors': top10_donors,
                 'top10-collaborators': top10_collaborations,
             },
-            filters = args.items()
+            filters=args.items()
         )
         return res

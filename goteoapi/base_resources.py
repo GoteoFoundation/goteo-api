@@ -81,7 +81,7 @@ class AbstractLang():
         return sub_class(**full_dict)
 
     @classmethod
-    def get_query(cls, search_langs, cols = None):
+    def get_query(cls, search_langs, cols=None):
         sub_class = cls.get_sub_class()
         joins = []
         if cols is None:
@@ -113,7 +113,7 @@ class AbstractLang():
 class Response():
     """Base response for Reports Endpoints"""
 
-    def __init__(self, attributes = {}, filters = {}, total = None, starttime = 0):
+    def __init__(self, attributes={}, filters={}, total=None, starttime=0):
         self.ret = {}
         for var, value in attributes.items():
             self.ret[var] = value
@@ -136,7 +136,7 @@ class Response():
     def set(self, var, value):
         self.ret[var] = value
 
-    def response(self, as_json = True):
+    def response(self, as_json=True):
         if self.time_start != 0:
             self.ret['time-elapsed'] = time.time() - self.time_start
         if as_json:

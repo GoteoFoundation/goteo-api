@@ -41,7 +41,7 @@ class Cost(db.Model):
     from_date = db.Column('from', Date)
     to_date = db.Column('until', Date)
     Translations = relationship("CostLang",
-                                primaryjoin = "and_(Cost.id==CostLang.id, CostLang.pending==0)",
+                                primaryjoin="and_(Cost.id==CostLang.id, CostLang.pending==0)",
                                 back_populates="Cost", lazy='joined') # Eager loading to allow catching
 
     def __repr__(self):
