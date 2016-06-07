@@ -16,7 +16,7 @@ def test_money():
     rv = test_app.get('/reports/money/')
     eq_(rv.headers['Content-Type'], 'application/json')
     resp = get_json(rv)
-    #make sure we get a response
+    # make sure we get a response
     eq_(rv.status_code, 200)
     resp = get_json(rv)
     if 'time-elapsed' in resp:

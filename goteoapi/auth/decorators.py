@@ -64,9 +64,9 @@ def verify_auth_token(token):
     try:
         data = s.loads(token)
     except SignatureExpired:
-        return 'Expired token' # valid token, but expired
+        return 'Expired token'  # valid token, but expired
     except BadSignature:
-        return 'Invalid token' # invalid token
+        return 'Invalid token'  # invalid token
 
     g.loginId = data['id']
     return True

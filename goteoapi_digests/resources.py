@@ -7,7 +7,7 @@ from datetime import date as dtdate, datetime as dtdatetime
 
 from flasgger.utils import swag_from
 
-#import current endpoints
+# import current endpoints
 from goteoapi.ratelimit import ratelimit
 from goteoapi.helpers import bad_request
 from goteoapi.auth.decorators import requires_auth
@@ -24,7 +24,7 @@ def year_sanitizer(data):
 
 class DigestsListAPI(BaseList):
     """Get Digest list"""
-    #TODO: configurable
+    # TODO: configurable
     AVAILABLE_ENDPOINTS = [
         '/reports/summary/',
         '/reports/money/',
@@ -42,7 +42,7 @@ class DigestsListAPI(BaseList):
         """Get the digests list"""
         time_start = time.time()
         self.reqparse.add_argument('year', type=year_sanitizer, default=None)
-        #removing not-needed standard filters
+        # removing not-needed standard filters
         args = self.parse_args(remove=('from_date', 'to_date', 'limit', 'page'))
         # get the class
         if endpoint[-1] != '/':
@@ -71,7 +71,7 @@ class DigestsListAPI(BaseList):
 
         buckets = {}
         try:
-            #arguments for the global response
+            # arguments for the global response
             year = args['year']
             if year is not None:
                 del args['year']
@@ -89,7 +89,7 @@ class DigestsListAPI(BaseList):
 
             # parse the args in the instance
             instance.parse_args = (lambda **a: self.dummy_parse_args(args, **a))
-            # # data for global dates
+            # data for global dates
             global_ = instance._get().response(False)
             # cleaning response
             # del global_['time-elapsed']
@@ -98,7 +98,7 @@ class DigestsListAPI(BaseList):
                 [args['from_date'], args['to_date']] = buckets[part]
                 buckets[part] = instance._get().response(False)
 
-            #aditional cleaning
+            # aditional cleaning
             if 'from_date' in args:
                 del args['from_date']
             if 'to_date' in args:

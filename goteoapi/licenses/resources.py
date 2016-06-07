@@ -38,7 +38,7 @@ class LicensesListAPI(BaseList):
         from ..projects.models import Project
 
         time_start = time.time()
-        #removing not-needed standard filters
+        # removing not-needed standard filters
         args = self.parse_args(remove=('page', 'limit'))
 
         items = []

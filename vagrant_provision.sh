@@ -71,7 +71,7 @@ fi
 sudo -H -u vagrant bash -l -c "pip install -r /home/vagrant/goteo-api/requirements.txt"
 sudo -H -u vagrant bash -l -c "pip install -r /home/vagrant/goteo-api/goteoapi_*/requirements.txt"
 
-#autochange to development dir on login
+# autochange to development dir on login
 if [ "$(grep -c 'cd ~/goteo-api' .bash_profile)" = "0" ]; then
     echo 'cd ~/goteo-api' >> /home/vagrant/.bash_profile
 fi

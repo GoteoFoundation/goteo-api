@@ -63,7 +63,7 @@ class ItemLocation(object):
     def location_subquery(self, latitude, longitude, radius, locable_only=False, fields=['id']):
         from math import degrees, radians, cos
 
-        R = 6371 # earth's mean radius, km
+        R = 6371  # earth's mean radius, km
         latitude = float(latitude)
         longitude = float(longitude)
         radius = float(radius)
@@ -145,7 +145,7 @@ class UserLocation(db.Model, ItemLocation):
     def __repr__(self):
         return '<UserLocation: (%s) in %f,%f>' % (self.id, self.latitude, self.longitude)
 
-    #Overide use to set default locable = True
+    # Overide use to set default locable = True
     @hybrid_method
     @cacher
     def get(self, id, locable=True):

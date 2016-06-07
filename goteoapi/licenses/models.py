@@ -78,7 +78,7 @@ class License(db.Model):
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(ProjectCategory.project_id == Reward.project_id)
             filters.append(ProjectCategory.category_id.in_(kwargs['category']))
-        #Filter by location
+        # Filter by location
         if 'location' in kwargs and kwargs['location'] is not None:
             filters.append(ProjectLocation.id == Reward.project_id)
             subquery = ProjectLocation.location_subquery(**kwargs['location'])

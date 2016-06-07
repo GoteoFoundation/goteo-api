@@ -12,6 +12,6 @@ if hasattr(config, 'MODULES'):
     for i in config.MODULES:
         __import__(i)
 
-#This part will not be executed under uWSGI module (nginx)
+# This part will not be executed under uWSGI module (nginx)
 if __name__ == '__main__':
     app.run(host='0.0.0.0')

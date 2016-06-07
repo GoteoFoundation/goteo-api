@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-#from flask.ext.sqlalchemy import Pagination
 from sqlalchemy import and_, desc, func, Integer, String, DateTime
 from sqlalchemy.ext.hybrid import hybrid_method
 from sqlalchemy.orm.exc import NoResultFound

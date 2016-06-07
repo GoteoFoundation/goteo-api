@@ -95,7 +95,7 @@ def cacher(f):
             datemax = now
         delta = now - datemax
         if delta.days > 60:
-            timeout = INFINITE # 1 year time caching
+            timeout = INFINITE  # 1 year time caching
         elif delta.total_seconds() > app.config['CACHE_MIN_TIMEOUT']:
             timeout = int(delta.total_seconds())
 

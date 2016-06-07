@@ -13,7 +13,7 @@ def test_main_routes():
     rv = test_app.get('/')
     eq_(rv.headers['Content-Type'], 'application/json')
     resp = get_json(rv)
-    #make sure we get a response
+    # make sure we get a response
     eq_(rv.status_code, 200)
 
     assert 'endpoints' in resp

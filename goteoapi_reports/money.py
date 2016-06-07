@@ -46,7 +46,7 @@ class MoneyAPI(BaseList):
 
         time_start = time.time()
 
-        #remove not used arguments
+        # remove not used arguments
         args = self.parse_args(remove=('page', 'limit'))
 
         res = Response(
@@ -56,8 +56,8 @@ class MoneyAPI(BaseList):
                 "pledged": Invest.pledged_total(**args),
                 # "pledged": Project.pledged_total(finished=True, **args),
                 # Perc. medio de recaudación sobre el mínimo recaudado
-                # "percentage-pledged-successful": Invest.percent_pledged_successful(**args), # <- este metodo filtra por fecha de invest, da numeros negativos
-                "percentage-pledged-successful": Project.percent_pledged(finished=True, **args), # <- filtra por fecha de proyecto
+                # "percentage-pledged-successful": Invest.percent_pledged_successful(**args),  # <- este metodo filtra por fecha de invest, da numeros negativos
+                "percentage-pledged-successful": Project.percent_pledged(finished=True, **args),  # <- filtra por fecha de proyecto
                 # Perc. dinero compr. medio sobre mínimo',
                 # "percentage-pledged-failed": Invest.percent_pledged_failed(**args),
                 "percentage-pledged-failed": Project.percent_pledged(failed=True, **args),

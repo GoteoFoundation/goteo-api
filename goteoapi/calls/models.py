@@ -37,7 +37,7 @@ class CallLang(AbstractLang, db.Model):
 class Call(db.Model):
     __tablename__ = 'call'
 
-    #CALL STATUS IDs
+    # CALL STATUS IDs
     STATUS_PENDING = 0
     STATUS_EDITING = 1
     STATUS_REVIEWING = 2
@@ -56,18 +56,18 @@ class Call(db.Model):
     subtitle = db.Column('subtitle', Text)
     description = db.Column('description', Text)
     user_id = db.Column('owner', String(50), db.ForeignKey('user.id'))
-    User = relationship("User", lazy='joined') # Eager loading to allow catching
+    User = relationship("User", lazy='joined')  # Eager loading to allow catching
     whom = db.Column('whom', Text)
     applies = db.Column('apply', Text)
     legal = db.Column('legal', Text)
     dossier = db.Column('dossier', Text)
-    amount_available = db.Column('amount', Integer, nullable=False) # Total available amount
-    amount_remaining = db.Column('rest', Integer, nullable=False) # Total Amount remaining to distribute
-    amount_committed = db.Column('used', Integer, nullable=False) # Total Amount committed on projects
-    projects_total = db.Column('num_projects', Integer, nullable=False) # Selected projects
-    projects_applied = db.Column('applied', Integer, nullable=False) # Applied projects succeeded
-    projects_active = db.Column('running_projects', Integer, nullable=False) # Applied projects in active campaign
-    projects_succeeded = db.Column('success_projects', Integer, nullable=False) # Applied successful projects
+    amount_available = db.Column('amount', Integer, nullable=False)  # Total available amount
+    amount_remaining = db.Column('rest', Integer, nullable=False)  # Total Amount remaining to distribute
+    amount_committed = db.Column('used', Integer, nullable=False)  # Total Amount committed on projects
+    projects_total = db.Column('num_projects', Integer, nullable=False)  # Selected projects
+    projects_applied = db.Column('applied', Integer, nullable=False)  # Applied projects succeeded
+    projects_active = db.Column('running_projects', Integer, nullable=False)  # Applied projects in active campaign
+    projects_succeeded = db.Column('success_projects', Integer, nullable=False)  # Applied successful projects
     tweet = db.Column('tweet', Text)
     resources = db.Column('resources', Text)
     lang = db.Column('lang', String(2))
@@ -86,7 +86,7 @@ class Call(db.Model):
     call_location = db.Column('call_location', String(255))
     Translations = relationship("CallLang",
                                 primaryjoin="and_(Call.id==CallLang.id, CallLang.pending==0)",
-                                back_populates="Call", lazy='joined') # Eager loading to allow catching
+                                back_populates="Call", lazy='joined')  # Eager loading to allow catching
 
     def __repr__(self):
         return '<Call %s: %s>' % (self.id, self.name)

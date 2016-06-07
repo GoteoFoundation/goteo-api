@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-#from flask.ext.sqlalchemy import Pagination
 from sqlalchemy import Integer, String, Text, Boolean, Date
 from sqlalchemy.ext.hybrid import hybrid_method, hybrid_property
 from sqlalchemy.orm.exc import NoResultFound
@@ -42,7 +41,7 @@ class Cost(db.Model):
     to_date = db.Column('until', Date)
     Translations = relationship("CostLang",
                                 primaryjoin="and_(Cost.id==CostLang.id, CostLang.pending==0)",
-                                back_populates="Cost", lazy='joined') # Eager loading to allow catching
+                                back_populates="Cost", lazy='joined')  # Eager loading to allow catching
 
     def __repr__(self):
         return '<Cost(%d) %s of project %s>' % (self.id, self.cost[:50], self.project_id)

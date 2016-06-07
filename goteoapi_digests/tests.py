@@ -16,7 +16,7 @@ def test_non_existing():
     rv = test_app.get('/digests/i-dont-exists')
     eq_(rv.headers['Content-Type'], 'application/json')
     resp = get_json(rv)
-    #make sure we get a response
+    # make sure we get a response
     eq_(rv.status_code, 400)
     eq_(resp['error'], 400)
     assert 'message' in resp

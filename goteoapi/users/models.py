@@ -51,7 +51,7 @@ class User(db.Model):
     updated = db.Column('modified', Date)
     lang = config.DEFAULT_DB_LANG
     Translations = relationship("UserLang",
-                                back_populates="User", lazy='joined') # Eager loading to allow catching
+                                back_populates="User", lazy='joined')  # Eager loading to allow catching
 
     def __repr__(self):
         return '<User %s: %r>' % (self.id, self.name)
@@ -150,7 +150,7 @@ class User(db.Model):
         # Filters by "project"
         # counting attached (invested or collaborated) to some project(s)
         if 'project' in kwargs and kwargs['project'] is not None:
-            #TODO: solo usuarios que cuyo pago ha si "exitoso"
+            # TODO: solo usuarios que cuyo pago ha si "exitoso"
             # adding users "invested in"
             sub_invest = db.session.query(Invest.user_id).filter(Invest.project_id.in_(kwargs['project']),
                                                                  Invest.status.in_(Invest.VALID_INVESTS))
@@ -161,14 +161,14 @@ class User(db.Model):
         if 'category' in kwargs and kwargs['category'] is not None:
             sub_interest = db.session.query(UserInterest.user_id).filter(UserInterest.category_id.in_(kwargs['category']))
             filters.append(self.id.in_(sub_interest))
-        #Filter by location
+        # Filter by location
         if 'location' in kwargs and kwargs['location'] is not None:
-            #location ids where to search
+            # location ids where to search
             subquery = UserLocation.location_subquery(**kwargs['location'])
             filters.append(UserLocation.id.in_(subquery))
             filters.append(UserLocation.id == self.id)
 
-        #TODO: more filters, like creators, invested, etc
+        # TODO: more filters, like creators, invested, etc
         return filters
 
     @hybrid_method
@@ -269,7 +269,7 @@ class User(db.Model):
             return 0
 
 
-#User roles
+# User roles
 class UserRole(db.Model):
     __tablename__ = 'user_role'
 
@@ -281,7 +281,7 @@ class UserRole(db.Model):
         return '<UserRole %s: %s>' % (self.user_id, self.role_id)
 
 
-#Api keys
+# Api keys
 class UserApi(db.Model):
     __tablename__ = 'user_api'
 
@@ -320,7 +320,7 @@ class UserInterest(db.Model):
             filters.append(Invest.user_id == self.user_id)
             filters.append(Invest.status.in_(Invest.VALID_INVESTS))
         if 'node' in kwargs and kwargs['node'] is not None:
-            #TODO: project_node o invest_node?
+            # TODO: project_node o invest_node?
             filters.append(User.id == self.user_id)
             filters.append(User.node_id.in_(kwargs['node']))
         if 'category' in kwargs and kwargs['category'] is not None:

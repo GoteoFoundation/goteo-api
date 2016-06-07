@@ -23,7 +23,7 @@ class Invest(db.Model):
     METHOD_CASH = 'cash'
     METHOD_DROP = 'drop'
 
-    #INVEST STATUS IDs
+    # INVEST STATUS IDs
     STATUS_PROCESSING = -1  # payment gateway not reached yet or just a failed payment
     STATUS_PENDING = 0   # In a status that requires post-processing (former paypal preapprovals)
     STATUS_CHARGED = 1   # charged by the platform
@@ -52,7 +52,7 @@ class Invest(db.Model):
     updated = db.Column('datetime', Date)
     returned = db.Column('returned', Date)
     resign = db.Column('resign', Boolean, nullable=False)
-    pool = db.Column('pool', Boolean, nullable=False) # if the invest goes to pool in case of failing
+    pool = db.Column('pool', Boolean, nullable=False)  # True if the invest goes to pool in case of failing
 
     def __repr__(self):
         return '<Invest %d: %s (%d EUR)>' % (self.id, self.project_id, self.amount)
@@ -266,7 +266,7 @@ class Invest(db.Model):
         filters = list(self.get_filters(**kwargs))
         filters.append(self.status.in_(self.VALID_INVESTS))
         filters.append(self.user_id == User.id)
-        #exclue convocadores, admines y owners
+        # exclude convocadores, admines y owners
         admins = db.session.query(UserRole.user_id).filter(UserRole.role_id == 'superadmin').subquery()
         calls = db.session.query(Call.user_id).filter(Call.status > Call.STATUS_REVIEWING).subquery()
         owners = db.session.query(Project.user_id).filter(Project.status.in_(Project.PUBLISHED_PROJECTS)).subquery()
@@ -296,7 +296,7 @@ class Invest(db.Model):
 
         filters.append(self.status.in_(self.VALID_INVESTS))
         filters.append(self.user_id == User.id)
-        #exclue convocadores, admines y owners
+        # exclude convocadores, admines y owners
         admins = db.session.query(UserRole.user_id).filter(UserRole.role_id == 'superadmin').subquery()
         calls = db.session.query(Call.user_id).filter(Call.status > Call.STATUS_REVIEWING).subquery()
         owners = db.session.query(Project.user_id).filter(Project.status.in_(Project.PUBLISHED_PROJECTS)).subquery()

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-#from flask.ext.sqlalchemy import Pagination
 from sqlalchemy import String, Boolean
 
 from .. import db

@@ -51,15 +51,15 @@ MODULES = {
 # debug (False by default)
 DEBUG = False
 
-#Year when goteo started
+# Year when goteo started
 INITIAL_YEAR = 2011
 
-#Api description
+# Api description
 DESCRIPTION = 'Goteo.org Api'
-#Api base path (useful for swagger-ui) in case is prefixed
+# Api base path (useful for swagger-ui) in case is prefixed
 BASE_PATH = ''
 
-#Timezone used in Goteo database
+# Timezone used in Goteo database
 # timezone = 'US/Eastern'
 TIMEZONE = 'Europe/Madrid'
 

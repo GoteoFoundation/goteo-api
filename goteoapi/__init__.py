@@ -21,7 +21,7 @@ def debug_time(func):
     return new_f
 
 # DB class
-#app = Flask(__name__)
+# app = Flask(__name__)
 app = Flask(__name__, static_url_path="")
 app.config.from_pyfile('config.py')
 # Custom config override
@@ -33,8 +33,8 @@ app.config.from_envvar('GOTEO_API_CONFIG_FILE', silent=True)
 app.debug = bool(app.config['DEBUG'])
 app.config['SQLALCHEMY_DATABASE_URI'] = app.config['DB_URI']
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-#app.config['SQLALCHEMY_POOL_TIMEOUT'] = 5
-#app.config['SQLALCHEMY_POOL_SIZE'] = 30
+# app.config['SQLALCHEMY_POOL_TIMEOUT'] = 5
+# app.config['SQLALCHEMY_POOL_SIZE'] = 30
 if app.debug:
     app.config['SQLALCHEMY_ECHO'] = True
 

@@ -35,7 +35,7 @@ class Category(db.Model):
     def __repr__(self):
         return '<Category %s: %r>' % (self.id, self.name)
 
-    #Filters for table category
+    # Filters for table category
     @hybrid_property
     def filters(self):
         return [self.name != '']
@@ -73,7 +73,7 @@ class Category(db.Model):
         # filter by category interests
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(self.id.in_(kwargs['category']))
-        #Filter by location
+        # Filter by location
         if 'location' in kwargs and kwargs['location'] is not None:
             filters.append(ProjectLocation.id == ProjectCategory.project_id)
             subquery = ProjectLocation.location_subquery(**kwargs['location'])

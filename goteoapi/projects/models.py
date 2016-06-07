@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-#from flask.ext.sqlalchemy import Pagination
 from sqlalchemy import or_, asc, desc, and_, distinct, func, Integer, String, Text, Date, Float
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
@@ -61,14 +60,14 @@ class Project(db.Model):
         """
     __tablename__ = 'project'
 
-    #PROJECT STATUS IDs
+    # PROJECT STATUS IDs
     STATUS_REJECTED = 0
-    STATUS_EDITING = 1 #
-    STATUS_REVIEWING = 2 # reviewing
+    STATUS_EDITING = 1  # editing
+    STATUS_REVIEWING = 2  # reviewing
     STATUS_IN_CAMPAIGN = 3
     STATUS_FUNDED = 4
-    STATUS_FULFILLED = 5 # 'Caso de exito'
-    STATUS_UNFUNDED = 6 # proyecto fallido
+    STATUS_FULFILLED = 5  # 'Caso de exito'
+    STATUS_UNFUNDED = 6  # proyecto fallido
     STATUS_STR = ('rejected', 'editing', 'reviewing', 'in_campaign', 'funded', 'fulfilled', 'unfunded')
 
     RECEIVED_PROJECTS = [STATUS_REVIEWING, STATUS_IN_CAMPAIGN, STATUS_FUNDED, STATUS_FULFILLED, STATUS_UNFUNDED]
@@ -79,7 +78,7 @@ class Project(db.Model):
 
     id = db.Column('id', String(50), primary_key=True)
     user_id = db.Column('owner', String(50), db.ForeignKey('user.id'))
-    User = relationship("User", lazy='joined') # Eager loading to allow catching
+    User = relationship("User", lazy='joined')  # Eager loading to allow catching
     name = db.Column('name', Text)
     subtitle = db.Column('subtitle', Text)
     description = db.Column('description', Text)
@@ -98,21 +97,21 @@ class Project(db.Model):
     minimum = db.Column('mincost', Integer)
     optimum = db.Column('maxcost', Integer)
     amount = db.Column('amount', Integer)
-    status = db.Column('status', Integer) # estado del proyecto
-    scope = db.Column('scope', Integer) #
-    passed = db.Column('passed', Date) # fecha de paso de primera ronda
-    created = db.Column('created', Date) # fecha de creacion
-    updated = db.Column('updated', Date) # fecha de actualizacion de datos de formulario
+    status = db.Column('status', Integer)  # estado del proyecto
+    scope = db.Column('scope', Integer)  #
+    passed = db.Column('passed', Date)  # fecha de paso de primera ronda
+    created = db.Column('created', Date)  # fecha de creacion
+    updated = db.Column('updated', Date)  # fecha de actualizacion de datos de formulario
     # deberia haber un campo como el updated solo hasta que se publica el proyecto,
     # luego coincidiria con el publicado
-    published = db.Column('published', Date) # fecha de publicacion de proyecto
-    closed = db.Column('closed', Date) # fecha de cierre de proyecto
-    success = db.Column('success', Date) # fecha de éxito de proyecto
+    published = db.Column('published', Date)  # fecha de publicacion de proyecto
+    closed = db.Column('closed', Date)  # fecha de cierre de proyecto
+    success = db.Column('success', Date)  # fecha de éxito de proyecto
     node_id = db.Column('node', String(50), db.ForeignKey('node.id'))
     #
     Translations = relationship("ProjectLang",
                                 primaryjoin="and_(Project.id==ProjectLang.id, ProjectLang.pending==0)",
-                                back_populates="Project", lazy='joined') # Eager loading to allow catching
+                                back_populates="Project", lazy='joined')  # Eager loading to allow catching
 
     def __repr__(self):
         return '<Project %s: %s>' % (self.id, self.name)
@@ -219,7 +218,7 @@ class Project(db.Model):
             and2 = and_(self.closed != None, self.closed != '0000-00-00')
             filters.append(or_(and1, and2))
         elif 'failed' in kwargs and kwargs['failed'] is not None:
-            #overwrite default status search
+            # overwrite default status search
             kwargs['status'] = self.STATUS_UNFUNDED
 
         if 'status' in kwargs and kwargs['status'] is not None:
@@ -241,19 +240,19 @@ class Project(db.Model):
 
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
             if 'received' in kwargs:
-                #Look at the updated date on RECEIVED projects
+                # Look at the updated date on RECEIVED projects
                 filters.append(self.updated >= kwargs['from_date'])
             elif 'successful' in kwargs or 'finished' in kwargs:
-                #Look at the passed date on SUCCESFUL projects
+                # Look at the passed date on SUCCESFUL projects
                 filters.append(self.passed >= kwargs['from_date'])
             elif 'closed' in kwargs:
-                #Look at the closed date on SUCCESFUL-closed projects
+                # Look at the closed date on SUCCESFUL-closed projects
                 filters.append(self.closed >= kwargs['from_date'])
             elif 'failed' in kwargs:
-                #Look at the closed date on FAILED projects
+                # Look at the closed date on FAILED projects
                 filters.append(self.closed >= kwargs['from_date'])
             else:
-                #Look at the published date on PUBLISHED projects
+                # Look at the published date on PUBLISHED projects
                 filters.append(self.published >= kwargs['from_date'])
 
         if 'to_date' in kwargs and kwargs['to_date'] is not None:

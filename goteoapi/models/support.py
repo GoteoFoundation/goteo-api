@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-#from flask.ext.sqlalchemy import Pagination
 from sqlalchemy import Integer, String, Text
 from sqlalchemy.ext.hybrid import hybrid_method
 from sqlalchemy.orm.exc import NoResultFound
@@ -38,7 +37,7 @@ class Support(db.Model):
     thread = db.Column('thread', Integer)
     Translations = relationship("SupportLang",
                                 primaryjoin="and_(Support.id==SupportLang.id, SupportLang.pending==0)",
-                                back_populates="Support", lazy='joined') # Eager loading to allow catching
+                                back_populates="Support", lazy='joined')  # Eager loading to allow catching
 
     def __repr__(self):
         return '<Support(%d) %s of project %s>' % (self.id, self.support, self.project_id)
