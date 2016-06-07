@@ -66,7 +66,8 @@ if app.debug:
     db.session.query = debug_time(db.session.query)
 else:
     # loggin errors to a file if not debugging
-    import logging, os
+    import logging
+    import os
     f = os.path.dirname(os.path.realpath(__file__)) + '/errors.log'
     logging.basicConfig(filename=f, level=logging.ERROR)
     # handler = logging.FileHandler(f)

@@ -58,6 +58,3 @@ def test_cors_headers():
     eq_(len(rv.headers.getlist('Access-Control-Allow-Methods')), 1)
     eq_(len(rv.headers.getlist('Access-Control-Allow-Credentials')), 1)
     eq_(len(rv.headers.getlist('Access-Control-Max-Age')), 1)
-
-
-

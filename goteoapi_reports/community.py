@@ -123,8 +123,8 @@ class CommunityAPI(Base):
                                 'name': t.name,
                                 'percentage-users': percent(t.total, users)
                             }
-                        }
-                    , categorias)),
+                        },
+                        categorias)),
                 'leading-category'                  : categorias[0].id if len(categorias) > 0 else None,
                 'users-leading-category'            : users_categoria1,
                 'percentage-users-leading-category' : percent(users_categoria1, users),

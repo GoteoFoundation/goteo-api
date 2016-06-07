@@ -352,8 +352,10 @@ class Project(db.Model):
             if 'lang' in kwargs and kwargs['lang'] is not None:
                 ret = []
                 for u in ProjectLang.get_query(kwargs['lang']) \
-                                 .filter(*filters).order_by(asc(self.created)) \
-                                 .offset(page * limit).limit(limit):
+                                    .filter(*filters) \
+                                    .order_by(asc(self.created)) \
+                                    .offset(page * limit) \
+                                    .limit(limit):
                     ret.append(ProjectLang.get_translated_object(u._asdict(), kwargs['lang'], u.lang))
                 return ret
             # No langs, normal query
@@ -436,10 +438,12 @@ class Project(db.Model):
         """Average number of posts by projects"""
         filters = self.get_filters(**kwargs)
         filters.append(Post.publish == 1)
-        sq1 = db.session.query(func.count(self.id).label('posts')).select_from(Post) \
-                            .join(Blog, and_(Blog.id == Post.blog_id, Blog.type == 'project')) \
-                            .join(self, self.id == Blog.user_id) \
-                            .filter(*filters).group_by(Post.blog_id).subquery()
+        sq1 = db.session.query(func.count(self.id) \
+                        .label('posts')).select_from(Post) \
+                        .join(Blog, and_(Blog.id == Post.blog_id, Blog.type == 'project')) \
+                        .join(self, self.id == Blog.user_id) \
+                        .filter(*filters).group_by(Post.blog_id) \
+                        .subquery()
         total = db.session.query(func.avg(sq1.c.posts)).scalar()
         total = 0 if total is None else round(total, 2)
         return total
@@ -476,8 +480,9 @@ class Project(db.Model):
         ret = []
         for u in query.join(Message) \
                       .filter(*filters).group_by(Message.project_id) \
-                      .order_by(desc('total')). \
-                      offset(page * limit).limit(limit):
+                      .order_by(desc('total')) \
+                      .offset(page * limit) \
+                      .limit(limit):
             u = u._asdict()
             if 'lang' in kwargs and kwargs['lang'] is not None:
                 u['subtitle'] = get_lang(u, 'subtitle', kwargs['lang'])

@@ -107,12 +107,14 @@ class License(db.Model):
             if 'lang' in kwargs and kwargs['lang'] is not None:
                 ret = []
                 for u in LicenseLang.get_query(kwargs['lang']) \
-                                 .filter(*filters).order_by(asc(self.order)):
+                                    .filter(*filters) \
+                                    .order_by(asc(self.order)):
                     ret.append(LicenseLang.get_translated_object(u._asdict(), kwargs['lang']))
                 return ret
             # No langs, normal query
             return self.query.distinct().filter(*filters) \
-                                        .order_by(asc(self.order)).all()
+                                        .order_by(asc(self.order)) \
+                                        .all()
         except NoResultFound:
             return []
 
@@ -128,4 +130,3 @@ class License(db.Model):
             return count
         except MultipleResultsFound:
             return 0
-

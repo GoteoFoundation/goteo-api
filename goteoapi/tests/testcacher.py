@@ -2,7 +2,8 @@
 #
 # Minimal tests for main routes
 #
-import random, datetime
+import random
+import datetime
 from nose.tools import *
 from time import sleep
 from . import app
@@ -137,5 +138,3 @@ def test_invalid_keys():
 #     assert len(key_list) == 1
 #     for f, args, kargs in key_list:
 #         eq_( "1" == f(*args, **kargs), True)
-
-

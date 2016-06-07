@@ -15,5 +15,3 @@ class Node(db.Model):
 
     def __repr__(self):
         return '<Node(%d): %s>' % (self.id, self.name)
-
-

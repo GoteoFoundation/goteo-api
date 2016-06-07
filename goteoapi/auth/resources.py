@@ -27,5 +27,3 @@ class TokenAPI(BaseItem):
                     'expires_in' :  duration,
                     'token_type' : 'bearer'
                 })
-
-

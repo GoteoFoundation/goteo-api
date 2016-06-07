@@ -86,4 +86,3 @@ def test_limit_behaviour():
     assert reset > 0
     rv = test_app.get('/projects/')
     eq_(int(rv.headers.get('X-RateLimit-Remaining')), remaining - 1)
-

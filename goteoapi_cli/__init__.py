@@ -71,7 +71,7 @@ def crontab(install=False, remove=False):
             cron.remove(job)
         # Install job
         if install:
-            job  = cron.new(command+  ' renewcache --execute > ' + os.getcwd() + '/crontab.log 2>&1')
+            job  = cron.new(command + ' renewcache --execute > ' + os.getcwd() + '/crontab.log 2>&1')
         cron.write()
 
     print("{0}\n{1}".format(colored('CURRENT CRONTAB:', 'green'), cron))

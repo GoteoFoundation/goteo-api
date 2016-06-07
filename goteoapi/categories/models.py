@@ -102,7 +102,8 @@ class Category(db.Model):
             if 'lang' in kwargs and kwargs['lang'] is not None:
                 ret = []
                 for u in CategoryLang.get_query(kwargs['lang']) \
-                                 .filter(*filters).order_by(asc(self.order)):
+                                     .filter(*filters) \
+                                     .order_by(asc(self.order)):
                     ret.append(CategoryLang.get_translated_object(u._asdict(), kwargs['lang']))
                 return ret
             # No langs, normal query

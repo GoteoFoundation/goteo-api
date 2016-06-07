@@ -177,4 +177,3 @@ def requires_auth(scope='public'):
             return resp
         return update_wrapper(wrapped_function, f)
     return decorator
-

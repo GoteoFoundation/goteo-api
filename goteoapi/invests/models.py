@@ -332,9 +332,11 @@ class Invest(db.Model):
         """Total number of donors who donates to more than 1 project"""
         filters = list(self.get_filters(**kwargs))
         filters.append(self.status.in_(self.VALID_INVESTS))
-        total = db.session.query(self.user_id).filter(*filters).group_by(self.user_id). \
-                                                    having(func.count(self.user_id) > 1). \
-                                                    having(func.count(self.project_id) > 1)
+        total = db.session.query(self.user_id) \
+                          .filter(*filters) \
+                          .group_by(self.user_id) \
+                          .having(func.count(self.user_id) > 1). \
+                          .having(func.count(self.project_id) > 1)
         res = total.count()
         if res is None:
             res = 0
@@ -349,9 +351,9 @@ class Invest(db.Model):
         filters.append(Message.thread > 0)
         filters.append(Message.thread.in_(sq_blocked))
         filters.append(self.status.in_(self.VALID_INVESTS))
-        res = db.session.query(func.count(func.distinct(self.user_id)))\
-                                            .join(Message, Message.user_id == self.user_id)\
-                                            .filter(*filters).scalar()
+        res = db.session.query(func.count(func.distinct(self.user_id))) \
+                        .join(Message, Message.user_id == self.user_id) \
+                        .filter(*filters).scalar()
         if res is None:
             res = 0
         return res
@@ -362,11 +364,11 @@ class Invest(db.Model):
         """Total number of donors who are also creators for some projects"""
         filters = list(self.get_filters(**kwargs))
         filters.append(self.status.in_([self.STATUS_PAID,
-                                          self.STATUS_RETURNED,
-                                          self.STATUS_RELOCATED]))
+                                        self.STATUS_RETURNED,
+                                        self.STATUS_RELOCATED]))
         filters.append(self.project_id != Project.id)
-        res = db.session.query(func.count(func.distinct(self.user_id)))\
-                        .join(Project, and_(Project.user_id == self.user_id, Project.status.in_(Project.PUBLISHED_PROJECTS)))\
+        res = db.session.query(func.count(func.distinct(self.user_id))) \
+                        .join(Project, and_(Project.user_id == self.user_id, Project.status.in_(Project.PUBLISHED_PROJECTS))) \
                         .filter(*filters).scalar()
         if res is None:
             res = 0
@@ -473,13 +475,16 @@ class Invest(db.Model):
             filters.append(Reward.amount < maxim)
         elif minim > 0 and maxim > 0:
             filters.append(Reward.amount.between(minim, maxim))
-        elif  minim > 0:
+        elif minim > 0:
             filters.append(Reward.amount > minim)
         else:
             return 0
 
-        recomp_dinero = db.session.query(func.count(self.id).label("amourew"))\
-                            .filter(*filters).group_by(Reward.id).subquery()
+        recomp_dinero = db.session.query(func.count(self.id) \
+                                  .label("amourew")) \
+                                  .filter(*filters) \
+                                  .group_by(Reward.id) \
+                                  .subquery()
         res = db.session.query(func.sum(recomp_dinero.c.amourew)).scalar()
         if res is None:
             res = 0
@@ -495,8 +500,11 @@ class Invest(db.Model):
                                         self.STATUS_PAID]))
         filters.append(Project.status.in_([Project.STATUS_FUNDED,
                                            Project.STATUS_FULFILLED]))
-        sub = db.session.query((func.sum(self.amount) / Project.minimum * 100 - 100).label('percent'))\
-                            .filter(*filters).group_by(self.project_id).subquery()
+        sub = db.session.query((func.sum(self.amount) / Project.minimum * 100 - 100) \
+                        .label('percent')) \
+                        .filter(*filters) \
+                        .group_by(self.project_id) \
+                        .subquery()
         total = db.session.query(func.avg(sub.c.percent)).scalar()
         total = 0 if total is None else round(total, 2)
         return total
@@ -510,8 +518,11 @@ class Invest(db.Model):
         filters.append(self.status.in_([self.STATUS_PENDING,
                                         self.STATUS_RETURNED]))
         filters.append(Project.status == Project.STATUS_UNFUNDED)
-        sub = db.session.query((func.sum(self.amount) / Project.minimum * 100).label('percent'))\
-                            .filter(*filters).group_by(self.project_id).subquery()
+        sub = db.session.query((func.sum(self.amount) / Project.minimum * 100) \
+                        .label('percent')) \
+                        .filter(*filters) \
+                        .group_by(self.project_id) \
+                        .subquery()
         total = db.session.query(func.avg(sub.c.percent)).scalar()
         total = 0 if total is None else round(total, 2)
         return total
@@ -523,9 +534,12 @@ class Invest(db.Model):
         filters = list(self.get_filters(**kwargs))
         filters.append(Project.status.in_([Project.STATUS_FUNDED,
                                            Project.STATUS_FULFILLED]))
-        sq = db.session.query(func.count(func.distinct(self.user_id)).label("co"))\
-                                    .join(Project, self.project_id == Project.id)\
-                                    .filter(*filters).group_by(self.project_id).subquery()
+        sq = db.session.query(func.count(func.distinct(self.user_id)) \
+                       .label("co")) \
+                       .join(Project, self.project_id == Project.id) \
+                       .filter(*filters) \
+                       .group_by(self.project_id) \
+                       .subquery()
         res = db.session.query(func.avg(sq.c.co)).scalar()
         if res is None:
             res = 0
@@ -539,8 +553,11 @@ class Invest(db.Model):
         filters.append(self.project_id == Project.id)
         filters.append(Project.status.in_(Project.PUBLISHED_PROJECTS))
         filters.append(self.status > self.STATUS_PENDING)
-        sub = db.session.query(func.avg(self.amount).label('amount')).join(Project)\
-                                .filter(*filters).group_by(self.user_id).subquery()
+        sub = db.session.query(func.avg(self.amount).label('amount')) \
+                        .join(Project) \
+                        .filter(*filters) \
+                        .group_by(self.user_id) \
+                        .subquery()
         total = db.session.query(func.avg(sub.c.amount)).scalar()
         total = 0 if total is None else round(total, 2)
         return total
@@ -551,8 +568,11 @@ class Invest(db.Model):
         """Average money raised (€) for successful projects (those which reached the minimum) """
         filters = list(self.get_filters(**kwargs))
         filters.append(self.date_created >= Project.date_passed)
-        sub = db.session.query(func.sum(self.amount).label('amount')).join(Project)\
-                                            .filter(*filters).group_by(Project.id).subquery()
+        sub = db.session.query(func.sum(self.amount).label('amount')) \
+                        .join(Project) \
+                        .filter(*filters) \
+                        .group_by(Project.id) \
+                        .subquery()
         total = db.session.query(func.avg(sub.c.amount)).scalar()
         total = 0 if total is None else round(total, 2)
         return total

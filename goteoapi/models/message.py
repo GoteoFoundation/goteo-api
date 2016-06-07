@@ -110,13 +110,16 @@ class Message(db.Model):
         filters.append(self.thread.in_(sq_blocked))
         filters.append(self.project_id != Project.id)
         res = db.session.query(func.count(func.distinct(self.user_id))) \
-                                    .join(Project, and_(Project.user_id == self.user_id, Project.status.in_([
-                                        Project.STATUS_FUNDED,
-                                        Project.STATUS_FULFILLED,
-                                        Project.STATUS_IN_CAMPAIGN,
-                                        Project.STATUS_UNFUNDED
-                                    ]))) \
-                                    .filter(*filters).scalar()
+                        .join(Project, and_(Project.user_id == self.user_id,
+                              Project.status.in_([
+                                Project.STATUS_FUNDED,
+                                Project.STATUS_FULFILLED,
+                                Project.STATUS_IN_CAMPAIGN,
+                                Project.STATUS_UNFUNDED
+                                ])
+                              )) \
+                        .filter(*filters) \
+                        .scalar()
         if res is None:
             res = 0
         return res
@@ -129,10 +132,11 @@ class Message(db.Model):
         filters.append(Project.status.in_([Project.STATUS_FUNDED,
                                            Project.STATUS_FULFILLED]))
         sq = db.session.query(func.count(func.distinct(self.user_id)).label("co")) \
-                                    .join(Project, self.project_id == Project.id) \
-                                    .filter(*filters).group_by(self.project_id).subquery()
+                       .join(Project, self.project_id == Project.id) \
+                       .filter(*filters) \
+                       .group_by(self.project_id) \
+                       .subquery()
         res = db.session.query(func.avg(sq.c.co)).scalar()
         if res is None:
             res = 0
         return res
-

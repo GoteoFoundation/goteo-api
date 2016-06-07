@@ -80,5 +80,3 @@ USERS = {}
 
 # Api version
 VERSION = "1.1"
-
-
