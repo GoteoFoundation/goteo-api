@@ -112,7 +112,7 @@ class CallAPI(BaseItem):
     def get(self, call_id):
         res = self._get(call_id)
 
-        if res.ret['id'] == None:
+        if res.ret['id'] is None:
             return bad_request('Matchfunding call not found', 404)
 
         return res.response()
@@ -123,7 +123,7 @@ class CallAPI(BaseItem):
         p = Call.get(call_id)
 
         item = marshal(p, call_full_resource_fields)
-        if p != None:
+        if p is not None:
             item['status'] = p.status_string
             item['scope'] = p.scope_string
             location = CallLocation.get(p.id)
@@ -153,7 +153,7 @@ class CallProjectsListAPI(BaseList):
     def get(self, call_id):
         res = self._get(call_id)
 
-        if res.ret['id'] == None:
+        if res.ret['id'] is None:
             return bad_request('Call not found', 404)
 
         return res.response()
@@ -167,7 +167,7 @@ class CallProjectsListAPI(BaseList):
 
         items = []
         call = Call.get(call_id)
-        if call == None:
+        if call is None:
             return Response(attributes={'id': None})
 
         for p in Project.list(**args):

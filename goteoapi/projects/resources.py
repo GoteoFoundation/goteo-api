@@ -170,7 +170,7 @@ class ProjectAPI(BaseItem):
     def get(self, project_id):
         res = self._get(project_id)
 
-        if res.ret['id'] == None:
+        if res.ret['id'] is None:
             return bad_request('Project not found', 404)
 
         return res.response()
@@ -181,7 +181,7 @@ class ProjectAPI(BaseItem):
         p = Project.get(project_id)
 
         item = marshal(p, project_full_resource_fields)
-        if p != None:
+        if p is not None:
             item['status'] = p.status_string
             item['scope'] = p.scope_string
             item['user'] = marshal(p.User, user_resource_fields)
@@ -250,7 +250,7 @@ class ProjectDonorsListAPI(BaseList):
     def get(self, project_id):
         res = self._get(project_id)
 
-        if res.ret['id'] == None:
+        if res.ret['id'] is None:
             return bad_request('Project not found', 404)
 
         return res.response()
@@ -262,7 +262,7 @@ class ProjectDonorsListAPI(BaseList):
         args = self.parse_args(remove=('location'))
 
         items = []
-        if Project.get(project_id) == None:
+        if Project.get(project_id) is None:
             return Response(attributes={'id': None})
 
         for u in User.donors_by_project(project_id, **args):

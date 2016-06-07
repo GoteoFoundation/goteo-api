@@ -85,7 +85,7 @@ class UserOwnerAPI(BaseItem):
     def get(self):
         res = UserAPI()._get(g.user.id)
 
-        if res.ret['id'] == None:
+        if res.ret['id'] is None:
             return bad_request('User not found', 404)
 
         return res.response()
@@ -100,7 +100,7 @@ class UserAPI(BaseItem):
     def get(self, user_id):
         res = self._get(user_id)
 
-        if res.ret['id'] == None:
+        if res.ret['id'] is None:
             return bad_request('User not found', 404)
 
         return res.response()
@@ -111,7 +111,7 @@ class UserAPI(BaseItem):
         u = User.get(user_id)
 
         item = marshal(u, user_full_resource_fields)
-        if u != None:
+        if u is not None:
             if 'latitude' in user_full_resource_fields:
                 location = UserLocation.get(u.id)
                 if location:

@@ -123,7 +123,7 @@ class InvestAPI(BaseItem):
         p = Invest.get(invest_id)
 
         item = marshal(p, invest_full_resource_fields)
-        if p != None:
+        if p is not None:
             item['status'] = p.status_string
             item['project'] = p.project_id
             if 'user' in invest_full_resource_fields:
