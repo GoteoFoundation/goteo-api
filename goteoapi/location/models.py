@@ -19,6 +19,7 @@ location_resource_fields = {
     "longitude"      : fields.Float,
 }
 
+
 class ItemLocation(object):
     """This class can be used as base for the implementing SQL tables"""
 
@@ -123,6 +124,7 @@ class ItemLocation(object):
 ## IMPLEMENTATIONS
 #####################
 
+
 class UserLocation(db.Model, ItemLocation):
     """User location particular case"""
     __tablename__ = 'user_location'
@@ -139,6 +141,7 @@ class UserLocation(db.Model, ItemLocation):
         """Get a valid Location Item from id"""
         return super().get(id, locable)
 
+
 class ProjectLocation(db.Model, ItemLocation):
     """Project location particular case"""
     __tablename__ = 'project_location'
@@ -148,6 +151,7 @@ class ProjectLocation(db.Model, ItemLocation):
     def __repr__(self):
         return '<ProjectLocation: (%s) in %f,%f>' % (self.id, self.latitude, self.longitude)
 
+
 class CallLocation(db.Model, ItemLocation):
     """Call location particular case"""
     __tablename__ = 'call_location'
@@ -156,6 +160,7 @@ class CallLocation(db.Model, ItemLocation):
 
     def __repr__(self):
         return '<CallLocation: (%s) in %f,%f>' % (self.id, self.latitude, self.longitude)
+
 
 class InvestLocation(db.Model, ItemLocation):
     """Invest location particular case"""

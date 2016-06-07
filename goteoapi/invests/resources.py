@@ -13,6 +13,7 @@ from .models import Invest
 # from ..users.resources import user_resource_fields
 from ..location.models import InvestLocation, location_resource_fields
 
+
 def type_sanitizer(type):
     if type not in ('drop', 'payment', 'pool'):
         raise Exception("Invalid parameter type. Only types 'drop', 'payment' or 'pool' are allowed")
@@ -86,14 +87,15 @@ class InvestsListAPI(BaseList):
 
         res = Response(
             starttime = time_start,
-            attributes = {  'items' : items,
-                            'extra' : {
-                                'pledged': float(Invest.pledged_total(**args)),
-                                'refunded': float(Invest.refunded_total(**args)),
-                                'projects': Invest.projects_total(**args),
-                                'calls': Invest.calls_total(**args)
-                            }
-                        },
+            attributes = {
+                'items' : items,
+                'extra' : {
+                    'pledged': float(Invest.pledged_total(**args)),
+                    'refunded': float(Invest.refunded_total(**args)),
+                    'projects': Invest.projects_total(**args),
+                    'calls': Invest.calls_total(**args)
+                }
+            },
             filters = args.items(),
             total = Invest.total(**args)
         )

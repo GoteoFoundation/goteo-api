@@ -33,12 +33,15 @@ class RateLimit(object):
     remaining = property(lambda x: x.limit - x.current)
     over_limit = property(lambda x: x.current >= x.limit)
 
+
 def get_view_rate_limit():
     return getattr(g, '_view_rate_limit', None)
+
 
 def on_over_limit(limit):
     resp = bad_request('Too many requests', 429)
     return resp
+
 
 def ratelimit(limit=app.config['REQUESTS_LIMIT'], per=app.config['REQUESTS_TIME'], over_limit=on_over_limit):
     def decorator(f):

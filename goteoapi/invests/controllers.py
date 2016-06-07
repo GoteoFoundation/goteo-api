@@ -10,6 +10,7 @@ from .resources import InvestsListAPI, InvestAPI
 api.add_resource(InvestsListAPI, '/invests/', endpoint='api_invests.invests')
 api.add_resource(InvestAPI, '/invests/<int:invest_id>', endpoint='api_invests.invest')
 
+
 # redirect end trailing slash
 @app.route('/invests/<int:invest_id>/', endpoint='redirect.invest')
 def invest_redirect(invest_id):

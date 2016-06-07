@@ -14,6 +14,7 @@ from ..models.message import Message
 from ..helpers import utc_from_local
 from .. import db
 
+
 class Invest(db.Model):
     __tablename__ = 'invest'
 
@@ -555,6 +556,7 @@ class Invest(db.Model):
         total = db.session.query(func.avg(sub.c.amount)).scalar()
         total = 0 if total is None else round(total, 2)
         return total
+
 
 class InvestNode(db.Model):
     __tablename__ = 'invest_node'

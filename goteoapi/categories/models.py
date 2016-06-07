@@ -10,7 +10,6 @@ from ..cacher import cacher
 
 from .. import db
 
-# Category stuff
 
 class CategoryLang(AbstractLang, db.Model):
     __tablename__ = 'category_lang'
@@ -23,6 +22,7 @@ class CategoryLang(AbstractLang, db.Model):
 
     def __repr__(self):
         return '<CategoryLang %s(%s): %r>' % (self.id, self.lang, self.name)
+
 
 class Category(db.Model):
     __tablename__ = 'category'

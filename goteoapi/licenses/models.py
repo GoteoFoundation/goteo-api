@@ -26,6 +26,7 @@ class LicenseLang(AbstractLang, db.Model):
     def __repr__(self):
         return '<LicenseLang %s(%s): %r>' % (self.id, self.lang, self.name)
 
+
 # License stuff
 class License(db.Model):
     __tablename__ = 'license'

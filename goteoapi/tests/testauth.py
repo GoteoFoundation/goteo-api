@@ -8,6 +8,7 @@ from . import test_app, app, get_json
 from base64 import b64encode
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
+
 def setup():
     app.config['AUTH_ENABLED'] = True
     app.config['USERS'] = {

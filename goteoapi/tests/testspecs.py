@@ -13,6 +13,7 @@ old_redis_url = app.config['REDIS_URL']
 old_cache_min_timeout = app.config['CACHE_MIN_TIMEOUT']
 old_cache_type = app.config['CACHE']['CACHE_TYPE']
 
+
 def setup():
     cache.clear()
     app.config['CACHING'] = True
@@ -21,14 +22,13 @@ def setup():
     app.config['CACHE']['CACHE_TYPE'] = 'simple'
     cache.init_app(app, config=app.config['CACHE'])
 
+
 def teardown():
     cache.clear()
     app.config['CACHING'] = False
     app.config['REDIS_URL'] = old_redis_url
     app.config['CACHE_MIN_TIMEOUT'] = old_cache_min_timeout
     app.config['CACHE']['CACHE_TYPE'] = old_cache_type
-
-DIR = os.path.dirname(__file__) + '/../calls/'
 
 
 def test_spec():

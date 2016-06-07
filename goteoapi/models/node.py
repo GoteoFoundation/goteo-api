@@ -5,6 +5,7 @@ from sqlalchemy import String, Boolean
 
 from .. import db
 
+
 class Node(db.Model):
     __tablename__ = 'node'
 

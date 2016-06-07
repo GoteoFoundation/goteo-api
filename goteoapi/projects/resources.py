@@ -123,6 +123,7 @@ project_full_translate_resource_fields['description_short'] = fields.String
 donor_resource_fields = user_resource_fields.copy()
 donor_resource_fields['anonymous'] = fields.Boolean
 
+
 class ProjectsListAPI(BaseList):
     """Project list"""
 

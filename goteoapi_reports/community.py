@@ -114,12 +114,17 @@ class CommunityAPI(Base):
                 'average-collaborators'             : Message.average_collaborators(**args),
                 'creators-donors'                   : Invest.donors_creators_total(**args),
                 'creators-collaborators'            : Message.collaborators_creators_total(**args),
-                'categories'                        : list(map(lambda t: {t.id:
-                                                                        {'users': t.total,
-                                                                         'id': t.id,
-                                                                         'name': t.name,
-                                                                         'percentage-users': percent(t.total, users)}
-                                                                        }, categorias)),
+                'categories'                        : list(
+                    map(
+                        lambda t: {
+                            t.id: {
+                                'users': t.total,
+                                'id': t.id,
+                                'name': t.name,
+                                'percentage-users': percent(t.total, users)
+                            }
+                        }
+                    , categorias)),
                 'leading-category'                  : categorias[0].id if len(categorias) > 0 else None,
                 'users-leading-category'            : users_categoria1,
                 'percentage-users-leading-category' : percent(users_categoria1, users),

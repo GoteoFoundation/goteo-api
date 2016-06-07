@@ -13,7 +13,6 @@ from .. import db
 
 
 # Icon stuff
-
 class IconLang(db.Model):
     __tablename__ = 'icon_lang'
 
@@ -25,6 +24,7 @@ class IconLang(db.Model):
 
     def __repr__(self):
         return '<IconLang %s: %r>' % (self.id, self.name)
+
 
 class Icon(db.Model):
     __tablename__ = 'icon'

@@ -10,6 +10,7 @@ from ..cacher import cacher
 
 from .. import db
 
+
 class Message(db.Model):
     __tablename__ = 'message'
 

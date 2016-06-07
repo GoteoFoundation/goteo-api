@@ -19,6 +19,7 @@ license_resource_fields = {
     "total-projects" : fields.Integer
 }
 
+
 class LicensesListAPI(BaseList):
     """License API"""
 

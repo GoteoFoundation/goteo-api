@@ -13,10 +13,12 @@ from . import app
 # Model helpers
 # ################
 
+
 # Helper class to convert a dict to a generic object
 class objectview(object):
     def __init__(self, d):
         self.__dict__ = d
+
 
 def get_lang(obj, field, langs=[], root_lang=app.config['DEFAULT_DB_LANG']):
     """
@@ -45,6 +47,7 @@ def get_lang(obj, field, langs=[], root_lang=app.config['DEFAULT_DB_LANG']):
     else:
         return getattr(obj, field)
 
+
 def image_url(img, size='medium', cut=False, default='la_gota.png'):
     """
     Goteo image urls
@@ -59,6 +62,7 @@ def image_url(img, size='medium', cut=False, default='la_gota.png'):
 
     return 'https://goteo.org/img/' + s + '/' + i
 
+
 def image_resource_url(url):
     """Links for images"""
     if url:
@@ -71,20 +75,26 @@ def image_resource_url(url):
         return 'http://goteo.org' + url
     return None
 
+
 def project_url(project_id):
     return 'https://goteo.org/project/' + project_id
+
 
 def call_url(call_id):
     return 'https://goteo.org/call/' + call_id
 
+
 def project_widget_url(project_id):
     return 'https://goteo.org/widget/project/' + project_id
+
 
 def user_url(user_id):
     return 'https://goteo.org/user/profile/' + user_id
 
+
 def svg_image_url(img, type='licenses'):
     return 'https://goteoassets.org/api/svg/' + type + '/' + img
+
 
 def utc_from_local(date_time, local_tz=None):
     """Translates a date according the timezone in settings"""
@@ -108,11 +118,13 @@ def utc_from_local(date_time, local_tz=None):
 # Resource helpers
 # ##################
 
+
 def bad_request(message, code = 400):
     """Error handling json response"""
     resp = jsonify(message=str(message), error = code)
     resp.status_code = code
     return resp
+
 
 # Generic percentage
 def percent(number, base=None):
@@ -123,6 +135,7 @@ def percent(number, base=None):
         return 0
     perc = float(number) / base * 100
     return round(perc, 2)
+
 
 def marshal(data, fields, envelope=None, remove_null=False):
     """
@@ -137,6 +150,7 @@ def marshal(data, fields, envelope=None, remove_null=False):
     if isinstance(m, dict):
         return { k.replace("_", "-"): v for k, v in m.items() if not remove_null or v is not None }
     return m
+
 
 # Customized filelds for the API
 
@@ -158,6 +172,7 @@ class Date(Raw):
                 return datetime.date.isoformat(date)
         except ValueError as ve:
             raise MarshallingException(ve)
+
 
 class DateTime(Raw):
     """

@@ -77,12 +77,15 @@ class SummaryAPI(Base):
                 'projects-published'      : Project.total(**args),
                 'projects-successful'     : Project.total(successful=True, **args),
                 'projects-failed'         : Project.total(failed=True, **args),
-                'categories'              : list(map(lambda t: {t.id:
-                                                    {'users': t.total,
-                                                     'id': t.id,
-                                                     'name': t.name,
-                                                     'percentage-users': percent(t.total, users)}
-                                                    }, categorias)),
+                'categories'              : list(
+                    map(lambda t: {
+                        t.id: {
+                            'users': t.total,
+                            'id': t.id,
+                            'name': t.name,
+                            'percentage-users': percent(t.total, users)
+                        }
+                    }, categorias)),
                 'top10-collaborations'    : top10_collaborations,
                 'top10-donations'         : top10_donations,
                 'favorite-rewards'       : favorites

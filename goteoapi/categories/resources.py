@@ -17,6 +17,7 @@ category_resource_fields = {
     "total-users"    : fields.Integer
 }
 
+
 class CategoriesListAPI(BaseList):
     """Category list"""
 

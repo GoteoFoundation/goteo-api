@@ -15,6 +15,7 @@ from ..base_resources import AbstractLang
 
 from .. import db
 
+
 class RewardLang(AbstractLang, db.Model):
     __tablename__ = 'reward_lang'
 
@@ -48,6 +49,7 @@ class RewardLang(AbstractLang, db.Model):
     @hybrid_property
     def license_url(self):
         return self.License.url
+
 
 # Reward stuff
 class Reward(db.Model):

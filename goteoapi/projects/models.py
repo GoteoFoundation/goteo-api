@@ -38,6 +38,7 @@ class ProjectLang(AbstractLang, db.Model):
     def description_short(self):
         return self.subtitle
 
+
 class Project(db.Model):
     """
         Projects status

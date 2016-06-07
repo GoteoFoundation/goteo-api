@@ -15,17 +15,20 @@ from sqlalchemy.ext.hybrid import hybrid_method
 from .helpers import *
 from . import app, db
 
+
 def date_sanitizer(data):
     d = parse(data)
     if d > dtdatetime.now():
         d = dtdatetime.now()
     return str(d.date())
 
+
 def lang_sanitizer(data):
     d = str(data)
     if len(data) != 2:
         raise Exception("Invalid parameter lang. 2 chars length required: (en, es, fr, pt, etc)")
     return d
+
 
 def location_sanitizer(data):
     location = data.split(",")
@@ -37,17 +40,20 @@ def location_sanitizer(data):
         raise Exception("Radius must be a value between 0 and 500 Km")
     return {'latitude':location[0], 'longitude':location[1], 'radius':radius}
 
+
 def loc_status_sanitizer(data):
     d = str(data)
     if d not in ('located', 'unlocated'):
         raise Exception("Invalid parameter loc_status. Must be one of 'located', 'unlocated'")
     return d
 
+
 def limit_sanitizer(limit):
     l = int(limit)
     if(l > 50):
         l = 50
     return l
+
 
 class AbstractLang():
     """Common methods for Language Model implementation in Goteo"""
@@ -103,6 +109,7 @@ class AbstractLang():
     #     sub_class = self.get_sub_class()
     #     # print('ASUB_CLASS', sub_class)
 
+
 class Response():
     """Base response for Reports Endpoints"""
 
@@ -136,6 +143,7 @@ class Response():
             return jsonify(self.ret)
         return self.ret
 
+
 class BaseItem(Resource):
     """Base class for individual enpoint reports"""
 
@@ -144,6 +152,7 @@ class BaseItem(Resource):
 
     def option(self):
         pass
+
 
 class BaseList(Resource):
     """Base class for list enpoint reports"""

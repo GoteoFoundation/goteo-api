@@ -17,12 +17,14 @@ redis_url = app.config['REDIS_URL']
 old_cache_min_timeout = app.config['CACHE_MIN_TIMEOUT']
 old_cache_type = app.config['CACHE']['CACHE_TYPE']
 
+
 def setup():
     app.config['CACHE_MIN_TIMEOUT'] = 1
     app.config['CACHE']['CACHE_TYPE'] = 'redis'
     cache.init_app(app, config=app.config['CACHE'])
     if not redis_url:
         warnings.warn('REDIS is not configured. Some tests will be skipped')
+
 
 def teardown():
     cache.clear()
@@ -32,8 +34,6 @@ def teardown():
 
 
 # Test Functions/Classes
-
-# TESTS
 
 # REDIS Test
 def test_cacher_redis():
@@ -72,6 +72,7 @@ def test_limit_headers():
     eq_(len(rv.headers.getlist('X-RateLimit-Remaining')), 1)
     eq_(len(rv.headers.getlist('X-RateLimit-Limit')), 1)
     eq_(len(rv.headers.getlist('X-RateLimit-Reset')), 1)
+
 
 def test_limit_behaviour():
     if not redis_url:

@@ -12,6 +12,7 @@ from ..base_resources import AbstractLang
 
 from .. import db
 
+
 class SupportLang(AbstractLang, db.Model):
     __tablename__ = 'support_lang'
 

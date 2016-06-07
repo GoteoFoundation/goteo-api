@@ -17,6 +17,7 @@ if redis:
 
 cache = Cache(app, config=app.config['CACHE'])
 
+
 #
 # CACHER BY ARGS FILTERS
 #
@@ -54,6 +55,7 @@ def add_key_list(key, timeout, time):
     keys[key] = val
     return cache.set('KEY-LIST', keys, timeout=INFINITE)
 
+
 def renew_key_list(key):
     if redis:
         # A more efficient way to touch a single key instead of retrieving the full set
@@ -71,6 +73,7 @@ def renew_key_list(key):
         return add_key_list(key, timeout, dtdatetime.now())
 
     return False
+
 
 def cacher(f):
     """Caches methods for model classes"""
@@ -139,6 +142,7 @@ def get_key_parts(key):
         app.logger.debug("ERROR DECODING Key '{0}' Exception {1}".format(key, str(e)))
 
     return False
+
 
 def get_key_functions(keys, force=False):
     """Returns a list with functions and parameters (ready to execute) associated with the keys in cache"""

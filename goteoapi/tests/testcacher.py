@@ -12,11 +12,13 @@ old_redis_url = app.config['REDIS_URL']
 old_cache_min_timeout = app.config['CACHE_MIN_TIMEOUT'] = 1
 old_cache_type = app.config['CACHE']['CACHE_TYPE'] = 'redis'
 
+
 def setup():
     app.config['REDIS_URL'] = None
     app.config['CACHE_MIN_TIMEOUT'] = 1
     app.config['CACHE']['CACHE_TYPE'] = 'simple'
     cache.init_app(app, config=app.config['CACHE'])
+
 
 def teardown():
     cache.clear()
@@ -27,9 +29,9 @@ def teardown():
 
 
 # Test Functions/Classes
-
-
 alt = 1
+
+
 @cacher
 def get_alt(a=None):
     global alt
@@ -38,13 +40,16 @@ def get_alt(a=None):
     alt = 1 - alt
     return alt
 
+
 @cacher
 def get_simple(num=0):
     return num
 
+
 @cacher
 def get_random():
     return random.random()
+
 
 class Dummy():
     @classmethod
@@ -59,11 +64,13 @@ class Dummy():
 
 # TESTS
 
+
 def test_non_cacher():
     app.config['CACHING'] = False
     eq_(get_random() == get_random(), False)
     eq_( get_alt() , 0)
     eq_( get_alt() , 1)
+
 
 def test_cacher():
     app.config['CACHING'] = True
@@ -77,21 +84,25 @@ def test_cacher():
     eq_( get_alt() , 1)
     assert len(get_key_list()) > 0
 
+
 def test_class_non_cacher():
     app.config['CACHING'] = False
     eq_( 0 == Dummy.get_simple(0), True)
     eq_( Dummy.get_random() == Dummy.get_random(), False)
+
 
 def test_class_cacher():
     app.config['CACHING'] = True
     eq_( 1 == Dummy.get_simple(1), True)
     eq_( Dummy.get_random() , Dummy.get_random())
 
+
 def test_renew_cacher():
     key_list = get_key_list()
     assert len(key_list) > 0
     func_list = get_key_functions(get_key_list(), True)
     assert len(func_list) > 0
+
 
 def test_static_methods():
     Dummy.get_simple(num=0)
@@ -109,6 +120,7 @@ def test_static_methods():
             elif f in globals():
                 f = globals()[f]
         eq_( 0, int(f(*args, **kargs)))
+
 
 def test_invalid_keys():
     keys = {

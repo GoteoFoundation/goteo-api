@@ -10,6 +10,7 @@ from flask.ext.restful import Api
 from flasgger import Swagger
 from flask.ext.sqlalchemy import SQLAlchemy
 
+
 def debug_time(func):
     def new_f(*args, **kwargs):
         time_start = time.time()

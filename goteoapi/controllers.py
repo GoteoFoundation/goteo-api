@@ -3,6 +3,7 @@ from flask import request, jsonify
 from . import app
 from .ratelimit import get_view_rate_limit
 
+
 @app.after_request
 def inject_addtional_headers(resp):
     """
@@ -40,6 +41,7 @@ def inject_addtional_headers(resp):
 
     return resp
 
+
 @app.errorhandler(400)
 @app.errorhandler(401)
 @app.errorhandler(403)
@@ -54,6 +56,7 @@ def page_not_found(e):
 #
 # Routing
 # =======
+
 
 # HOME
 @app.route('/', endpoint='api_home')

@@ -13,6 +13,7 @@ from ..base_resources import AbstractLang
 
 from .. import db
 
+
 class CostLang(AbstractLang, db.Model):
     __tablename__ = 'cost_lang'
 
@@ -25,6 +26,7 @@ class CostLang(AbstractLang, db.Model):
 
     def __repr__(self):
         return '<CostLang %s(%s): %r>' % (self.id, self.lang, self.name)
+
 
 class Cost(db.Model):
     __tablename__ = 'cost'

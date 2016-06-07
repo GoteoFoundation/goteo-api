@@ -53,9 +53,11 @@ from ..helpers import *
 from .. import app
 from ..users.models import User, UserApi
 
+
 def generate_auth_token(authid, expiration = app.config['ACCESS_TOKEN_DURATION']):
     s = Serializer(app.secret_key, expires_in = expiration)
     return s.dumps({ 'id': authid })
+
 
 def verify_auth_token(token):
     s = Serializer(app.secret_key)
@@ -68,6 +70,7 @@ def verify_auth_token(token):
 
     g.loginId = data['id']
     return True
+
 
 def check_builtin_auth(username, password):
     """Checks username & password authentication"""
@@ -94,6 +97,7 @@ def check_builtin_auth(username, password):
             return True
     return False
 
+
 def check_apikey_auth(username, password):
     """Checks username & API-key authentication"""
 
@@ -109,6 +113,7 @@ def check_apikey_auth(username, password):
     g.loginId = user.id
     return True
 
+
 def check_user_auth(username, password):
     """Checks username & password authentication"""
 
@@ -118,6 +123,7 @@ def check_user_auth(username, password):
         g.loginId = user.id
         return True
     return 'Invalid username or password'
+
 
 def requires_auth(scope='public'):
     """
