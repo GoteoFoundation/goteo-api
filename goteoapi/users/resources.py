@@ -36,6 +36,7 @@ user_full_resource_fields['projects_collaborated'] = fields.Integer
 # user_full_resource_fields['amount_private_invested'] = fields.Float
 # user_full_resource_fields['projects_private_invested'] = fields.Integer
 
+
 class UsersListAPI(BaseList):
     """User list"""
 

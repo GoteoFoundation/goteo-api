@@ -33,6 +33,7 @@ class UserLang(AbstractLang, db.Model):
     def __repr__(self):
         return '<UserLang %s(%s): %r>' % (self.id, self.lang, self.name)
 
+
 # User stuff
 class User(db.Model):
     __tablename__ = 'user'
@@ -265,6 +266,7 @@ class User(db.Model):
         except MultipleResultsFound:
             return 0
 
+
 #User roles
 class UserRole(db.Model):
     __tablename__ = 'user_role'
@@ -287,6 +289,7 @@ class UserApi(db.Model):
 
     def __repr__(self):
         return '<UserApi: %s %s (%s)>' % (self.user_id, self.key, self.expiration_date)
+
 
 # User interest
 class UserInterest(db.Model):
