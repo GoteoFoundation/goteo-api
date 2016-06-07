@@ -89,7 +89,7 @@ def cacher(f):
         # timeout variable (the closer to now, the lesser the value)
         timeout = app.config['CACHE_MIN_TIMEOUT']
         now = dtdatetime.now()
-        if 'to_date' in kwargs and kwargs['to_date'] != None:
+        if 'to_date' in kwargs and kwargs['to_date'] is not None:
             datemax = parse(kwargs['to_date'])
         else:
             datemax = now
