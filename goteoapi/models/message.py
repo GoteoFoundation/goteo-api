@@ -69,7 +69,7 @@ class Message(db.Model):
         filters = list(self.get_filters(**kwargs))
         filters.append(self.user_id == User.id)
         # Exclude threads initiated by owners
-        filters.append(self.thread != None)
+        filters.append(self.thread is not None)
         try:
             return db.session.query(self.user_id, User.name, User.id, User.avatar,
                                     func.count(self.id).label('interactions')) \

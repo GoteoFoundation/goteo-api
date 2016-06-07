@@ -56,20 +56,28 @@ class MoneyAPI(BaseList):
                 "pledged": Invest.pledged_total(**args),
                 # "pledged": Project.pledged_total(finished=True, **args),
                 # Perc. medio de recaudación sobre el mínimo recaudado
-                # "percentage-pledged-successful": Invest.percent_pledged_successful(**args),  # <- este metodo filtra por fecha de invest, da numeros negativos
-                "percentage-pledged-successful": Project.percent_pledged(finished=True, **args),  # <- filtra por fecha de proyecto
+                # "percentage-pledged-successful":
+                #    # este metodo filtra por fecha de invest, da numeros negativos
+                #    Invest.percent_pledged_successful(**args),
+                "percentage-pledged-successful":
+                    # filtra por fecha de proyecto
+                    Project.percent_pledged(finished=True, **args),
                 # Perc. dinero compr. medio sobre mínimo',
-                # "percentage-pledged-failed": Invest.percent_pledged_failed(**args),
-                "percentage-pledged-failed": Project.percent_pledged(failed=True, **args),
+                # "percentage-pledged-failed":
+                #    Invest.percent_pledged_failed(**args),
+                "percentage-pledged-failed":
+                    Project.percent_pledged(failed=True, **args),
                 # Dinero devuelto (en proyectos archivados)
                 "refunded": Invest.refunded_total(**args),
                 # "refunded": Project.refunded_total(failed=True, **args),
                 # Recaudado mediante PayPal
                 # TODO: confirmar si hay que quitar devueltos
-                "paypal-amount": Invest.pledged_total(method=Invest.METHOD_PAYPAL, **args),
+                "paypal-amount":
+                    Invest.pledged_total(method=Invest.METHOD_PAYPAL, **args),
                 # Recaudado mediante TPV
-                "creditcard-amount": Invest.pledged_total(method=Invest.METHOD_TPV, **args),
-                # # Aportes manuales: recaudado mediante transferencia bancaria directa
+                "creditcard-amount":
+                    Invest.pledged_total(method=Invest.METHOD_TPV, **args),
+                # Aportes manuales: recaudado mediante transferencia bancaria directa
                 "cash-amount": Invest.pledged_total(method=Invest.METHOD_CASH, **args),
                 #  Suma recaudada en Convocatorias (Capital riego distribuido + crowd)
                 # SOLO CONVOCATORIA:

@@ -69,7 +69,8 @@ class SummaryAPI(Base):
             starttime=time_start,
             attributes={
                 'pledged': Invest.pledged_total(**args),
-                'matchfund-amount': Invest.pledged_total(method=Invest.METHOD_DROP, **args),
+                'matchfund-amount':
+                    Invest.pledged_total(method=Invest.METHOD_DROP, **args),
                 'matchfundpledge-amount': Call.pledged_total(**args),
                 'average-donation': Invest.average_donation(**args),
                 'users': users,

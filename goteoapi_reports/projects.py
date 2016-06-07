@@ -79,10 +79,14 @@ class ProjectsAPI(Base):
                 'failed': fail_projects,
                 'successful': succ_projects,
                 'successful-completed': succ_finished,
-                'percentage-successful': percent(succ_projects, succ_projects + fail_projects),
-                'percentage-successful-completed': percent(succ_finished, succ_finished + fail_projects),
-                'average-amount-successful': Project.average_total(successful=True, **args),
-                'average-posts-successful': Project.average_posts(successful=True, **args),
+                'percentage-successful':
+                    percent(succ_projects, succ_projects + fail_projects),
+                'percentage-successful-completed':
+                    percent(succ_finished, succ_finished + fail_projects),
+                'average-amount-successful':
+                    Project.average_total(successful=True, **args),
+                'average-posts-successful':
+                    Project.average_posts(successful=True, **args),
                 'top10-collaborations': top10_collaborations,
                 'top10-donations': top10_donations,
                 'top10-receipts': top10_receipts,

@@ -202,11 +202,11 @@ class Project(db.Model):
         if 'received' in kwargs and kwargs['received'] is not None:
             # Any project with a "updated" date set is a RECEIVED project
             # overwrite the default published filters
-            filters = [self.updated != None, self.updated != '0000-00-00']
+            filters = [self.updated is not None, self.updated != '0000-00-00']
             kwargs['status'] = self.RECEIVED_PROJECTS
         elif 'successful' in kwargs and kwargs['successful'] is not None:
             # successful projects (checked by passed date only)
-            filters.append(self.passed != None)
+            filters.append(self.passed is not None)
             filters.append(self.passed != '0000-00-00')
         elif 'finished' in kwargs and kwargs['finished'] is not None:
             # successful projects (checked by status bit)
@@ -214,8 +214,8 @@ class Project(db.Model):
             # filters.append(self.status > self.STATUS_REJECTED)
         elif 'closed' in kwargs and kwargs['closed'] is not None:
             # successful, and closed campaign projects
-            and1 = and_(self.passed != None, self.passed != '0000-00-00')
-            and2 = and_(self.closed != None, self.closed != '0000-00-00')
+            and1 = and_(self.passed is not None, self.passed != '0000-00-00')
+            and2 = and_(self.closed is not None, self.closed != '0000-00-00')
             filters.append(or_(and1, and2))
         elif 'failed' in kwargs and kwargs['failed'] is not None:
             # overwrite default status search
@@ -288,9 +288,9 @@ class Project(db.Model):
             #  is_anonymous == None  => all Invests
             if 'is_anonymous' in kwargs and kwargs['is_anonymous'] is not None:
                 if kwargs['is_anonymous'] is True:
-                    filters.append(Invest.anonymous == True)
+                    filters.append(Invest.anonymous is True)
                 elif kwargs['is_anonymous'] is False:
-                    filters.append(or_(Invest.anonymous == None, Invest.anonymous == False))
+                    filters.append(or_(Invest.anonymous is None, Invest.anonymous is False))
 
         if 'project' in kwargs and kwargs['project'] is not None:
             if isinstance(kwargs['project'], (list, tuple)):

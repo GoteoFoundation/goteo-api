@@ -61,14 +61,20 @@ class RewardsAPI(Base):
             starttime=time_start,
             attributes={
                 'reward-refusal': renuncias,
-                'percentage-reward-refusal': percent(renuncias, cofinanciadores),
+                'percentage-reward-refusal':
+                    percent(renuncias, cofinanciadores),
                 'rewards-per-amount': {
-                    'rewards-less-than-15': Invest.rewards_per_amount(0, 15, **args),
-                    'rewards-between-15-30': Invest.rewards_per_amount(15, 30, **args),
-                    'rewards-between-30-100': Invest.rewards_per_amount(30, 100, **args),
-                    'rewards-between-100-400': Invest.rewards_per_amount(100, 400, **args),
-                    'rewards-more-than-400': Invest.rewards_per_amount(400,  **args),
-                },
+                    'rewards-less-than-15':
+                        Invest.rewards_per_amount(0, 15, **args),
+                    'rewards-between-15-30':
+                        Invest.rewards_per_amount(15, 30, **args),
+                    'rewards-between-30-100':
+                        Invest.rewards_per_amount(30, 100, **args),
+                    'rewards-between-100-400':
+                        Invest.rewards_per_amount(100, 400, **args),
+                    'rewards-more-than-400':
+                        Invest.rewards_per_amount(400,  **args),
+                    },
                 'favorite-rewards': favorites
             },
             filters=args.items()
