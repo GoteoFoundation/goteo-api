@@ -64,6 +64,7 @@ call_full_resource_fields["location"]         = fields.List(fields.Nested(locati
 call_project_resource_fields = project_resource_fields.copy()
 call_project_resource_fields['amount_call'] = fields.Float
 
+
 class CallsListAPI(BaseList):
     """Call list"""
 
@@ -141,6 +142,7 @@ class CallAPI(BaseItem):
         )
 
         return res
+
 
 class CallProjectsListAPI(BaseList):
     """Projects list"""

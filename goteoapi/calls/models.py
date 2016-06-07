@@ -12,6 +12,7 @@ from ..invests.models import Invest
 
 from .. import db
 
+
 class CallLang(AbstractLang, db.Model):
     __tablename__ = 'call_lang'
 
@@ -31,6 +32,7 @@ class CallLang(AbstractLang, db.Model):
 
     def __repr__(self):
         return '<CallLang %s(%s): %r>' % (self.id, self.lang, self.name)
+
 
 class Call(db.Model):
     __tablename__ = 'call'
@@ -257,6 +259,7 @@ class Call(db.Model):
             return total
         except MultipleResultsFound:
             return 0
+
 
 # Call projects
 class CallProject(db.Model):
