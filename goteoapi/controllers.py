@@ -47,9 +47,9 @@ def inject_addtional_headers(resp):
 @app.errorhandler(410)
 @app.errorhandler(500)
 def page_not_found(e):
-     resp = jsonify(error=e.code, message=str(e), links=app.config['LINKS'])
-     resp.status_code = e.code
-     return resp
+    resp = jsonify(error=e.code, message=str(e), links=app.config['LINKS'])
+    resp.status_code = e.code
+    return resp
 
 #
 # Routing

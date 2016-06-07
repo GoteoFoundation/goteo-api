@@ -13,7 +13,7 @@ test_app = app.test_client()
 __import__('goteoapi.controllers')
 
 def get_json(rv_object):
-  return json.loads(rv_object.get_data(as_text=True))
+    return json.loads(rv_object.get_data(as_text=True))
 
 def get_swagger(file, objectName=None):
     import yaml

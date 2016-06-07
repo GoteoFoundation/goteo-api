@@ -75,7 +75,6 @@ class ItemLocation(object):
         filters = [self.latitude.between(minLat, maxLat), self.longitude.between(minLon, maxLon)]
         if locable_only:
             filters.append(self.locable == True)
-         # acos(sin(:lat)*sin(radians(Lat)) + cos(:lat)*cos(radians(Lat))*cos(radians(Lon)-:lon)) * :R
         rlat = radians(latitude)
         rlng = radians(longitude)
         distance = (

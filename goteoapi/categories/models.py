@@ -69,7 +69,7 @@ class Category(db.Model):
         # Filters by "project"
         # counting attached (invested or collaborated) to some project(s)
         if 'project' in kwargs and kwargs['project'] is not None:
-        	filters.append(Project.id.in_(kwargs['project']))
+            filters.append(Project.id.in_(kwargs['project']))
         # filter by category interests
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(self.id.in_(kwargs['category']))

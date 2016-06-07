@@ -41,7 +41,7 @@ class License(db.Model):
 
     @hybrid_property
     def svg_url(self):
-    	return svg_image_url(self.id + '.svg')
+        return svg_image_url(self.id + '.svg')
 
     # Getting filters for this model
     @hybrid_method
