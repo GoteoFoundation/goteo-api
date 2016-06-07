@@ -38,7 +38,7 @@ def location_sanitizer(data):
     radius = int(location[2])
     if radius > 500 or radius < 0:
         raise Exception("Radius must be a value between 0 and 500 Km")
-    return {'latitude':location[0], 'longitude':location[1], 'radius':radius}
+    return {'latitude': location[0], 'longitude': location[1], 'radius': radius}
 
 
 def loc_status_sanitizer(data):

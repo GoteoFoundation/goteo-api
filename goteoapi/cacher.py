@@ -147,7 +147,7 @@ def get_key_parts(key):
 def get_key_functions(keys, force=False):
     """Returns a list with functions and parameters (ready to execute) associated with the keys in cache"""
     funcs = []
-    for key,(timeout,time) in keys.items():
+    for key, (timeout, time) in keys.items():
         delta = dtdatetime.now() - time
         # print (key, timeout, time.isoformat(), delta.total_seconds(), timeout / delta.total_seconds(), delta.total_seconds() / timeout)
         # if delta.total_seconds() / timeout < 0.75 and (timeout - delta.total_seconds()) > 60:

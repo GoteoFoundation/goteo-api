@@ -31,5 +31,5 @@ def test_categories():
         del resp['time-elapsed']
 
     fields = get_swagger(DIR + 'swagger_specs.yml', 'Digest')
-    eq_(set(resp.keys()) , set(fields.keys()))
+    eq_(set(resp.keys()), set(fields.keys()))
     eq_(rv.status_code, 200)

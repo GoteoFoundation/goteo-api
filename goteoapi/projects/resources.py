@@ -19,43 +19,43 @@ from ..models.cost import Cost
 from ..models.support import Support
 
 project_resource_fields = {
-    "id"                : fields.String,
-    "name"              : fields.String,
-    "description_short" : fields.String,
-    "lang" : fields.String,
-    "node"              : fields.String,
-    "date_created"      : DateTime,
-    "date_published"    : DateTime,
-    "project_url"       : fields.String,
-    "image_url" : fields.String,
-    "latitude" : fields.Float,
-    "longitude" : fields.Float,
-    "region" : fields.String,
-    "owner" : fields.String,
-    "owner_name" : fields.String,
-    "status" : fields.String,
-    "minimum" : fields.Float,
-    "optimum" : fields.Float,
-    "amount" : fields.Float,
+    "id": fields.String,
+    "name": fields.String,
+    "description_short": fields.String,
+    "lang": fields.String,
+    "node": fields.String,
+    "date_created": DateTime,
+    "date_published": DateTime,
+    "project_url": fields.String,
+    "image_url": fields.String,
+    "latitude": fields.Float,
+    "longitude": fields.Float,
+    "region": fields.String,
+    "owner": fields.String,
+    "owner_name": fields.String,
+    "status": fields.String,
+    "minimum": fields.Float,
+    "optimum": fields.Float,
+    "amount": fields.Float,
 }
 
 project_gallery_resource_fields = {
-    "image_url" : fields.String,
-    "resource_url" : fields.String,
+    "image_url": fields.String,
+    "resource_url": fields.String,
 }
 
 project_reward_resource_fields = {
-    "id" : fields.Integer,
-    "name" : fields.String,
-    "description"              : fields.String,
-    "type"              : fields.String,
-    "amount"              : fields.Integer,
-    "icon_url"              : fields.String,
-    "license"              : fields.String,
-    "license_description"              : fields.String,
-    "license_name"              : fields.String,
-    "license_url"              : fields.String,
-    "license_svg_url"              : fields.String,
+    "id": fields.Integer,
+    "name": fields.String,
+    "description": fields.String,
+    "type": fields.String,
+    "amount": fields.Integer,
+    "icon_url": fields.String,
+    "license": fields.String,
+    "license_description": fields.String,
+    "license_name": fields.String,
+    "license_url": fields.String,
+    "license_svg_url": fields.String,
 }
 project_reward_translate_resource_fields = project_reward_resource_fields.copy()
 project_reward_translate_resource_fields.pop('type')
@@ -66,29 +66,29 @@ project_reward_translate_resource_fields.pop('id')
 project_reward_translate_resource_fields.pop('amount')
 
 project_cost_resource_fields = {
-    "id" : fields.Integer,
-    "name" : fields.String,
-    "description"              : fields.String,
-    "type"              : fields.String,
-    "amount"              : fields.Float,
-    "required"              : fields.String,
-    "date_from"              : DateTime,
-    "date_to"              : DateTime,
+    "id": fields.Integer,
+    "name": fields.String,
+    "description": fields.String,
+    "type": fields.String,
+    "amount": fields.Float,
+    "required": fields.String,
+    "date_from": DateTime,
+    "date_to": DateTime,
 }
 project_cost_translate_resource_fields = {
-    "name" : fields.String,
-    "description"              : fields.String,
+    "name": fields.String,
+    "description": fields.String,
 }
 
 project_need_resource_fields = {
-    "id" : fields.Integer,
-    "name" : fields.String,
-    "description"              : fields.String,
-    "type"              : fields.String,
+    "id": fields.Integer,
+    "name": fields.String,
+    "description": fields.String,
+    "type": fields.String,
 }
 project_need_translate_resource_fields = {
-    "name" : fields.String,
-    "description"              : fields.String,
+    "name": fields.String,
+    "description": fields.String,
 }
 
 project_full_resource_fields = project_resource_fields.copy()
@@ -154,7 +154,7 @@ class ProjectsListAPI(BaseList):
 
         res = Response(
             starttime = time_start,
-            attributes = {'items' : items},
+            attributes = {'items': items},
             filters = args.items(),
             total = Project.total(**args)
         )
@@ -194,8 +194,8 @@ class ProjectAPI(BaseItem):
                 item['image-gallery'] = []
                 for i in gallery:
                     item['image-gallery'].append({
-                        'image-url' : image_url(i.image, 'big', False),
-                        'resource-url' : image_resource_url(i.url)
+                        'image-url': image_url(i.image, 'big', False),
+                        'resource-url': image_resource_url(i.url)
                         })
                 #     i['image-url'] = gallery.image
             rewards = Reward.list_by_project(p.id)
@@ -288,7 +288,7 @@ class ProjectDonorsListAPI(BaseList):
             items.append(item)
         res = Response(
             starttime = time_start,
-            attributes = {'id':project_id, 'items' : items},
+            attributes = {'id': project_id, 'items': items},
             filters = args.items(),
             total = User.donors_by_project_total(project_id, **args)
         )

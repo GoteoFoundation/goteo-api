@@ -13,16 +13,16 @@ from ..location.models import UserLocation
 from .models import User, UserLang
 
 user_resource_fields = {
-    "id"                : fields.String,
-    "name"              : fields.String,
-    "node"              : fields.String,
-    "date_created"      : DateTime,
-    "profile_url"       : fields.String,
-    "profile_image_url" : fields.String,
+    "id": fields.String,
+    "name": fields.String,
+    "node": fields.String,
+    "date_created": DateTime,
+    "profile_url": fields.String,
+    "profile_image_url": fields.String,
     # privacy concerns here
-    # "latitude" : fields.Float,
-    # "longitude" : fields.Float
-    # "region" : fields.String
+    # "latitude": fields.Float,
+    # "longitude": fields.Float
+    # "region": fields.String
 }
 
 user_full_resource_fields = user_resource_fields.copy()
@@ -69,7 +69,7 @@ class UsersListAPI(BaseList):
 
         res = Response(
             starttime = time_start,
-            attributes = {'items' : items},
+            attributes = {'items': items},
             filters = args.items(),
             total = User.total(**args)
         )

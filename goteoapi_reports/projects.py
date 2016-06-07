@@ -9,14 +9,14 @@ from goteoapi.helpers import *
 from goteoapi.base_resources import BaseList as Base, Response
 
 contribution_resource_fields = {
-    'project'  : fields.String,
-    'name'  : fields.String,
-    'project_url'  : fields.String,
-    'description_short'  : fields.String,
-    'image_url'  : fields.String,
-    'video_url'  : fields.String,
-    'date_published'  : DateTime,
-    'total' : fields.Integer
+    'project': fields.String,
+    'name': fields.String,
+    'project_url': fields.String,
+    'description_short': fields.String,
+    'image_url': fields.String,
+    'video_url': fields.String,
+    'date_published': DateTime,
+    'total': fields.Integer
 }
 
 amount_resource_fields = contribution_resource_fields.copy()
@@ -43,7 +43,7 @@ class ProjectsAPI(Base):
 
         time_start = time.time()
         # remove not used args
-        args = self.parse_args(remove=('page','limit'))
+        args = self.parse_args(remove=('page', 'limit'))
 
         succ_projects = Project.total(successful=True, **args)
         # succ_projects_closed = Project.total(closed=True, **args)
@@ -74,18 +74,18 @@ class ProjectsAPI(Base):
         res = Response(
             starttime = time_start,
             attributes = {
-                'received'                       : Project.total(received=True, **args),
-                'published'                      : Project.total(**args),
-                'failed'                         : fail_projects,
-                'successful'                     : succ_projects,
-                'successful-completed'           : succ_finished,
-                'percentage-successful'          : percent(succ_projects, succ_projects + fail_projects),
+                'received': Project.total(received=True, **args),
+                'published': Project.total(**args),
+                'failed': fail_projects,
+                'successful': succ_projects,
+                'successful-completed': succ_finished,
+                'percentage-successful': percent(succ_projects, succ_projects + fail_projects),
                 'percentage-successful-completed': percent(succ_finished, succ_finished + fail_projects),
-                'average-amount-successful'      : Project.average_total(successful=True, **args),
-                'average-posts-successful'       : Project.average_posts(successful=True, **args),
-                'top10-collaborations'           : top10_collaborations,
-                'top10-donations'                : top10_donations,
-                'top10-receipts'                 : top10_receipts,
+                'average-amount-successful': Project.average_total(successful=True, **args),
+                'average-posts-successful': Project.average_posts(successful=True, **args),
+                'top10-collaborations': top10_collaborations,
+                'top10-donations': top10_donations,
+                'top10-receipts': top10_receipts,
             },
             filters = args.items()
         )

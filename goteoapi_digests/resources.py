@@ -77,18 +77,18 @@ class DigestsListAPI(BaseList):
                 del args['year']
                 # digest by months in the specified year
                 # Assign date filters
-                [args['from_date'], args['to_date']] = map(lambda d:d.isoformat(),self.max_min(year))
-                for month in range(1,13):
+                [args['from_date'], args['to_date']] = map(lambda d: d.isoformat(), self.max_min(year))
+                for month in range(1, 13):
                     maxmin = self.max_min(year, month)
                     if maxmin[0] < maxmin[1]:
-                        buckets[format(month, '02')] = map(lambda d:d.isoformat(),maxmin)
+                        buckets[format(month, '02')] = map(lambda d: d.isoformat(), maxmin)
             else:
                 # digest by years
                 for year in range(app.config['INITIAL_YEAR'], dtdate.today().year + 1):
-                    buckets[year] = map(lambda d:d.isoformat(),self.max_min(year))
+                    buckets[year] = map(lambda d: d.isoformat(), self.max_min(year))
 
             # parse the args in the instance
-            instance.parse_args = (lambda **a:self.dummy_parse_args(args, **a))
+            instance.parse_args = (lambda **a: self.dummy_parse_args(args, **a))
             # # data for global dates
             global_ = instance._get().response(False)
             # cleaning response
@@ -113,7 +113,7 @@ class DigestsListAPI(BaseList):
 
         res = Response(
             starttime = time_start,
-            attributes = {'global' : global_, 'buckets' : buckets, 'endpoint' : endpoint},
+            attributes = {'global': global_, 'buckets': buckets, 'endpoint': endpoint},
             filters = args.items()
         )
 

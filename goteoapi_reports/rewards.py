@@ -10,19 +10,19 @@ from goteoapi.helpers import percent, marshal
 from goteoapi.base_resources import BaseList as Base, Response
 
 favorite_resource_fields = {
-    "icon"    : fields.String,
-    "name"    : fields.String,
-    "description"    : fields.String,
-    "svg_url"    : fields.String,
-    "total"   : fields.Integer,
+    "icon": fields.String,
+    "name": fields.String,
+    "description": fields.String,
+    "svg_url": fields.String,
+    "total": fields.Integer,
 }
 
 per_amount_resource_fields = {
-    "rewards-less-than-15"    : fields.Integer,
-    "rewards-between-15-30"   : fields.Integer,
-    "rewards-between-30-100"  : fields.Integer,
-    "rewards-between-100-400" : fields.Integer,
-    "rewards-more-than-400"   : fields.Integer
+    "rewards-less-than-15": fields.Integer,
+    "rewards-between-15-30": fields.Integer,
+    "rewards-between-30-100": fields.Integer,
+    "rewards-between-100-400": fields.Integer,
+    "rewards-more-than-400": fields.Integer
 }
 
 
@@ -47,7 +47,7 @@ class RewardsAPI(Base):
 
         time_start = time.time()
         # remove not used args
-        args = self.parse_args(remove=('page','limit'))
+        args = self.parse_args(remove=('page', 'limit'))
 
         cofinanciadores = Invest.donors_total(**args)
         renuncias = Invest.total(is_refusal=True, **args)
@@ -60,14 +60,14 @@ class RewardsAPI(Base):
         res = Response(
             starttime = time_start,
             attributes = {
-                'reward-refusal'            : renuncias,
-                'percentage-reward-refusal' : percent(renuncias, cofinanciadores),
-                'rewards-per-amount'        : {
-                    'rewards-less-than-15'    : Invest.rewards_per_amount(0, 15, **args),
-                    'rewards-between-15-30'   : Invest.rewards_per_amount(15, 30, **args),
-                    'rewards-between-30-100'  : Invest.rewards_per_amount(30, 100, **args),
-                    'rewards-between-100-400' : Invest.rewards_per_amount(100, 400, **args),
-                    'rewards-more-than-400'   : Invest.rewards_per_amount(400,  **args),
+                'reward-refusal': renuncias,
+                'percentage-reward-refusal': percent(renuncias, cofinanciadores),
+                'rewards-per-amount': {
+                    'rewards-less-than-15': Invest.rewards_per_amount(0, 15, **args),
+                    'rewards-between-15-30': Invest.rewards_per_amount(15, 30, **args),
+                    'rewards-between-30-100': Invest.rewards_per_amount(30, 100, **args),
+                    'rewards-between-100-400': Invest.rewards_per_amount(100, 400, **args),
+                    'rewards-more-than-400': Invest.rewards_per_amount(400,  **args),
                 },
                 'favorite-rewards': favorites
             },

@@ -20,26 +20,26 @@ def type_sanitizer(type):
     return str(type)
 
 invest_resource_fields = {
-    "id"             : fields.Integer,
+    "id": fields.Integer,
     # Privacy concerns here...
-    # "owner"        : fields.String,
-    # "owner_name"        : fields.String,
-    # "anonymous"         : fields.Boolean,
-    "type"         : fields.String,
-    "project"        : fields.String,
-    "call"        : fields.String,
-    "amount"         : fields.Float,
-    "status"         : fields.String,
-    "currency"         : fields.String,
-    "conversion_ratio"         : fields.Float,
-    "resign"         : fields.Boolean,
-    "latitude" : fields.Float,
-    "longitude" : fields.Float,
-    "region" : fields.String,
-    "date_created"  : DateTime,
-    "date_charged"  : DateTime,
-    "date_returned"  : DateTime,
-    "date_updated"  : DateTime,
+    # "owner": fields.String,
+    # "owner_name": fields.String,
+    # "anonymous": fields.Boolean,
+    "type": fields.String,
+    "project": fields.String,
+    "call": fields.String,
+    "amount": fields.Float,
+    "status": fields.String,
+    "currency": fields.String,
+    "conversion_ratio": fields.Float,
+    "resign": fields.Boolean,
+    "latitude": fields.Float,
+    "longitude": fields.Float,
+    "region": fields.String,
+    "date_created": DateTime,
+    "date_charged": DateTime,
+    "date_returned": DateTime,
+    "date_updated": DateTime,
 }
 
 invest_full_resource_fields = invest_resource_fields.copy()
@@ -88,8 +88,8 @@ class InvestsListAPI(BaseList):
         res = Response(
             starttime = time_start,
             attributes = {
-                'items' : items,
-                'extra' : {
+                'items': items,
+                'extra': {
                     'pledged': float(Invest.pledged_total(**args)),
                     'refunded': float(Invest.refunded_total(**args)),
                     'projects': Invest.projects_total(**args),

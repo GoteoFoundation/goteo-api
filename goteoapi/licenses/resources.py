@@ -10,13 +10,13 @@ from ..base_resources import BaseList, Response
 from .models import License
 
 license_resource_fields = {
-    "id"             : fields.String,
-    "name"           : fields.String,
-    "description"    : fields.String,
-    "url"            : fields.String,
-    "svg-url"        : fields.String,
-    "total-rewards"  : fields.Integer,
-    "total-projects" : fields.Integer
+    "id": fields.String,
+    "name": fields.String,
+    "description": fields.String,
+    "url": fields.String,
+    "svg-url": fields.String,
+    "total-rewards": fields.Integer,
+    "total-projects": fields.Integer
 }
 
 
@@ -39,7 +39,7 @@ class LicensesListAPI(BaseList):
 
         time_start = time.time()
         #removing not-needed standard filters
-        args = self.parse_args(remove=('page','limit'))
+        args = self.parse_args(remove=('page', 'limit'))
 
         items = []
         for u in License.list(**args):
@@ -54,7 +54,7 @@ class LicensesListAPI(BaseList):
 
         res = Response(
             starttime = time_start,
-            attributes = {'items' : items},
+            attributes = {'items': items},
             filters = args.items(),
             total = License.total(**args)
         )

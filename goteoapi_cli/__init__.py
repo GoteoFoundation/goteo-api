@@ -37,12 +37,12 @@ def renewcache(execute=False, force=False):
         for key, clas, f, args, kargs in key_list:
             print("{0} {1} {2} {3} {4} {5}".format(colored('FUNCTION', 'green'), f.__name__, colored('WITH ARGS', 'green'), args, colored('KARGS', 'green'), kargs))
             if execute:
-                cprint("EXECUTING {0}".format(f),'yellow')
+                cprint("EXECUTING {0}".format(f), 'yellow')
                 try:
                     renew_key_list(key)
                     f(*args, **kargs)
                 except Exception as e:
-                    cprint("EXCEPTION {0} EXECUTING {1}".format(str(e), f),'red')
+                    cprint("EXCEPTION {0} EXECUTING {1}".format(str(e), f), 'red')
         if not execute:
             cprint("Run with option --execute (-e) to actually renew the cache", 'red')
     else:

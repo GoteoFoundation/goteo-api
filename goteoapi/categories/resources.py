@@ -10,11 +10,11 @@ from ..base_resources import BaseList, Response
 from .models import Category
 
 category_resource_fields = {
-    "id"             : fields.Integer,
-    "name"           : fields.String,
-    "description"    : fields.String,
-    "total-projects" : fields.Integer,
-    "total-users"    : fields.Integer
+    "id": fields.Integer,
+    "name": fields.String,
+    "description": fields.String,
+    "total-projects": fields.Integer,
+    "total-users": fields.Integer
 }
 
 
@@ -36,7 +36,7 @@ class CategoriesListAPI(BaseList):
 
         time_start = time.time()
         #removing not-needed standard filters
-        args = self.parse_args(remove=('page','limit'))
+        args = self.parse_args(remove=('page', 'limit'))
 
         items = []
         for u in Category.list(**args):
@@ -49,7 +49,7 @@ class CategoriesListAPI(BaseList):
 
         res = Response(
             starttime = time_start,
-            attributes = {'items' : items},
+            attributes = {'items': items},
             filters = args.items(),
             total = Category.total(**args)
         )

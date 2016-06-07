@@ -77,7 +77,7 @@ def check_builtin_auth(username, password):
 
     # Personal token workflow
     # try some built-in auth first
-    origin = request.headers.get('Origin','*')
+    origin = request.headers.get('Origin', '*')
     remote_ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
     if app.config['USERS'] and username in app.config['USERS'] and 'password' in app.config['USERS'][username]:
         user = app.config['USERS'][username]

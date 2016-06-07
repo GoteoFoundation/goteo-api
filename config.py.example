@@ -55,9 +55,9 @@ DESCRIPTION = 'Goteo.org API'
 
 # Usefull links for general messages
 LINKS = {
-	'Developers Documentation' : 'http://developers.goteo.org',
-    'Swagger Interface' : '/spec',
-    'Swagger Documentation' : '/apidocs/index.html'
+	'Developers Documentation': 'http://developers.goteo.org',
+    'Swagger Interface': '/spec',
+    'Swagger Documentation': '/apidocs/index.html'
 }
 
 # Built-in Users Authentication
@@ -65,10 +65,10 @@ LINKS = {
 # cors referes to the "Access-Control-Allow-Origin" header directive
 USERS = {
     # username (optional)
-	'goteo' : {
+	'goteo': {
         'password':'goteo',
         # Optional fields:
-        # 'remotes' : ['127.0.0.0/16', '192.168.0.0/24'],
+        # 'remotes': ['127.0.0.0/16', '192.168.0.0/24'],
         # 'cors': ['http://stats.goteo.org', 'https://stats.goteo.org']
     }
 }

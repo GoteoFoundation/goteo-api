@@ -3,10 +3,7 @@
 # Minimal tests for main routes
 #
 from nose.tools import *
-import os
-from . import app,test_app, get_json, get_swagger
-from ..calls.resources import call_resource_fields, call_full_resource_fields
-from ..projects.resources import project_resource_fields
+from . import app, test_app, get_swagger
 from ..cacher import cache
 
 old_redis_url = app.config['REDIS_URL']

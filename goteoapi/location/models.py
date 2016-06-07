@@ -11,12 +11,12 @@ from ..cacher import cacher
 from .. import db
 
 location_resource_fields = {
-    "city"           : fields.String,
-    "region"         : fields.String,
-    "country"        : fields.String,
-    "country_code"   : fields.String,
-    "latitude"       : fields.Float,
-    "longitude"      : fields.Float,
+    "city": fields.String,
+    "region": fields.String,
+    "country": fields.String,
+    "country_code": fields.String,
+    "latitude": fields.Float,
+    "longitude": fields.Float,
 }
 
 
@@ -87,7 +87,18 @@ class ItemLocation(object):
                   func.cos(func.radians(column('longitude')) - rlng)
             ) * R
         ).label('distance')
-        subquery = db.session.query(self.id,self.latitude,self.longitude,self.method,self.city,self.country,self.country_code,self.modified,distance).filter(*filters).subquery('FirstCut')
+        subquery = db.session.query(
+                self.id,
+                self.latitude,
+                self.longitude,
+                self.method,
+                self.city,
+                self.country,
+                self.country_code,
+                self.modified,
+                distance) \
+            .filter(*filters) \
+            .subquery('FirstCut')
         sub = select(map(lambda x: column(x), fields)).select_from(subquery).where(distance <= radius)
         return sub
 

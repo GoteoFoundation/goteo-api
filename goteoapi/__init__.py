@@ -116,7 +116,7 @@ app.config['SWAGGER'] = {
         }
     ],
     # "static_url_path": "/apidocs",
-    "test" : 'text',
+    "test": 'text',
     "securityDefinitions": {
         # TODO: include oauth specification (login html screen must be generated)
         # "petstore_auth": {

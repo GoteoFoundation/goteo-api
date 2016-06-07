@@ -11,7 +11,7 @@ def inject_addtional_headers(resp):
     This ensures any failures are also accessible by the client.
     """
     # Default global opened CORS
-    origin = request.headers.get('Origin','*')
+    origin = request.headers.get('Origin', '*')
     # Check system user bind to CORS response
     auth = request.authorization
     if auth and app.config['USERS'] and auth.username in app.config['USERS'] and 'password' in app.config['USERS'][auth.username]:

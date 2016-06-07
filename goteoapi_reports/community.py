@@ -11,27 +11,27 @@ from goteoapi.helpers import image_url, user_url, percent
 from goteoapi.base_resources import BaseList as Base, Response
 
 category_resource_fields = {
-    'id'              : fields.Integer,
-    'name'            : fields.String,
+    'id': fields.Integer,
+    'name': fields.String,
     'percentage-users': fields.Float,
-    'users'           : fields.Integer
+    'users': fields.Integer
 }
 
 donation_resource_fields = {
-    'user'         : fields.String,
-    'name'              : fields.String,
-    'profile-image-url' : fields.String,
-    'profile-url' : fields.String,
-    'amount'       : fields.Float,
+    'user': fields.String,
+    'name': fields.String,
+    'profile-image-url': fields.String,
+    'profile-url': fields.String,
+    'amount': fields.Float,
     'contributions': fields.Integer
 }
 
 collaboration_resource_fields = {
-    'user'              : fields.String,
-    'name'              : fields.String,
-    'profile-image-url' : fields.String,
-    'profile-url' : fields.String,
-    'interactions'      : fields.Integer
+    'user': fields.String,
+    'name': fields.String,
+    'profile-image-url': fields.String,
+    'profile-url': fields.String,
+    'interactions': fields.Integer
 }
 
 
@@ -56,7 +56,7 @@ class CommunityAPI(Base):
 
         time_start = time.time()
         # remove not used args
-        args = self.parse_args(remove=('page','limit'))
+        args = self.parse_args(remove=('page', 'limit'))
 
         users = User.total(**args)
         nargs = args.copy()
@@ -68,7 +68,7 @@ class CommunityAPI(Base):
         paypal_donors = Invest.donors_total(method=Invest.METHOD_PAYPAL, **args)
         creditcard_donors = Invest.donors_total(method=Invest.METHOD_TPV, **args)
         cash_donors = Invest.donors_total(method=Invest.METHOD_CASH, **args)
-        # paypal_multidonors = Invest.multidonors_total(**dict(args, **{'method' : Invest.METHOD_PAYPAL}))
+        # paypal_multidonors = Invest.multidonors_total(**dict(args, **{'method': Invest.METHOD_PAYPAL}))
 
         categorias = UserInterest.categories(**args)
         users_categoria1 = categorias[0].total if len(categorias) > 0 else 0
@@ -98,23 +98,23 @@ class CommunityAPI(Base):
         res = Response(
             starttime = time_start,
             attributes = {
-                'users'                             : users,
-                'donors'                            : donors,
-                'multidonors'                       : multidonors,
-                'percentage-donors-users'           : percent(donors, users),
-                'percentage-unsubscribed-users'     : percent(bajas, users),
-                'percentage-multidonor-donors'      : percent(multidonors, donors),
-                'percentage-multidonor-users'       : percent(multidonors, users),
-                'collaborators'                     : Message.collaborators_total(**args),
-                'paypal-donors'                     : paypal_donors,
-                'creditcard-donors'                 : creditcard_donors,
-                'cash-donors'                       : cash_donors,
-                'donors-collaborators'              : Invest.donors_collaborators_total(**args),
-                'average-donors'                    : Invest.average_donors(**args),
-                'average-collaborators'             : Message.average_collaborators(**args),
-                'creators-donors'                   : Invest.donors_creators_total(**args),
-                'creators-collaborators'            : Message.collaborators_creators_total(**args),
-                'categories'                        : list(
+                'users': users,
+                'donors': donors,
+                'multidonors': multidonors,
+                'percentage-donors-users': percent(donors, users),
+                'percentage-unsubscribed-users': percent(bajas, users),
+                'percentage-multidonor-donors': percent(multidonors, donors),
+                'percentage-multidonor-users': percent(multidonors, users),
+                'collaborators': Message.collaborators_total(**args),
+                'paypal-donors': paypal_donors,
+                'creditcard-donors': creditcard_donors,
+                'cash-donors': cash_donors,
+                'donors-collaborators': Invest.donors_collaborators_total(**args),
+                'average-donors': Invest.average_donors(**args),
+                'average-collaborators': Message.average_collaborators(**args),
+                'creators-donors': Invest.donors_creators_total(**args),
+                'creators-collaborators': Message.collaborators_creators_total(**args),
+                'categories': list(
                     map(
                         lambda t: {
                             t.id: {
@@ -125,15 +125,15 @@ class CommunityAPI(Base):
                             }
                         },
                         categorias)),
-                'leading-category'                  : categorias[0].id if len(categorias) > 0 else None,
-                'users-leading-category'            : users_categoria1,
-                'percentage-users-leading-category' : percent(users_categoria1, users),
-                'second-category'                   : categorias[1].id if len(categorias) > 1 else None,
-                'users-second-category'             : users_categoria2,
-                'percentage-users-second-category'  : percent(users_categoria2, users),
-                'top10-multidonors'                 : top10_multidonors,
-                'top10-donors'                      : top10_donors,
-                'top10-collaborators'               : top10_collaborations,
+                'leading-category': categorias[0].id if len(categorias) > 0 else None,
+                'users-leading-category': users_categoria1,
+                'percentage-users-leading-category': percent(users_categoria1, users),
+                'second-category': categorias[1].id if len(categorias) > 1 else None,
+                'users-second-category': users_categoria2,
+                'percentage-users-second-category': percent(users_categoria2, users),
+                'top10-multidonors': top10_multidonors,
+                'top10-donors': top10_donors,
+                'top10-collaborators': top10_collaborations,
             },
             filters = args.items()
         )

@@ -17,30 +17,30 @@ from ..invests.models import Invest
 from ..location.models import CallLocation, ProjectLocation, location_resource_fields
 
 call_resource_fields = {
-    "id"                : fields.String,
-    "name"              : fields.String,
-    "description_short" : fields.String,
-    "date_opened"      : DateTime,
-    "date_published"    : DateTime,
-    "date_succeeded"    : DateTime,
-    "call_url"       : fields.String,
-    "logo_url" : fields.String,
-    "image_url" : fields.String,
-    "latitude" : fields.Float,
-    "longitude" : fields.Float,
-    "region" : fields.String,
-    "call_location" : fields.String,
-    "owner" : fields.String,
-    "owner_name" : fields.String,
-    "amount_available" : fields.Float,
-    "amount_peers" : fields.Float,
-    "amount_committed" : fields.Float,
-    "amount_remaining" : fields.Float,
-    "projects_total" : fields.Integer,
-    "projects_applied" : fields.Integer,
-    "projects_active" : fields.Integer,
-    "projects_succeeded" : fields.Integer,
-    "status" : fields.String,
+    "id": fields.String,
+    "name": fields.String,
+    "description_short": fields.String,
+    "date_opened": DateTime,
+    "date_published": DateTime,
+    "date_succeeded": DateTime,
+    "call_url": fields.String,
+    "logo_url": fields.String,
+    "image_url": fields.String,
+    "latitude": fields.Float,
+    "longitude": fields.Float,
+    "region": fields.String,
+    "call_location": fields.String,
+    "owner": fields.String,
+    "owner_name": fields.String,
+    "amount_available": fields.Float,
+    "amount_peers": fields.Float,
+    "amount_committed": fields.Float,
+    "amount_remaining": fields.Float,
+    "projects_total": fields.Integer,
+    "projects_applied": fields.Integer,
+    "projects_active": fields.Integer,
+    "projects_succeeded": fields.Integer,
+    "status": fields.String,
 }
 
 call_full_resource_fields = call_resource_fields.copy()
@@ -95,7 +95,7 @@ class CallsListAPI(BaseList):
 
         res = Response(
             starttime = time_start,
-            attributes = {'items' : items},
+            attributes = {'items': items},
             filters = args.items(),
             total = Call.total(**args)
         )
@@ -184,7 +184,7 @@ class CallProjectsListAPI(BaseList):
 
         res = Response(
             starttime = time_start,
-            attributes = {'id':call_id, 'items' : items},
+            attributes = {'id': call_id, 'items': items},
             filters = args.items(),
             total = Project.total(**args)
         )

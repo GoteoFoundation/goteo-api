@@ -9,7 +9,7 @@ from ..base_resources import BaseItem
 from .decorators import requires_auth, generate_auth_token
 
 user_resource_fields = {
-    "id"                : fields.String
+    "id": fields.String
 }
 
 
@@ -24,6 +24,6 @@ class TokenAPI(BaseItem):
         token = generate_auth_token(g.loginId, duration)
         return jsonify({
                     'access_token': token.decode('ascii'),
-                    'expires_in' :  duration,
-                    'token_type' : 'bearer'
+                    'expires_in':  duration,
+                    'token_type': 'bearer'
                 })

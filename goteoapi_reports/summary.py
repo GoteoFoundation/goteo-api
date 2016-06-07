@@ -35,7 +35,7 @@ class SummaryAPI(Base):
 
         time_start = time.time()
         # remove not used args
-        args = self.parse_args(remove=('page','limit'))
+        args = self.parse_args(remove=('page', 'limit'))
 
         top10_collaborations = []
         for u in Project.collaborated_list(**args):
@@ -68,16 +68,16 @@ class SummaryAPI(Base):
         res = Response(
             starttime = time_start,
             attributes = {
-                'pledged'                 : Invest.pledged_total(**args),
-                'matchfund-amount'        : Invest.pledged_total(method=Invest.METHOD_DROP, **args),
-                'matchfundpledge-amount'  : Call.pledged_total(**args),
-                'average-donation'        : Invest.average_donation(**args),
-                'users'                   : users,
-                'projects-received'       : Project.total(received=True, **args),
-                'projects-published'      : Project.total(**args),
-                'projects-successful'     : Project.total(successful=True, **args),
-                'projects-failed'         : Project.total(failed=True, **args),
-                'categories'              : list(
+                'pledged': Invest.pledged_total(**args),
+                'matchfund-amount': Invest.pledged_total(method=Invest.METHOD_DROP, **args),
+                'matchfundpledge-amount': Call.pledged_total(**args),
+                'average-donation': Invest.average_donation(**args),
+                'users': users,
+                'projects-received': Project.total(received=True, **args),
+                'projects-published': Project.total(**args),
+                'projects-successful': Project.total(successful=True, **args),
+                'projects-failed': Project.total(failed=True, **args),
+                'categories': list(
                     map(lambda t: {
                         t.id: {
                             'users': t.total,
@@ -86,9 +86,9 @@ class SummaryAPI(Base):
                             'percentage-users': percent(t.total, users)
                         }
                     }, categorias)),
-                'top10-collaborations'    : top10_collaborations,
-                'top10-donations'         : top10_donations,
-                'favorite-rewards'       : favorites
+                'top10-collaborations': top10_collaborations,
+                'top10-donations': top10_donations,
+                'favorite-rewards': favorites
             },
             filters = args.items()
         )

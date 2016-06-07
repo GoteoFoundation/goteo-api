@@ -41,14 +41,14 @@ def test_cacher_redis():
         raise SkipTest()
     app.config['CACHING'] = True
     assert redis
-    eq_(get_random() , get_random())
-    eq_(get_simple() , get_simple(0))
-    eq_(get_simple(num=1) , get_simple(1))
+    eq_(get_random(), get_random())
+    eq_(get_simple(), get_simple(0))
+    eq_(get_simple(num=1), get_simple(1))
     get_alt(0)
-    eq_(get_alt() , 0)
-    eq_(get_alt() , 0)
+    eq_(get_alt(), 0)
+    eq_(get_alt(), 0)
     sleep(1.1)
-    eq_(get_alt() , 1)
+    eq_(get_alt(), 1)
     assert len(get_key_list()) > 0
 
 
@@ -56,7 +56,7 @@ def test_class_cacher_redis():
     if not redis_url:
         raise SkipTest()
     eq_(1 == Dummy.get_simple(1), True)
-    eq_(Dummy.get_random() , Dummy.get_random())
+    eq_(Dummy.get_random(), Dummy.get_random())
 
 
 # Rate limit tests

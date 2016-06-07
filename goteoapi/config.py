@@ -33,7 +33,7 @@ REDIS_URL = False
 # Use cache type (null by default)
 # View http://pythonhosted.org/Flask-Cache/#configuring-flask-cache
 # for types and configuration options
-CACHE = {'CACHE_TYPE' : 'null'}
+CACHE = {'CACHE_TYPE': 'null'}
 # Minimun timeout for function caching
 CACHE_MIN_TIMEOUT = 0
 
@@ -71,8 +71,8 @@ DEFAULT_DB_LANG = 'es'
 
 # Some usefull links
 LINKS = {
-    'Swagger Interface' : '/spec',
-    'Swagger Documentation' : '/apidocs/index.html'
+    'Swagger Interface': '/spec',
+    'Swagger Documentation': '/apidocs/index.html'
 }
 
 # Built-in Users Authentication
