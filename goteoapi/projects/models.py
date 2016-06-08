@@ -670,6 +670,6 @@ class ProjectImage(db.Model):
             return self.query \
                 .filter(self.project_id == id, self.section == section) \
                 .order_by(asc(self.order)).all()
-        except:
+        except Exception:
             pass
         return []

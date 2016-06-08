@@ -5,7 +5,6 @@ from functools import wraps
 from flask.ext.cache import Cache
 
 import pickle
-from .helpers import *
 
 from . import app
 from .ratelimit import redis
@@ -68,7 +67,7 @@ def renew_key_list(key):
             (timeout, time) = pickle.loads(redis.get(redis_prefix + key)
                                                 .decode('utf-8'))
             return add_key_list(key, timeout, dtdatetime.now())
-        except:
+        except Exception:
             pass
 
     keys = get_key_list()

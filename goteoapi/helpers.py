@@ -92,8 +92,8 @@ def user_url(user_id):
     return 'https://goteo.org/user/profile/' + user_id
 
 
-def svg_image_url(img, type='licenses'):
-    return 'https://goteoassets.org/api/svg/' + type + '/' + img
+def svg_image_url(img, type_='licenses'):
+    return 'https://goteoassets.org/api/svg/' + type_ + '/' + img
 
 
 def utc_from_local(date_time, local_tz=None):

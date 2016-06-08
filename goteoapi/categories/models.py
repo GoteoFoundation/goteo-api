@@ -84,11 +84,11 @@ class Category(db.Model):
 
     @hybrid_method
     @cacher
-    def get(self, id):
+    def get(self, id_):
         """Get a valid category from id"""
         try:
             filters = list(self.filters)
-            filters.append(self.id == id)
+            filters.append(self.id == id_)
             return self.query.filter(*filters).one()
         except NoResultFound:
             return None

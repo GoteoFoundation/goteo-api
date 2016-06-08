@@ -4,5 +4,7 @@ autodetect: yes
 requirements:
     - requirements.txt
     - goteoapi_cli/requirements.txt
+ignore-patterns:
+    - ^console.*\.py$
 python-targets:
     - 3

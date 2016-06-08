@@ -62,7 +62,7 @@ def limit_sanitizer(limit):
     return l
 
 
-class AbstractLang():
+class AbstractLang(object):
     """Common methods for Language Model implementation in Goteo"""
     @classmethod
     def get_sub_class(cls):
@@ -128,7 +128,7 @@ class AbstractLang():
     #     # print('ASUB_CLASS', sub_class)
 
 
-class Response():
+class Response(object):
     """Base response for Reports Endpoints"""
 
     def __init__(self, attributes={}, filters={}, total=None, starttime=0):

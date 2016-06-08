@@ -52,24 +52,8 @@ class DigestsListAPI(BaseList):
             endpoint = endpoint + '/'
         endpoint = '/' + endpoint
         # endpoint = '/'.join(endpoint.split('/')[:2])
-        mod = None
         try:
-            for rule in app.url_map.iter_rules():
-                if rule.rule in self.AVAILABLE_ENDPOINTS \
-                   and rule.rule == endpoint:
-                    # Find the Class
-                    pack = app.view_functions[rule.endpoint] \
-                              .__dict__['view_class'].__module__
-                    clas = app.view_functions[rule.endpoint] \
-                              .__dict__['view_class'].__name__
-                    parts = pack.split('.')
-                    parts.append(clas)
-                    mod = __import__(parts[0])
-                    for att in parts[1:]:
-                        mod = getattr(mod, att)
-
-            # global data, construct from_date >> to_date
-            instance = mod()
+            instance = self.get_module(endpoint)
         except Exception as e:
             if app.debug:
                 return bad_request("Endpoint error. "
@@ -120,7 +104,6 @@ class DigestsListAPI(BaseList):
 
         except Exception as e:
             return bad_request('Unexpected error. [{0}]'.format(e), 400)
-            pass
 
         if global_ == []:
             return bad_request('No digests to list.', 404)
@@ -134,6 +117,28 @@ class DigestsListAPI(BaseList):
         )
 
         return res.response()
+
+    def get_module(self, endpoint):
+        """Return a instance of the class handleing the endpoint
+        Raises an Exception if fails
+        """
+        mod = None
+        for rule in app.url_map.iter_rules():
+            if rule.rule in self.AVAILABLE_ENDPOINTS \
+               and rule.rule == endpoint:
+                # Find the Class
+                pack = app.view_functions[rule.endpoint] \
+                          .__dict__['view_class'].__module__
+                clas = app.view_functions[rule.endpoint] \
+                          .__dict__['view_class'].__name__
+                parts = pack.split('.')
+                parts.append(clas)
+                mod = __import__(parts[0])
+                for att in parts[1:]:
+                    mod = getattr(mod, att)
+
+        # global data, construct from_date >> to_date
+        return mod()
 
     def dummy_parse_args(self, old_args, remove=()):
         new_args = {}
