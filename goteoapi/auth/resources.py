@@ -23,7 +23,7 @@ class TokenAPI(BaseItem):
         duration = int(app.config['ACCESS_TOKEN_DURATION'])
         token = generate_auth_token(g.loginId, duration)
         return jsonify({
-                    'access_token': token.decode('ascii'),
-                    'expires_in':  duration,
-                    'token_type': 'bearer'
-                })
+            'access_token': token.decode('ascii'),
+            'expires_in': duration,
+            'token_type': 'bearer'
+        })

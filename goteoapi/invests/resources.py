@@ -16,7 +16,8 @@ from ..location.models import InvestLocation, location_resource_fields
 
 def type_sanitizer(type):
     if type not in ('drop', 'payment', 'pool'):
-        raise Exception("Invalid parameter type. Only types 'drop', 'payment' or 'pool' are allowed")
+        raise Exception("Invalid parameter type. "
+                        "Only types 'drop', 'payment' or 'pool' are allowed")
     return str(type)
 
 invest_resource_fields = {
@@ -45,7 +46,8 @@ invest_resource_fields = {
 invest_full_resource_fields = invest_resource_fields.copy()
 invest_full_resource_fields.pop('latitude')
 invest_full_resource_fields.pop('longitude')
-invest_full_resource_fields["location"] = fields.List(fields.Nested(location_resource_fields))
+invest_full_resource_fields["location"] = fields.List(
+    fields.Nested(location_resource_fields))
 
 
 class InvestsListAPI(BaseList):
@@ -82,7 +84,10 @@ class InvestsListAPI(BaseList):
                 if location and not p.anonymous:
                     item['latitude'] = location.latitude
                     item['longitude'] = location.longitude
-                    item['region'] = location.region if location.region != '' else location.country
+                    if location.region:
+                        item['region'] = location.region
+                    else:
+                        item['region'] = location.country
             items.append(item)
 
         res = Response(
@@ -132,7 +137,8 @@ class InvestAPI(BaseItem):
             if 'location' in invest_full_resource_fields:
                 location = InvestLocation.get(p.id)
                 if location:
-                    item['location'] = [marshal(location, location_resource_fields)]
+                    item['location'] = [marshal(location,
+                                                location_resource_fields)]
 
         res = Response(
             starttime=time_start,

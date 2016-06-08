@@ -37,7 +37,7 @@ class ItemLocation(object):
 
     def __repr__(self):
         return '<ItemLocation: (%s) in %f,%f>' % (
-                    self.id, self.latitude, self.longitude)
+            self.id, self.latitude, self.longitude)
 
     @hybrid_method
     @cacher
@@ -76,11 +76,12 @@ class ItemLocation(object):
         longitude = float(longitude)
         radius = float(radius)
         # first-cut bounding box (in degrees)
-        maxLat = latitude + degrees(radius/R)
-        minLat = latitude - degrees(radius/R)
-        # compensate for degrees longitude getting smaller with increasing latitude
-        maxLon = longitude + degrees(radius/R/cos(radians(latitude)))
-        minLon = longitude - degrees(radius/R/cos(radians(latitude)))
+        maxLat = latitude + degrees(radius / R)
+        minLat = latitude - degrees(radius / R)
+        # compensate for degrees longitude
+        # getting smaller with increasing latitude
+        maxLon = longitude + degrees(radius / R / cos(radians(latitude)))
+        minLon = longitude - degrees(radius / R / cos(radians(latitude)))
         filters = [self.latitude.between(minLat, maxLat),
                    self.longitude.between(minLon, maxLon)]
         if locable_only:
@@ -89,23 +90,23 @@ class ItemLocation(object):
         rlng = radians(longitude)
         distance = (
             func.acos(
-                  func.sin(rlat)
-                  * func.sin(func.radians(column('latitude')))
-                  + func.cos(rlat)
-                  * func.cos(func.radians(column('latitude')))
-                  * func.cos(func.radians(column('longitude')) - rlng)
+                func.sin(rlat)
+                * func.sin(func.radians(column('latitude')))
+                + func.cos(rlat)
+                * func.cos(func.radians(column('latitude')))
+                * func.cos(func.radians(column('longitude')) - rlng)
             ) * R
         ).label('distance')
         subquery = db.session.query(
-                self.id,
-                self.latitude,
-                self.longitude,
-                self.method,
-                self.city,
-                self.country,
-                self.country_code,
-                self.modified,
-                distance) \
+            self.id,
+            self.latitude,
+            self.longitude,
+            self.method,
+            self.city,
+            self.country,
+            self.country_code,
+            self.modified,
+            distance) \
             .filter(*filters) \
             .subquery('FirstCut')
         sub = select(map(lambda x: column(x), fields)) \
@@ -155,7 +156,8 @@ class UserLocation(db.Model, ItemLocation):
     """User location particular case"""
     __tablename__ = 'user_location'
 
-    id = db.Column('id', String(50), db.ForeignKey('user.id'), primary_key=True)
+    id = db.Column('id', String(50),
+                   db.ForeignKey('user.id'), primary_key=True)
 
     def __repr__(self):
         return '<UserLocation: (%s) in %f,%f>' % (

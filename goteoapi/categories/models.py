@@ -14,7 +14,8 @@ from .. import db
 class CategoryLang(AbstractLang, db.Model):
     __tablename__ = 'category_lang'
 
-    id = db.Column('id', Integer, db.ForeignKey('category.id'), primary_key=True)
+    id = db.Column('id', Integer,
+                   db.ForeignKey('category.id'), primary_key=True)
     lang = db.Column('lang', String(2), primary_key=True)
     name = db.Column('name', Text)
     description = db.Column('description', Text)
@@ -104,7 +105,8 @@ class Category(db.Model):
                 for u in CategoryLang.get_query(kwargs['lang']) \
                                      .filter(*filters) \
                                      .order_by(asc(self.order)):
-                    ret.append(CategoryLang.get_translated_object(u._asdict(), kwargs['lang']))
+                    ret.append(CategoryLang.get_translated_object(
+                        u._asdict(), kwargs['lang']))
                 return ret
             # No langs, normal query
             return self.query.distinct().filter(*filters) \
@@ -119,7 +121,8 @@ class Category(db.Model):
         """Returns the total number of valid category"""
         try:
             filters = list(self.get_filters(**kwargs))
-            count = db.session.query(func.count(distinct(self.id))).filter(*filters).scalar()
+            count = db.session.query(func.count(distinct(self.id))) \
+                              .filter(*filters).scalar()
             if count is None:
                 count = 0
             return count

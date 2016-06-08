@@ -16,7 +16,8 @@ from .. import db
 class LicenseLang(AbstractLang, db.Model):
     __tablename__ = 'license_lang'
 
-    id = db.Column('id', String(50), db.ForeignKey('license.id'), primary_key=True)
+    id = db.Column('id', String(50),
+                   db.ForeignKey('license.id'), primary_key=True)
     lang = db.Column('lang', String(2), primary_key=True)
     name = db.Column('name', String(100))
     description = db.Column('description', Text)
@@ -53,8 +54,10 @@ class License(db.Model):
         from ..location.models import ProjectLocation
 
         filters = []
+        proj_filters = (
+            'node', 'from_date', 'to_date', 'project', 'category', 'location')
         # Join project table if filters
-        for i in ('node', 'from_date', 'to_date', 'project', 'category', 'location'):
+        for i in prj_filters:
             if i in kwargs and kwargs[i] is not None:
                 filters.append(Reward.license_id == self.id)
                 filters.append(Project.id == Reward.project_id)
@@ -109,7 +112,9 @@ class License(db.Model):
                 for u in LicenseLang.get_query(kwargs['lang']) \
                                     .filter(*filters) \
                                     .order_by(asc(self.order)):
-                    ret.append(LicenseLang.get_translated_object(u._asdict(), kwargs['lang']))
+                    ret.append(LicenseLang
+                               .get_translated_object(u._asdict(),
+                                                      kwargs['lang']))
                 return ret
             # No langs, normal query
             return self.query.distinct().filter(*filters) \
@@ -124,7 +129,8 @@ class License(db.Model):
         """Returns the total number of valid license"""
         try:
             filters = list(self.get_filters(**kwargs))
-            count = db.session.query(func.count(distinct(self.id))).filter(*filters).scalar()
+            count = db.session.query(func.count(distinct(self.id))) \
+                              .filter(*filters).scalar()
             if count is None:
                 count = 0
             return count

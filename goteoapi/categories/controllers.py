@@ -6,4 +6,6 @@
 from .. import api
 from .resources import CategoriesListAPI
 
-api.add_resource(CategoriesListAPI, '/categories/', endpoint='api_categories.categories')
+api.add_resource(CategoriesListAPI,
+                 '/categories/',
+                 endpoint='api_categories.categories')

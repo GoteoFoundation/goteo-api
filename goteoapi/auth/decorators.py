@@ -41,7 +41,8 @@
 #            | <-------JSON------- |
 #
 from datetime import datetime as dtdatetime
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from itsdangerous import BadSignature, SignatureExpired
 
 from functools import update_wrapper
 from flask import g, request, jsonify
@@ -54,7 +55,8 @@ from .. import app
 from ..users.models import User, UserApi
 
 
-def generate_auth_token(authid, expiration=app.config['ACCESS_TOKEN_DURATION']):
+def generate_auth_token(authid,
+                        expiration=app.config['ACCESS_TOKEN_DURATION']):
     s = Serializer(app.secret_key, expires_in=expiration)
     return s.dumps({'id': authid})
 
@@ -79,7 +81,9 @@ def check_builtin_auth(username, password):
     # try some built-in auth first
     origin = request.headers.get('Origin', '*')
     remote_ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
-    if app.config['USERS'] and username in app.config['USERS'] and 'password' in app.config['USERS'][username]:
+    if (app.config['USERS']
+       and username in app.config['USERS']
+       and 'password' in app.config['USERS'][username]):
         user = app.config['USERS'][username]
         if user['password'] == password:
             if 'remotes' in user:
@@ -103,9 +107,11 @@ def check_apikey_auth(username, password):
 
     # Try the user-id-key values in sql
     try:
-        userapi = UserApi.query.filter(UserApi.user_id == username, UserApi.key == password).one()
+        userapi = UserApi.query.filter(UserApi.user_id == username,
+                                       UserApi.key == password).one()
 
-        if userapi.expiration_date is not None and userapi.expiration_date <= dtdatetime.today():
+        if (userapi.expiration_date is not None
+           and userapi.expiration_date <= dtdatetime.today()):
             return 'API Key expired'
         user = User.query.filter(User.id == userapi.user_id).one()
     except NoResultFound:
@@ -128,9 +134,11 @@ def check_user_auth(username, password):
 def requires_auth(scope='public'):
     """
     scope:
-        - public: Either "Bearer" token or a pair key/secret can be used to gain access to the resource
-        - access_token: Either user/password or key/secret can be used to gain access
-                        The endpoint using this kind of auth should return the "Bearer" token
+        - public: Either "Bearer" token or a pair key/secret can be used
+                  to gain access to the resource
+        - access_token: Either user/password or key/secret can be used
+                        to gain access. The endpoint using this kind of
+                        auth should return the "Bearer" token
         - private: Only "Bearer" token will be accepted as authorization
     """
     def decorator(f):
@@ -153,10 +161,12 @@ def requires_auth(scope='public'):
             else:
                 # Basic Auth
                 auth = request.authorization
-                msg = 'This resource requires authorization. More info in http://developers.goteo.org/'
+                msg = ("This resource requires authorization. "
+                       "More info in http://developers.goteo.org/")
                 if auth:
                     msg = 'Invalid access method or wrong credentials'
-                    # normal user/password can only be used to obtain access_tokens
+                    # normal user/password can only be used to
+                    # obtain access_tokens
                     if scope == 'access_token':
                         ok = check_user_auth(auth.username, auth.password)
                     if ok is not True:
@@ -165,7 +175,9 @@ def requires_auth(scope='public'):
                         ok = check_builtin_auth(auth.username, auth.password)
 
             # Check scope for non public resources
-            if ok is True and scope not in ('public', 'access_token') and not hasattr(g, 'user'):
+            if (ok is True
+               and scope not in ('public', 'access_token')
+               and not hasattr(g, 'user')):
                 ok = 'Use a proper access token to access this resource'
             if ok is True:
                 return f(*args, **kwargs)
