@@ -39,7 +39,8 @@ def test_invests():
         if 'time-elapsed' in resp:
             del resp['time-elapsed']
 
-        eq_(len(set(map(lambda x: str(x), resp.keys())) - set(fields.keys())) >= 0, True)
+        eq_(len(set(map(lambda x: str(x), resp.keys()))
+                - set(fields.keys())) >= 0, True)
         eq_(rv.status_code, 200)
         # Swagger test
         eq_(set(resp['items'][0].keys()), set(fields_swagger.keys()))
@@ -81,7 +82,8 @@ def test_invest():
     if 'time-elapsed' in resp:
         del resp['time-elapsed']
 
-    eq_(len(set(map(lambda x: str(x), resp.keys())) - set(fields.keys())) >= 0, True)
+    eq_(len(set(map(lambda x: str(x), resp.keys()))
+            - set(fields.keys())) >= 0, True)
     eq_(rv.status_code, 200)
     # Swagger test
     fields = get_swagger(DIR + 'swagger_specs/invest_item.yml', 'InvestFull')

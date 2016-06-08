@@ -32,10 +32,12 @@ def teardown():
 
 
 def test_reject_auth():
-    rv = test_app.get('/login',
-                      headers={
-                          'Authorization': 'Basic %s' % b64encode(b"jimmy:cliff").decode("ascii")
-                      })
+    rv = test_app.get(
+        '/login',
+        headers={
+            'Authorization':
+                'Basic %s' % b64encode(b"jimmy:cliff").decode("ascii")
+        })
     assert 'WWW-Authenticate' in rv.headers
     assert 'Basic' in rv.headers['WWW-Authenticate']
     eq_(rv.status_code, 401)
@@ -45,10 +47,12 @@ token = False
 
 def test_accept_auth():
     global token
-    rv = test_app.get('/login',
-                      headers={
-                          'Authorization': 'Basic %s' % b64encode(b"bob:marley").decode("ascii")
-                      })
+    rv = test_app.get(
+        '/login',
+        headers={
+            'Authorization':
+                'Basic %s' % b64encode(b"bob:marley").decode("ascii")
+        })
     eq_(rv.status_code, 200)
     content = get_json(rv)
     # Test access token
@@ -110,52 +114,62 @@ def test_accept_auth_by_token():
 
 
 def test_reject_auth_by_remote():
-    rv = test_app.get('/login',
-                      environ_base={
-                          'HTTP_X_REAL_IP': '172.0.0.2'
-                      },
-                      headers={
-                          'Authorization': 'Basic %s' % b64encode(b"peter:tosh").decode("ascii")
-                      })
+    rv = test_app.get(
+        '/login',
+        environ_base={
+            'HTTP_X_REAL_IP': '172.0.0.2'
+        },
+        headers={
+            'Authorization':
+                'Basic %s' % b64encode(b"peter:tosh").decode("ascii")
+        })
     eq_(rv.status_code, 401)
 
 
 def test_accept_auth_by_remote():
-    rv = test_app.get('/login',
-                      environ_base={
-                          'HTTP_X_REAL_IP': '127.0.0.1'
-                      },
-                      headers={
-                          'Authorization': 'Basic %s' % b64encode(b"peter:tosh").decode("ascii")
-                      })
+    rv = test_app.get(
+        '/login',
+        environ_base={
+            'HTTP_X_REAL_IP': '127.0.0.1'
+        },
+        headers={
+            'Authorization':
+                'Basic %s' % b64encode(b"peter:tosh").decode("ascii")
+        })
     eq_(rv.status_code, 200)
 
 
 def test_reject_auth_by_cors():
-    rv = test_app.get('/login',
-                      environ_base={
-                          'HTTP_X_REAL_IP': '127.0.0.2'
-                      }, headers={
-                          'Authorization': 'Basic %s' % b64encode(b"bunny:wailer").decode("ascii"),
-                          'Origin': 'http://stats.goteo.org'
-                      })
+    rv = test_app.get(
+        '/login',
+        environ_base={
+            'HTTP_X_REAL_IP': '127.0.0.2'
+        }, headers={
+            'Authorization':
+                'Basic %s' % b64encode(b"bunny:wailer").decode("ascii"),
+            'Origin': 'http://stats.goteo.org'
+        })
     eq_(rv.status_code, 401)
 
 
 def test_accept_auth_by_cors():
-    rv = test_app.get('/login',
-                      environ_base={
-                          'HTTP_X_REAL_IP': '127.0.0.1'
-                      }, headers={
-                          'Authorization': 'Basic %s' % b64encode(b"bunny:wailer").decode("ascii"),
-                          'Origin': 'https://stats.goteo.org'
-                      })
+    rv = test_app.get(
+        '/login',
+        environ_base={
+            'HTTP_X_REAL_IP': '127.0.0.1'
+        }, headers={
+            'Authorization':
+                'Basic %s' % b64encode(b"bunny:wailer").decode("ascii"),
+            'Origin': 'https://stats.goteo.org'
+        })
     eq_(rv.status_code, 200)
 
 
 def test_oauth_user_login():
-    rv = test_app.get('/login',
-                      headers={
-                          'Authorization': 'Basic %s' % b64encode(b"bob:marley").decode("ascii")
-                      })
+    rv = test_app.get(
+        '/login',
+        headers={
+            'Authorization':
+                'Basic %s' % b64encode(b"bob:marley").decode("ascii")
+        })
     eq_(rv.status_code, 200)

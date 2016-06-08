@@ -47,7 +47,8 @@ FILTERS = [
     'location=41.38879,2.15899,50',
     'location=41.38879,2.15899,50&from_date=' + from_date,
     'location=41.38879,2.15899,50&to_date=' + to_date,
-    'location=41.38879,2.15899,50&from_date=' + from_date + '&to_date=' + to_date
+    'location=41.38879,2.15899,50&from_date=' + from_date
+                                              + '&to_date=' + to_date
 ]
 
 
@@ -62,7 +63,8 @@ def test_categories():
         if 'time-elapsed' in resp:
             del resp['time-elapsed']
 
-        eq_(len(set(map(lambda x: str(x), resp.keys())) - set(fields.keys())) >= 0, True)
+        eq_(len(set(map(lambda x: str(x), resp.keys()))
+                - set(fields.keys())) >= 0, True)
         eq_(rv.status_code, 200)
 
         # Swagger test
