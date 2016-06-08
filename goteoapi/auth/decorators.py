@@ -49,8 +49,6 @@ from flask import g, request, jsonify
 from netaddr import IPSet, AddrFormatError, IPAddress
 from sqlalchemy.orm.exc import NoResultFound
 
-from ..helpers import *
-
 from .. import app
 from ..users.models import User, UserApi
 

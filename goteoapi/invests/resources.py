@@ -6,7 +6,7 @@ from flasgger.utils import swag_from
 
 from ..ratelimit import ratelimit
 from ..auth.decorators import requires_auth
-from ..helpers import *
+from ..helpers import DateTime, marshal, bad_request
 
 from ..base_resources import BaseItem, BaseList, Response
 from .models import Invest
@@ -14,11 +14,11 @@ from .models import Invest
 from ..location.models import InvestLocation, location_resource_fields
 
 
-def type_sanitizer(type):
-    if type not in ('drop', 'payment', 'pool'):
-        raise Exception("Invalid parameter type. "
+def type_sanitizer(type_):
+    if type_ not in ('drop', 'payment', 'pool'):
+        raise Exception("Invalid parameter type_. "
                         "Only types 'drop', 'payment' or 'pool' are allowed")
-    return str(type)
+    return str(type_)
 
 invest_resource_fields = {
     "id": fields.Integer,

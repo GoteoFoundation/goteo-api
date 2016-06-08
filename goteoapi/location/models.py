@@ -41,13 +41,13 @@ class ItemLocation(object):
 
     @hybrid_method
     @cacher
-    def get(self, id, locable=False):
-        """Get a valid Location Item from id"""
+    def get(self, id_, locable=False):
+        """Get a valid Location Item from id_"""
         try:
             if not locable:
-                return self.query.get(id)
+                return self.query.get(id_)
             return self.query \
-                       .filter(self.id == id, self.locable == locable) \
+                       .filter(self.id == id_, self.locable == locable) \
                        .one()
         except NoResultFound:
             return None
@@ -109,7 +109,7 @@ class ItemLocation(object):
             distance) \
             .filter(*filters) \
             .subquery('FirstCut')
-        sub = select(map(lambda x: column(x), fields)) \
+        sub = select(map(column, fields)) \
             .select_from(subquery) \
             .where(distance <= radius)
         return sub
@@ -166,9 +166,9 @@ class UserLocation(db.Model, ItemLocation):
     # Overide use to set default locable = True
     @hybrid_method
     @cacher
-    def get(self, id, locable=True):
+    def get(self, id_, locable=True):
         """Get a valid Location Item from id"""
-        return super().get(id, locable)
+        return super(ItemLocation, self).get(id_, locable)
 
 
 class ProjectLocation(db.Model, ItemLocation):

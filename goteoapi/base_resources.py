@@ -12,7 +12,7 @@ from sqlalchemy.inspection import inspect
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.ext.hybrid import hybrid_method
 
-from .helpers import *
+from .helpers import get_lang
 from . import app, db
 
 

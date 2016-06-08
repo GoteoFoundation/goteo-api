@@ -9,8 +9,7 @@ from sqlalchemy.orm import relationship
 from ..cacher import cacher
 from ..helpers import svg_image_url
 from ..projects.models import Project, ProjectCategory
-from ..licenses.models import License, LicenseLang
-from ..models.icon import Icon
+from ..licenses.models import LicenseLang
 from ..base_resources import AbstractLang
 
 from .. import db

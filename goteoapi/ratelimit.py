@@ -5,7 +5,7 @@ from functools import update_wrapper
 from flask import request, g
 from flask_redis import FlaskRedis
 
-from .helpers import *
+from .helpers import bad_request
 from . import app
 
 #
