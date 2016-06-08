@@ -54,7 +54,7 @@ class License(db.Model):
         from ..location.models import ProjectLocation
 
         filters = []
-        proj_filters = (
+        prj_filters = (
             'node', 'from_date', 'to_date', 'project', 'category', 'location')
         # Join project table if filters
         for i in prj_filters:
