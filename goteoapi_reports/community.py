@@ -65,10 +65,14 @@ class CommunityAPI(Base):
         donors = Invest.donors_total(**args)
         multidonors = Invest.multidonors_total(**args)
 
-        paypal_donors = Invest.donors_total(method=Invest.METHOD_PAYPAL, **args)
-        creditcard_donors = Invest.donors_total(method=Invest.METHOD_TPV, **args)
-        cash_donors = Invest.donors_total(method=Invest.METHOD_CASH, **args)
-        # paypal_multidonors = Invest.multidonors_total(**dict(args, **{'method': Invest.METHOD_PAYPAL}))
+        paypal_donors = Invest.donors_total(method=Invest.METHOD_PAYPAL,
+                                            **args)
+        creditcard_donors = Invest.donors_total(method=Invest.METHOD_TPV,
+                                                **args)
+        cash_donors = Invest.donors_total(method=Invest.METHOD_CASH,
+                                          **args)
+        # paypal_multidonors = Invest.multidonors_total(
+        #       **dict(args, **{'method': Invest.METHOD_PAYPAL}))
 
         categorias = UserInterest.categories(**args)
         users_categoria1 = categorias[0].total if len(categorias) > 0 else 0
@@ -109,11 +113,14 @@ class CommunityAPI(Base):
                 'paypal-donors': paypal_donors,
                 'creditcard-donors': creditcard_donors,
                 'cash-donors': cash_donors,
-                'donors-collaborators': Invest.donors_collaborators_total(**args),
+                'donors-collaborators':
+                    Invest.donors_collaborators_total(**args),
                 'average-donors': Invest.average_donors(**args),
-                'average-collaborators': Message.average_collaborators(**args),
+                'average-collaborators':
+                    Message.average_collaborators(**args),
                 'creators-donors': Invest.donors_creators_total(**args),
-                'creators-collaborators': Message.collaborators_creators_total(**args),
+                'creators-collaborators':
+                    Message.collaborators_creators_total(**args),
                 'categories': list(
                     map(
                         lambda t: {
@@ -125,12 +132,16 @@ class CommunityAPI(Base):
                             }
                         },
                         categorias)),
-                'leading-category': categorias[0].id if len(categorias) > 0 else None,
+                'leading-category':
+                    categorias[0].id if len(categorias) > 0 else None,
                 'users-leading-category': users_categoria1,
-                'percentage-users-leading-category': percent(users_categoria1, users),
-                'second-category': categorias[1].id if len(categorias) > 1 else None,
+                'percentage-users-leading-category':
+                    percent(users_categoria1, users),
+                'second-category':
+                    categorias[1].id if len(categorias) > 1 else None,
                 'users-second-category': users_categoria2,
-                'percentage-users-second-category': percent(users_categoria2, users),
+                'percentage-users-second-category':
+                    percent(users_categoria2, users),
                 'top10-multidonors': top10_multidonors,
                 'top10-donors': top10_donors,
                 'top10-collaborators': top10_collaborations,
