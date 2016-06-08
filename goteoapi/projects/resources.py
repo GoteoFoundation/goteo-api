@@ -12,7 +12,8 @@ from ..base_resources import BaseItem, BaseList, Response
 from .models import Project, ProjectImage, ProjectLang
 from ..users.models import User
 from ..users.resources import user_resource_fields
-from ..location.models import ProjectLocation, UserLocation, location_resource_fields
+from ..location.models import ProjectLocation, UserLocation
+from ..location.models import location_resource_fields
 from ..models.reward import Reward
 from ..models.cost import Cost
 from ..models.support import Support
@@ -56,7 +57,8 @@ project_reward_resource_fields = {
     "license_url": fields.String,
     "license_svg_url": fields.String,
 }
-project_reward_translate_resource_fields = project_reward_resource_fields.copy()
+project_reward_translate_resource_fields = project_reward_resource_fields \
+    .copy()
 project_reward_translate_resource_fields.pop('type')
 project_reward_translate_resource_fields.pop('icon_url')
 project_reward_translate_resource_fields.pop('license_svg_url')
@@ -107,17 +109,25 @@ project_full_resource_fields["date_updated"] = DateTime
 project_full_resource_fields["date_succeeded"] = DateTime
 project_full_resource_fields["date_closed"] = DateTime
 project_full_resource_fields["date_passed"] = DateTime
-project_full_resource_fields["location"] = fields.List(fields.Nested(location_resource_fields))
+project_full_resource_fields["location"] = fields.List(
+    fields.Nested(location_resource_fields))
 project_full_resource_fields["user"] = fields.Nested(user_resource_fields)
 project_full_resource_fields["widget_url"] = fields.String
 project_full_resource_fields["image_url_big"] = fields.String
-project_full_resource_fields["image_gallery"] = fields.List(fields.Nested(project_gallery_resource_fields))
+project_full_resource_fields["image_gallery"] = fields.List(
+    fields.Nested(project_gallery_resource_fields))
 project_full_resource_fields["video_url"] = fields.String
-project_full_resource_fields["rewards"] = fields.List(fields.Nested(project_reward_resource_fields))
-project_full_resource_fields["costs"] = fields.List(fields.Nested(project_cost_resource_fields))
-project_full_resource_fields["needs"] = fields.List(fields.Nested(project_need_resource_fields))
+project_full_resource_fields["rewards"] = fields.List(
+    fields.Nested(project_reward_resource_fields))
+project_full_resource_fields["costs"] = fields.List(
+    fields.Nested(project_cost_resource_fields))
+project_full_resource_fields["needs"] = fields.List(
+    fields.Nested(project_need_resource_fields))
 
-project_full_translate_resource_fields = {k: v for k, v in project_full_resource_fields.items() if k in ProjectLang.get_translate_keys()}
+project_full_translate_resource_fields = {
+    k: v for k, v in project_full_resource_fields.items()
+    if k in ProjectLang.get_translate_keys()
+}
 project_full_translate_resource_fields['description_short'] = fields.String
 donor_resource_fields = user_resource_fields.copy()
 donor_resource_fields['anonymous'] = fields.Boolean
@@ -148,7 +158,10 @@ class ProjectsListAPI(BaseList):
             if location:
                 item['latitude'] = location.latitude
                 item['longitude'] = location.longitude
-                item['region'] = location.region if location.region != '' else location.country
+                if location.region:
+                    item['region'] = location.region
+                else:
+                    item['region'] = location.country
             items.append(item)
 
         res = Response(
@@ -187,7 +200,8 @@ class ProjectAPI(BaseItem):
             item['user'] = marshal(p.User, user_resource_fields)
             location = ProjectLocation.get(p.id)
             if location:
-                item['location'] = [marshal(location, location_resource_fields)]
+                item['location'] = [marshal(location,
+                                            location_resource_fields)]
             gallery = ProjectImage.get(p.id)
             if gallery:
                 item['image-gallery'] = []
@@ -195,41 +209,58 @@ class ProjectAPI(BaseItem):
                     item['image-gallery'].append({
                         'image-url': image_url(i.image, 'big', False),
                         'resource-url': image_resource_url(i.url)
-                        })
+                    })
                 #     i['image-url'] = gallery.image
             rewards = Reward.list_by_project(p.id)
             print(rewards)
             if rewards:
-                item['rewards'] = marshal(rewards, project_reward_resource_fields, remove_null=True)
+                item['rewards'] = marshal(rewards,
+                                          project_reward_resource_fields,
+                                          remove_null=True)
 
             costs = Cost.list_by_project(p.id)
             if costs:
-                item['costs'] = marshal(costs, project_cost_resource_fields, remove_null=True)
+                item['costs'] = marshal(costs,
+                                        project_cost_resource_fields,
+                                        remove_null=True)
 
             needs = Support.list_by_project(p.id)
             if needs:
-                item['needs'] = marshal(needs, project_need_resource_fields, remove_null=True)
+                item['needs'] = marshal(needs,
+                                        project_need_resource_fields,
+                                        remove_null=True)
 
             translations = {}
             for k in p.Translations:
-                translations[k.lang] = marshal(k, project_full_translate_resource_fields)
+                translations[k.lang] = marshal(
+                    k,
+                    project_full_translate_resource_fields)
                 rewards = Reward.list_by_project(p.id, lang=k.lang)
                 if rewards:
                     translations[k.lang]['rewards'] = {}
                     for r in rewards:
-                        translations[k.lang]['rewards'][r.id] = marshal(r, project_reward_translate_resource_fields, remove_null=True)
+                        translations[k.lang]['rewards'][r.id] = marshal(
+                            r,
+                            project_reward_translate_resource_fields,
+                            remove_null=True)
 
                 costs = Cost.list_by_project(p.id, lang=k.lang)
                 if costs:
                     translations[k.lang]['costs'] = {}
                     for r in costs:
-                        translations[k.lang]['costs'][r.id] = marshal(r, project_cost_translate_resource_fields, remove_null=True)
+                        translations[k.lang]['costs'][r.id] = marshal(
+                            r,
+                            project_cost_translate_resource_fields,
+                            remove_null=True)
 
                 needs = Support.list_by_project(p.id, lang=k.lang)
                 if needs:
                     translations[k.lang]['needs'] = {}
                     for r in needs:
-                        translations[k.lang]['needs'][r.id] = marshal(r, project_need_translate_resource_fields, remove_null=True)
+                        translations[k.lang]['needs'][r.id] = marshal(
+                            r,
+                            project_need_translate_resource_fields,
+                            remove_null=True)
 
             item['translations'] = translations
 
@@ -282,7 +313,10 @@ class ProjectDonorsListAPI(BaseList):
                 if location:
                     item['latitude'] = location.latitude
                     item['longitude'] = location.longitude
-                    item['region'] = location.region if location.region != '' else location.country
+                    if location.region:
+                        item['region'] = location.region
+                    else:
+                        item['region'] = location.country
 
             items.append(item)
         res = Response(

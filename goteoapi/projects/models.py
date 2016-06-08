@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import or_, asc, desc, and_, distinct, func, Integer, String, Text, Date, Float
+from sqlalchemy import or_, asc, desc, and_, distinct
+from sqlalchemy import func, Integer, String, Text, Date, Float
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.orm import aliased, relationship
 
-from ..helpers import image_url, project_url, project_widget_url, utc_from_local, get_lang
+from ..helpers import image_url, project_url, project_widget_url
+from ..helpers import utc_from_local, get_lang
 from ..cacher import cacher
 from ..base_resources import AbstractLang
 from ..models.post import Post, Blog
@@ -15,7 +17,8 @@ from .. import db
 class ProjectLang(AbstractLang, db.Model):
     __tablename__ = 'project_lang'
 
-    id = db.Column('id', String(50), db.ForeignKey('project.id'), primary_key=True)
+    id = db.Column('id', String(50),
+                   db.ForeignKey('project.id'), primary_key=True)
     lang = db.Column('lang', String(2), primary_key=True)
     # name = db.Column('name', String(100))
     subtitle = db.Column('subtitle', Text)
@@ -31,7 +34,8 @@ class ProjectLang(AbstractLang, db.Model):
     Project = relationship('Project', back_populates='Translations')
 
     def __repr__(self):
-        return '<ProjectLang %s(%s): %r>' % (self.id, self.lang, self.subtitle)
+        return '<ProjectLang %s(%s): %r>' % (
+            self.id, self.lang, self.subtitle)
 
     @hybrid_property
     def description_short(self):
@@ -45,16 +49,23 @@ class Project(db.Model):
         status = 0 : Non considered or rejected
         status = 1 : EDITING, considerations:
                      - DRAFT if it has an "ugly" id
-                     - NEGOTIATION if it has a "nice" id (is coming from the status = 2). Meaning, "needs more work by the user"
-                                   if it has the "updated" date set means "still needs more work"
+                     - NEGOTIATION:
+                        if it has a "nice" id:
+                            (prior status was 2).
+                            Meaning, "needs more work by the user"
+                        if it has the "updated":
+                            date set means "still needs more work"
                      with date updated set
         status = 2 : REVIEWING (has a "nice" id), considerations:
                      - REVIEW PENDING if it doesn't have the "updated" date set
-                     - SECOND REVIEW PENDING if it has the "updated" date set (when it's coming from a second edition by the user)
-        status = 3 : Published (hast the "updated" date set) during the 2 rounds
+                     - SECOND REVIEW PENDING if it has the "updated" date set
+                        (when it's coming from a second edition by the user)
+        status = 3 : Published (hast the "updated" date set)
+                               during the 2 rounds
                      Funded if the has passed the first round
         status = 4 : Funded, after the 2 rounds only
-        status = 5 : Fulfilled, after funded an editor can decide to put this status meaning "Outstanding project"
+        status = 5 : Fulfilled, after funded an editor can decide
+                     to put this status meaning "Outstanding project"
         status = 6 : Project failed after an unsuccessful campaign
 
         """
@@ -68,17 +79,32 @@ class Project(db.Model):
     STATUS_FUNDED = 4
     STATUS_FULFILLED = 5  # 'Caso de exito'
     STATUS_UNFUNDED = 6  # proyecto fallido
-    STATUS_STR = ('rejected', 'editing', 'reviewing', 'in_campaign', 'funded', 'fulfilled', 'unfunded')
+    STATUS_STR = ('rejected',
+                  'editing',
+                  'reviewing',
+                  'in_campaign',
+                  'funded',
+                  'fulfilled',
+                  'unfunded')
 
-    RECEIVED_PROJECTS = [STATUS_REVIEWING, STATUS_IN_CAMPAIGN, STATUS_FUNDED, STATUS_FULFILLED, STATUS_UNFUNDED]
-    PUBLISHED_PROJECTS = [STATUS_IN_CAMPAIGN, STATUS_FUNDED, STATUS_FULFILLED, STATUS_UNFUNDED]
-    SUCCESSFUL_PROJECTS = [STATUS_IN_CAMPAIGN, STATUS_FUNDED, STATUS_FULFILLED]
+    RECEIVED_PROJECTS = [STATUS_REVIEWING,
+                         STATUS_IN_CAMPAIGN,
+                         STATUS_FUNDED,
+                         STATUS_FULFILLED,
+                         STATUS_UNFUNDED]
+    PUBLISHED_PROJECTS = [STATUS_IN_CAMPAIGN,
+                          STATUS_FUNDED,
+                          STATUS_FULFILLED,
+                          STATUS_UNFUNDED]
+    SUCCESSFUL_PROJECTS = [STATUS_IN_CAMPAIGN,
+                           STATUS_FUNDED,
+                           STATUS_FULFILLED]
 
     SCOPES_STR = ('', 'local', 'regional', 'national', 'global')
 
     id = db.Column('id', String(50), primary_key=True)
     user_id = db.Column('owner', String(50), db.ForeignKey('user.id'))
-    User = relationship("User", lazy='joined')  # Eager loading to allow catching
+    User = relationship("User", lazy='joined')  # Eager loading for catching
     name = db.Column('name', Text)
     subtitle = db.Column('subtitle', Text)
     description = db.Column('description', Text)
@@ -101,17 +127,18 @@ class Project(db.Model):
     scope = db.Column('scope', Integer)  #
     passed = db.Column('passed', Date)  # fecha de paso de primera ronda
     created = db.Column('created', Date)  # fecha de creacion
-    updated = db.Column('updated', Date)  # fecha de actualizacion de datos de formulario
-    # deberia haber un campo como el updated solo hasta que se publica el proyecto,
-    # luego coincidiria con el publicado
-    published = db.Column('published', Date)  # fecha de publicacion de proyecto
+    # fecha de actualizacion de datos de formulario
+    updated = db.Column('updated', Date)
+    # fecha de publicacion de proyecto
+    published = db.Column('published', Date)
     closed = db.Column('closed', Date)  # fecha de cierre de proyecto
     success = db.Column('success', Date)  # fecha de éxito de proyecto
     node_id = db.Column('node', String(50), db.ForeignKey('node.id'))
     #
-    Translations = relationship("ProjectLang",
-                                primaryjoin="and_(Project.id==ProjectLang.id, ProjectLang.pending==0)",
-                                back_populates="Project", lazy='joined')  # Eager loading to allow catching
+    Translations = relationship(
+        "ProjectLang",
+        primaryjoin="and_(Project.id==ProjectLang.id, ProjectLang.pending==0)",
+        back_populates="Project", lazy='joined')  # Eager loading for catching
 
     def __repr__(self):
         return '<Project %s: %s>' % (self.id, self.name)
@@ -290,7 +317,8 @@ class Project(db.Model):
                 if kwargs['is_anonymous'] is True:
                     filters.append(Invest.anonymous is True)
                 elif kwargs['is_anonymous'] is False:
-                    filters.append(or_(Invest.anonymous is None, Invest.anonymous is False))
+                    filters.append(or_(Invest.anonymous is None,
+                                       Invest.anonymous is False))
 
         if 'project' in kwargs and kwargs['project'] is not None:
             if isinstance(kwargs['project'], (list, tuple)):
@@ -310,9 +338,11 @@ class Project(db.Model):
 
         if 'loc_status' in kwargs and kwargs['loc_status'] is not None:
             if kwargs['loc_status'] == 'located':
-                filters.append(self.id.in_(db.session.query(ProjectLocation.id).subquery()))
+                filters.append(self.id.in_(
+                    db.session.query(ProjectLocation.id).subquery()))
             if kwargs['loc_status'] == 'unlocated':
-                filters.append(~self.id.in_(db.session.query(ProjectLocation.id).subquery()))
+                filters.append(~self.id.in_(
+                    db.session.query(ProjectLocation.id).subquery()))
 
         if 'location' in kwargs and kwargs['location'] is not None:
             subquery = ProjectLocation.location_subquery(**kwargs['location'])
@@ -355,12 +385,16 @@ class Project(db.Model):
                                     .order_by(asc(self.created)) \
                                     .offset(page * limit) \
                                     .limit(limit):
-                    ret.append(ProjectLang.get_translated_object(u._asdict(), kwargs['lang'], u.lang))
+                    ret.append(ProjectLang.get_translated_object(
+                        u._asdict(),
+                        kwargs['lang'],
+                        u.lang))
                 return ret
             # No langs, normal query
             return self.query.distinct().filter(*filters) \
                                         .order_by(asc(self.created)) \
-                                        .offset(page * limit).limit(limit).all()
+                                        .offset(page * limit) \
+                                        .limit(limit).all()
         except NoResultFound:
             return []
 
@@ -370,7 +404,8 @@ class Project(db.Model):
         """Total number of projects"""
         try:
             filters = self.get_filters(**kwargs)
-            total = db.session.query(func.count(distinct(self.id))).filter(*filters).scalar()
+            total = db.session.query(func.count(distinct(self.id))) \
+                              .filter(*filters).scalar()
             if total is None:
                 total = 0
             return total
@@ -383,7 +418,8 @@ class Project(db.Model):
         """Total amount of money (€) raised by Goteo"""
         try:
             filters = self.get_filters(**kwargs)
-            total = db.session.query(func.sum(self.amount)).filter(*filters).scalar()
+            total = db.session.query(func.sum(self.amount)) \
+                              .filter(*filters).scalar()
             if total is None:
                 total = 0
             return total
@@ -396,7 +432,8 @@ class Project(db.Model):
         """Refunded money (€) on projects """
         try:
             filters = self.get_filters(**kwargs)
-            total = db.session.query(func.sum(self.amount)).filter(*filters).scalar()
+            total = db.session.query(func.sum(self.amount)) \
+                              .filter(*filters).scalar()
             if total is None:
                 total = 0
             return total
@@ -408,16 +445,20 @@ class Project(db.Model):
     def percent_pledged(self, **kwargs):
         """Percentage of money raised over the minimum on projects """
         filters = self.get_filters(**kwargs)
-        total = db.session.query(func.avg(self.amount / self.minimum * 100)).filter(*filters).scalar()
+        total = db.session.query(func.avg(self.amount / self.minimum * 100)) \
+                          .filter(*filters).scalar()
         total = 0 if total is None else round(total, 2)
         return total
 
     @hybrid_method
     @cacher
     def average_minimum(self, **kwargs):
-        """Average minimum cost (€) for projects (NOTE: this field is not affected by the location filter)"""
+        """Average minimum cost (€) for projects
+        (NOTE: this field is not affected by the location filter)
+        """
         filters = self.get_filters(**kwargs)
-        total = db.session.query(func.avg(self.minimum)).filter(*filters).scalar()
+        total = db.session.query(func.avg(self.minimum)) \
+                          .filter(*filters).scalar()
         total = 0 if total is None else round(total, 2)
         return total
 
@@ -427,7 +468,8 @@ class Project(db.Model):
         """Average money raised (€) for projects"""
         print('AVERAGE TOTAL', kwargs)
         filters = self.get_filters(**kwargs)
-        total = db.session.query(func.avg(self.amount)).filter(*filters).scalar()
+        total = db.session.query(func.avg(self.amount)) \
+                          .filter(*filters).scalar()
         total = 0 if total is None else round(total, 2)
         return total
 
@@ -439,7 +481,8 @@ class Project(db.Model):
         filters.append(Post.publish == 1)
         sq1 = db.session.query(func.count(self.id).label('posts')) \
                         .select_from(Post) \
-                        .join(Blog, and_(Blog.id == Post.blog_id, Blog.type == 'project')) \
+                        .join(Blog, and_(Blog.id == Post.blog_id,
+                                         Blog.type == 'project')) \
                         .join(self, self.id == Blog.user_id) \
                         .filter(*filters).group_by(Post.blog_id) \
                         .subquery()
@@ -471,7 +514,8 @@ class Project(db.Model):
             for l in kwargs['lang']:
                 alias = aliased(ProjectLang)
                 cols.append(alias.subtitle.label('subtitle_' + l))
-                joins.append((alias, and_(alias.id == self.id, alias.lang == l)))
+                joins.append((alias, and_(alias.id == self.id,
+                                          alias.lang == l)))
             query = db.session.query(*cols).outerjoin(*joins)
         else:
             query = db.session.query(*cols)
@@ -495,7 +539,9 @@ class Project(db.Model):
     @hybrid_method
     @cacher
     def donated_list(self, **kwargs):
-        """Get a list of projects with more donations (by individual contributions)"""
+        """Get a list of projects with more donations
+        (by individual contributions)
+        """
 
         from ..invests.models import Invest
 
@@ -518,7 +564,8 @@ class Project(db.Model):
             for l in kwargs['lang']:
                 alias = aliased(ProjectLang)
                 cols.append(alias.subtitle.label('subtitle_' + l))
-                joins.append((alias, and_(alias.id == self.id, alias.lang == l)))
+                joins.append((alias, and_(alias.id == self.id,
+                                          alias.lang == l)))
             query = db.session.query(*cols).outerjoin(*joins)
         else:
             query = db.session.query(*cols)
@@ -526,7 +573,9 @@ class Project(db.Model):
         ret = []
         for u in query.join(Invest) \
                       .filter(*filters).group_by(Invest.project_id) \
-                      .order_by(desc('total')).offset(page * limit).limit(limit):
+                      .order_by(desc('total')) \
+                      .offset(page * limit) \
+                      .limit(limit):
             u = u._asdict()
             if 'lang' in kwargs and kwargs['lang'] is not None:
                 u['subtitle'] = get_lang(u, 'subtitle', kwargs['lang'])
@@ -563,7 +612,8 @@ class Project(db.Model):
             for l in kwargs['lang']:
                 alias = aliased(ProjectLang)
                 cols.append(alias.subtitle.label('subtitle_' + l))
-                joins.append((alias, and_(alias.id == self.id, alias.lang == l)))
+                joins.append((alias, and_(alias.id == self.id,
+                                          alias.lang == l)))
             query = db.session.query(*cols).outerjoin(*joins)
         else:
             query = db.session.query(*cols)
@@ -571,7 +621,9 @@ class Project(db.Model):
         ret = []
         for u in query.join(Invest) \
                       .filter(*filters).group_by(Invest.project_id) \
-                      .order_by(desc('amount')).offset(page * limit).limit(limit):
+                      .order_by(desc('amount')) \
+                      .offset(page * limit) \
+                      .limit(limit):
             u = u._asdict()
             if 'lang' in kwargs and kwargs['lang'] is not None:
                 u['subtitle'] = get_lang(u, 'subtitle', kwargs['lang'])
@@ -586,8 +638,10 @@ class Project(db.Model):
 class ProjectCategory(db.Model):
     __tablename__ = 'project_category'
 
-    project_id = db.Column('project', String(50), db.ForeignKey('project.id'), primary_key=True)
-    category_id = db.Column('category', Integer, db.ForeignKey('category.id'), primary_key=True)
+    project_id = db.Column('project', String(50),
+                           db.ForeignKey('project.id'), primary_key=True)
+    category_id = db.Column('category', Integer,
+                            db.ForeignKey('category.id'), primary_key=True)
 
     def __repr__(self):
         return '<ProjectCategory %s-%s>' % (self.project_id, self.category_id)
@@ -596,7 +650,8 @@ class ProjectCategory(db.Model):
 class ProjectImage(db.Model):
     __tablename__ = 'project_image'
 
-    project_id = db.Column('project', String(50), db.ForeignKey('project.id'), primary_key=True)
+    project_id = db.Column('project', String(50),
+                           db.ForeignKey('project.id'), primary_key=True)
     image = db.Column('image', String(255), primary_key=True)
     section = db.Column('section', String(50))
     url = db.Column('url', Text)
@@ -612,7 +667,9 @@ class ProjectImage(db.Model):
         try:
             if section is None:
                 return self.query.get(id)
-            return self.query.filter(self.project_id == id, self.section == section).order_by(asc(self.order)).all()
+            return self.query \
+                .filter(self.project_id == id, self.section == section) \
+                .order_by(asc(self.order)).all()
         except:
             pass
         return []
