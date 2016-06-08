@@ -15,7 +15,8 @@ from .. import db
 class SupportLang(AbstractLang, db.Model):
     __tablename__ = 'support_lang'
 
-    id = db.Column('id', Integer, db.ForeignKey('support.id'), primary_key=True)
+    id = db.Column('id', Integer,
+                   db.ForeignKey('support.id'), primary_key=True)
     lang = db.Column('lang', String(2), primary_key=True)
     name = db.Column('support', Text)
     description = db.Column('description', Text)
@@ -35,12 +36,14 @@ class Support(db.Model):
     type = db.Column('type', String(50))
     project_id = db.Column('project', String(50), db.ForeignKey('project.id'))
     thread = db.Column('thread', Integer)
-    Translations = relationship("SupportLang",
-                                primaryjoin="and_(Support.id==SupportLang.id, SupportLang.pending==0)",
-                                back_populates="Support", lazy='joined')  # Eager loading to allow catching
+    Translations = relationship(
+        "SupportLang",
+        primaryjoin="and_(Support.id==SupportLang.id, SupportLang.pending==0)",
+        back_populates="Support", lazy='joined')  # Eager loading for catching
 
     def __repr__(self):
-        return '<Support(%d) %s of project %s>' % (self.id, self.support, self.project_id)
+        return '<Support(%d) %s of project %s>' % (
+            self.id, self.support, self.project_id)
 
     @hybrid_method
     @cacher
@@ -51,8 +54,11 @@ class Support(db.Model):
             if lang:
                 filters.append(SupportLang.id == self.id)
                 filters.append(SupportLang.lang == lang)
-                return SupportLang.query.distinct().filter(*filters).order_by(asc(self.id)).all()
+                return SupportLang.query.distinct() \
+                                  .filter(*filters) \
+                                  .order_by(asc(self.id)).all()
 
-            return self.query.distinct().filter(*filters).order_by(asc(self.id)).all()
+            return self.query.distinct() \
+                             .filter(*filters).order_by(asc(self.id)).all()
         except NoResultFound:
             return []

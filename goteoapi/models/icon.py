@@ -16,7 +16,8 @@ from .. import db
 class IconLang(db.Model):
     __tablename__ = 'icon_lang'
 
-    id = db.Column('id', String(50), db.ForeignKey('icon.id'), primary_key=True)
+    id = db.Column('id', String(50),
+                   db.ForeignKey('icon.id'), primary_key=True)
     lang = db.Column('lang', String(2), primary_key=True)
     name = db.Column('name', Text)
     description = db.Column('description', Text)
@@ -83,7 +84,8 @@ class Icon(db.Model):
         """Total number of icons"""
         try:
             filters = list(self.get_filters(**kwargs))
-            total = db.session.query(func.count(distinct(self.id))).filter(*filters).scalar()
+            total = db.session.query(func.count(distinct(self.id))) \
+                              .filter(*filters).scalar()
             if total is None:
                 total = 0
             return total
@@ -114,7 +116,8 @@ class Icon(db.Model):
                 alias = aliased(IconLang)
                 cols.append(alias.name.label('name_' + l))
                 cols.append(alias.description.label('description_' + l))
-                joins.append((alias, and_(alias.id == self.id, alias.lang == l)))
+                joins.append((alias, and_(alias.id == self.id,
+                                          alias.lang == l)))
             query = db.session.query(*cols).outerjoin(*joins)
         else:
             query = db.session.query(*cols)

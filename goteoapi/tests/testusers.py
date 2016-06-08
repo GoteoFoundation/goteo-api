@@ -44,11 +44,7 @@ FILTERS = [
     'node=goteo&lang=en&lang=ca',
     'from_date=' + from_date,
     'to_date=' + to_date,
-    'from_date=' + from_date + '&to_date=' + to_date,
-    # 'location=41.38879,2.15899,50',
-    # 'location=41.38879,2.15899,50&from_date=' + from_date,
-    # 'location=41.38879,2.15899,50&to_date=' + to_date,
-    # 'location=41.38879,2.15899,50&from_date=' + from_date + '&to_date=' + to_date
+    'from_date=' + from_date + '&to_date=' + to_date
 ]
 
 
@@ -63,7 +59,8 @@ def test_users():
         if 'time-elapsed' in resp:
             del resp['time-elapsed']
 
-        eq_(len(set(map(lambda x: str(x), resp.keys())) - set(fields.keys())) >= 0, True)
+        eq_(len(set(map(lambda x: str(x), resp.keys()))
+                - set(fields.keys())) >= 0, True)
         eq_(rv.status_code, 200)
         # Swagger test
         eq_(set(resp['items'][0].keys()), set(fields_swagger.keys()))
@@ -94,8 +91,9 @@ def test_user_trailing_slash():
     eq_(rv.status_code, 301)
     assert 'text/html' in rv.headers['Content-Type']
     assert 'location' in rv.headers, "%r not in %r" % ('location', rv.headers)
-    assert '/users/owner-project-passing' in rv.headers['Location'], "%r not in %r" % (
-        '/users/owner-project-passing', rv.headers['Location'])
+    assert ('/users/owner-project-passing' in rv.headers['Location'],
+            "%r not in %r" % ('/users/owner-project-passing',
+                              rv.headers['Location']))
 
 
 def test_user():
@@ -109,7 +107,8 @@ def test_user():
     if 'time-elapsed' in resp:
         del resp['time-elapsed']
 
-    eq_(len(set(map(lambda x: str(x), resp.keys())) - set(fields.keys())) >= 0, True)
+    eq_(len(set(map(lambda x: str(x), resp.keys()))
+            - set(fields.keys())) >= 0, True)
     eq_(rv.status_code, 200)
     # Swagger test
     fields = get_swagger(DIR + 'swagger_specs/user_item.yml', 'UserFull')

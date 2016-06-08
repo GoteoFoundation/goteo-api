@@ -25,7 +25,9 @@ class RewardLang(AbstractLang, db.Model):
     description = db.Column('description', Text)
     other = db.Column('other', String(255))
     pending = db.Column('pending', Integer)
-    Reward = relationship('Reward', back_populates='Translations', lazy='joined')  # Eager loading to allow catching
+    Reward = relationship('Reward',
+                          back_populates='Translations',
+                          lazy='joined')  # Eager loading to allow catching
 
     def __repr__(self):
         return '<RewardLang %s(%s): %r>' % (self.id, self.lang, self.name)
@@ -68,14 +70,18 @@ class Reward(db.Model):
     icon_id = db.Column('icon', String(50), db.ForeignKey('icon.id'))
     license_id = db.Column('license', String(50), db.ForeignKey('license.id'))
     order = db.Column('order', Integer)
-    License = relationship("License", lazy="joined")  # Eager loading to allow catching
-    Icon = relationship("Icon", lazy="joined")  # Eager loading to allow catching
-    Translations = relationship("RewardLang",
-                                primaryjoin="and_(Reward.id==RewardLang.id, RewardLang.pending==0)",
-                                back_populates="Reward", lazy='joined')  # Eager loading to allow catching
+    License = relationship("License",
+                           lazy="joined")  # Eager loading to allow catching
+    Icon = relationship("Icon",
+                        lazy="joined")  # Eager loading to allow catching
+    Translations = relationship(
+        "RewardLang",
+        primaryjoin="and_(Reward.id==RewardLang.id, RewardLang.pending==0)",
+        back_populates="Reward", lazy='joined')  # Eager loading for catching
 
     def __repr__(self):
-        return '<Reward(%d) %s[%s]: %s>' % (self.id, self.project_id, self.type, self.name)
+        return '<Reward(%d) %s[%s]: %s>' % (
+            self.id, self.project_id, self.type, self.name)
 
     @hybrid_property
     def icon_url(self):
@@ -107,8 +113,10 @@ class Reward(db.Model):
         from ..location.models import ProjectLocation
 
         filters = []
+        prj_filters = (
+            'node', 'from_date', 'to_date', 'project', 'category', 'location')
         # Join project table if filters
-        for i in ('node', 'from_date', 'to_date', 'project', 'category', 'location'):
+        for i in prj_filters:
             if i in kwargs and kwargs[i] is not None:
                 filters.append(Project.id == self.project_id)
                 filters.append(Project.status.in_(Project.PUBLISHED_PROJECTS))
@@ -144,7 +152,10 @@ class Reward(db.Model):
             limit = kwargs['limit'] if 'limit' in kwargs else 10
             page = kwargs['page'] if 'page' in kwargs else 0
             filters = self.get_filters(**kwargs)
-            return self.query.distinct().filter(*filters).order_by(asc(self.order), asc(self.amount)).offset(page * limit).limit(limit).all()
+            return self.query.distinct() \
+                       .filter(*filters) \
+                       .order_by(asc(self.order), asc(self.amount)) \
+                       .offset(page * limit).limit(limit).all()
         except NoResultFound:
             return []
 
@@ -157,8 +168,13 @@ class Reward(db.Model):
             if lang:
                 filters.append(RewardLang.id == self.id)
                 filters.append(RewardLang.lang == lang)
-                return RewardLang.query.distinct().filter(*filters).order_by(asc(self.order), asc(self.amount)).all()
-            return self.query.distinct().filter(*filters).order_by(asc(self.order), asc(self.amount)).all()
+                return RewardLang.query.distinct() \
+                                 .filter(*filters) \
+                                 .order_by(asc(self.order), asc(self.amount)) \
+                                 .all()
+            return self.query.distinct() \
+                       .filter(*filters) \
+                       .order_by(asc(self.order), asc(self.amount)).all()
         except NoResultFound:
             return []
 
@@ -168,7 +184,8 @@ class Reward(db.Model):
         """Total number of rewards"""
         try:
             filters = list(self.get_filters(**kwargs))
-            total = db.session.query(func.count(distinct(self.id))).filter(*filters).scalar()
+            total = db.session.query(func.count(distinct(self.id))) \
+                      .filter(*filters).scalar()
             if total is None:
                 total = 0
             return total

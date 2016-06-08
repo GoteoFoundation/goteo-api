@@ -10,7 +10,8 @@ from nose.tools import *
 from datetime import date, timedelta
 import os
 from . import app, test_app, get_json, get_swagger
-from ..projects.resources import project_resource_fields, project_full_resource_fields
+from ..projects.resources import project_resource_fields
+from ..projects.resources import project_full_resource_fields
 from ..cacher import cache
 
 old_redis_url = app.config['REDIS_URL']
@@ -52,7 +53,8 @@ FILTERS = [
     'location=41.38879,2.15899,50',
     'location=41.38879,2.15899,50&from_date=' + from_date,
     'location=41.38879,2.15899,50&to_date=' + to_date,
-    'location=41.38879,2.15899,50&from_date=' + from_date + '&to_date=' + to_date
+    'location=41.38879,2.15899,50&from_date=' + from_date
+                                              + '&to_date=' + to_date
 ]
 
 
@@ -68,7 +70,8 @@ def test_projects():
         if 'time-elapsed' in resp:
             del resp['time-elapsed']
 
-        eq_(len(set(map(lambda x: str(x), resp.keys())) - set(fields.keys())) >= 0, True)
+        eq_(len(set(map(lambda x: str(x), resp.keys()))
+                - set(fields.keys())) >= 0, True)
         eq_(len(resp['items']) >= 1, True)
         eq_(rv.status_code, 200)
         # Swagger test
@@ -100,8 +103,9 @@ def test_project_trailing_slash():
     eq_(rv.status_code, 301)
     assert 'text/html' in rv.headers['Content-Type']
     assert 'location' in rv.headers, "%r not in %r" % ('location', rv.headers)
-    assert '/projects/test-project' in rv.headers['Location'], "%r not in %r" % (
-        '/projects/test-project', rv.headers['Location'])
+    assert ('/projects/test-project' in rv.headers['Location'],
+            "%r not in %r" % ('/projects/test-project',
+                              rv.headers['Location']))
 
 
 def test_project():
@@ -116,7 +120,8 @@ def test_project():
     if 'time-elapsed' in resp:
         del resp['time-elapsed']
 
-    eq_(len(set(map(lambda x: str(x), resp.keys())) - set(fields.keys())) >= 0, True)
+    eq_(len(set(map(lambda x: str(x), resp.keys()))
+            - set(fields.keys())) >= 0, True)
     # Swagger test
     fields = get_swagger(DIR + 'swagger_specs/project_item.yml', 'ProjectFull')
     eq_(set(resp.keys()), set(fields.keys()))
@@ -145,7 +150,8 @@ def test_call_projects():
     if 'time-elapsed' in resp:
         del resp['time-elapsed']
 
-    eq_(len(set(map(lambda x: str(x), resp.keys())) - set(fields.keys())) >= 0, True)
+    eq_(len(set(map(lambda x: str(x), resp.keys()))
+            - set(fields.keys())) >= 0, True)
 
     # Swagger test
     fields_swagger = get_swagger(

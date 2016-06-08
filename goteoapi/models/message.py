@@ -22,7 +22,8 @@ class Message(db.Model):
     # message = db.Column('message', Text)
 
     def __repr__(self):
-        return '<Message(%d) from %s to project %s>' % (self.id, self.user_id, self.project_id)
+        return '<Message(%d) from %s to project %s>' % (
+            self.id, self.user_id, self.project_id)
 
     # Getting filters for this model
     @hybrid_method
@@ -71,8 +72,12 @@ class Message(db.Model):
         # Exclude threads initiated by owners
         filters.append(self.thread is not None)
         try:
-            return db.session.query(self.user_id, User.name, User.id, User.avatar,
-                                    func.count(self.id).label('interactions')) \
+            return db.session.query(self.user_id,
+                                    User.name,
+                                    User.id,
+                                    User.avatar,
+                                    func.count(self.id)
+                                        .label('interactions')) \
                              .filter(*filters).group_by(self.user_id) \
                              .order_by(desc('interactions')) \
                              .offset(page * limit).limit(limit).all()
@@ -84,7 +89,8 @@ class Message(db.Model):
     def collaborators_total(self, **kwargs):
         """Total number of collaborators"""
         filters = list(self.get_filters(**kwargs))
-        res = db.session.query(func.count(func.distinct(self.user_id))).filter(*filters).scalar()
+        res = db.session.query(func.count(func.distinct(self.user_id))) \
+                        .filter(*filters).scalar()
         if res is None:
             res = 0
         return res
@@ -94,7 +100,8 @@ class Message(db.Model):
     def projects_total(self, **kwargs):
         """Total number of projects"""
         filters = list(self.get_filters(**kwargs))
-        res = db.session.query(func.count(func.distinct(self.project_id))).filter(*filters).scalar()
+        res = db.session.query(func.count(func.distinct(self.project_id))) \
+                        .filter(*filters).scalar()
         if res is None:
             res = 0
         return res
@@ -102,21 +109,19 @@ class Message(db.Model):
     @hybrid_method
     @cacher
     def collaborators_creators_total(self, **kwargs):
-        """Total number of collaborators who are also creators of some projects"""
+        """Total number of collaborators
+        who are also creators in other projects
+        """
         filters = list(self.get_filters(**kwargs))
-        sq_blocked = db.session.query(self.id).filter(self.blocked == 1).subquery()
+        sq_blocked = db.session.query(self.id).filter(self.blocked == 1) \
+                               .subquery()
         filters.append(self.thread > 0)
         filters.append(self.thread.in_(sq_blocked))
         filters.append(self.project_id != Project.id)
         res = db.session.query(func.count(func.distinct(self.user_id))) \
-                        .join(Project, and_(Project.user_id == self.user_id,
-                              Project.status.in_([
-                                Project.STATUS_FUNDED,
-                                Project.STATUS_FULFILLED,
-                                Project.STATUS_IN_CAMPAIGN,
-                                Project.STATUS_UNFUNDED
-                                ])
-                              )) \
+                        .join(Project, and_(
+                            Project.user_id == self.user_id,
+                            Project.status.in_(Project.PUBLISHED_PROJECTS))) \
                         .filter(*filters) \
                         .scalar()
         if res is None:
@@ -130,7 +135,8 @@ class Message(db.Model):
         filters = list(self.get_filters(**kwargs))
         filters.append(Project.status.in_([Project.STATUS_FUNDED,
                                            Project.STATUS_FULFILLED]))
-        sq = db.session.query(func.count(func.distinct(self.user_id)).label("co")) \
+        sq = db.session.query(func.count(func.distinct(self.user_id))
+                                  .label("co")) \
                        .join(Project, self.project_id == Project.id) \
                        .filter(*filters) \
                        .group_by(self.project_id) \

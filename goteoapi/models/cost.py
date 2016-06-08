@@ -39,12 +39,14 @@ class Cost(db.Model):
     required = db.Column('required', Boolean)
     from_date = db.Column('from', Date)
     to_date = db.Column('until', Date)
-    Translations = relationship("CostLang",
-                                primaryjoin="and_(Cost.id==CostLang.id, CostLang.pending==0)",
-                                back_populates="Cost", lazy='joined')  # Eager loading to allow catching
+    Translations = relationship(
+        "CostLang",
+        primaryjoin="and_(Cost.id==CostLang.id, CostLang.pending==0)",
+        back_populates="Cost", lazy='joined')  # Eager loading for catching
 
     def __repr__(self):
-        return '<Cost(%d) %s of project %s>' % (self.id, self.cost[:50], self.project_id)
+        return '<Cost(%d) %s of project %s>' % (
+            self.id, self.cost[:50], self.project_id)
 
     @hybrid_property
     def date_from(self):
@@ -63,7 +65,10 @@ class Cost(db.Model):
             if lang:
                 filters.append(CostLang.id == self.id)
                 filters.append(CostLang.lang == lang)
-                return CostLang.query.distinct().filter(*filters).order_by(asc(self.from_date)).all()
-            return self.query.distinct().filter(*filters).order_by(asc(self.from_date)).all()
+                return CostLang.query.distinct() \
+                               .filter(*filters)  \
+                               .order_by(asc(self.from_date)).all()
+            return self.query.distinct() \
+                       .filter(*filters).order_by(asc(self.from_date)).all()
         except NoResultFound:
             return []
