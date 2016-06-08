@@ -55,6 +55,8 @@ class RewardLang(AbstractLang, db.Model):
 # Reward stuff
 class Reward(db.Model):
     __tablename__ = 'reward'
+    from .icon import Icon
+    from ..licenses.models import License
 
     id = db.Column('id', Integer, primary_key=True)
     project_id = db.Column('project', String(50), db.ForeignKey('project.id'))
