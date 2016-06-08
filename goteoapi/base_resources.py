@@ -165,9 +165,6 @@ class Response():
 class BaseItem(Resource):
     """Base class for individual enpoint reports"""
 
-    def __init__(self):
-        super().__init__()
-
     def option(self):
         pass
 
@@ -188,8 +185,6 @@ class BaseList(Resource):
         self.reqparse.add_argument('limit', type=limit_sanitizer, default=10)
         self.reqparse.add_argument('lang', type=lang_sanitizer,
                                    action='append')
-
-        super().__init__()
 
     def parse_args(self, remove=()):
         """

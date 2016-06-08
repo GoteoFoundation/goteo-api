@@ -160,7 +160,7 @@ class Date(Raw):
     Plain date format as YYYY-MM-DD (ISO 8601 or RFC822) only the date part
     """
     def __init__(self, dt_format='rfc822', **kwargs):
-        super(Date, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.dt_format = dt_format
 
     def format(self, value):
@@ -193,7 +193,7 @@ class DateTime(Raw):
     :type dt_format: str
     """
     def __init__(self, dt_format='rfc822', localtime=True, **kwargs):
-        super(DateTime, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.dt_format = dt_format
         self.localtime = localtime
 
