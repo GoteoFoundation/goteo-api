@@ -33,7 +33,7 @@ class DigestsListAPI(BaseList):
         '/reports/rewards/',
         '/categories/',
         '/licenses/'
-        ]
+    ]
 
     @requires_auth()
     @ratelimit()
@@ -43,7 +43,10 @@ class DigestsListAPI(BaseList):
         time_start = time.time()
         self.reqparse.add_argument('year', type=year_sanitizer, default=None)
         # removing not-needed standard filters
-        args = self.parse_args(remove=('from_date', 'to_date', 'limit', 'page'))
+        args = self.parse_args(remove=('from_date',
+                                       'to_date',
+                                       'limit',
+                                       'page'))
         # get the class
         if endpoint[-1] != '/':
             endpoint = endpoint + '/'
@@ -52,10 +55,13 @@ class DigestsListAPI(BaseList):
         mod = None
         try:
             for rule in app.url_map.iter_rules():
-                if rule.rule in self.AVAILABLE_ENDPOINTS and rule.rule == endpoint:
+                if rule.rule in self.AVAILABLE_ENDPOINTS \
+                   and rule.rule == endpoint:
                     # Find the Class
-                    pack = app.view_functions[rule.endpoint].__dict__['view_class'].__module__
-                    clas = app.view_functions[rule.endpoint].__dict__['view_class'].__name__
+                    pack = app.view_functions[rule.endpoint] \
+                              .__dict__['view_class'].__module__
+                    clas = app.view_functions[rule.endpoint] \
+                              .__dict__['view_class'].__name__
                     parts = pack.split('.')
                     parts.append(clas)
                     mod = __import__(parts[0])
@@ -66,8 +72,11 @@ class DigestsListAPI(BaseList):
             instance = mod()
         except Exception as e:
             if app.debug:
-                return bad_request('Endpoint error. Try some allowed endpoint to digest. {0}'.format(str(e)))
-            return bad_request('Endpoint error. Try some allowed endpoint to digest.')
+                return bad_request("Endpoint error. "
+                                   "Try some allowed endpoint to digest. {0}"
+                                   .format(str(e)))
+            return bad_request("Endpoint error. "
+                               "Try some allowed endpoint to digest.")
 
         buckets = {}
         try:
@@ -77,18 +86,23 @@ class DigestsListAPI(BaseList):
                 del args['year']
                 # digest by months in the specified year
                 # Assign date filters
-                [args['from_date'], args['to_date']] = map(lambda d: d.isoformat(), self.max_min(year))
+                [args['from_date'], args['to_date']] = map(
+                    lambda d: d.isoformat(), self.max_min(year))
                 for month in range(1, 13):
                     maxmin = self.max_min(year, month)
                     if maxmin[0] < maxmin[1]:
-                        buckets[format(month, '02')] = map(lambda d: d.isoformat(), maxmin)
+                        buckets[format(month, '02')] = map(
+                            lambda d: d.isoformat(), maxmin)
             else:
                 # digest by years
-                for year in range(app.config['INITIAL_YEAR'], dtdate.today().year + 1):
-                    buckets[year] = map(lambda d: d.isoformat(), self.max_min(year))
+                for year in range(app.config['INITIAL_YEAR'],
+                                  dtdate.today().year + 1):
+                    buckets[year] = map(
+                        lambda d: d.isoformat(), self.max_min(year))
 
             # parse the args in the instance
-            instance.parse_args = (lambda **a: self.dummy_parse_args(args, **a))
+            instance.parse_args = (lambda **a: self.dummy_parse_args(args,
+                                                                     **a))
             # data for global dates
             global_ = instance._get().response(False)
             # cleaning response
@@ -113,7 +127,9 @@ class DigestsListAPI(BaseList):
 
         res = Response(
             starttime=time_start,
-            attributes={'global': global_, 'buckets': buckets, 'endpoint': endpoint},
+            attributes={'global': global_,
+                        'buckets': buckets,
+                        'endpoint': endpoint},
             filters=args.items()
         )
 
@@ -135,8 +151,12 @@ class DigestsListAPI(BaseList):
             start_month = 1
             month = 12
 
-        d_min = dtdate(int(year), int(start_month), 1)
-        d_max = dtdate(int(year), int(month), calendar.monthrange(int(year), int(month))[1])
+        d_min = dtdate(int(year),
+                       int(start_month), 1)
+        d_max = dtdate(int(year),
+                       int(month),
+                       calendar.monthrange(int(year),
+                       int(month))[1])
 
         d_min = dtdate.today() if d_min > dtdate.today() else d_min
         d_max = dtdate.today() if d_max > dtdate.today() else d_max

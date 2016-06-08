@@ -15,7 +15,8 @@ from flask.ext.script import Manager
 from termcolor import colored, cprint
 from crontab import CronTab
 from goteoapi import app
-from goteoapi.cacher import cache, get_key_list, renew_key_list, get_key_functions
+from goteoapi.cacher import cache, get_key_list
+from goteoapi.cacher import renew_key_list, get_key_functions
 
 manager = Manager(app)
 
@@ -35,20 +36,27 @@ def renewcache(execute=False, force=False):
     key_list = get_key_functions(get_key_list(), force)
     if key_list:
         for key, clas, f, args, kargs in key_list:
-            print("{0} {1} {2} {3} {4} {5}".format(colored('FUNCTION', 'green'), f.__name__, colored('WITH ARGS', 'green'), args, colored('KARGS', 'green'), kargs))
+            print("{0} {1} {2} {3} {4} {5}".format(
+                colored('FUNCTION', 'green'),
+                f.__name__, colored('WITH ARGS', 'green'),
+                args,
+                colored('KARGS', 'green'), kargs))
             if execute:
                 cprint("EXECUTING {0}".format(f), 'yellow')
                 try:
                     renew_key_list(key)
                     f(*args, **kargs)
                 except Exception as e:
-                    cprint("EXCEPTION {0} EXECUTING {1}".format(str(e), f), 'red')
+                    cprint("EXCEPTION {0} EXECUTING {1}".format(str(e), f),
+                           'red')
         if not execute:
-            cprint("Run with option --execute (-e) to actually renew the cache", 'red')
+            cprint("Run with option --execute (-e) to renew the cache",
+                   'red')
     else:
         cprint("No keys to be renewed", 'red')
     if not force:
-        cprint("Run with option --force (-f) to force renew of non close-to-expire keys", 'yellow')
+        cprint("Run with option --force (-f) in order to force"
+               " the renew of still active keys", 'yellow')
 
 
 @manager.command
@@ -59,7 +67,8 @@ def crontab(install=False, remove=False):
     elif remove:
         cprint('Installing crontab', 'yellow')
     else:
-        cprint('Please specifiy --install (-i) or --remove (-r) argument', 'red')
+        cprint('Please specifiy --install (-i) or --remove (-r) argument',
+               'red')
 
     command = os.getcwd() + '/console'
     cron = CronTab(user=True)
@@ -71,7 +80,9 @@ def crontab(install=False, remove=False):
             cron.remove(job)
         # Install job
         if install:
-            job = cron.new(command + ' renewcache --execute > ' + os.getcwd() + '/crontab.log 2>&1')
+            job = cron.new(command + ' renewcache --execute > '
+                           + os.getcwd()
+                           + '/crontab.log 2>&1')
         cron.write()
 
     print("{0}\n{1}".format(colored('CURRENT CRONTAB:', 'green'), cron))

@@ -6,4 +6,6 @@ from goteoapi import api
 
 from .resources import DigestsListAPI
 
-api.add_resource(DigestsListAPI, '/digests/<path:endpoint>', endpoint='api_digests')
+api.add_resource(DigestsListAPI,
+                 '/digests/<path:endpoint>',
+                 endpoint='api_digests')
