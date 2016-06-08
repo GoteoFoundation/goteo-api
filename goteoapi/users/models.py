@@ -25,7 +25,8 @@ from .. import db
 class UserLang(AbstractLang, db.Model):
     __tablename__ = 'user_lang'
 
-    id = db.Column('id', String(50), db.ForeignKey('user.id'), primary_key=True)
+    id = db.Column('id', String(50),
+                   db.ForeignKey('user.id'), primary_key=True)
     lang = db.Column('lang', String(2), primary_key=True)
     name = db.Column('name', String(100))
     User = relationship('User', back_populates='Translations')
@@ -51,7 +52,8 @@ class User(db.Model):
     updated = db.Column('modified', Date)
     lang = config.DEFAULT_DB_LANG
     Translations = relationship("UserLang",
-                                back_populates="User", lazy='joined')  # Eager loading to allow catching
+                                back_populates="User",
+                                lazy='joined')  # Eager loading for catching
 
     def __repr__(self):
         return '<User %s: %r>' % (self.id, self.name)
@@ -114,7 +116,9 @@ class User(db.Model):
 
         sha = sha1(password.encode('utf-8'))
         try:
-            (ok, update) = self.get_context().verify_and_update(sha.hexdigest(), self.password_hash)
+            (ok, update) = self.get_context() \
+                               .verify_and_update(sha.hexdigest(),
+                                                  self.password_hash)
         except ValueError:
             print('old ' + self.password_hash)
             # Old plain SHA-1 database stored password
@@ -152,14 +156,19 @@ class User(db.Model):
         if 'project' in kwargs and kwargs['project'] is not None:
             # TODO: solo usuarios que cuyo pago ha si "exitoso"
             # adding users "invested in"
-            sub_invest = db.session.query(Invest.user_id).filter(Invest.project_id.in_(kwargs['project']),
-                                                                 Invest.status.in_(Invest.VALID_INVESTS))
+            sub_invest = db.session.query(Invest.user_id).filter(
+                Invest.project_id.in_(kwargs['project']),
+                Invest.status.in_(Invest.VALID_INVESTS))
             # adding users "collaborated in"
-            sub_message = db.session.query(Message.user_id).filter(Message.project_id.in_(kwargs['project']))
-            filters.append(or_(self.id.in_(sub_invest), self.id.in_(sub_message)))
+            sub_message = db.session.query(Message.user_id) \
+                            .filter(Message.project_id.in_(kwargs['project']))
+            filters.append(or_(self.id.in_(sub_invest),
+                               self.id.in_(sub_message)))
         # filter by user interests
         if 'category' in kwargs and kwargs['category'] is not None:
-            sub_interest = db.session.query(UserInterest.user_id).filter(UserInterest.category_id.in_(kwargs['category']))
+            sub_interest = db.session.query(UserInterest.user_id) \
+                             .filter(UserInterest.category_id
+                                                 .in_(kwargs['category']))
             filters.append(self.id.in_(sub_interest))
         # Filter by location
         if 'location' in kwargs and kwargs['location'] is not None:
@@ -196,13 +205,16 @@ class User(db.Model):
                 for u in UserLang.get_query(kwargs['lang']) \
                                  .filter(*filters).order_by(asc(self.id)) \
                                  .offset(page * limit).limit(limit):
-                    ret.append(UserLang.get_translated_object(u._asdict(), kwargs['lang']))
+                    ret.append(UserLang.get_translated_object(u._asdict(),
+                                                              kwargs['lang']))
                 return ret
 
             # No langs, normal query
             return self.query.distinct().filter(*filters) \
                                         .order_by(asc(self.id)) \
-                                        .offset(page * limit).limit(limit).all()
+                                        .offset(page * limit) \
+                                        .limit(limit) \
+                                        .all()
         except NoResultFound:
             return []
 
@@ -212,7 +224,8 @@ class User(db.Model):
         """Returns the total number of valid users"""
         try:
             filters = list(self.get_filters(**kwargs))
-            count = db.session.query(func.count(distinct(self.id))).filter(*filters).scalar()
+            count = db.session.query(func.count(distinct(self.id))) \
+                      .filter(*filters).scalar()
             if count is None:
                 count = 0
             return count
@@ -231,23 +244,26 @@ class User(db.Model):
             filters.append(Invest.status.in_(Invest.VALID_INVESTS))
             filters.append(Invest.user_id == self.id)
             filters.append(Invest.project_id == project_id)
-            # return self.query.distinct().filter(*filters).order_by(asc(self.id)).offset(page * limit).limit(limit).all()
+            # return self.query.distinct() \
+            # .filter(*filters) \
+            # .order_by(asc(self.id)) \
+            # .offset(page * limit).limit(limit).all()
             return [d._asdict() for d in db.session.query(
-                        Invest.anonymous,
-                        self.id,
-                        self.name,
-                        self.avatar,
-                        self.active,
-                        self.hide,
-                        self.node_id,
-                        self.created,
-                        self.updated)
-                    .filter(*filters) \
-                    # .order_by(asc(self.id)) \
-                    .group_by(self.id) \
-                    .offset(page * limit) \
-                    .limit(limit)
-                    ]
+                Invest.anonymous,
+                self.id,
+                self.name,
+                self.avatar,
+                self.active,
+                self.hide,
+                self.node_id,
+                self.created,
+                self.updated)
+                .filter(*filters) \
+                # .order_by(asc(self.id)) \
+                .group_by(self.id) \
+                .offset(page * limit) \
+                .limit(limit)
+            ]
         except NoResultFound:
             return []
 
@@ -261,7 +277,8 @@ class User(db.Model):
             filters.append(Invest.status.in_(Invest.VALID_INVESTS))
             filters.append(Invest.user_id == self.id)
             filters.append(Invest.project_id == project_id)
-            count = db.session.query(func.count(distinct(self.id))).filter(*filters).scalar()
+            count = db.session.query(func.count(distinct(self.id))) \
+                      .filter(*filters).scalar()
             if count is None:
                 count = 0
             return count
@@ -273,7 +290,8 @@ class User(db.Model):
 class UserRole(db.Model):
     __tablename__ = 'user_role'
 
-    user_id = db.Column('user_id', String(50), db.ForeignKey('user.id'), primary_key=True)
+    user_id = db.Column('user_id', String(50),
+                        db.ForeignKey('user.id'), primary_key=True)
     role_id = db.Column('role_id', String(50), primary_key=True)
     node_id = db.Column('node_id', String(50), db.ForeignKey('node.id'))
 
@@ -285,23 +303,28 @@ class UserRole(db.Model):
 class UserApi(db.Model):
     __tablename__ = 'user_api'
 
-    user_id = db.Column('user_id', String(50), db.ForeignKey('user.id'), primary_key=True)
+    user_id = db.Column('user_id', String(50),
+                        db.ForeignKey('user.id'), primary_key=True)
     key = db.Column('key', String(50))
     expiration_date = db.Column('expiration_date', DateTime)
 
     def __repr__(self):
-        return '<UserApi: %s %s (%s)>' % (self.user_id, self.key, self.expiration_date)
+        return '<UserApi: %s %s (%s)>' % (
+            self.user_id, self.key, self.expiration_date)
 
 
 # User interest
 class UserInterest(db.Model):
     __tablename__ = 'user_interest'
 
-    user_id = db.Column('user', String(50), db.ForeignKey('user.id'), primary_key=True)
-    category_id = db.Column('interest', Integer, db.ForeignKey('category.id'), primary_key=True)
+    user_id = db.Column('user', String(50),
+                        db.ForeignKey('user.id'), primary_key=True)
+    category_id = db.Column('interest', Integer,
+                            db.ForeignKey('category.id'), primary_key=True)
 
     def __repr__(self):
-        return '<UserInterest from %s to category %s>' % (self.user_id, self.category_id)
+        return '<UserInterest from %s to category %s>' % (
+            self.user_id, self.category_id)
 
     # Getting filters for this model
     @hybrid_method
@@ -337,7 +360,9 @@ class UserInterest(db.Model):
     @cacher
     def categories(self, **kwargs):
         # In case of requiring languages, a LEFT JOIN must be generated
-        cols = [func.count(self.user_id).label('total'), Category.id, Category.name]
+        cols = [func.count(self.user_id).label('total'),
+                Category.id,
+                Category.name]
         filters = list(self.get_filters(**kwargs))
         # In case of requiring languages, a LEFT JOIN must be generated
         if 'lang' in kwargs and kwargs['lang'] is not None:
@@ -345,10 +370,14 @@ class UserInterest(db.Model):
             for l in kwargs['lang']:
                 alias = aliased(CategoryLang)
                 cols.append(alias.name.label('name_' + l))
-                joins.append((alias, and_(alias.id == Category.id, alias.lang == l)))
-            query = db.session.query(*cols).join(Category, Category.id == self.category_id).outerjoin(*joins)
+                joins.append((alias, and_(alias.id == Category.id,
+                                          alias.lang == l)))
+            query = db.session.query(*cols) \
+                      .join(Category, Category.id == self.category_id) \
+                      .outerjoin(*joins)
         else:
-            query = db.session.query(*cols).join(Category, Category.id == self.category_id)
+            query = db.session.query(*cols) \
+                      .join(Category, Category.id == self.category_id)
         ret = []
 
         for u in query.filter(*filters).group_by(self.category_id)\

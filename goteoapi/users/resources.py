@@ -63,7 +63,10 @@ class UsersListAPI(BaseList):
                 if location:
                     item['latitude'] = location.latitude
                     item['longitude'] = location.longitude
-                    item['region'] = location.region if location.region != '' else location.country
+                    if location.region:
+                        item['region'] = location.region
+                    else:
+                        item['region'] = location.country
 
             items.append(item)
 
@@ -117,10 +120,16 @@ class UserAPI(BaseItem):
                 if location:
                     item['latitude'] = location.latitude
                     item['longitude'] = location.longitude
-                    item['region'] = location.region if location.region != '' else location.country
+                    if location.region:
+                        item['region'] = location.region
+                    else:
+                        item['region'] = location.country
 
             translations = {}
-            translate_keys = {k: v for k, v in user_full_resource_fields.items() if k in UserLang.get_translate_keys()}
+            translate_keys = {
+                k: v for k, v in user_full_resource_fields.items()
+                if k in UserLang.get_translate_keys()
+            }
             for k in u.Translations:
                 translations[k.lang] = marshal(k, translate_keys)
             item['translations'] = translations
