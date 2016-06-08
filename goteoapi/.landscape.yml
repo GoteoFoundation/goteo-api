@@ -1,0 +1,8 @@
+uses:
+    - flask
+autodetect: yes
+requirements:
+    - requirements.txt
+    - goteoapi_cli/requirements.txt
+python-targets:
+    - 3
