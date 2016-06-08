@@ -14,7 +14,9 @@ def inject_addtional_headers(resp):
     origin = request.headers.get('Origin', '*')
     # Check system user bind to CORS response
     auth = request.authorization
-    if auth and app.config['USERS'] and auth.username in app.config['USERS'] and 'password' in app.config['USERS'][auth.username]:
+    if (auth and app.config['USERS']
+       and auth.username in app.config['USERS']
+       and 'password' in app.config['USERS'][auth.username]):
         user = app.config['USERS'][auth.username]
         if user['password'] == auth.password:
             if 'cors' in user and origin not in user['cors']:
@@ -22,9 +24,10 @@ def inject_addtional_headers(resp):
     resp.headers['Access-Control-Allow-Origin'] = origin
     resp.headers['Access-Control-Allow-Credentials'] = 'true'
     resp.headers['Access-Control-Expose-Headers'] = 'Authorization'
-    # resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, HEAD, PUT, DELETE, OPTIONS'
+    # 'GET, POST, HEAD, PUT, DELETE, OPTIONS'
     resp.headers['Access-Control-Allow-Methods'] = 'GET, HEAD, OPTIONS'
-    resp.headers['Access-Control-Allow-Headers'] = request.headers.get('Access-Control-Request-Headers', 'Authorization')
+    resp.headers['Access-Control-Allow-Headers'] = request.headers.get(
+        'Access-Control-Request-Headers', 'Authorization')
     # set low for debugging
     if app.debug:
         resp.headers['Access-Control-Max-Age'] = 1
@@ -71,7 +74,8 @@ def index():
         if "GET" in rule.methods and rule.endpoint.startswith('api_'):
             func_list[rule.rule] = app.view_functions[rule.endpoint].__doc__
     return jsonify(version=app.config['VERSION'],
-                   message=app.config['DESCRIPTION'] + ' v' + str(app.config['VERSION']),
+                   message=app.config['DESCRIPTION']
+                   + ' v' + str(app.config['VERSION']),
                    endpoints=func_list,
                    links=app.config['LINKS'])
 

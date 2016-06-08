@@ -26,25 +26,32 @@ def date_sanitizer(data):
 def lang_sanitizer(data):
     d = str(data)
     if len(data) != 2:
-        raise Exception("Invalid parameter lang. 2 chars length required: (en, es, fr, pt, etc)")
+        raise Exception("Invalid parameter lang. 2 chars length "
+                        "required: (en, es, fr, pt, etc)")
     return d
 
 
 def location_sanitizer(data):
     location = data.split(",")
     if len(location) != 3:
-        raise Exception("Invalid parameter location. 3 parameters required: latitude,longitude,radius(km)")
+        raise Exception("Invalid parameter location. 3 parameters "
+                        "required: latitude,longitude,radius(km)")
 
     radius = int(location[2])
     if radius > 500 or radius < 0:
         raise Exception("Radius must be a value between 0 and 500 Km")
-    return {'latitude': location[0], 'longitude': location[1], 'radius': radius}
+    return {
+        'latitude': location[0],
+        'longitude': location[1],
+        'radius': radius
+    }
 
 
 def loc_status_sanitizer(data):
     d = str(data)
     if d not in ('located', 'unlocated'):
-        raise Exception("Invalid parameter loc_status. Must be one of 'located', 'unlocated'")
+        raise Exception("Invalid parameter loc_status. "
+                        "Must be one of 'located', 'unlocated'")
     return d
 
 
@@ -60,7 +67,9 @@ class AbstractLang():
     @classmethod
     def get_sub_class(cls):
         class_name = cls.__name__[:-4]
-        return getattr(__import__(cls.__module__, fromlist=[class_name]), class_name)
+        return getattr(__import__(cls.__module__,
+                                  fromlist=[class_name]),
+                       class_name)
 
     @classmethod
     def get_translate_keys(cls):
@@ -72,7 +81,10 @@ class AbstractLang():
         return ret
 
     @classmethod
-    def get_translated_object(cls, full_dict, langs, root_lang=app.config['DEFAULT_DB_LANG']):
+    def get_translated_object(cls,
+                              full_dict,
+                              langs,
+                              root_lang=app.config['DEFAULT_DB_LANG']):
         sub_class = cls.get_sub_class()
         for k in cls.get_translate_keys():
             full_dict[k] = get_lang(full_dict, k, langs, root_lang)
@@ -85,18 +97,24 @@ class AbstractLang():
         sub_class = cls.get_sub_class()
         joins = []
         if cols is None:
-            cols = list(map(lambda c: getattr(sub_class, c), inspect(sub_class).columns.keys()))
+            cols = list(map(
+                lambda c:
+                    getattr(sub_class, c),
+                    inspect(sub_class).columns.keys()))
         for l in search_langs:
             alias = aliased(cls)
             for k in cls.get_translate_keys():
                 cols.append(getattr(alias, k).label(k + '_' + l))
-            joins.append((alias, and_(alias.id == sub_class.id, alias.lang == l)))
+            joins.append((alias, and_(alias.id == sub_class.id,
+                                      alias.lang == l)))
             # print(joins)
         return db.session.query(*cols).distinct().outerjoin(*joins)
 
     @hybrid_method
     def get(self, id, lang):
-        """Get a generic entry for the ObjectLang (assuming uses id as primary key)"""
+        """Get a generic entry for the ObjectLang
+        (assuming uses id as primary key)
+        """
         try:
             return self.query.filter(self.id == id, self.lang == lang).one()
         except NoResultFound:
@@ -168,7 +186,8 @@ class BaseList(Resource):
         self.reqparse.add_argument('loc_status', type=loc_status_sanitizer)
         self.reqparse.add_argument('page', type=int, default=0)
         self.reqparse.add_argument('limit', type=limit_sanitizer, default=10)
-        self.reqparse.add_argument('lang', type=lang_sanitizer, action='append')
+        self.reqparse.add_argument('lang', type=lang_sanitizer,
+                                   action='append')
 
         super().__init__()
 

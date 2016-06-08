@@ -13,7 +13,8 @@ from .ratelimit import redis
 # a long time, when the cars will fly...
 INFINITE = 365 * 24 * 3600
 if redis:
-    redis_prefix = app.config['CACHE']['CACHE_KEY_PREFIX'].encode('utf-8') + b'KEY-ITEM/'
+    redis_prefix = app.config['CACHE']['CACHE_KEY_PREFIX'] \
+                      .encode('utf-8') + b'KEY-ITEM/'
 
 cache = Cache(app, config=app.config['CACHE'])
 
@@ -33,7 +34,8 @@ def get_key_list():
                 decoded = pickle.loads(val)
                 keys[key[len(redis_prefix):]] = decoded
         except Exception as e:
-            app.logger.debug('Error decoding key {key} [{e}]'.format(key=key, e=e))
+            app.logger.debug('Error decoding key {key} [{e}]'
+                             .format(key=key, e=e))
     else:
         keys = cache.get('KEY-LIST')
 
@@ -46,8 +48,10 @@ def add_key_list(key, timeout, time):
     """Save cache key to a listable set"""
     val = (timeout, time)
     if redis:
-        # A more efficient way to touch a single key instead of retrieving the full set
-        app.logger.debug('Adding key to REDIS {key} {val}'.format(key=key, val=val))
+        # A more efficient way to touch a single key
+        # instead of retrieving the full set
+        app.logger.debug('Adding key to REDIS {key} {val}'
+                         .format(key=key, val=val))
         v = pickle.dumps(val, pickle.HIGHEST_PROTOCOL)
         return redis.set(redis_prefix + key, v)
 
@@ -58,9 +62,11 @@ def add_key_list(key, timeout, time):
 
 def renew_key_list(key):
     if redis:
-        # A more efficient way to touch a single key instead of retrieving the full set
+        # A more efficient way to touch a single key
+        # instead of retrieving the full set
         try:
-            (timeout, time) = pickle.loads(redis.get(redis_prefix + key).decode('utf-8'))
+            (timeout, time) = pickle.loads(redis.get(redis_prefix + key)
+                                                .decode('utf-8'))
             return add_key_list(key, timeout, dtdatetime.now())
         except:
             pass
@@ -99,11 +105,14 @@ def cacher(f):
         elif delta.total_seconds() > app.config['CACHE_MIN_TIMEOUT']:
             timeout = int(delta.total_seconds())
 
-        app.logger.debug('CACHER FOR FUNCTION: {0} TIMEOUT: {1}s KEY: {2}'.format(f.__name__, timeout, key))
+        app.logger.debug('CACHER FOR FUNCTION: {0} TIMEOUT: {1}s KEY: {2}'
+                         .format(f.__name__, timeout, key))
 
         cached = cache.get(str(key))
         if cached is not None:
-            if 'BYPASS_CACHING' in app.config and app.config['BYPASS_CACHING'] and app.debug:
+            if ('BYPASS_CACHING' in app.config
+               and app.config['BYPASS_CACHING']
+               and app.debug):
                 app.logger.debug('--Bypassing caching result---')
             else:
                 app.logger.debug('--Cached result--')
@@ -139,22 +148,36 @@ def get_key_parts(key):
             func = getattr(clas, func)
         return (clas, func, args, kwargs)
     except Exception as e:
-        app.logger.debug("ERROR DECODING Key '{0}' Exception {1}".format(key, str(e)))
+        app.logger.debug("ERROR DECODING Key '{0}' Exception {1}"
+                         .format(key, str(e)))
 
     return False
 
 
 def get_key_functions(keys, force=False):
-    """Returns a list with functions and parameters (ready to execute) associated with the keys in cache"""
+    """Returns a list with functions and parameters
+    (ready to execute) associated with the keys in cache
+    """
     funcs = []
     for key, (timeout, time) in keys.items():
         delta = dtdatetime.now() - time
-        # print (key, timeout, time.isoformat(), delta.total_seconds(), timeout / delta.total_seconds(), delta.total_seconds() / timeout)
-        # if delta.total_seconds() / timeout < 0.75 and (timeout - delta.total_seconds()) > 60:
+        # print (key, timeout, time.isoformat(), delta.total_seconds(),
+        #        timeout / delta.total_seconds(),
+        #        delta.total_seconds() / timeout)
+        # if (delta.total_seconds() / timeout < 0.75
+        #    and (timeout - delta.total_seconds()) > 60):
         if not force and (timeout - delta.total_seconds()) > 60:
-            app.logger.debug("BYPASSING Key '{0}' with timeout {1} still have {2} seconds to expire".format(key, timeout, timeout - delta.total_seconds()))
+            app.logger.debug("BYPASSING Key '{0}' with timeout {1} "
+                             "still have {2} seconds to expire"
+                             .format(key,
+                                     timeout,
+                                     timeout - delta.total_seconds()))
             continue
-        app.logger.debug("PROCESSING Key '{0}' with timeout {1}  about to expire in {2} seconds".format(key, timeout, timeout - delta.total_seconds()))
+        app.logger.debug("PROCESSING Key '{0}' with timeout {1} "
+                         "about to expire in {2} seconds"
+                         .format(key,
+                                 timeout,
+                                 timeout - delta.total_seconds()))
 
         key_parts = get_key_parts(key)
         if key_parts is False:

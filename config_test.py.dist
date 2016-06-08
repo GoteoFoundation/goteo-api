@@ -28,8 +28,8 @@ MODULES = {
 
 USERS = {
     'goteo': {
-            'password': 'goteo',
-            'remotes': ['127.0.0.0/16', '192.168.0.0/24'],
-            # 'cors': ['http://stats.goteo.org', 'https://stats.goteo.org']
-            }
+        'password': 'goteo',
+        'remotes': ['127.0.0.0/16', '192.168.0.0/24'],
+        # 'cors': ['http://stats.goteo.org', 'https://stats.goteo.org']
+    }
 }

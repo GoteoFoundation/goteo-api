@@ -77,7 +77,8 @@ else:
 
 # Swagger auto-yaml specification
 
-# api = swagger.docs(Api(app), apiVersion=app.config['VERSION'], description=app.config['DESCRIPTION'])
+# api = swagger.docs(Api(app), apiVersion=app.config['VERSION'],
+# description=app.config['DESCRIPTION'])
 # config your API specs
 # you can define multiple specs in the case your api has multiple versions
 # ommit configs to get the default (all views exposed in /spec url)
@@ -118,7 +119,8 @@ app.config['SWAGGER'] = {
     # "static_url_path": "/apidocs",
     "test": 'text',
     "securityDefinitions": {
-        # TODO: include oauth specification (login html screen must be generated)
+        # TODO: include oauth specification
+        # (login html screen must be generated)
         # "petstore_auth": {
         #     "type": "oauth2",
         #     "authorizationUrl": "/oauth/dialog",

@@ -43,7 +43,9 @@ def on_over_limit(limit):
     return resp
 
 
-def ratelimit(limit=app.config['REQUESTS_LIMIT'], per=app.config['REQUESTS_TIME'], over_limit=on_over_limit):
+def ratelimit(limit=app.config['REQUESTS_LIMIT'],
+              per=app.config['REQUESTS_TIME'],
+              over_limit=on_over_limit):
     def decorator(f):
         def rate_limited(*args, **kwargs):
             if not app.config['REQUESTS_LIMIT'] or not redis:
@@ -52,7 +54,8 @@ def ratelimit(limit=app.config['REQUESTS_LIMIT'], per=app.config['REQUESTS_TIME'
             if app.config['AUTH_ENABLED'] and request.authorization:
                 key = 'rate-limit/%s/' % request.authorization.username
             else:
-                remote_ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
+                remote_ip = request.environ.get('HTTP_X_REAL_IP',
+                                                request.remote_addr)
                 key = 'rate-limit/%s/' % remote_ip
 
             rlimit = RateLimit(key, limit, per)

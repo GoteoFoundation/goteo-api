@@ -148,7 +148,8 @@ def marshal(data, fields, envelope=None, remove_null=False):
         return [marshal(d, fields, envelope, remove_null) for d in data]
     m = s_marshal(data, fields, envelope)
     if isinstance(m, dict):
-        return {k.replace("_", "-"): v for k, v in m.items() if not remove_null or v is not None}
+        return {k.replace("_", "-"):
+                v for k, v in m.items() if not remove_null or v is not None}
     return m
 
 
@@ -199,7 +200,8 @@ class DateTime(Raw):
     def format(self, value):
         try:
             if self.dt_format == 'rfc822':
-                return formatdate(timegm(value.utctimetuple()), localtime=self.localtime)
+                return formatdate(timegm(value.utctimetuple()),
+                                  localtime=self.localtime)
             elif self.dt_format == 'iso8601':
                 return value.isoformat()
             else:
