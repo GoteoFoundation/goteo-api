@@ -14,7 +14,8 @@ from ..users.resources import user_resource_fields
 from ..projects.resources import project_resource_fields
 from ..projects.models import Project
 from ..invests.models import Invest
-from ..location.models import CallLocation, ProjectLocation, location_resource_fields
+from ..location.models import CallLocation, ProjectLocation
+from ..location.models import location_resource_fields
 
 call_resource_fields = {
     "id": fields.String,
@@ -59,7 +60,8 @@ call_full_resource_fields["image_url_big"] = fields.String
 call_full_resource_fields["image_background_url"] = fields.String
 call_full_resource_fields["facebook_url"] = fields.String
 call_full_resource_fields["user"] = fields.Nested(user_resource_fields)
-call_full_resource_fields["location"] = fields.List(fields.Nested(location_resource_fields))
+call_full_resource_fields["location"] = fields.List(
+    fields.Nested(location_resource_fields))
 
 call_project_resource_fields = project_resource_fields.copy()
 call_project_resource_fields['amount_call'] = fields.Float
@@ -90,7 +92,10 @@ class CallsListAPI(BaseList):
             if location:
                 item['latitude'] = location.latitude
                 item['longitude'] = location.longitude
-                item['region'] = location.region if location.region != '' else location.country
+                if location.region:
+                    item['region'] = location.region
+                else:
+                    item['region'] = location.country
             items.append(item)
 
         res = Response(
@@ -128,9 +133,13 @@ class CallAPI(BaseItem):
             item['scope'] = p.scope_string
             location = CallLocation.get(p.id)
             if location:
-                item['location'] = [marshal(location, location_resource_fields)]
+                item['location'] = [marshal(location,
+                                            location_resource_fields)]
             translations = {}
-            translate_keys = {k: v for k, v in call_full_resource_fields.items() if k in CallLang.get_translate_keys()}
+            translate_keys = {
+                k: v for k, v in call_full_resource_fields.items()
+                if k in CallLang.get_translate_keys()
+            }
             for k in p.Translations:
                 translations[k.lang] = marshal(k, translate_keys)
                 translations[k.lang]['description-short'] = k.subtitle
@@ -173,13 +182,17 @@ class CallProjectsListAPI(BaseList):
         for p in Project.list(**args):
             item = marshal(p, call_project_resource_fields)
             item['status'] = p.status_string
-            item['amount-call'] = float(Invest.pledged_total(project=p.id, user=call.owner))
+            item['amount-call'] = float(Invest.pledged_total(project=p.id,
+                                                             user=call.owner))
             item['image-url'] = image_url(p.image, 'medium', False)
             location = ProjectLocation.get(p.id)
             if location:
                 item['latitude'] = location.latitude
                 item['longitude'] = location.longitude
-                item['region'] = location.region if location.region != '' else location.country
+                if location.region:
+                    item['region'] = location.region
+                else:
+                    item['region'] = location.country
             items.append(item)
 
         res = Response(

@@ -16,7 +16,8 @@ from .. import db
 class CallLang(AbstractLang, db.Model):
     __tablename__ = 'call_lang'
 
-    id = db.Column('id', String(50), db.ForeignKey('call.id'), primary_key=True)
+    id = db.Column('id', String(50),
+                   db.ForeignKey('call.id'), primary_key=True)
     lang = db.Column('lang', String(2), primary_key=True)
     name = db.Column('name', String(100))
     subtitle = db.Column('subtitle', Text)
@@ -45,9 +46,18 @@ class Call(db.Model):
     STATUS_PUBLISHED = 4
     STATUS_SUCCEEDED = 5
     STATUS_EXPIRED = 6
-    STATUS_STR = ('pending', 'editing', 'reviewing', 'applying', 'published', 'succeeded', 'expired')
+    STATUS_STR = ('pending',
+                  'editing',
+                  'reviewing',
+                  'applying',
+                  'published',
+                  'succeeded',
+                  'expired')
 
-    PUBLIC_CALLS = [STATUS_APPLYING, STATUS_PUBLISHED, STATUS_SUCCEEDED, STATUS_EXPIRED]
+    PUBLIC_CALLS = [STATUS_APPLYING,
+                    STATUS_PUBLISHED,
+                    STATUS_SUCCEEDED,
+                    STATUS_EXPIRED]
 
     SCOPES_STR = ('', 'local', 'regional', 'national', 'global')
 
@@ -56,18 +66,25 @@ class Call(db.Model):
     subtitle = db.Column('subtitle', Text)
     description = db.Column('description', Text)
     user_id = db.Column('owner', String(50), db.ForeignKey('user.id'))
-    User = relationship("User", lazy='joined')  # Eager loading to allow catching
+    User = relationship("User", lazy='joined')  # Eager loading for catching
     whom = db.Column('whom', Text)
     applies = db.Column('apply', Text)
     legal = db.Column('legal', Text)
     dossier = db.Column('dossier', Text)
-    amount_available = db.Column('amount', Integer, nullable=False)  # Total available amount
-    amount_remaining = db.Column('rest', Integer, nullable=False)  # Total Amount remaining to distribute
-    amount_committed = db.Column('used', Integer, nullable=False)  # Total Amount committed on projects
-    projects_total = db.Column('num_projects', Integer, nullable=False)  # Selected projects
-    projects_applied = db.Column('applied', Integer, nullable=False)  # Applied projects succeeded
-    projects_active = db.Column('running_projects', Integer, nullable=False)  # Applied projects in active campaign
-    projects_succeeded = db.Column('success_projects', Integer, nullable=False)  # Applied successful projects
+    # Total available amount
+    amount_available = db.Column('amount', Integer, nullable=False)
+    # Total Amount remaining to distribute
+    amount_remaining = db.Column('rest', Integer, nullable=False)
+    # Total Amount committed on projects
+    amount_committed = db.Column('used', Integer, nullable=False)
+    # Selected projects
+    projects_total = db.Column('num_projects', Integer, nullable=False)
+    # Applied projects succeeded
+    projects_applied = db.Column('applied', Integer, nullable=False)
+    # Applied projects in active campaign
+    projects_active = db.Column('running_projects', Integer, nullable=False)
+    # Applied successful projects
+    projects_succeeded = db.Column('success_projects', Integer, nullable=False)
     tweet = db.Column('tweet', Text)
     resources = db.Column('resources', Text)
     lang = db.Column('lang', String(2))
@@ -84,16 +101,18 @@ class Call(db.Model):
     backimage = db.Column('backimage', String(255))
     facebook = db.Column('fbappid', String(255))
     call_location = db.Column('call_location', String(255))
-    Translations = relationship("CallLang",
-                                primaryjoin="and_(Call.id==CallLang.id, CallLang.pending==0)",
-                                back_populates="Call", lazy='joined')  # Eager loading to allow catching
+    Translations = relationship(
+        "CallLang",
+        primaryjoin="and_(Call.id==CallLang.id, CallLang.pending==0)",
+        back_populates="Call", lazy='joined')  # Eager loading for catching
 
     def __repr__(self):
         return '<Call %s: %s>' % (self.id, self.name)
 
     @hybrid_property
     def amount_peers(self):
-        return float(Invest.pledged_total(not_method=Invest.METHOD_DROP, call=self.id))
+        return float(Invest.pledged_total(not_method=Invest.METHOD_DROP,
+                                          call=self.id))
 
     @hybrid_property
     def owner(self):
@@ -182,7 +201,8 @@ class Call(db.Model):
             filters.append(CallProject.project_id.in_(kwargs['project']))
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(self.id == CallProject.call_id)
-            filters.append(CallProject.project_id == ProjectCategory.project_id)
+            filters.append(
+                CallProject.project_id == ProjectCategory.project_id)
             filters.append(ProjectCategory.category_id.in_(kwargs['category']))
         if 'node' in kwargs and kwargs['node'] is not None:
             filters.append(self.id == CallProject.call_id)
@@ -194,9 +214,11 @@ class Call(db.Model):
             filters.append(CallLocation.id.in_(subquery))
         if 'loc_status' in kwargs and kwargs['loc_status'] is not None:
             if kwargs['loc_status'] == 'located':
-                filters.append(self.id.in_(db.session.query(CallLocation.id).subquery()))
+                filters.append(self.id.in_(
+                    db.session.query(CallLocation.id).subquery()))
             if kwargs['loc_status'] == 'unlocated':
-                filters.append(~self.id.in_(db.session.query(CallLocation.id).subquery()))
+                filters.append(~self.id.in_(
+                    db.session.query(CallLocation.id).subquery()))
 
         return filters
 
@@ -225,12 +247,14 @@ class Call(db.Model):
                 for u in CallLang.get_query(kwargs['lang']) \
                                  .filter(*filters).order_by(asc(self.opened)) \
                                  .offset(page * limit).limit(limit):
-                    ret.append(CallLang.get_translated_object(u._asdict(), kwargs['lang']))
+                    ret.append(CallLang.get_translated_object(u._asdict(),
+                                                              kwargs['lang']))
                 return ret
             # No langs, normal query
             return self.query.distinct().filter(*filters) \
                                         .order_by(asc(self.opened)) \
-                                        .offset(page * limit).limit(limit).all()
+                                        .offset(page * limit) \
+                                        .limit(limit).all()
         except NoResultFound:
             return []
 
@@ -240,7 +264,8 @@ class Call(db.Model):
         """Total number of matchfunding calls"""
         try:
             filters = self.get_filters(**kwargs)
-            total = db.session.query(func.count(distinct(self.id))).filter(*filters).scalar()
+            total = db.session.query(func.count(distinct(self.id))) \
+                      .filter(*filters).scalar()
             if total is None:
                 total = 0
             return total
@@ -250,10 +275,13 @@ class Call(db.Model):
     @hybrid_method
     @cacher
     def pledged_total(self, **kwargs):
-        """Capital Riego de Goteo (funds from institutions and companies added to the Capital Riego) """
+        """Capital Riego de Goteo
+        (funds from institutions and companies added to the Capital Riego)
+        """
         try:
             filters = list(self.get_filters(**kwargs))
-            total = db.session.query(func.sum(Call.amount_available)).filter(*filters).scalar()
+            total = db.session.query(func.sum(Call.amount_available)) \
+                      .filter(*filters).scalar()
             if total is None:
                 total = 0
             return total
@@ -265,8 +293,11 @@ class Call(db.Model):
 class CallProject(db.Model):
     __tablename__ = 'call_project'
 
-    call_id = db.Column('call', String(50), db.ForeignKey('call.id'), primary_key=True)
-    project_id = db.Column('project', String(50), db.ForeignKey('project.id'), primary_key=True)
+    call_id = db.Column('call', String(50),
+                        db.ForeignKey('call.id'), primary_key=True)
+    project_id = db.Column('project', String(50),
+                           db.ForeignKey('project.id'), primary_key=True)
 
     def __repr__(self):
-        return '<CallProject from %s to project %s>' % (self.call_id, self.project_id)
+        return '<CallProject from %s to project %s>' % (
+            self.call_id, self.project_id)
