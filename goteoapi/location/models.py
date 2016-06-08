@@ -36,7 +36,8 @@ class ItemLocation(object):
     modified = db.Column('modified', DateTime)
 
     def __repr__(self):
-        return '<ItemLocation: (%s) in %f,%f>' % (self.id, self.latitude, self.longitude)
+        return '<ItemLocation: (%s) in %f,%f>' % (
+                    self.id, self.latitude, self.longitude)
 
     @hybrid_method
     @cacher
@@ -45,7 +46,9 @@ class ItemLocation(object):
         try:
             if not locable:
                 return self.query.get(id)
-            return self.query.filter(self.id == id, self.locable == locable).one()
+            return self.query \
+                       .filter(self.id == id, self.locable == locable) \
+                       .one()
         except NoResultFound:
             return None
 
@@ -57,10 +60,15 @@ class ItemLocation(object):
     #  as described here:
     #  http://www.movable-type.co.uk/scripts/latlong-db.html
     #
-    #  @Cacher cannot be applied here, this only returns a subquery to be executed
+    #  @Cacher cannot be applied here,
+    #  this only returns a subquery to be executed
     #  from the calling entity
     @hybrid_method
-    def location_subquery(self, latitude, longitude, radius, locable_only=False, fields=['id']):
+    def location_subquery(self,
+                          latitude,
+                          longitude,
+                          radius,
+                          locable_only=False, fields=['id']):
         from math import degrees, radians, cos
 
         R = 6371  # earth's mean radius, km
@@ -73,18 +81,19 @@ class ItemLocation(object):
         # compensate for degrees longitude getting smaller with increasing latitude
         maxLon = longitude + degrees(radius/R/cos(radians(latitude)))
         minLon = longitude - degrees(radius/R/cos(radians(latitude)))
-        filters = [self.latitude.between(minLat, maxLat), self.longitude.between(minLon, maxLon)]
+        filters = [self.latitude.between(minLat, maxLat),
+                   self.longitude.between(minLon, maxLon)]
         if locable_only:
             filters.append(self.locable is True)
         rlat = radians(latitude)
         rlng = radians(longitude)
         distance = (
             func.acos(
-                  func.sin(rlat) *
-                  func.sin(func.radians(column('latitude'))) +
-                  func.cos(rlat) *
-                  func.cos(func.radians(column('latitude'))) *
-                  func.cos(func.radians(column('longitude')) - rlng)
+                  func.sin(rlat)
+                  * func.sin(func.radians(column('latitude')))
+                  + func.cos(rlat)
+                  * func.cos(func.radians(column('latitude')))
+                  * func.cos(func.radians(column('longitude')) - rlng)
             ) * R
         ).label('distance')
         subquery = db.session.query(
@@ -99,13 +108,16 @@ class ItemLocation(object):
                 distance) \
             .filter(*filters) \
             .subquery('FirstCut')
-        sub = select(map(lambda x: column(x), fields)).select_from(subquery).where(distance <= radius)
+        sub = select(map(lambda x: column(x), fields)) \
+            .select_from(subquery) \
+            .where(distance <= radius)
         return sub
 
-    # Vincenty Method, slightly better precision, high cost on querying database
+    # Vincenty Method, slightly better precision,
+    # high cost on querying database
     # @hybrid_method
     # @cacher
-    # def location_ids(self, latitude, longitude, radius, locable_only = False):
+    # def location_ids(self, latitude, longitude, radius, locable_only=False):
     #     from geopy.distance import VincentyDistance
     #     from math import degrees, radians, cos
 
@@ -116,16 +128,19 @@ class ItemLocation(object):
     #     # first-cut bounding box (in degrees)
     #     maxLat = latitude + degrees(radius/R)
     #     minLat = longitude - degrees(radius/R)
-    #     # compensate for degrees longitude getting smaller with increasing latitude
+    #     # compensate for degrees longitude getting smaller
+    #     # with increasing latitude
     #     maxLon = longitude + degrees(radius/R/cos(radians(latitude)))
     #     minLon = longitude - degrees(radius/R/cos(radians(latitude)))
-    #     filters = [self.latitude.between(minLat, maxLat), self.longitude.between(minLon, maxLon)]
+    #     filters = [self.latitude.between(minLat, maxLat),
+    #               self.longitude.between(minLon, maxLon)]
     #     if locable_only:
     #         filters.append(self.locable == True)
 
     #     locations = self.query.filter(*filters).all()
 
-    #     locations = filter(lambda l: VincentyDistance((latitude, longitude), (l.latitude, l.longitude)).km <= radius, locations)
+    #     locations = filter(lambda l: VincentyDistance((latitude, longitude),
+    #                   (l.latitude, l.longitude)).km <= radius, locations)
     #     location_ids = map(lambda l: int(l.id), locations)
 
     #     return location_ids
@@ -143,7 +158,8 @@ class UserLocation(db.Model, ItemLocation):
     id = db.Column('id', String(50), db.ForeignKey('user.id'), primary_key=True)
 
     def __repr__(self):
-        return '<UserLocation: (%s) in %f,%f>' % (self.id, self.latitude, self.longitude)
+        return '<UserLocation: (%s) in %f,%f>' % (
+            self.id, self.latitude, self.longitude)
 
     # Overide use to set default locable = True
     @hybrid_method
@@ -157,27 +173,33 @@ class ProjectLocation(db.Model, ItemLocation):
     """Project location particular case"""
     __tablename__ = 'project_location'
 
-    id = db.Column('id', String(50), db.ForeignKey('project.id'), primary_key=True)
+    id = db.Column('id', String(50),
+                   db.ForeignKey('project.id'), primary_key=True)
 
     def __repr__(self):
-        return '<ProjectLocation: (%s) in %f,%f>' % (self.id, self.latitude, self.longitude)
+        return '<ProjectLocation: (%s) in %f,%f>' % (
+            self.id, self.latitude, self.longitude)
 
 
 class CallLocation(db.Model, ItemLocation):
     """Call location particular case"""
     __tablename__ = 'call_location'
 
-    id = db.Column('id', String(50), db.ForeignKey('call.id'), primary_key=True)
+    id = db.Column('id', String(50),
+                   db.ForeignKey('call.id'), primary_key=True)
 
     def __repr__(self):
-        return '<CallLocation: (%s) in %f,%f>' % (self.id, self.latitude, self.longitude)
+        return '<CallLocation: (%s) in %f,%f>' % (
+            self.id, self.latitude, self.longitude)
 
 
 class InvestLocation(db.Model, ItemLocation):
     """Invest location particular case"""
     __tablename__ = 'invest_location'
 
-    id = db.Column('id', Integer, db.ForeignKey('invest.id'), primary_key=True)
+    id = db.Column('id', Integer,
+                   db.ForeignKey('invest.id'), primary_key=True)
 
     def __repr__(self):
-        return '<InvestLocation: (%s) in %f,%f>' % (self.id, self.latitude, self.longitude)
+        return '<InvestLocation: (%s) in %f,%f>' % (
+            self.id, self.latitude, self.longitude)
