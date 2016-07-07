@@ -9,24 +9,39 @@ if [ -z "$WORKON_HOME" ]; then
 fi
 
 CONFIG="config_test.py"
-if [ ! -z "$CONFIG" ]; then
-    echo "Custom [$CONFIG] file not found"
-    CONFIG="config_test.py.dist"
-fi
-
-echo "Using [$CONFIG] file for testing"
-
-export GOTEO_API_CONFIG_FILE=$CURR/$CONFIG
-
 ARGS=()
 for var in "$@"; do
+    if [ "$SET_CONFIG" == "1" ]; then
+        CONFIG="$var"
+        SET_CONFIG=
+        continue
+    fi
     # Remove --reset argument
     if [ "$var" == '--reset-database' ] || [ "$var" == '-r' ]; then
         RESET_DATABASE=1
+    elif [ "$var" == '--test-config' ] || [ "$var" == '-t' ]; then
+        SET_CONFIG=1
+        continue
     else
         ARGS+=("$var")
     fi
 done
+
+if [ ! -e "$CONFIG" ]; then
+    echo "Custom [$CONFIG] file not found"
+    CONFIG="config_test.py.dist"
+fi
+
+if [ "${CONFIG:0:1}" != "/" ]; then
+    CONFIG=$CURR/$CONFIG;
+fi
+if [ "${CONFIG:0:1}" != "." ]; then
+    CONFIG=$(realpath $CONFIG)
+fi
+
+echo "Using [$CONFIG] file for testing"
+export GOTEO_API_CONFIG_FILE=$CONFIG
+
 
 if [ "$RESET_DATABASE" != "" ]; then
     echo "Removing database"
