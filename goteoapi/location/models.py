@@ -17,6 +17,7 @@ location_resource_fields = {
     "country_code": fields.String,
     "latitude": fields.Float,
     "longitude": fields.Float,
+    "radius": fields.Integer
 }
 
 
@@ -26,6 +27,7 @@ class ItemLocation(object):
     id = db.Column('id', String(50), primary_key=True)
     latitude = db.Column('latitude', Float)
     longitude = db.Column('longitude', Float)
+    radius = db.Column('radius', Integer)
     method = db.Column('method', String(50))
     locable = db.Column('locable', Boolean)
     city = db.Column('city', String(255))

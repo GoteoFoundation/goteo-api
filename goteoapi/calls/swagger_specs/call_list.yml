@@ -45,6 +45,9 @@ definitions:
             longitude:
                 type: number
                 description: Longitude coordinate for the call
+            radius:
+                type: number
+                description: Radius (Km) of influence for the call (if any)
             region:
                 type: string
                 description: Region location for the call

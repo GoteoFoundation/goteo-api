@@ -29,6 +29,7 @@ call_resource_fields = {
     "image_url": fields.String,
     "latitude": fields.Float,
     "longitude": fields.Float,
+    "radius": fields.Integer,
     "region": fields.String,
     "call_location": fields.String,
     "owner": fields.String,
@@ -48,6 +49,7 @@ call_full_resource_fields = call_resource_fields.copy()
 call_full_resource_fields.pop('latitude')
 call_full_resource_fields.pop('region')
 call_full_resource_fields.pop('longitude')
+call_full_resource_fields.pop('radius')
 call_full_resource_fields["description"] = fields.String
 call_full_resource_fields["legal"] = fields.String
 call_full_resource_fields["whom"] = fields.String
@@ -65,7 +67,8 @@ call_full_resource_fields["location"] = fields.List(
 
 call_project_resource_fields = project_resource_fields.copy()
 call_project_resource_fields['amount_call'] = fields.Float
-
+# Add radius
+location_resource_fields['radius'] = fields.Integer
 
 class CallsListAPI(BaseList):
     """Call list"""
@@ -92,6 +95,7 @@ class CallsListAPI(BaseList):
             if location:
                 item['latitude'] = location.latitude
                 item['longitude'] = location.longitude
+                item['radius'] = location.radius
                 if location.region:
                     item['region'] = location.region
                 else:
