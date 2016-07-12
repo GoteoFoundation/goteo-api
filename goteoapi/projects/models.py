@@ -143,6 +143,22 @@ class Project(db.Model):
     def __repr__(self):
         return '<Project %s: %s>' % (self.id, self.name)
 
+    @hybrid_method
+    def status_number(self, status):
+        """Returns apropiate numbers string statuses"""
+        print(status)
+        statuses = []
+        if not isinstance(status, (list, tuple)):
+            status = (status)
+        for s in status:
+            if s == 'all':
+                return tuple(range(0, self.STATUS_UNFUNDED+1))
+            if isinstance(s, str):
+                statuses.append(self.STATUS_STR.index(s))
+            else:
+                statuses.append(s)
+        return statuses
+
     @hybrid_property
     def node(self):
         return self.node_id
@@ -248,13 +264,11 @@ class Project(db.Model):
             # overwrite default status search
             kwargs['status'] = self.STATUS_UNFUNDED
 
+        statuses = self.PUBLISHED_PROJECTS
         if 'status' in kwargs and kwargs['status'] is not None:
-            if isinstance(kwargs['status'], (list, tuple)):
-                filters.append(self.status.in_(kwargs['status']))
-            else:
-                filters.append(self.status == kwargs['status'])
-        else:
-            filters.append(self.status.in_(self.PUBLISHED_PROJECTS))
+            statuses = self.status_number(kwargs['status'])
+        print('STATUSES',statuses)
+        filters.append(self.status.in_(statuses))
 
         # # Join project table if filters
         for i in ('license', 'license_type'):

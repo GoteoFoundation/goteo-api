@@ -54,6 +54,14 @@ def loc_status_sanitizer(data):
                         "Must be one of 'located', 'unlocated'")
     return d
 
+def project_status_sanitizer(data):
+    from .projects.models import Project
+    d = str(data)
+
+    if d == 'all' or d in Project.STATUS_STR:
+        return d
+    raise Exception("Invalid parameter status. "
+                    "Must be one of 'all', " + "',' ".join(Project.STATUS_STR)+"'")
 
 def limit_sanitizer(limit):
     l = int(limit)

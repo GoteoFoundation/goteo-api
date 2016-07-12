@@ -9,7 +9,7 @@ from ..auth.decorators import requires_auth
 from ..helpers import DateTime, marshal, bad_request
 from ..helpers import image_url, image_resource_url, user_url
 
-from ..base_resources import BaseItem, BaseList, Response
+from ..base_resources import BaseItem, BaseList, Response, project_status_sanitizer
 from .models import Project, ProjectImage, ProjectLang
 from ..users.models import User
 from ..users.resources import user_resource_fields
@@ -141,6 +141,8 @@ class ProjectsListAPI(BaseList):
     @ratelimit()
     @swag_from('swagger_specs/project_list.yml')
     def get(self):
+
+        self.reqparse.add_argument('status', type=project_status_sanitizer, action='append')
         res = self._get()
 
         return res.response()
@@ -150,7 +152,6 @@ class ProjectsListAPI(BaseList):
 
         time_start = time.time()
         args = self.parse_args()
-
         items = []
         for p in Project.list(**args):
             item = marshal(p, project_resource_fields)

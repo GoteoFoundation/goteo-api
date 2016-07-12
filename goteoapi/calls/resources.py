@@ -8,7 +8,7 @@ from ..ratelimit import ratelimit
 from ..auth.decorators import requires_auth
 from ..helpers import DateTime, marshal, bad_request, image_url
 
-from ..base_resources import BaseItem, BaseList, Response
+from ..base_resources import BaseItem, BaseList, Response, project_status_sanitizer
 from .models import Call, CallLang
 from ..users.resources import user_resource_fields
 from ..projects.resources import project_resource_fields
@@ -164,6 +164,9 @@ class CallProjectsListAPI(BaseList):
     @ratelimit()
     @swag_from('swagger_specs/call_projects.yml')
     def get(self, call_id):
+
+        self.reqparse.add_argument('status', type=project_status_sanitizer, action='append')
+
         res = self._get(call_id)
 
         if res.ret['id'] is None:
