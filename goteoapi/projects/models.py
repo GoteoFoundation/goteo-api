@@ -148,7 +148,7 @@ class Project(db.Model):
         """Returns apropiate numbers string statuses"""
         statuses = []
         if not isinstance(status, (list, tuple)):
-            status = (status)
+            status = [status]
         for s in status:
             if s == 'all':
                 return tuple(range(0, self.STATUS_UNFUNDED+1))
