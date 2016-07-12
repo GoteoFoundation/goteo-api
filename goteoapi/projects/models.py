@@ -146,7 +146,6 @@ class Project(db.Model):
     @hybrid_method
     def status_number(self, status):
         """Returns apropiate numbers string statuses"""
-        print(status)
         statuses = []
         if not isinstance(status, (list, tuple)):
             status = (status)
@@ -267,7 +266,6 @@ class Project(db.Model):
         statuses = self.PUBLISHED_PROJECTS
         if 'status' in kwargs and kwargs['status'] is not None:
             statuses = self.status_number(kwargs['status'])
-        print('STATUSES',statuses)
         filters.append(self.status.in_(statuses))
 
         # # Join project table if filters
@@ -480,7 +478,6 @@ class Project(db.Model):
     @cacher
     def average_total(self, **kwargs):
         """Average money raised (€) for projects"""
-        print('AVERAGE TOTAL', kwargs)
         filters = self.get_filters(**kwargs)
         total = db.session.query(func.avg(self.amount)) \
                           .filter(*filters).scalar()
