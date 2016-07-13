@@ -103,9 +103,8 @@ def test_project_trailing_slash():
     eq_(rv.status_code, 301)
     assert 'text/html' in rv.headers['Content-Type']
     assert 'location' in rv.headers, "%r not in %r" % ('location', rv.headers)
-    assert ('/projects/test-project' in rv.headers['Location'],
-            "%r not in %r" % ('/projects/test-project',
-                              rv.headers['Location']))
+    assert '/projects/test-project' in rv.headers['Location'], \
+           "%r not in %r" % ('/projects/test-project', rv.headers['Location'])
 
 
 def test_project():

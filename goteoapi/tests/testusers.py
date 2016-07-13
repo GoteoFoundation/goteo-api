@@ -91,9 +91,9 @@ def test_user_trailing_slash():
     eq_(rv.status_code, 301)
     assert 'text/html' in rv.headers['Content-Type']
     assert 'location' in rv.headers, "%r not in %r" % ('location', rv.headers)
-    assert ('/users/owner-project-passing' in rv.headers['Location'],
-            "%r not in %r" % ('/users/owner-project-passing',
-                              rv.headers['Location']))
+    assert '/users/owner-project-passing' in rv.headers['Location'], \
+           "%r not in %r" % ('/users/owner-project-passing', \
+                              rv.headers['Location'])
 
 
 def test_user():
