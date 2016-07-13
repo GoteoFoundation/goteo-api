@@ -15,7 +15,6 @@ from ..projects.models import Project
 from ..models.node import Node
 from ..models.message import Message
 from ..location.models import UserLocation
-from .. import config
 from hashlib import sha1
 from passlib.context import CryptContext
 
@@ -50,7 +49,7 @@ class User(db.Model):
     node_id = db.Column('node', String(50), db.ForeignKey(Node.id))
     created = db.Column('created', Date)
     updated = db.Column('modified', Date)
-    lang = config.DEFAULT_DB_LANG
+    lang = db.Column('lang', String(2))
     Translations = relationship("UserLang",
                                 back_populates="User",
                                 lazy='joined')  # Eager loading for catching
