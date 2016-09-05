@@ -120,6 +120,10 @@ class Call(db.Model):
 
     @hybrid_property
     def owner_name(self):
+        # Manually get the User object if not exists
+        if not self.User:
+            from ..users.models import User
+            self.User = User.get(self.user_id)
         return self.User.name
 
     @hybrid_property
