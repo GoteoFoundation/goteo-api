@@ -110,8 +110,8 @@ class CallsListAPI(BaseList):
                 else:
                     item['region'] = location.country
             sponsors = []
-            for k in p.Sponsors:
-                sponsors.append(marshal(k, call_sponsors_resource_fields))
+            for s in p.sponsors_list():
+                sponsors.append(marshal(s, call_sponsors_resource_fields))
             item['sponsors'] = sponsors
             items.append(item)
 

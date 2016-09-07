@@ -299,15 +299,17 @@ class Call(db.Model):
 
     @hybrid_method
     @cacher
-    def sponsors(self):
+    def sponsors_list(self):
+        sponsors = []
+        for s in self.Sponsors:
+            sponsors.append(s)
         try:
             filters = [(self.id == CallSponsor.call_id)]
-            print('FILTERS',filters)
-            print(CallSponsor.query.filter(*filters).all())
-            return CallSponsor.query.filter(*filters).all()
+            sponsors = CallSponsor.query.filter(*filters) \
+                        .order_by(asc(CallSponsor.order)).all()
+            return sponsors
         except NoResultFound:
-            return None
-
+            return []
 
 # Call projects
 class CallProject(db.Model):
