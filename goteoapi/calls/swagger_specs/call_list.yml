@@ -87,6 +87,11 @@ definitions:
             status:
                 type: string
                 description: Status of the call, one of `pending`, `editing`, `reviewing`, `applying`, `published`, `succeeded`, `expired`
+            sponsors:
+                type: array
+                description: All available sponsors in a ordered list
+                items:
+                    $ref: '#/definitions/api_calls_call_get_CallSponsor'
 
     - schema:
         id: ResponseCall

@@ -119,9 +119,14 @@ definitions:
                 description: Location of the call
                 items:
                     $ref: '#/definitions/api_calls_call_get_CallLocation'
+            sponsors:
+                type: array
+                description: All available sponsors in a ordered list
+                items:
+                    $ref: '#/definitions/api_calls_call_get_CallSponsor'
             translations:
                 type: array
-                description: All available translations in a list by language
+                description: All available translations in a dictionary by language
                 items:
                     $ref: '#/definitions/api_calls_call_get_CallTranslation'
 
@@ -157,6 +162,18 @@ definitions:
                 type: string
                 description: Every item of a translation will have the same structure as the parent object with the same fields (**and those fields only**) translated. Non translated items won't be displayed at all
 
+    - schema:
+        id: CallSponsor
+        properties:
+            name:
+                type: string
+                description: Name of the sponsor
+            url:
+                type: string
+                description: URL for the sponsor (if available)
+            image-url:
+                type: string
+                description: URL for the image/logo of the sponsor
 
 parameters:
     - in: path

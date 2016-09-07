@@ -105,6 +105,11 @@ class Call(db.Model):
         "CallLang",
         primaryjoin="and_(Call.id==CallLang.id, CallLang.pending==0)",
         back_populates="Call", lazy='joined')  # Eager loading for catching
+    Sponsors = relationship(
+        "CallSponsor",
+        primaryjoin="Call.id==CallSponsor.call_id",
+        order_by="asc(CallSponsor.order)",
+        back_populates="Call", lazy='joined')  # Eager loading for catching
 
     def __repr__(self):
         return '<Call %s: %s>' % (self.id, self.name)
@@ -292,6 +297,17 @@ class Call(db.Model):
         except MultipleResultsFound:
             return 0
 
+    @hybrid_method
+    @cacher
+    def sponsors(self):
+        try:
+            filters = [(self.id == CallSponsor.call_id)]
+            print('FILTERS',filters)
+            print(CallSponsor.query.filter(*filters).all())
+            return CallSponsor.query.filter(*filters).all()
+        except NoResultFound:
+            return None
+
 
 # Call projects
 class CallProject(db.Model):
@@ -305,3 +321,29 @@ class CallProject(db.Model):
     def __repr__(self):
         return '<CallProject from %s to project %s>' % (
             self.call_id, self.project_id)
+
+# Call sponsors
+class CallSponsor(db.Model):
+    __tablename__ = 'call_sponsor'
+
+    id = db.Column('id', Integer, primary_key=True)
+    call_id = db.Column('call', String(50),
+                        db.ForeignKey('call.id'), primary_key=True)
+    name = db.Column('name', String(100))
+    url = db.Column('url', String(100))
+    image = db.Column('image', String(255))
+    order = db.Column('order', Integer)
+    amount = db.Column('amount', Integer)
+    Call = relationship('Call', back_populates='Sponsors')
+
+    def __repr__(self):
+        return '<CallSponsor %s for call %s>' % (
+            self.name, self.call_id)
+
+    @hybrid_property
+    def image_url(self):
+        return image_url(self.image, size="medium")
+
+    @hybrid_property
+    def image_url_big(self):
+        return image_url(self.image, size="big")

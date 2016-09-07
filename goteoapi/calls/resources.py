@@ -9,13 +9,21 @@ from ..auth.decorators import requires_auth
 from ..helpers import DateTime, marshal, bad_request, image_url
 
 from ..base_resources import BaseItem, BaseList, Response, project_status_sanitizer
-from .models import Call, CallLang
+from .models import Call, CallLang, CallSponsor
 from ..users.resources import user_resource_fields
 from ..projects.resources import project_resource_fields
 from ..projects.models import Project
 from ..invests.models import Invest
 from ..location.models import CallLocation, ProjectLocation
 from ..location.models import location_resource_fields
+
+call_sponsors_resource_fields = {
+    "name": fields.String,
+    "url": fields.String,
+    "image_url": fields.String,
+    # "amount": fields.Float,
+    # "order": fields.Integer,
+}
 
 call_resource_fields = {
     "id": fields.String,
@@ -43,6 +51,7 @@ call_resource_fields = {
     "projects_active": fields.Integer,
     "projects_succeeded": fields.Integer,
     "status": fields.String,
+    "sponsors": fields.List(fields.Nested(call_sponsors_resource_fields))
 }
 
 call_full_resource_fields = call_resource_fields.copy()
@@ -100,6 +109,10 @@ class CallsListAPI(BaseList):
                     item['region'] = location.region
                 else:
                     item['region'] = location.country
+            sponsors = []
+            for k in p.Sponsors:
+                sponsors.append(marshal(k, call_sponsors_resource_fields))
+            item['sponsors'] = sponsors
             items.append(item)
 
         res = Response(
@@ -135,6 +148,7 @@ class CallAPI(BaseItem):
         if p is not None:
             item['status'] = p.status_string
             item['scope'] = p.scope_string
+            item['user'] = marshal(p.User, user_resource_fields)
             location = CallLocation.get(p.id)
             if location:
                 item['location'] = [marshal(location,
@@ -148,6 +162,10 @@ class CallAPI(BaseItem):
                 translations[k.lang] = marshal(k, translate_keys)
                 translations[k.lang]['description-short'] = k.subtitle
             item['translations'] = translations
+            sponsors = []
+            for k in p.Sponsors:
+                sponsors.append(marshal(k, call_sponsors_resource_fields))
+            item['sponsors'] = sponsors
 
         res = Response(
             starttime=time_start,

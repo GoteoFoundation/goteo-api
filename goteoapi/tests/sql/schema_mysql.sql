@@ -368,6 +368,7 @@ CREATE TABLE `call_sponsor`(
     `url` tinytext COLLATE utf8_general_ci NULL  ,
     `image` varchar(255) COLLATE utf8_general_ci NULL  COMMENT 'Contiene nombre de archivo' ,
     `order` int(11) NOT NULL  DEFAULT 1 ,
+    `amount` int(11) DEFAULT NULL,
     PRIMARY KEY (`id`) ,
     UNIQUE KEY `id`(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET='utf8' COLLATE='utf8_general_ci' COMMENT='Patrocinadores de convocatorias';
