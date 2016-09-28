@@ -141,19 +141,18 @@ class Invest(db.Model):
         #  is_refusal == None  => all Invests
         if 'is_refusal' in kwargs and kwargs['is_refusal'] is not None:
             if kwargs['is_refusal'] is True:
-                filters.append(self.resign is True)
+                filters.append(self.resign == True)
             elif kwargs['is_refusal'] is False:
-                filters.append(or_(self.resign is None, self.resign is False))
-
+                filters.append(or_(self.resign == None, self.resign == False))
         #  is_anonymous == False   => Not anonymous Invests
         #  is_anonymous == True   => Anonymous Invests
         #  is_anonymous == None  => all Invests
         if 'is_anonymous' in kwargs and kwargs['is_anonymous'] is not None:
             if kwargs['is_anonymous'] is True:
-                filters.append(self.anonymous is True)
+                filters.append(self.anonymous == True)
             elif kwargs['is_anonymous'] is False:
-                filters.append(or_(self.anonymous is None,
-                                   self.anonymous is False))
+                filters.append(or_(self.anonymous == None,
+                                   self.anonymous == False))
 
         # Search by user
         if 'user' in kwargs and kwargs['user'] is not None:
@@ -169,10 +168,10 @@ class Invest(db.Model):
         #  call == 'call-id'   => Invest applying to that specific Call
         if 'call' in kwargs and kwargs['call'] is not None:
             if kwargs['call'] is True:
-                filters.append(and_(self.call_id is not None,
+                filters.append(and_(self.call_id != None,
                                     self.call_id != ''))
             elif kwargs['call'] is False:
-                filters.append(or_(self.call_id is None, self.call_id == ''))
+                filters.append(or_(self.call_id == None, self.call_id == ''))
             else:
                 if isinstance(kwargs['call'], (list, tuple)):
                     filters.append(self.call_id.in_(kwargs['call']))
@@ -186,10 +185,10 @@ class Invest(db.Model):
         #  project == 'project-id'  => Invest applying to that specific Project
         if 'project' in kwargs and kwargs['project'] is not None:
             if kwargs['project'] is True:
-                filters.append(and_(self.project_id is not None,
+                filters.append(and_(self.project_id != None,
                                     self.project_id != ''))
             elif kwargs['project'] is False:
-                filters.append(or_(self.project_id is not None,
+                filters.append(or_(self.project_id != None,
                                    self.project_id == ''))
             else:
                 if isinstance(kwargs['project'], (list, tuple)):
@@ -526,11 +525,11 @@ class Invest(db.Model):
     def rewards_per_amount(self, minim=0, maxim=0, **kwargs):
         """Num. of users choosing rewards from {minim} € to {maxim} € """
         filters = list(self.get_filters(**kwargs))
-        # filters.append(Reward.id is not None)
+        # filters.append(Reward.id != None)
         filters.append(InvestReward.invest_id == self.id)
         filters.append(InvestReward.reward_id == Reward.id)
-        filters.append(or_(self.resign is None,
-                           self.resign is False,
+        filters.append(or_(self.resign == None,
+                           self.resign == False,
                            self.resign == 0))
 
         if minim == 0 and maxim > 0:

@@ -87,7 +87,7 @@ class ItemLocation(object):
         filters = [self.latitude.between(minLat, maxLat),
                    self.longitude.between(minLon, maxLon)]
         if locable_only:
-            filters.append(self.locable is True)
+            filters.append(self.locable == True)
         rlat = radians(latitude)
         rlng = radians(longitude)
         distance = (
