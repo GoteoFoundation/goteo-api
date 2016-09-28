@@ -215,10 +215,10 @@ class Invest(db.Model):
             filters.append(self.method != kwargs['not_method'])
 
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
-            filters.append(self.date_created >= kwargs['from_date'])
+            filters.append(self.created >= kwargs['from_date'])
 
         if 'to_date' in kwargs and kwargs['to_date'] is not None:
-            filters.append(self.date_created <= kwargs['to_date'])
+            filters.append(self.created <= kwargs['to_date'])
 
         if 'node' in kwargs and kwargs['node'] is not None:
             filters.append(self.id == InvestNode.invest_id)
@@ -635,7 +635,7 @@ class Invest(db.Model):
         (those which reached the minimum)
         """
         filters = list(self.get_filters(**kwargs))
-        filters.append(self.date_created >= Project.date_passed)
+        filters.append(self.created >= Project.passed)
         sub = db.session.query(func.sum(self.amount).label('amount')) \
                         .join(Project) \
                         .filter(*filters) \
