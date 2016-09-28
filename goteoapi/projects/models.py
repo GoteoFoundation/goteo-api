@@ -87,7 +87,9 @@ class Project(db.Model):
                   'fulfilled',
                   'unfunded')
 
-    RECEIVED_PROJECTS = [STATUS_REVIEWING,
+    RECEIVED_PROJECTS = [STATUS_REJECTED,
+                         STATUS_EDITING,
+                         STATUS_REVIEWING,
                          STATUS_IN_CAMPAIGN,
                          STATUS_FUNDED,
                          STATUS_FULFILLED,
