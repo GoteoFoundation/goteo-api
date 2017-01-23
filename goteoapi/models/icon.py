@@ -53,7 +53,7 @@ class Icon(db.Model):
         from .reward import Reward
         from ..projects.models import Project, ProjectCategory
         from ..location.models import ProjectLocation
-        from ..call.models import CallProject
+        from ..calls.models import CallProject
 
         filters = []
         # Join Rewards and Project tables for counting
