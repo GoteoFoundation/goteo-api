@@ -71,6 +71,11 @@ parameters:
       description: Filter by individual node(s). Multiple nodes can be specified
       collectionFormat: multi
     - in: query
+      type: string
+      name: call
+      description: Filter by individual matchfunding call(s). Multiple calls can be specified. Restricts the list to the projects originally created in that call(s)
+      collectionFormat: multi
+    - in: query
       name: project
       description: Filter by individual project(s). Multiple projects can be specified
       type: string

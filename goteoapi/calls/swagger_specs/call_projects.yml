@@ -82,6 +82,16 @@ parameters:
       description: Filter by individual node(s). Multiple nodes can be specified. Restricts the list to the users originally created in that node(s)
       collectionFormat: multi
     - in: query
+      type: string
+      name: call
+      description: Filter by individual matchfunding call(s). Multiple calls can be specified. Restricts the list to the projects originally created in that call(s)
+      collectionFormat: multi
+    - in: query
+      type: string
+      name: call
+      description: Filter by individual matchfunding call(s). Multiple calls can be specified. Restricts the list to the projects originally created in that call(s)
+      collectionFormat: multi
+    - in: query
       name: lang
       description: Get results by specified lang. Multiple langs can be specified
       type: string
