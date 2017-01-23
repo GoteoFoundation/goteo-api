@@ -47,14 +47,16 @@ class Category(db.Model):
 
         from ..projects.models import Project, ProjectCategory
         from ..location.models import ProjectLocation
+        from ..calls.models import CallProject
 
         filters = self.filters
         # Join project table if filters
-        for i in ('node', 'from_date', 'to_date', 'project', 'location'):
+        for i in ('node', 'call', 'from_date', 'to_date', 'project', 'location'):
             if i in kwargs and kwargs[i] is not None:
                 filters.append(self.id == ProjectCategory.category_id)
                 filters.append(Project.id == ProjectCategory.project_id)
                 filters.append(Project.status.in_(Project.PUBLISHED_PROJECTS))
+                break
 
         # Filters by goteo node
         if 'node' in kwargs and kwargs['node'] is not None:
@@ -71,6 +73,11 @@ class Category(db.Model):
         # counting attached (invested or collaborated) to some project(s)
         if 'project' in kwargs and kwargs['project'] is not None:
             filters.append(Project.id.in_(kwargs['project']))
+        # counting attached (invested or collaborated) to some project(s)
+        # involving call
+        if 'call' in kwargs and kwargs['call'] is not None:
+            filters.append(ProjectCategory.project_id == CallProject.project_id)
+            filters.append(CallProject.call_id.in_(kwargs['call']))
         # filter by category interests
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(self.id.in_(kwargs['category']))

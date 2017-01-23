@@ -30,6 +30,7 @@ class Message(db.Model):
     def get_filters(self, **kwargs):
         from ..users.models import User
         from ..location.models import UserLocation
+        from ..calls.models import CallProject
 
         filters = []
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
@@ -41,6 +42,9 @@ class Message(db.Model):
         if 'node' in kwargs and kwargs['node'] is not None:
             filters.append(self.user_id == User.id)
             filters.append(User.node_id.in_(kwargs['node']))
+        if 'call' in kwargs and kwargs['call'] is not None:
+            filters.append(self.project_id == CallProject.project_id)
+            filters.append(CallProject.call_id.in_(kwargs['call']))
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(self.project_id == ProjectCategory.project_id)
             filters.append(ProjectCategory.category_id.in_(kwargs['category']))

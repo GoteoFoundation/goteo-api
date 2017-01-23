@@ -663,7 +663,6 @@ class ProjectCategory(db.Model):
     def __repr__(self):
         return '<ProjectCategory %s-%s>' % (self.project_id, self.category_id)
 
-
 class ProjectImage(db.Model):
     __tablename__ = 'project_image'
 

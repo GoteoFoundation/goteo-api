@@ -53,6 +53,7 @@ class Icon(db.Model):
         from .reward import Reward
         from ..projects.models import Project, ProjectCategory
         from ..location.models import ProjectLocation
+        from ..call.models import CallProject
 
         filters = []
         # Join Rewards and Project tables for counting
@@ -69,6 +70,9 @@ class Icon(db.Model):
             filters.append(Reward.project_id.in_(kwargs['project']))
         if 'node' in kwargs and kwargs['node'] is not None:
             filters.append(Project.node_id.in_(kwargs['node']))
+        if 'call' in kwargs and kwargs['call'] is not None:
+            filters.append(Project.id == CallProject.project_id)
+            filters.append(CallProject.call_id.in_(kwargs['call']))
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(Project.id == ProjectCategory.project_id)
             filters.append(ProjectCategory.category_id.in_(kwargs['category']))

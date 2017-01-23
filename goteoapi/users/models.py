@@ -345,6 +345,10 @@ class UserInterest(db.Model):
             # TODO: project_node o invest_node?
             filters.append(User.id == self.user_id)
             filters.append(User.node_id.in_(kwargs['node']))
+        if 'call' in kwargs and kwargs['call'] is not None:
+            filters.append(Invest.call_id.in_(kwargs['call']))
+            filters.append(Invest.user_id == self.user_id)
+            filters.append(Invest.status.in_(Invest.VALID_INVESTS))
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(self.category_id.in_(kwargs['category']))
         if 'location' in kwargs and kwargs['location'] is not None:

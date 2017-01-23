@@ -213,6 +213,8 @@ class Call(db.Model):
             filters.append(
                 CallProject.project_id == ProjectCategory.project_id)
             filters.append(ProjectCategory.category_id.in_(kwargs['category']))
+        if 'call' in kwargs and kwargs['call'] is not None:
+            filters.append(self.id.in_(kwargs['call']))
         if 'node' in kwargs and kwargs['node'] is not None:
             filters.append(self.id == CallProject.call_id)
             filters.append(CallProject.project_id == Project.id)

@@ -112,10 +112,11 @@ class Reward(db.Model):
     @hybrid_method
     def get_filters(self, **kwargs):
         from ..location.models import ProjectLocation
+        from ..calls.models import CallProject
 
         filters = []
         prj_filters = (
-            'node', 'from_date', 'to_date', 'project', 'category', 'location')
+            'node', 'call', 'from_date', 'to_date', 'project', 'category', 'location')
         # Join project table if filters
         for i in prj_filters:
             if i in kwargs and kwargs[i] is not None:
@@ -135,6 +136,9 @@ class Reward(db.Model):
             filters.append(self.project_id.in_(kwargs['project']))
         if 'node' in kwargs and kwargs['node'] is not None:
             filters.append(Project.node_id.in_(kwargs['node']))
+        if 'call' in kwargs and kwargs['call'] is not None:
+            filters.append(Project.id == CallProject.project_id)
+            filters.append(CallProject.call_id.in_(kwargs['call']))
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(Project.id == ProjectCategory.project_id)
             filters.append(ProjectCategory.category_id.in_(kwargs['category']))

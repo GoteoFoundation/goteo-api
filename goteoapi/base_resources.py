@@ -185,6 +185,7 @@ class BaseList(Resource):
         self.reqparse.add_argument('from_date', type=date_sanitizer)
         self.reqparse.add_argument('to_date', type=date_sanitizer)
         self.reqparse.add_argument('node', type=str, action='append')
+        self.reqparse.add_argument('call', type=str, action='append')
         self.reqparse.add_argument('project', type=str, action='append')
         self.reqparse.add_argument('category', type=int, action='append')
         self.reqparse.add_argument('location', type=location_sanitizer)

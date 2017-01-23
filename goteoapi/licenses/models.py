@@ -52,16 +52,18 @@ class License(db.Model):
         from ..models.reward import Reward
         from ..projects.models import Project, ProjectCategory
         from ..location.models import ProjectLocation
+        from ..calls.models import CallProject
 
         filters = []
         prj_filters = (
-            'node', 'from_date', 'to_date', 'project', 'category', 'location')
+            'node', 'call', 'from_date', 'to_date', 'project', 'category', 'location')
         # Join project table if filters
         for i in prj_filters:
             if i in kwargs and kwargs[i] is not None:
                 filters.append(Reward.license_id == self.id)
                 filters.append(Project.id == Reward.project_id)
                 filters.append(Project.status.in_(Project.PUBLISHED_PROJECTS))
+                break
         # Filters by goteo node
         if 'node' in kwargs and kwargs['node'] is not None:
             filters.append(Project.node_id.in_(kwargs['node']))
@@ -77,6 +79,11 @@ class License(db.Model):
         # counting attached (invested or collaborated) to some project(s)
         if 'project' in kwargs and kwargs['project'] is not None:
             filters.append(Project.id.in_(kwargs['project']))
+        # counting attached (invested or collaborated) to some project(s)
+        # involving call
+        if 'call' in kwargs and kwargs['call'] is not None:
+            filters.append(Project.id == CallProject.project_id)
+            filters.append(CallProject.call_id.in_(kwargs['call']))
         # filter by license interests
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(ProjectCategory.project_id == Reward.project_id)
