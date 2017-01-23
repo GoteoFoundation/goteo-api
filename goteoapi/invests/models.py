@@ -220,8 +220,8 @@ class Invest(db.Model):
             filters.append(self.created <= kwargs['to_date'])
 
         if 'node' in kwargs and kwargs['node'] is not None:
-            filters.append(self.id == InvestNode.invest_id)
-            filters.append(InvestNode.invest_node.in_(kwargs['node']))
+            filters.append(self.project_id == Project.id)
+            filters.append(Project.node.in_(kwargs['node']))
 
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(self.project_id == ProjectCategory.project_id)
