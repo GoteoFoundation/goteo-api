@@ -12,6 +12,7 @@ from ..base_resources import AbstractLang
 from ..categories.models import Category, CategoryLang
 from ..invests.models import Invest
 from ..projects.models import Project
+from ..calls.models import CallProject
 from ..models.node import Node
 from ..models.message import Message
 from ..location.models import UserLocation
@@ -141,7 +142,36 @@ class User(db.Model):
 
         # Filters by goteo node
         if 'node' in kwargs and kwargs['node'] is not None:
-            filters.append(self.node_id.in_(kwargs['node']))
+            # Old method: does not seems to be very reliable
+            # filters.append(self.node_id.in_(kwargs['node']))
+            #
+            sub_invest1 = db.session.query(Invest.user_id).filter(
+                Invest.user_id == self.id,
+                Invest.project_id == Project.id,
+                Invest.status.in_(Invest.VALID_INVESTS),
+                Project.node_id.in_(kwargs['node']))
+            sub_project1 = db.session.query(Project.user_id).filter(
+                Project.user_id == self.id,
+                Project.node_id.in_(kwargs['node']))
+            # sub_message1 = db.session.query(Message.user_id).filter(
+            #     Message.user_id == self.id,
+            #     Message.project_id == Project.id,
+            #     Project.node_id.in_(kwargs['node']))
+            filters.append(or_(self.id.in_(sub_invest1),
+                self.id.in_(sub_project1)
+                # , self.id.in_(sub_message1)
+                ))
+        if 'call' in kwargs and kwargs['call'] is not None:
+            sub_invest2 = db.session.query(Invest.user_id).filter(
+                Invest.user_id == self.id,
+                Invest.call_id.in_(kwargs['call']),
+                Invest.status.in_(Invest.VALID_INVESTS))
+            sub_project2 = db.session.query(Project.user_id).filter(
+                Project.user_id == self.id,
+                Project.id == CallProject.project_id,
+                CallProject.call_id.in_(kwargs['call']))
+            filters.append(or_(self.id.in_(sub_invest2),
+                self.id.in_(sub_project2)))
         # Filters by "from date"
         # counting users created after this date
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
@@ -343,6 +373,7 @@ class UserInterest(db.Model):
             filters.append(Invest.status.in_(Invest.VALID_INVESTS))
         if 'node' in kwargs and kwargs['node'] is not None:
             # TODO: project_node o invest_node?
+            # Does not seems to be realiable
             filters.append(User.id == self.user_id)
             filters.append(User.node_id.in_(kwargs['node']))
         if 'call' in kwargs and kwargs['call'] is not None:
