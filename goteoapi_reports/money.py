@@ -41,6 +41,7 @@ class MoneyAPI(BaseList):
     def _get(self):
         """Get()'s method dirty work"""
         from goteoapi.calls.models import Call
+        from goteoapi.matchers.models import Matcher
         from goteoapi.projects.models import Project
         from goteoapi.invests.models import Invest
 
@@ -94,7 +95,7 @@ class MoneyAPI(BaseList):
                 # (fondos captados de instituciones y empresas destinados
                 # a la bolsa de Capital Riego
                 # https://goteo.org/service/resources)
-                "matchfundpledge-amount": Call.pledged_total(**args),
+                "matchfundpledge-amount": Call.pledged_total(**args) + Matcher.pledged_total(**args),
                 # Total 8% recaudado por Goteo
                 "fee-amount": Invest.fee_total(**args),
                 # Aporte medio por cofinanciador(micromecenas)
