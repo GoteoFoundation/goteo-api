@@ -7,8 +7,8 @@
 if [ -z "$WORKON_HOME" ]; then
     PYEXE=$(env which python3)
 
-    source virtualenv/bin/activate
     /usr/bin/virtualenv -p $PYEXE virtualenv
+    source virtualenv/bin/activate
 fi
 
 pip install -r requirements.txt

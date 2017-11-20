@@ -34,11 +34,6 @@ sudo apt-get install -y redis-server python-redis
 sudo apt-get install -y python3-pip
 sudo pip3 install virtualenvwrapper
 
-if [ ! -d /home/ubuntu/.virtualenvs ]; then
-    mkdir /home/ubuntu/.virtualenvs
-    chown ubuntu.ubuntu /home/ubuntu/.virtualenvs
-fi
-
 if [ ! -f /home/ubuntu/.bash_profile ]; then
     touch /home/ubuntu/.bash_profile
     echo "if [ -f ~/.bashrc ]; then" >> /home/ubuntu/.bash_profile
@@ -56,9 +51,6 @@ if [ "$(grep -c 'GOTEO_API_CONFIG_FILE=' .bash_profile)" = "0" ]; then
     echo "fi" >> /home/ubuntu/.bash_profile
 fi
 
-if [ ! -d /home/ubuntu/.virtualenvs/goteoapi ]; then
-    sudo -H -u ubuntu bash -l -c "mkvirtualenv goteoapi"
-fi
 
 sudo -H -u ubuntu bash -l -c "/home/ubuntu/goteo-api/deployer"
 

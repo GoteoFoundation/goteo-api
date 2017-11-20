@@ -321,7 +321,7 @@ CREATE TABLE `category` (
   `social_commitment` varchar(50) DEFAULT NULL COMMENT 'Social commitment',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8 COMMENT='Categorias de los proyectos';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Categorias de los proyectos';
 
 /*Table structure for table `category_lang` */
 
@@ -468,7 +468,7 @@ CREATE TABLE `cost` (
   KEY `order` (`order`),
   KEY `project` (`project`),
   CONSTRAINT `cost_ibfk_1` FOREIGN KEY (`project`) REFERENCES `project` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='Desglose de costes de proyectos';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Desglose de costes de proyectos';
 
 /*Table structure for table `cost_lang` */
 
@@ -495,7 +495,7 @@ CREATE TABLE `criteria` (
   `order` tinyint(4) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8 COMMENT='Criterios de puntuación';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Criterios de puntuación';
 
 /*Table structure for table `criteria_lang` */
 
@@ -1086,7 +1086,7 @@ CREATE TABLE `message` (
   CONSTRAINT `message_ibfk_1` FOREIGN KEY (`thread`) REFERENCES `message` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `message_ibfk_2` FOREIGN KEY (`user`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `message_ibfk_3` FOREIGN KEY (`project`) REFERENCES `project` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='Mensajes de usuarios en proyecto';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Mensajes de usuarios en proyecto';
 
 /*Table structure for table `message_lang` */
 
@@ -1755,7 +1755,7 @@ CREATE TABLE `reward` (
   KEY `type` (`type`),
   KEY `order` (`order`),
   CONSTRAINT `reward_ibfk_1` FOREIGN KEY (`project`) REFERENCES `project` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='Retornos colectivos e individuales';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Retornos colectivos e individuales';
 
 /*Table structure for table `reward_lang` */
 
@@ -1887,7 +1887,7 @@ CREATE TABLE `support` (
   KEY `proyecto` (`project`),
   CONSTRAINT `support_ibfk_1` FOREIGN KEY (`thread`) REFERENCES `message` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `support_ibfk_2` FOREIGN KEY (`project`) REFERENCES `project` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='Colaboraciones';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Colaboraciones';
 
 /*Table structure for table `support_lang` */
 
@@ -2250,7 +2250,7 @@ CREATE TABLE `worthcracy` (
   `name` tinytext NOT NULL,
   `amount` int(6) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8 COMMENT='Niveles de meritocracia';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Niveles de meritocracia';
 
 /*Table structure for table `worthcracy_lang` */
 
