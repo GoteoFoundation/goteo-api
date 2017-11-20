@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+export DEBIAN_FRONTEND=noninteractive
 sudo apt-get update
 sudo apt-get -y upgrade
 
@@ -21,10 +21,10 @@ fi
 # Install goteodev & goteotest database
 mysql -uroot -proot -e "CREATE DATABASE goteodev;"
 mysql -uroot -proot -e "CREATE DATABASE goteotest;"
-mysql -uroot -proot goteodev < /home/vagrant/goteo-api/goteoapi/tests/sql/schema_mysql.sql
-mysql -uroot -proot goteodev < /home/vagrant/goteo-api/goteoapi/tests/sql/data_mysql.sql
-mysql -utravis goteotest < /home/vagrant/goteo-api/goteoapi/tests/sql/schema_mysql.sql
-mysql -utravis goteotest < /home/vagrant/goteo-api/goteoapi/tests/sql/data_mysql.sql
+mysql -uroot -proot goteodev < /home/ubuntu/goteo-api/goteoapi/tests/sql/schema_mysql.sql
+mysql -uroot -proot goteodev < /home/ubuntu/goteo-api/goteoapi/tests/sql/data_mysql.sql
+mysql -utravis goteotest < /home/ubuntu/goteo-api/goteoapi/tests/sql/schema_mysql.sql
+mysql -utravis goteotest < /home/ubuntu/goteo-api/goteoapi/tests/sql/data_mysql.sql
 
 # Install Python libs
 sudo apt-get install -y python3-setuptools python3-dev build-essential
@@ -34,46 +34,35 @@ sudo apt-get install -y redis-server python-redis
 sudo apt-get install -y python3-pip
 sudo pip3 install virtualenvwrapper
 
-if [ ! -d /home/vagrant/.virtualenvs ]; then
-    mkdir /home/vagrant/.virtualenvs
-    chown vagrant.vagrant /home/vagrant/.virtualenvs
+if [ ! -d /home/ubuntu/.virtualenvs ]; then
+    mkdir /home/ubuntu/.virtualenvs
+    chown ubuntu.ubuntu /home/ubuntu/.virtualenvs
 fi
 
-if [ ! -f /home/vagrant/.bash_profile ]; then
-    touch /home/vagrant/.bash_profile
-    echo "if [ -f ~/.bashrc ]; then" >> /home/vagrant/.bash_profile
-    echo "   source ~/.bashrc" >> /home/vagrant/.bash_profile
-    echo "fi" >> /home/vagrant/.bash_profile
-    chown vagrant.vagrant /home/vagrant/.bash_profile
+if [ ! -f /home/ubuntu/.bash_profile ]; then
+    touch /home/ubuntu/.bash_profile
+    echo "if [ -f ~/.bashrc ]; then" >> /home/ubuntu/.bash_profile
+    echo "   source ~/.bashrc" >> /home/ubuntu/.bash_profile
+    echo "fi" >> /home/ubuntu/.bash_profile
+    echo 'export LC_ALL="en_US.UTF-8"' >> /home/ubuntu/.bash_profile
+    chown ubuntu.ubuntu /home/ubuntu/.bash_profile
 fi
-
-if [ "$(grep -c 'WORKON_HOME=~/.virtualenvs' .bash_profile)" = "0" ]; then
-    echo "export WORKON_HOME=~/.virtualenvs" >> /home/vagrant/.bash_profile
-    echo "VIRTUALENVWRAPPER_PYTHON='/usr/bin/python3'" >> /home/vagrant/.bash_profile
-    echo "source /usr/local/bin/virtualenvwrapper.sh" >> /home/vagrant/.bash_profile
-fi
-
 
 if [ "$(grep -c 'GOTEO_API_CONFIG_FILE=' .bash_profile)" = "0" ]; then
-    echo "if [ -f /home/vagrant/goteo-api/config_vagrant.py ]; then" >> /home/vagrant/.bash_profile
-    echo "  export GOTEO_API_CONFIG_FILE=/home/vagrant/goteo-api/config_vagrant.py" >> /home/vagrant/.bash_profile
-    echo "else" >> /home/vagrant/.bash_profile
-    echo "  export GOTEO_API_CONFIG_FILE=/home/vagrant/goteo-api/config_vagrant.py.dist" >> /home/vagrant/.bash_profile
-    echo "fi" >> /home/vagrant/.bash_profile
+    echo "if [ -f /home/ubuntu/goteo-api/config_ubuntu.py ]; then" >> /home/ubuntu/.bash_profile
+    echo "  export GOTEO_API_CONFIG_FILE=/home/ubuntu/goteo-api/config_ubuntu.py" >> /home/ubuntu/.bash_profile
+    echo "else" >> /home/ubuntu/.bash_profile
+    echo "  export GOTEO_API_CONFIG_FILE=/home/ubuntu/goteo-api/config_ubuntu.py.dist" >> /home/ubuntu/.bash_profile
+    echo "fi" >> /home/ubuntu/.bash_profile
 fi
 
-if [ ! -d /home/vagrant/.virtualenvs/goteoapi ]; then
-    sudo -H -u vagrant bash -l -c "mkvirtualenv goteoapi"
+if [ ! -d /home/ubuntu/.virtualenvs/goteoapi ]; then
+    sudo -H -u ubuntu bash -l -c "mkvirtualenv goteoapi"
 fi
 
-if [ "$(grep -c 'workon goteoapi' .bash_profile)" = "0" ]; then
-    echo "workon goteoapi" >> /home/vagrant/.bash_profile
-fi
-
-sudo -H -u vagrant bash -l -c "pip install -r /home/vagrant/goteo-api/requirements.txt"
-sudo -H -u vagrant bash -l -c "pip install -r /home/vagrant/goteo-api/goteoapi_*/requirements.txt"
+sudo -H -u ubuntu bash -l -c "/home/ubuntu/goteo-api/deployer"
 
 # autochange to development dir on login
 if [ "$(grep -c 'cd ~/goteo-api' .bash_profile)" = "0" ]; then
-    echo 'cd ~/goteo-api' >> /home/vagrant/.bash_profile
+    echo 'cd ~/goteo-api' >> /home/ubuntu/.bash_profile
 fi

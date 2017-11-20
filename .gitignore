@@ -9,4 +9,6 @@ virtualenv
 config.py
 config_test.py
 !goteoapi/config.py
+extend/*
+!extend/README.md
 

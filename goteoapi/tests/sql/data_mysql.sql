@@ -635,24 +635,24 @@ INSERT INTO `page_node` (`page`, `node`, `lang`, `content`) VALUES('privacy', 'g
 
 /* Owner */
 
-INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `created`, `modified`,`node`) VALUES
-('owner-project-passing', 'Owner project passing', 'owner-project-passing@example.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Owner project passing', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, NOW()-INTERVAL 50 DAY , NOW()-INTERVAL 50 DAY,'goteo');
+INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`,`token`, `created`, `modified`,`node`) VALUES
+('owner-project-passing', 'Owner project passing', 'owner-project-passing@example.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Owner project passing', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, '', NOW()-INTERVAL 50 DAY , NOW()-INTERVAL 50 DAY,'goteo');
 
 /* categories */
 INSERT INTO `user_interest` (`user`, `interest`) VALUES ('owner-project-passing', '2');
 /* Backers */
 
-INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `created`, `modified`) VALUES
-('backer-1-passing-project', 'Backer 1 passing project', 'backer-1-passing-project@example.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Backer 1 passing project', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, NOW()-INTERVAL 50 DAY , NOW()-INTERVAL 50 DAY);
+INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `token`, `created`, `modified`) VALUES
+('backer-1-passing-project', 'Backer 1 passing project', 'backer-1-passing-project@example.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Backer 1 passing project', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, '', NOW()-INTERVAL 50 DAY , NOW()-INTERVAL 50 DAY);
 
-INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `created`, `modified`) VALUES
-('backer-2-passing-project', 'Backer 2 passing project', 'backer-2-passing-project@example.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Backer 2 passing project', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, NOW()-INTERVAL 50 DAY , NOW()-INTERVAL 50 DAY);
+INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `token`,`created`, `modified`) VALUES
+('backer-2-passing-project', 'Backer 2 passing project', 'backer-2-passing-project@example.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Backer 2 passing project', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, '', NOW()-INTERVAL 50 DAY , NOW()-INTERVAL 50 DAY);
 
-INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `created`, `modified`) VALUES
-('backer-3-passing-project', 'Backer 3 passing project', 'backer-3-passing-project@example.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Backer 3 passing project', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, NOW()-INTERVAL 50 DAY , NOW()-INTERVAL 50 DAY);
+INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `token`, `created`, `modified`) VALUES
+('backer-3-passing-project', 'Backer 3 passing project', 'backer-3-passing-project@example.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Backer 3 passing project', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, '', NOW()-INTERVAL 50 DAY , NOW()-INTERVAL 50 DAY);
 
-INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `created`, `modified`) VALUES
-('backer-4-passing-project', 'Backer 4 passing project', 'backer-4-passing-project@example.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Backer 4 passing project', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, NOW()-INTERVAL 50 DAY , NOW()-INTERVAL 50 DAY);
+INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `token`, `created`, `modified`) VALUES
+('backer-4-passing-project', 'Backer 4 passing project', 'backer-4-passing-project@example.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Backer 4 passing project', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, '', NOW()-INTERVAL 50 DAY , NOW()-INTERVAL 50 DAY);
 
 
 /* Project active */
@@ -732,8 +732,8 @@ INSERT INTO `project` (`id`,
  'https://www.youtube.com/watch?v=3On4rAJdeKg',
  'City, country');
 /* translation */
-INSERT INTO `project_lang` (`id`, `lang`, `description`, `subtitle`) VALUES ('project-plassing-today', 'en', 'English test', 'English short desc');
-INSERT INTO `project_lang` (`id`, `lang`, `description`, `subtitle`) VALUES ('project-plassing-today', 'ca', 'Catalan test', 'Catalan short desc');
+INSERT INTO `project_lang` (`id`, `lang`, `description`, `subtitle`) VALUES ('project-passing-today', 'en', 'English test', 'English short desc');
+INSERT INTO `project_lang` (`id`, `lang`, `description`, `subtitle`) VALUES ('project-passing-today', 'ca', 'Catalan test', 'Catalan short desc');
 /* rewards */
 INSERT INTO `reward` (`project`, `reward`,`description`,`type`,`icon`, `license`,`order`) VALUES ('project-passing-today', 'Test reward 1', 'reward description', 'social', 'code', 'agpl', '1');
 INSERT INTO `reward` (`project`, `reward`,`description`,`type`,`icon`, `amount`, `units`,`order`) VALUES ('project-passing-today', 'Test reward 2', 'reward description', 'individual', 'thanks', '100', '100', '2');/* messages */
@@ -745,8 +745,8 @@ INSERT INTO `cost` (`project`,`cost`, `description`, `type`, `amount`, `required
 /* Invests */
 
 INSERT INTO `invest` (`id`, `user`, `project`, `account`, `amount`, `amount_original`, `currency`, `currency_rate`, `status`, `anonymous`, `resign`, `invested`, `charged`, `returned`, `preapproval`, `payment`, `transaction`, `method`, `admin`, `campaign`, `datetime`, `drops`, `droped`, `call`, `issue`, `pool`) VALUES
-(1, 'backer-1-passing-project', 'project-passing-today', '', 200, 200, 'EUR', 1.00000, 1, NULL, 1, NOW()-INTERVAL 35 DAY, NOW()-INTERVAL 35 DAY, NULL, NULL, '', NULL, 'dummy', NULL, NULL, NOW()-INTERVAL 60 DAY, NULL, NULL, NULL, NULL, 1),
-(2, 'backer-2-passing-project', 'project-passing-today', '', 40, 40, 'EUR', 1.00000, 1, NULL, NULL, NOW()-INTERVAL 30 DAY, NOW()-INTERVAL 30 DAY, NULL, '', NULL, NULL, 'dummy', NULL, NULL, NOW()-INTERVAL 70 DAY, NULL, NULL, NULL, NULL, NULL);
+(1, 'backer-1-passing-project', 'project-passing-today', '', 200, 200, 'EUR', 1.00000, 1, 0, 1, NOW()-INTERVAL 35 DAY, NOW()-INTERVAL 35 DAY, NULL, NULL, '', NULL, 'dummy', NULL, 0, NOW()-INTERVAL 60 DAY, NULL, NULL, NULL, 0, 1),
+(2, 'backer-2-passing-project', 'project-passing-today', '', 40, 40, 'EUR', 1.00000, 1, 0, 0, NOW()-INTERVAL 30 DAY, NOW()-INTERVAL 30 DAY, NULL, '', NULL, NULL, 'dummy', NULL, 0, NOW()-INTERVAL 70 DAY, NULL, NULL, NULL, 0, 0);
 /* invest node */
 INSERT INTO `invest_node` (`user_id`, `user_node`, `project_id`, `project_node`, `invest_id`, `invest_node`) VALUES ('backer-1-passing-project', 'goteo', 'project-passing-today', 'goteo', '1', 'goteo');
 INSERT INTO `invest_node` (`user_id`, `user_node`, `project_id`, `project_node`, `invest_id`, `invest_node`) VALUES ('backer-2-passing-project', 'goteo', 'project-passing-today', 'goteo', '2', 'goteo');
@@ -755,27 +755,27 @@ INSERT INTO `promote` (`node`, `project`, `active`) VALUES ('goteo', 'project-pa
 /* category */
 INSERT INTO `project_category` (`project`, `category`) VALUES ('project-passing-today', '2');
 /* location */
-INSERT INTO `project_location` (`id`, `latitude`, `longitude`, `locable`, `city`, `country`, `country_code`) VALUES ('project-passing-today', '41.3', '2.1', '1', 'Barcelona', 'Spain', 'ES');
+INSERT INTO `project_location` (`id`, `latitude`, `longitude`, `locable`, `city`, `country`, `country_code`, `region`) VALUES ('project-passing-today', '41.3', '2.1', '1', 'Barcelona', 'Spain', 'ES', '');
 
 /* another project/* Project finishing today */
 
 /* Owner */
 
-INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `created`, `modified`) VALUES
-('owner-project-finishing', 'Owner project finishing', 'owner-project-finishing@goteo.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Owner project finishing', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, NOW()-INTERVAL 50 DAY , NOW()-INTERVAL 50 DAY);
+INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `token`, `created`, `modified`) VALUES
+('owner-project-finishing', 'Owner project finishing', 'owner-project-finishing@goteo.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Owner project finishing', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, '', NOW()-INTERVAL 50 DAY , NOW()-INTERVAL 50 DAY);
 /* Backers */
 
-INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `created`, `modified`) VALUES
-('backer-1-finishing-project', 'Backer 1 finishing project', 'backer-1-finishing-project@goteo.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Backer 1 finishing project', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, NOW()-INTERVAL 50 DAY , NOW()-INTERVAL 50 DAY);
+INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `token`, `created`, `modified`) VALUES
+('backer-1-finishing-project', 'Backer 1 finishing project', 'backer-1-finishing-project@goteo.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Backer 1 finishing project', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, '', NOW()-INTERVAL 50 DAY , NOW()-INTERVAL 50 DAY);
 
-INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `created`, `modified`) VALUES
-('backer-2-finishing-project', 'Backer 2 finishing project', 'backer-2-finishing-project@goteo.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Backer 2 finishing project', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, NOW()-INTERVAL 50 DAY , NOW()-INTERVAL 50 DAY);
+INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `token`, `created`, `modified`) VALUES
+('backer-2-finishing-project', 'Backer 2 finishing project', 'backer-2-finishing-project@goteo.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Backer 2 finishing project', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, '', NOW()-INTERVAL 50 DAY , NOW()-INTERVAL 50 DAY);
 
-INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `created`, `modified`) VALUES
-('backer-3-finishing-project', 'Backer 3 finishing project', 'backer-3-finishing-project@goteo.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Backer 3 finishing project', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, NOW()-INTERVAL 50 DAY , NOW()-INTERVAL 50 DAY);
+INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `token`, `created`, `modified`) VALUES
+('backer-3-finishing-project', 'Backer 3 finishing project', 'backer-3-finishing-project@goteo.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Backer 3 finishing project', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, '', NOW()-INTERVAL 50 DAY , NOW()-INTERVAL 50 DAY);
 
-INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `created`, `modified`) VALUES
-('backer-4-finishing-project', 'Backer 4 finishing project', 'backer-4-finishing-project@goteo.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Backer 4 finishing project', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, NOW()-INTERVAL 50 DAY , NOW()-INTERVAL 50 DAY);
+INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `token`, `created`, `modified`) VALUES
+('backer-4-finishing-project', 'Backer 4 finishing project', 'backer-4-finishing-project@goteo.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Backer 4 finishing project', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, '', NOW()-INTERVAL 50 DAY , NOW()-INTERVAL 50 DAY);
 
 /* Project */
 
@@ -867,9 +867,9 @@ INSERT INTO `cost` (`project`, `cost`, `description`, `type`, `amount`, `require
 /* Invests */
 
 INSERT INTO `invest` (`id`, `user`, `project`, `account`, `amount`, `amount_original`, `currency`, `currency_rate`, `status`, `anonymous`, `resign`, `invested`, `charged`, `returned`, `preapproval`, `payment`, `transaction`, `method`, `admin`, `campaign`, `datetime`, `drops`, `droped`, `call`, `issue`, `pool`) VALUES
-(3, 'backer-1-finishing-project', 'project-finishing-today', '', 200, 200, 'EUR', 1.00000, 1, NULL, 1, NOW()-INTERVAL 60 DAY, NOW()-INTERVAL 60 DAY, NULL, '727025821', '1200387012150822204948007100', '', 'dummy', NULL, NULL, NOW()-INTERVAL 60 DAY, NULL, NULL, NULL, NULL, NULL),
-(4, 'backer-2-finishing-project', 'project-finishing-today', '', 200, 200, 'EUR', 1.00000, 1, NULL, NULL, NOW()-INTERVAL 65 DAY, NOW()-INTERVAL 65 DAY, NULL, '727001105', '1200386948150822192936007100', '', 'dummy', NULL, NULL, NOW()-INTERVAL 65 DAY, NULL, NULL, NULL, NULL, 1),
-(5, 'backer-3-finishing-project', 'project-finishing-today', '', 40, 40, 'EUR', 1.00000, 1, NULL, NULL, NOW()-INTERVAL 70 DAY, NULL, NULL, 'PA-7X430535Y6705613F', NULL, NULL, 'dummy', NULL, NULL, NOW()-INTERVAL 70 DAY, NULL, NULL, NULL, NULL, NULL);
+(3, 'backer-1-finishing-project', 'project-finishing-today', '', 200, 200, 'EUR', 1.00000, 1, 0, 1, NOW()-INTERVAL 60 DAY, NOW()-INTERVAL 60 DAY, NULL, '727025821', '1200387012150822204948007100', '', 'dummy', NULL, 0, NOW()-INTERVAL 60 DAY, NULL, NULL, NULL, 0, 0),
+(4, 'backer-2-finishing-project', 'project-finishing-today', '', 200, 200, 'EUR', 1.00000, 1, 0, 0, NOW()-INTERVAL 65 DAY, NOW()-INTERVAL 65 DAY, NULL, '727001105', '1200386948150822192936007100', '', 'dummy', NULL, 0, NOW()-INTERVAL 65 DAY, NULL, NULL, NULL, 0, 1),
+(5, 'backer-3-finishing-project', 'project-finishing-today', '', 40, 40, 'EUR', 1.00000, 1, 0, 0, NOW()-INTERVAL 70 DAY, NULL, NULL, 'PA-7X430535Y6705613F', NULL, NULL, 'dummy', NULL, 0, NOW()-INTERVAL 70 DAY, NULL, NULL, NULL, 0, 0);
 /* invest node */
 INSERT INTO `invest_node` (`user_id`, `user_node`, `project_id`, `project_node`, `invest_id`, `invest_node`) VALUES ('backer-1-finishing-project', 'goteo', 'project-finishing-today', 'goteo', '3', 'goteo');
 INSERT INTO `invest_node` (`user_id`, `user_node`, `project_id`, `project_node`, `invest_id`, `invest_node`) VALUES ('backer-2-finishing-project', 'goteo', 'project-finishing-today', 'goteo', '4', 'goteo');
@@ -877,21 +877,21 @@ INSERT INTO `invest_node` (`user_id`, `user_node`, `project_id`, `project_node`,
 
 /* Project passed */
 
-INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `created`, `modified`,`node`) VALUES
-('owner-project-passed', 'Owner project passed', 'owner-project-passed@example.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Owner project passed', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, NOW()-INTERVAL 150 DAY , NOW()-INTERVAL 150 DAY,'goteo');
+INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `created`, `modified`,`node`, `token`) VALUES
+('owner-project-passed', 'Owner project passed', 'owner-project-passed@example.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Owner project passed', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, NOW()-INTERVAL 150 DAY , NOW()-INTERVAL 150 DAY,'goteo','');
 
 /* categories */
 INSERT INTO `user_interest` (`user`, `interest`) VALUES ('owner-project-passed', '2');
 
 
-INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `created`, `modified`) VALUES
-('backer-1-passed', 'Backer 1 passed project', 'backer-1-passed@goteo.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Backer 1 passed project', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, NOW()-INTERVAL 150 DAY , NOW()-INTERVAL 150 DAY);
+INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `created`, `modified`, `token`) VALUES
+('backer-1-passed', 'Backer 1 passed project', 'backer-1-passed@goteo.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Backer 1 passed project', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, NOW()-INTERVAL 150 DAY , NOW()-INTERVAL 150 DAY, '');
 
-INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `created`, `modified`) VALUES
-('backer-2-passed', 'Backer 2 passed project', 'backer-2-passed@goteo.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Backer 2 passed project', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, NOW()-INTERVAL 150 DAY , NOW()-INTERVAL 150 DAY);
+INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `created`, `modified`, `token`) VALUES
+('backer-2-passed', 'Backer 2 passed project', 'backer-2-passed@goteo.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Backer 2 passed project', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, NOW()-INTERVAL 150 DAY , NOW()-INTERVAL 150 DAY, '');
 
-INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `created`, `modified`) VALUES
-('backer-3-passed', 'Backer 3 passed project', 'backer-3-passed@goteo.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Backer 3 finishing project', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, NOW()-INTERVAL 150 DAY , NOW()-INTERVAL 150 DAY);
+INSERT INTO `user` (`id`, `name`, `email`, `password`, `about`, `keywords`, `active`, `avatar`, `contribution`, `twitter`, `facebook`, `linkedin`, `worth`, `created`, `modified`, `token`) VALUES
+('backer-3-passed', 'Backer 3 passed project', 'backer-3-passed@goteo.org', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3', 'Backer 3 finishing project', NULL, 1, 0, 'mucho arte', '@owner', 'feisbuc.com', 'ein?', NULL, NOW()-INTERVAL 150 DAY , NOW()-INTERVAL 150 DAY, '');
 
 
 INSERT INTO `project` (`id`,
@@ -983,9 +983,9 @@ INSERT INTO `cost` (`project`,`cost`, `description`, `type`, `amount`, `required
 /* Invests */
 
 INSERT INTO `invest` (`id`, `user`, `project`, `account`, `amount`, `amount_original`, `currency`, `currency_rate`, `status`, `anonymous`, `resign`, `invested`, `charged`, `returned`, `preapproval`, `payment`, `transaction`, `method`, `admin`, `campaign`, `datetime`, `drops`, `droped`, `call`, `issue`, `pool`) VALUES
-(6, 'backer-1-passed', 'project-passed', '', 200, 200, 'EUR', 1.00000, 1, NULL, 1, NOW()-INTERVAL 135 DAY, NOW()-INTERVAL 135 DAY, NULL, NULL, '', NULL, 'dummy', NULL, NULL, NOW()-INTERVAL 60 DAY, NULL, NULL, NULL, NULL, 1),
-(7, 'backer-2-passed', 'project-passed', '', 200, 200, 'EUR', 1.00000, 1, NULL, 1, NOW()-INTERVAL 135 DAY, NOW()-INTERVAL 135 DAY, NULL, NULL, '', NULL, 'dummy', NULL, NULL, NOW()-INTERVAL 60 DAY, NULL, NULL, NULL, NULL, 1),
-(8, 'backer-3-passed', 'project-passed', '', 40, 40, 'EUR', 1.00000, 1, NULL, NULL, NOW()-INTERVAL 130 DAY, NOW()-INTERVAL 130 DAY, NULL, '', NULL, NULL, 'dummy', NULL, NULL, NOW()-INTERVAL 70 DAY, NULL, NULL, NULL, NULL, NULL);
+(6, 'backer-1-passed', 'project-passed', '', 200, 200, 'EUR', 1.00000, 1, 0, 1, NOW()-INTERVAL 135 DAY, NOW()-INTERVAL 135 DAY, NULL, NULL, '', NULL, 'dummy', NULL, 0, NOW()-INTERVAL 60 DAY, NULL, NULL, NULL, 0, 1),
+(7, 'backer-2-passed', 'project-passed', '', 200, 200, 'EUR', 1.00000, 1, 0, 1, NOW()-INTERVAL 135 DAY, NOW()-INTERVAL 135 DAY, NULL, NULL, '', NULL, 'dummy', NULL, 0, NOW()-INTERVAL 60 DAY, NULL, NULL, NULL, 0, 1),
+(8, 'backer-3-passed', 'project-passed', '', 40, 40, 'EUR', 1.00000, 1, 0, 0, NOW()-INTERVAL 130 DAY, NOW()-INTERVAL 130 DAY, NULL, '', NULL, NULL, 'dummy', NULL, 0, NOW()-INTERVAL 70 DAY, NULL, NULL, NULL, 0, 0);
 /* invest node */
 INSERT INTO `invest_node` (`user_id`, `user_node`, `project_id`, `project_node`, `invest_id`, `invest_node`) VALUES ('backer-1-passed', 'goteo', 'project-passed', 'goteo', '6', 'goteo');
 INSERT INTO `invest_node` (`user_id`, `user_node`, `project_id`, `project_node`, `invest_id`, `invest_node`) VALUES ('backer-2-passed', 'goteo', 'project-passed', 'goteo', '7', 'goteo');
@@ -993,16 +993,16 @@ INSERT INTO `invest_node` (`user_id`, `user_node`, `project_id`, `project_node`,
 /* category */
 INSERT INTO `project_category` (`project`, `category`) VALUES ('project-passed', '2');
 /* location */
-INSERT INTO `project_location` (`id`, `latitude`, `longitude`, `locable`, `city`, `country`, `country_code`) VALUES ('project-passed', '41.3', '2.1', '1', 'Barcelona', 'Spain', 'ES');
+INSERT INTO `project_location` (`id`, `latitude`, `longitude`, `locable`, `city`, `country`, `country_code`, `region`) VALUES ('project-passed', '41.3', '2.1', '1', 'Barcelona', 'Spain', 'ES', '');
 
 
 /* test call */
-INSERT INTO `call` (`id`, `name`, `subtitle`, `status`, `owner`, `amount`, `created`, `updated`, `opened`, `published`, `scope`, `maxproj`, `num_projects`, `running_projects`, `success_projects`) VALUES ('test-call', 'Test call', 'Description test call', '3', 'owner-project-passing', '1000', NOW()-INTERVAL 50 day, NOW()-INTERVAL 50 day, NOW()-INTERVAL 50 day, NOW()-INTERVAL 50 day, 'global', '10', '1', '1', '0');
+INSERT INTO `call` (`id`, `name`, `subtitle`, `status`, `owner`, `amount`, `created`, `updated`, `opened`, `published`, `scope`, `maxproj`, `num_projects`, `running_projects`, `success_projects`, `rest`, `used`, `applied`) VALUES ('test-call', 'Test call', 'Description test call', '3', 'owner-project-passing', '1000', NOW()-INTERVAL 50 day, NOW()-INTERVAL 50 day, NOW()-INTERVAL 50 day, NOW()-INTERVAL 50 day, 0, '10', '1', '1', '0',0,0,0);
 /* project appying */
 INSERT INTO `call_project` (`call`, `project`) VALUES ('test-call', 'project-passing-today');
 /* call location */
 INSERT INTO `call_location` (`id`, `latitude`, `longitude`, `method`, `locable`, `city`, `region`, `country`, `country_code`) VALUES ('test-call', '42.9', '-2.6', 'manual', '1', 'Bilbo', 'Euskadi', 'Spain', 'ES');
 /* second call */
-INSERT INTO `call` (`id`, `name`, `subtitle`, `status`, `owner`, `amount`, `created`, `updated`, `opened`, `published`, `closed`, `scope`, `maxproj`, `num_projects`, `running_projects`, `success_projects`) VALUES ('test-call-2', 'Test call', 'Description test call', '3', 'owner-project-passing', '1000', NOW()-INTERVAL 100 day, NOW()-INTERVAL 100 day, NOW()-INTERVAL 100 day, NOW()-INTERVAL 100 day, NOW()-INTERVAL 30 day, 'global', '10', '1', '1', '0');
+INSERT INTO `call` (`id`, `name`, `subtitle`, `status`, `owner`, `amount`, `created`, `updated`, `opened`, `published`, `closed`, `scope`, `maxproj`, `num_projects`, `running_projects`, `success_projects`, `rest`, `used`, `applied`) VALUES ('test-call-2', 'Test call', 'Description test call', '3', 'owner-project-passing', '1000', NOW()-INTERVAL 100 day, NOW()-INTERVAL 100 day, NOW()-INTERVAL 100 day, NOW()-INTERVAL 100 day, NOW()-INTERVAL 30 day, 0, '10', '1', '1', '0',0,0,0);
 
 INSERT INTO `call_location` (`id`, `latitude`, `longitude`, `method`, `locable`, `city`, `region`, `country`, `country_code`) VALUES ('test-call-2', '42.91', '-2.61', 'manual', '1', 'Bilbo', 'Euskadi', 'Spain', 'ES');

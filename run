@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 CURR=$(dirname $(readlink -f $0))
 
 if [ ! -z "$GOTEO_API_CONFIG_FILE" ]; then
@@ -13,4 +14,4 @@ if [ -z "$WORKON_HOME" ]; then
     source "$CURR/"virtualenv/bin/activate
 fi
 
-python "$CURR/"run.py
+$PYEXE "$CURR/"run.py
