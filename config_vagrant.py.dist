@@ -7,14 +7,9 @@
 
 # Mysql Goteo Database (mandatory)
 # ================================
-dbhost = 'devgoteo.org'
-dbuser = 'goteo'
-dbpass = 'goteo1234'
-dbname = 'goteo'
-DB_URI = 'mysql://' + dbuser + ':' + dbpass + '@' + dbhost + '/' + dbname
-
+DB_URI = 'mysql://root:root@localhost/goteodev'
 # A unique secret key for this application
-SECRET_KEY = 'a-super-secret-and-random-key'
+SECRET_KEY = 'no-a-very-secret-and-random-key'
 
 # Optional config:
 # ================
@@ -35,9 +30,9 @@ AUTH_ENABLED = True
 # Extend the API functionality by enabling additional modules/plugins
 MODULES = {
     # reports endpoints
-    #'goteoapi_reports.controllers',
+    'goteoapi_reports.controllers',
     # digests endpoints
-    #'goteoapi_digests.controllers'
+    'goteoapi_digests.controllers'
 }
 
 # debug (False by default)
@@ -49,6 +44,7 @@ DEBUG = True
 CACHE_TYPE = 'null'
 # Minimun timeout for function caching
 CACHE_MIN_TIMEOUT = 30
+CACHE_KEY_PREFIX='Test/'
 
 # Opcional description for general messages
 DESCRIPTION = 'Goteo.org API'

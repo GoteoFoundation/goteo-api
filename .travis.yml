@@ -1,0 +1,22 @@
+language: python
+python:
+  - "3.4"
+  - "3.5"
+services:
+    - mysql
+    - redis-server
+before_script:
+  - mysql -e 'create database goteotest;'
+  - mysql goteotest < goteoapi/tests/sql/schema_mysql.sql
+  - mysql goteotest < goteoapi/tests/sql/data_mysql.sql
+install:
+    - pip install -r requirements.txt
+    - pip install -r goteoapi_*/requirements.txt
+env:
+    - GOTEO_API_CONFIG_FILE="$TRAVIS_BUILD_DIR/config_test.py.dist"
+script: nosetests --with-coverage --cover-erase --cover-package=goteoapi --cover-package=goteoapi_reports --cover-package=goteoapi_digests
+
+addons:
+    code_climate:
+        repo_token:
+            secure: hz5i+f1yQcWXpGbIK8vAxI6cq9hTZK5n29Kf8Hg1AGLyy/e474NuXG9iRXRsvGsW003td6cZH53BvKN/fhrkYuGfku3829pO6Ayb5c8PREYv1aY3sQ8zdKGpzlw9tgJQm9POOmUdW1I8roOqlpVtrXrvro+rautkPg+vrDghc+qn129vOafmm1jZiDhaW4CdkM+WO/mcLDzBhJ3aRlEfPi6pzbMIWbngHj2x4JvoUuLTN+HHRJJGuTed22ToihK8+LyhtIxPiKqptpKdY96lu1Gx4Zr1QBkvqUrkQk9zBqdgdUZsmPOllfKNP3Pn2gCfV+liI/eYl8RxBqe1DVu/kQ7xD1UHy3IqVfhsOW8D0xaSh7Vosfm7OdB8+/mGIT72NAEtbv/8eB6j6Oy8ZhDk1yxmXkiANo9WdhOy/wmztc1tInEDFuSFPpQ1VtkcSBDatYCWCTYcVokTk6jKgJCz5zf5clRMi20uQnNfc4Vvv8B7CFrkQWjcoSzLPuHbkEdaif00OknB4qgmsBR4904f3/u540G78P3Rv5BFP/ni1z0ZatpPnATiUT8uejbzUU1cDyhtycyERxfgg6V/hZRPzYr3rEXxoHwcksDk1EQMBFe7iDEIcSG0AYnwkrrxPBZ7xwKqzWdoxinbKoLlAjCXI9Cz5oYz9AE2D4EViFjp7eU=

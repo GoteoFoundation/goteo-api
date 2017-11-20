@@ -1,0 +1,194 @@
+Call API
+This resource returns call information.
+http://developers.goteo.org/calls#call
+---
+tags:
+    - call
+
+security:
+    - basic: []
+
+definitions:
+    - schema:
+        id: CallFull
+        properties:
+            id:
+                type: string
+                description: Id of the matchfunding call
+            name:
+                type: string
+                description: Name of the matchfunding call
+            description-short:
+                type: string
+                description: Short description for the matchfunding call
+            description:
+                type: string
+                description: Full description for the matchfunding call
+            applies:
+                type: string
+                description: Text description about which kind of projects will be selected for the matchfunding call
+            dossier:
+                type: string
+                description: External links for the matchfunding call
+            legal:
+                type: string
+                description: Some particular legal or conditions for the matchfunding call
+            resources:
+                type: string
+                description: Text description of the available resources for the matchfunding call
+            tweet:
+                type: string
+                description: Text used to make an automatic tweet to share the the matchfunding call
+            whom:
+                type: string
+                description: Target of the matchfunding call
+            date-opened:
+                type: string
+                description: Date when the matchfunding call was opened
+            date-published:
+                type: string
+                description: Date when the matchfunding call was published
+            date-succeeded:
+                type: string
+                description: Date when the matchfunding call was succeeded
+            date-closed:
+                type: string
+                description: Date when the matchfunding call was closed
+            call-url:
+                type: string
+                description: URL where to visualize the matchfunding call
+            facebook-url:
+                type: string
+                description: URL of the Facebook page for the matchfunding call
+            logo-url:
+                type: string
+                description: URL for the call's logo
+            image-url:
+                type: string
+                description: URL for the main call image
+            image-url-big:
+                type: string
+                description: URL for the main call image (big size)
+            image-background-url:
+                type: string
+                description: URL for the main call image
+            call-location:
+                type: string
+                description: Custom location value for the call
+            scope:
+                type: string
+                description: Scope of the matchfunding call, one of `local`, `regional`, `national`, `global` (or `null`)
+            owner:
+                type: string
+                description: User ID of the call's owner
+            owner-name:
+                type: string
+                description: User name of the call's owner
+            user:
+                type: string
+                description: Call owner's user Object
+            amount-available:
+                type: number
+                description: Available amount of cash to distribute among projects
+            amount-peers:
+                type: number
+                description: Amount of cash already distribute among projects
+            amount-committed:
+                type: number
+                description: Maximum total amount of cash that was available to distribute among projects
+            amount-remaining:
+                type: number
+                description: Amount of cash still available for distribute among projects
+            projects-total:
+                type: integer
+                description: Total number of projects included into this matchfunding call
+            projects-applied:
+                type: integer
+                description: Total number of projects effectively applicating to this matchfunding call
+            projects-active:
+                type: integer
+                description: Active projects (still with a running campaign) in this matchfunding call
+            projects-succeeded:
+                type: integer
+                description: Projects funded in this matchfunding call
+            status:
+                type: string
+                description: Status of the call, one of `pending`, `editing`, `reviewing`, `applying`, `published`, `succeeded`, `expired`
+            location:
+                type: array
+                description: Location of the call
+                items:
+                    $ref: '#/definitions/api_calls_call_get_CallLocation'
+            sponsors:
+                type: array
+                description: All available sponsors in a ordered list
+                items:
+                    $ref: '#/definitions/api_calls_call_get_CallSponsor'
+            translations:
+                type: array
+                description: All available translations in a dictionary by language
+                items:
+                    $ref: '#/definitions/api_calls_call_get_CallTranslation'
+
+    - schema:
+        id: CallLocation
+        properties:
+            city:
+                type: string
+                description: City location of the matchfunding call (language may vary)
+            region:
+                type: string
+                description: Region location of the matchfunding call (language may vary)
+            country:
+                type: string
+                description: Country name of the matchfunding call (language may vary)
+            country-code:
+                type: string
+                description: Country code of the matchfunding call in [ISO 3166-1](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) format
+            latitude:
+                type: number
+                description: Project's location latitude coordinate
+            longitude:
+                type: number
+                description: Project's location longitude coordinate
+            radius:
+                type: number
+                description: Radius (Km) of influence for the call (if any)
+
+    - schema:
+        id: CallTranslation
+        properties:
+            "*misc*":
+                type: string
+                description: Every item of a translation will have the same structure as the parent object with the same fields (**and those fields only**) translated. Non translated items won't be displayed at all
+
+    - schema:
+        id: CallSponsor
+        properties:
+            name:
+                type: string
+                description: Name of the sponsor
+            url:
+                type: string
+                description: URL for the sponsor (if available)
+            image-url:
+                type: string
+                description: URL for the image/logo of the sponsor
+
+parameters:
+    - in: path
+      type: integer
+      name: call_id
+      description: Unique ID for the call
+      required: true
+
+responses:
+    200:
+        description: Call data
+        schema:
+            $ref: '#/definitions/api_calls_call_get_CallFull'
+    401:
+        description: Resource requires authorization
+    404:
+        description: Resource not found
+

@@ -1,5 +1,12 @@
-/ve
+/cover
+__pycache__
+.coverage
+.vagrant
 *.pyc
+*.log
 *~
+virtualenv
+config.py
+config_test.py
+!goteoapi/config.py
 
-/config.py

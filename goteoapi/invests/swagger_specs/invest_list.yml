@@ -1,0 +1,143 @@
+Invest API
+This resource returns invest information.
+http://developers.goteo.org/doc/invests
+---
+tags:
+    - invests
+
+security:
+    - basic: []
+
+definitions:
+    - schema:
+        id: Invest
+        properties:
+            id:
+                type: integer
+                description: Invest unique identifier
+            amount:
+                type: number
+                description: Amount of the contribution
+            currency:
+                type: string
+                description: Currency of the contribution (currently one of `EUR`, `GBP`, `USD`) in [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) format
+            conversion-ratio:
+                type: number
+                description: Currency rate at the moment of the payment (relative to EUR)
+            date-charged:
+                type: string
+                description: Date-only when the invest was charged in RFC822 format
+            date-created:
+                type: string
+                description: Date-only when the invest was created in RFC822 format
+            date-returned:
+                type: string
+                description: Date-only when the invest was returned (if applicable) in RFC822 format
+            date-updated:
+                type: string
+                description: Date & Time when the invest was last updated in RFC822 format
+            latitude:
+                type: number
+                description: Latitude coordinate for the invest
+            longitude:
+                type: number
+                description: Longitude coordinate for the invest
+            region:
+                type: string
+                description: Region location for the invest
+            project:
+                type: string
+                description: Id of the invest where applies the invests
+            call:
+                type: string
+                description: Id of the matchfunding call if this invest belongs to a invest in selected
+            type:
+                type: string
+                description: Type of the payment, one of `payment`, `drop`, `pool`
+            status:
+                type: string
+                description: Status of the payment, one of `processing`, `pending`, `charged`, `cancelled`, `paid`, `returned`, `relocated`, `pool-returned`
+            resign:
+                type: boolean
+                description: True if the user does not want any reward in exchango of the contribution
+    - schema:
+        id: ExtraInvest
+        properties:
+            calls:
+                type: integer
+                description: Number of matchfunding calls applying in the current query
+            pledged:
+                type: number
+                description: Total sum pledged amount for the current query
+            projects:
+                type: integer
+                description: Total sum of projects applying in the current query
+            refunded:
+                type: number
+                description: Total sum of refunded amount for the current query
+
+    - schema:
+        id: ResponseInvest
+        properties:
+            items:
+                type: array
+                items:
+                    $ref: '#/definitions/api_invests_invests_get_Invest'
+            meta:
+                $ref: '#/definitions/api_projects_projects_get_MetaProject'
+            extra:
+                $ref: '#/definitions/api_invests_invests_get_ExtraInvest'
+
+parameters:
+    - in: query
+      type: string
+      name: node
+      description: Filter by individual node(s). Multiple nodes can be specified. Restricts the list to the invests originally created in that node(s)
+      collectionFormat: multi
+    - in: query
+      type: string
+      name: call
+      description: Filter by individual matchfunding call(s). Multiple calls can be specified. Restricts the list to the projects originally created in that call(s)
+      collectionFormat: multi
+    - in: query
+      name: project
+      description: Filter by individual project(s). Multiple projects can be specified. Restricts the list to the invests that have either collaborate or contributed (financially) to that project(s).
+      type: string
+      collectionFormat: multi
+    - in: query
+      name: from_date
+      description: Filter from date. Ex. "2013-01-01". Restricts the list to the invests created in that range
+      type: string
+      format: date
+    - in: query
+      name: to_date
+      description: Filter until date.. Ex. "2014-01-01". Restricts the list to the invests created in that range
+      type: string
+      format: date
+    - in: query
+      name: category
+      description: Filter by project category. Multiple categories can be specified. Restricts the list to the invests that have interests in that category(ies)
+      type: integer
+      collectionFormat: multi
+    - in: query
+      name: location
+      description: Filter by project location (Latitude,longitude,Radius in Km). Restricts the list to the invests used in projects geolocated in that area
+      type: number
+      collectionFormat: csv
+    - in: query
+      name: page
+      description: Page number (starting at 1) if the result can be paginated
+      type: integer
+    - in: query
+      name: limit
+      description: Page limit (maximum 50 results, defaults to 10) if the result can be paginated
+      type: integer
+responses:
+    200:
+        description: List of available invests
+        schema:
+            $ref: '#/definitions/api_invests_invests_get_ResponseInvest'
+    401:
+        description: Resource requires authorization
+    400:
+        description: Invalid parameters format

@@ -1,0 +1,164 @@
+Call API
+This resource returns call information.
+http://developers.goteo.org/doc/calls
+---
+tags:
+    - calls
+
+security:
+    - basic: []
+
+definitions:
+    - schema:
+        id: Call
+        properties:
+            id:
+                type: string
+                description: Id of the matchfunding call
+            name:
+                type: string
+                description: Name of the matchfunding call
+            description-short:
+                type: string
+                description: Short description for the matchfunding call
+            date-opened:
+                type: string
+                description: Date when the matchfunding call was opened
+            date-published:
+                type: string
+                description: Date when the matchfunding call was published
+            date-succeeded:
+                type: string
+                description: Date when the matchfunding call was succeeded
+            call-url:
+                type: string
+                description: URL where to visualize the matchfunding call
+            logo-url:
+                type: string
+                description: URL for the call's logo
+            image-url:
+                type: string
+                description: URL for the main call's image
+            latitude:
+                type: number
+                description: Latitude coordinate for the call
+            longitude:
+                type: number
+                description: Longitude coordinate for the call
+            radius:
+                type: number
+                description: Radius (Km) of influence for the call (if any)
+            region:
+                type: string
+                description: Region location for the call
+            call-location:
+                type: string
+                description: Custom location value for the call
+            owner:
+                type: string
+                description: User ID of the call's owner
+            owner-name:
+                type: string
+                description: User name of the call's owner
+            amount-available:
+                type: number
+                description: Available amount of cash to distribute among projects
+            amount-peers:
+                type: number
+                description: Amount of cash already distribute among projects
+            amount-committed:
+                type: number
+                description: Maximum total amount of cash that was available to distribute among projects
+            amount-remaining:
+                type: number
+                description: Amount of cash still available for distribute among projects
+            projects-total:
+                type: integer
+                description: Total number of projects included into this matchfunding call
+            projects-applied:
+                type: integer
+                description: Total number of projects effectively applicating to this matchfunding call
+            projects-active:
+                type: integer
+                description: Active projects (still with a running campaign) in this matchfunding call
+            projects-succeeded:
+                type: integer
+                description: Projects funded in this matchfunding call
+            status:
+                type: string
+                description: Status of the call, one of `pending`, `editing`, `reviewing`, `applying`, `published`, `succeeded`, `expired`
+            sponsors:
+                type: array
+                description: All available sponsors in a ordered list
+                items:
+                    $ref: '#/definitions/api_calls_call_get_CallSponsor'
+
+    - schema:
+        id: ResponseCall
+        properties:
+            items:
+                type: array
+                items:
+                    $ref: '#/definitions/api_calls_calls_get_Call'
+            meta:
+                $ref: '#/definitions/api_projects_projects_get_MetaProject'
+
+parameters:
+    - in: query
+      type: string
+      name: node
+      description: Filter by individual node(s). Multiple nodes can be specified. Restricts the list to the calls originally created in that node(s)
+      collectionFormat: multi
+    - in: query
+      type: string
+      name: call
+      description: Filter by individual matchfunding call(s). Multiple calls can be specified. Restricts the list to the projects originally created in that call(s)
+      collectionFormat: multi
+    - in: query
+      name: project
+      description: Filter by individual project(s). Multiple projects can be specified. Restricts the list to the calls that containing that projects
+      type: string
+      collectionFormat: multi
+    - in: query
+      name: lang
+      description: Get results by specified lang. Multiple langs can be specified
+      type: string
+      collectionFormat: multi
+    - in: query
+      name: from_date
+      description: Filter from date. Ex. "2013-01-01". Restricts the list to the calls published in that range
+      type: string
+      format: date
+    - in: query
+      name: to_date
+      description: Filter until date.. Ex. "2014-01-01". Restricts the list to the calls published in that range
+      type: string
+      format: date
+    - in: query
+      name: category
+      description: Filter by project category. Multiple categories can be specified. Restricts the list to the calls containing project with interests in that category(ies)
+      type: integer
+      collectionFormat: multi
+    - in: query
+      name: location
+      description: Filter by project location (Latitude,longitude,Radius in Km). Restricts the list to the calls with projects geolocated in that area
+      type: number
+      collectionFormat: csv
+    - in: query
+      name: page
+      description: Page number (starting at 1) if the result can be paginated
+      type: integer
+    - in: query
+      name: limit
+      description: Page limit (maximum 50 results, defaults to 10) if the result can be paginated
+      type: integer
+
+responses:
+    200:
+        description: List of available calls
+        schema:
+            $ref: '#/definitions/api_calls_calls_get_ResponseCall'
+    401:
+        description: Resource requires authorization
+    400:
+        description: Invalid parameters format

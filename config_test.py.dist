@@ -1,0 +1,35 @@
+#
+# Dist. test file
+# Create a new config_test.py with your customization
+#
+DB_URI = 'mysql://travis:@localhost/goteotest'
+
+TESTING = True
+DEBUG = False
+SQLALCHEMY_ECHO = False
+AUTH_ENABLED = False
+
+SECRET_KEY = 'not-a-very-secret-key'
+
+REQUESTS_LIMIT = 300
+REQUESTS_TIME = 30
+
+REDIS_URL = "redis://localhost:6379/0"
+CACHE_TYPE = 'null'
+CACHING = False
+CACHE_KEY_PREFIX = 'Test/'
+CACHE_MIN_TIMEOUT = 2
+
+MODULES = {
+    'goteoapi_reports.controllers',
+    'goteoapi_digests.controllers'
+}
+
+
+USERS = {
+    'goteo': {
+        'password': 'goteo',
+        'remotes': ['127.0.0.0/16', '192.168.0.0/24'],
+        # 'cors': ['http://stats.goteo.org', 'https://stats.goteo.org']
+    }
+}

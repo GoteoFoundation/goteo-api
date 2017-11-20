@@ -1,0 +1,80 @@
+User API
+This resource returns user information.
+http://developers.goteo.org/users#user
+---
+tags:
+    - user
+
+security:
+    - basic: []
+
+definitions:
+    - schema:
+        id: UserFull
+        properties:
+            id:
+                type: string
+                description: User unique identifier
+            name:
+                type: string
+                description: Name of the user
+            about:
+                type: string
+                description: User's about text
+            node:
+                type: string
+                description: Node where the user was created originally
+            lang:
+                type: string
+                description: Language for the user's texts description
+            profile-image-url:
+                type: string
+                description: URL with the avatar (image) of the user
+            profile-url:
+                type: string
+                description: URL for the user profile
+            date-created:
+                type: string
+                description: Date when the user was created RFC822 format
+            amount-public-invested:
+                type: number
+                description: Amount of money invested in any project (excluding anonymous investions)
+            projects-public-invested:
+                type: number
+                description: Number of projects where the user has invested (excluding anonymous investions)
+            projects-published:
+                type: number
+                description: Number of project the user has created and published
+            projects-collaborated:
+                type: number
+                description: Number of project the user has interacted
+            translations:
+                type: array
+                description: All available translations in a list indexed by language in [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) format
+                items:
+                    $ref: '#/definitions/api_users_user_get_UserTranslation'
+    - schema:
+        id: UserTranslation
+        properties:
+            name:
+                type: string
+                description: Name of the user translated (if any)
+            about:
+                type: string
+                description: User's about text translated (if any)
+
+parameters:
+    - in: path
+      type: string
+      name: user_id
+      description: Unique ID for the user
+      required: true
+responses:
+    200:
+        description: User data
+        schema:
+            $ref: '#/definitions/api_users_user_get_UserFull'
+    401:
+        description: Resource requires authorization
+    404:
+        description: Resource not found

@@ -1,0 +1,30 @@
+Auth API
+This resource returns login information.
+https://developers.goteo.org/doc/licenses
+---
+tags:
+    - auth
+
+security:
+    - basic: []
+
+definitions:
+    - schema:
+        id: Token
+        properties:
+            access_token:
+                type: string
+                description: 'Acces token that can be used to authenticate the API endpoints throught a HTTP Header:<br> "Authorization: Bearer {access_token}"'
+            expires_in:
+                type: string
+                description: Number of seconds wich the access_token will be valid
+            token_type:
+                type: string
+                description: Currently, only `bearer`
+responses:
+    200:
+        description: Bearer token data ready for an OAuth implicit authorization
+        schema:
+            $ref: '#/definitions/api_auth_token_get_Token'
+    401:
+        description: Resource requires authorization

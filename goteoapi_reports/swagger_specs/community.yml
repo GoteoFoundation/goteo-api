@@ -1,0 +1,203 @@
+Community Stats API
+This resource returns statistics about the community in Goteo.
+http://developers.goteo.org/doc/reports#community
+---
+tags:
+    - reports_community
+
+security:
+    - basic: []
+
+definitions:
+    - schema:
+        id: Community
+        properties:
+            users:
+                type: integer
+                description: Total number of registered users
+            donors:
+                type: integer
+                description: Number of donors
+            percentage-donors-users:
+                type: number
+                description: Percentage of registered users that are donors (*100 * donors / users*)
+            percentage-unsubscribed-users:
+                type: number
+                description: Percentage of unsubscribed users (over the  total number of users)
+            donors-collaborators:
+                type: integer
+                description: Number of donors who collaborate with others creators
+            multidonors:
+                type: integer
+                description: Number of donors who donate to more than 1 project
+            percentage-multidonor-donors:
+                type: number
+                description: "Percentage of multidonors (over total donors: *100 * multidonors / donors*)"
+            percentage-multidonor-users:
+                type: number
+                description: "Percentage of multidonors (over total users: *100 * multidonors / users*)"
+            paypal-donors:
+                type: integer
+                description: Number of donors using PayPal
+            creditcard-donors:
+                type: integer
+                description: Number of donors using a Credit Card
+            cash-donors:
+                type: integer
+                description: Number of donors donanting to projects off-line
+            collaborators:
+                type: integer
+                description: Number of collaborators
+            average-donors:
+                type: integer
+                description: Average number of donors per successful project
+            average-collaborators:
+                type: integer
+                description: Average number of collaborators per succesful  project
+            creators-donors:
+                type: integer
+                description: Number of creators funding other projects
+            creators-collaborators:
+                type: integer
+                description: Number of creators collaborating with other  projects |
+            leading-category:
+                type: integer
+                description: Category with the highest number of interested users
+            second-category:
+                type: integer
+                description: Second category with more users
+            users-leading-category:
+                type: integer
+                description: Number of users in this category
+            users-second-category:
+                type: integer
+                description: Number of users in this category
+            percentage-users-leading-category:
+                type: number
+                description: Percentage of users in the leading category
+            percentage-users-second-category:
+                type: number
+                description: Percentage of users in this category
+            categories:
+                type: array
+                description: Array of categories
+                items:
+                    $ref: '#/definitions/api_reports_reports_community_get_Category'
+            top10-donors:
+                type: array
+                description: The top 10 donors who spend more money on projects (the most generous co-financiers)
+                items:
+                    $ref: '#/definitions/api_reports_reports_community_get_Donation'
+            top10-multidonors:
+                type: array
+                description: Top 10 multidonors who are contributed to more different projects (The most diversified co-financiers)
+                items:
+                    $ref: '#/definitions/api_reports_reports_community_get_Donation'
+            top10-collaborators:
+                type: array
+                description: Top 10 talkers
+                items:
+                    $ref: '#/definitions/api_reports_reports_community_get_Collaboration'
+    - schema:
+        id: Category
+        properties:
+            id:
+                type: integer
+                description: Category unique identifier
+            name:
+                type: string
+                description: Category name
+            percentage-users:
+                type: number
+                description: Percentage of users in this category over the total number of users
+            users:
+                type: integer
+                description: Total number of users interested in the category
+    - schema:
+        id: Donation
+        properties:
+            user:
+                type: string
+                description: User unique identifier
+            name:
+                type: string
+                description: Name of the user
+            profile-image-url:
+                type: string
+                description: URL with the avatar (image) of the user
+            profile-url:
+                type: string
+                description: URL for the user profile
+            amount:
+                type: number
+                description: Total amount of money (€) spent by the user in projects
+            contributions:
+                type: integer
+                description: Total number of different projects the user has contributed to
+    - schema:
+        id: Collaboration
+        properties:
+            user:
+                type: string
+                description: User unique identifier
+            name:
+                type: string
+                description: Name of the user
+            profile-image-url:
+                type: string
+                description: URL with the avatar (image) of the user
+            profile-url:
+                type: string
+                description: URL for the user profile
+            interactions:
+                type: integer
+                description: Karma number of the user collaborations
+parameters:
+    - in: query
+      type: string
+      name: node
+      description: Filter by individual node(s). Multiple nodes can be specified
+      collectionFormat: multi
+    - in: query
+      type: string
+      name: call
+      description: Filter by individual matchfunding call(s). Multiple calls can be specified. Restricts the list to the projects originally created in that call(s)
+      collectionFormat: multi
+    - in: query
+      name: project
+      description: Filter by individual project(s). Multiple projects can be specified
+      type: string
+      collectionFormat: multi
+    - in: query
+      name: lang
+      description: Get results by specified lang. Multiple langs can be specified
+      type: string
+      collectionFormat: multi
+    - in: query
+      name: from_date
+      description: Filter from date. Ex. "2013-01-01"
+      type: string
+      format: date
+    - in: query
+      name: to_date
+      description: Filter until date.. Ex. "2014-01-01"
+      type: string
+      format: date
+    - in: query
+      name: category
+      description: Filter by project category. Multiple categories can be specified
+      type: integer
+    - in: query
+      name: location
+      description: Filter by project location (Latitude,longitude,Radius in Km)
+      type: number
+      collectionFormat: csv
+responses:
+    200:
+        description: Community object
+        schema:
+            $ref: '#/definitions/api_reports_reports_community_get_Community'
+    401:
+        description: Resource requires authorization
+    400:
+        description: Invalid parameters format

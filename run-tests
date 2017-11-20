@@ -1,0 +1,98 @@
+#!/bin/bash
+
+CURR=$(dirname $(readlink -f $0))
+
+cd $CURR
+
+if [ -z "$WORKON_HOME" ]; then
+    source virtualenv/bin/activate
+fi
+
+CONFIG="config_test.py"
+ARGS=()
+for var in "$@"; do
+    if [ "$SET_CONFIG" == "1" ]; then
+        CONFIG="$var"
+        SET_CONFIG=
+        continue
+    fi
+    # Remove --reset argument
+    if [ "$var" == '--reset-database' ] || [ "$var" == '-r' ]; then
+        RESET_DATABASE=1
+    elif [ "$var" == '--test-config' ] || [ "$var" == '-t' ]; then
+        SET_CONFIG=1
+        continue
+    else
+        ARGS+=("$var")
+    fi
+done
+
+if [ ! -e "$CONFIG" ]; then
+    echo "Custom [$CONFIG] file not found"
+    CONFIG="config_test.py.dist"
+fi
+
+if [ "${CONFIG:0:1}" != "/" ]; then
+    CONFIG=$CURR/$CONFIG;
+fi
+if [ "${CONFIG:0:1}" != "." ]; then
+    CONFIG=$(dirname $(readlink -f $CONFIG))/$(basename $CONFIG)
+fi
+
+echo "Using [$CONFIG] file for testing"
+export GOTEO_API_CONFIG_FILE=$CONFIG
+
+
+if [ "$RESET_DATABASE" != "" ]; then
+    echo "Removing database"
+    DB_URI=$(cat $CONFIG | grep DB_URI)
+    #remove spaces
+    DB_URI=${DB_URI// /}
+    #remove DB_URI PART
+    DB_URI=${DB_URI//DB_URI=/}
+    #remove ' and "'
+    DB_URI=${DB_URI//\'/}
+    DB_URI=${DB_URI//\"/}
+    DB_URI=${DB_URI//mysql:\/\//}
+    PARAMS=($(echo $DB_URI | tr ":@/" "\n"))
+    USER=${PARAMS[0]}
+    PASS=${PARAMS[1]}
+    HOST=${PARAMS[2]}
+    DATABASE=${PARAMS[3]}
+
+    # check if password is empty
+    if [ -z "$DATABASE" ]; then
+        DATABASE=$HOST
+        HOST=$PASS
+        PASS=''
+    else
+        PASS="-p$PASS"
+    fi
+
+    mysql -h $HOST -u $USER $PASS $DATABASE < goteoapi/tests/sql/schema_mysql.sql
+    mysql -h $HOST -u $USER $PASS $DATABASE < goteoapi/tests/sql/data_mysql.sql
+
+
+    if [ "$?" != '0' ]; then
+        echo "Error creating tables or importing data!"
+        exit 2
+    fi
+    echo "Done, now testing"
+fi
+
+# clean redis
+PREFIX=$(cat $CONFIG | grep CACHE_KEY_PREFIX)
+#remove spaces
+PREFIX=${PREFIX// /}
+#remove CACHE_KEY_PREFIX part
+PREFIX=${PREFIX//CACHE_KEY_PREFIX=/}
+#remove ' and "'
+PREFIX=${PREFIX//\'/}
+PREFIX=${PREFIX//\"/}
+
+if [ ! -z "$PREFIX" ]; then
+    redis-cli KEYS "$PREFIX:*" | tr "\n" "\0" | xargs -0 redis-cli DEL
+fi
+
+# run tests
+nosetests --cover-package=goteoapi "${ARGS[@]}"
