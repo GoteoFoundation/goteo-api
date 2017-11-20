@@ -98,11 +98,11 @@ class Matcher(db.Model):
         filters = [self.active == True]
 
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
-            filters.append(self.opened >= kwargs['from_date'])
+            filters.append(self.created >= kwargs['from_date'])
         # Filters by "to date"
         # counting license created before this date
         if 'to_date' in kwargs and kwargs['to_date'] is not None:
-            filters.append(self.opened <= kwargs['to_date'])
+            filters.append(self.created <= kwargs['to_date'])
         if 'project' in kwargs and kwargs['project'] is not None:
             filters.append(self.id == MatcherProject.matcher_id)
             filters.append(MatcherProject.project_id.in_(kwargs['project']))
@@ -154,14 +154,14 @@ class Matcher(db.Model):
             if 'lang' in kwargs and kwargs['lang'] is not None:
                 ret = []
                 for u in MatcherLang.get_query(kwargs['lang']) \
-                                 .filter(*filters).order_by(asc(self.opened)) \
+                                 .filter(*filters).order_by(asc(self.created)) \
                                  .offset(page * limit).limit(limit):
                     ret.append(MatcherLang.get_translated_object(u._asdict(),
                                                               kwargs['lang']))
                 return ret
             # No langs, normal query
             return self.query.distinct().filter(*filters) \
-                                        .order_by(asc(self.opened)) \
+                                        .order_by(asc(self.created)) \
                                         .offset(page * limit) \
                                         .limit(limit).all()
         except NoResultFound:
