@@ -83,6 +83,9 @@ def project_url(project_id):
 def call_url(call_id):
     return 'https://goteo.org/call/' + call_id
 
+def matcher_url(call_id):
+    return 'https://goteo.org/call/' + call_id
+
 
 def project_widget_url(project_id):
     return 'https://goteo.org/widget/project/' + project_id

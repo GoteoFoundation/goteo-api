@@ -32,6 +32,7 @@ class SummaryAPI(Base):
         from goteoapi.projects.models import Project
         from goteoapi.users.models import User, UserInterest
         from goteoapi.calls.models import Call
+        from goteoapi.matchers.models import Matcher
 
         time_start = time.time()
         # remove not used args
@@ -71,7 +72,7 @@ class SummaryAPI(Base):
                 'pledged': Invest.pledged_total(**args),
                 'matchfund-amount':
                     Invest.pledged_total(method=Invest.METHOD_DROP, **args),
-                'matchfundpledge-amount': Call.pledged_total(**args),
+                'matchfundpledge-amount': Call.pledged_total(**args) + Matcher.pledged_total(**args),
                 'average-donation': Invest.average_donation(**args),
                 'users': users,
                 'projects-received': Project.total(received=True, **args),
