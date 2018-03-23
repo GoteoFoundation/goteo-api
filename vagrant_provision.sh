@@ -32,6 +32,7 @@ sudo apt-get install -y libffi6 libffi-dev libevent1-dev libmysqlclient-dev libp
 sudo apt-get install -y python-virtualenv virtualenvwrapper
 sudo apt-get install -y redis-server python-redis
 sudo apt-get install -y python3-pip
+sudo apt-get install -y libmysqlclient-dev libffi-dev
 sudo pip3 install virtualenvwrapper
 
 if [ ! -f /home/ubuntu/.bash_profile ]; then

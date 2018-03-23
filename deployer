@@ -7,7 +7,7 @@
 if [ -z "$WORKON_HOME" ]; then
     PYEXE=$(env which python3)
 
-    /usr/bin/virtualenv -p $PYEXE virtualenv
+    env virtualenv -p $PYEXE virtualenv
     source virtualenv/bin/activate
 fi
 

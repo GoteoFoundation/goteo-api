@@ -22,6 +22,7 @@ class Invest(db.Model):
     METHOD_TPV = 'tpv'
     METHOD_CASH = 'cash'
     METHOD_DROP = 'drop'
+    METHOD_POOL = 'pool'
 
     # INVEST STATUS IDs
     # payment gateway not reached yet or just a failed payment
@@ -471,9 +472,10 @@ class Invest(db.Model):
         """Total amount of money (€) raised by Goteo"""
         try:
             filters = list(self.get_filters(**kwargs))
-            filters.append(self.project_id == Project.id)
-            filters.append(Project.status.in_(Project.PUBLISHED_PROJECTS))
+            # filters.append(self.project_id == Project.id)
+            # filters.append(Project.status.in_(Project.PUBLISHED_PROJECTS))
             filters.append(self.status.in_(self.VALID_INVESTS))
+            filters.append(self.method != self.METHOD_POOL)
             total = db.session.query(func.sum(self.amount)) \
                       .filter(*filters).scalar()
             if total is None:
@@ -488,8 +490,8 @@ class Invest(db.Model):
         """Refunded money (€) on failed projects """
         try:
             filters = list(self.get_filters(**kwargs))
-            filters.append(self.project_id == Project.id)
-            filters.append(Project.status.in_(Project.PUBLISHED_PROJECTS))
+            # filters.append(self.project_id == Project.id)
+            # filters.append(Project.status.in_(Project.PUBLISHED_PROJECTS))
             filters.append(self.status == self.STATUS_RETURNED)
             total = db.session.query(func.sum(self.amount)) \
                       .filter(*filters).scalar()
@@ -514,7 +516,7 @@ class Invest(db.Model):
                       .filter(*filters).scalar()
             if total is None:
                 total = 0
-            total = float(total) * 0.08
+            total = float(total) * 0.04
             total = round(total, 2)
             return total
         except MultipleResultsFound:

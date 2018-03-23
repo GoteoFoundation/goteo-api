@@ -7,7 +7,7 @@
 
 # Mysql Goteo Database (mandatory)
 # ================================
-dbhost = 'devgoteo.org'
+dbhost = 'goteo.test'
 dbuser = 'goteo'
 dbpass = 'goteo1234'
 dbname = 'goteo'

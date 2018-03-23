@@ -70,7 +70,8 @@ def crontab(install=False, remove=False):
         cprint('Please specifiy --install (-i) or --remove (-r) argument',
                'red')
 
-    command = os.getcwd() + '/console'
+    # The run-one command ensures only one copy is executed at the time
+    command = 'run-one' + os.getcwd() + '/console'
     cron = CronTab(user=True)
 
     if install or remove:
