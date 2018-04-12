@@ -18,6 +18,7 @@ class Message(db.Model):
     user_id = db.Column('user', String(50), db.ForeignKey('user.id'))
     thread = db.Column('thread', Integer)
     blocked = db.Column('blocked', Integer)
+    private = db.Column('private', Integer)
     date = db.Column('date', DateTime)
     # message = db.Column('message', Text)
 
@@ -93,6 +94,8 @@ class Message(db.Model):
     def collaborators_total(self, **kwargs):
         """Total number of collaborators"""
         filters = list(self.get_filters(**kwargs))
+        filters.append(self.thread == None)
+        filters.append(self.private == 0)
         res = db.session.query(func.count(func.distinct(self.user_id))) \
                         .filter(*filters).scalar()
         if res is None:
