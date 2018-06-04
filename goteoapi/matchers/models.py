@@ -36,7 +36,7 @@ class Matcher(db.Model):
     User = relationship("User", lazy='joined')  # Eager loading for catching
     terms = db.Column('terms', Text)
     # Total available amount
-    amount_total = db.Column('amount', Integer, nullable=False)
+    amount_available = db.Column('amount', Integer, nullable=False)
     # Total Amount committed on projects
     amount_committed = db.Column('used', Integer, nullable=False)
     # Total Amount provided by end users (not matchfunding)
@@ -89,7 +89,7 @@ class Matcher(db.Model):
 
     @hybrid_property
     def amount_remaining(self):
-        return self.amount_total - self.amount_committed
+        return self.amount_available - self.amount_committed
 
     @hybrid_property
     def date_created(self):

@@ -37,7 +37,7 @@ matcher_resource_fields = {
     "matcher_location": fields.String,
     "owner": fields.String,
     "owner_name": fields.String,
-    "amount_total": fields.Float,
+    "amount_available": fields.Float,
     "amount_peers": fields.Float,
     "amount_committed": fields.Float,
     "amount_remaining": fields.Float,
@@ -47,6 +47,7 @@ matcher_resource_fields = {
     "projects_rejected": fields.Integer,
     "projects_discarded": fields.Integer,
     "projects_accepted": fields.Integer,
+    "date_created": DateTime,
     "active": fields.Boolean
 }
 
