@@ -242,6 +242,7 @@ class Project(db.Model):
         from ..invests.models import Invest
         from ..location.models import ProjectLocation
         from ..calls.models import CallProject
+        from ..matchers.models import MatcherProject
 
         # Filters by default only published projects
         filters = []
@@ -373,6 +374,13 @@ class Project(db.Model):
                 filters.append(CallProject.call_id.in_(kwargs['call']))
             else:
                 filters.append(CallProject.call_id == kwargs['call'])
+
+        if 'matcher' in kwargs and kwargs['matcher'] is not None:
+            filters.append(self.id == MatcherProject.project_id)
+            if isinstance(kwargs['matcher'], (list, tuple)):
+                filters.append(MatcherProject.matcher_id.in_(kwargs['matcher']))
+            else:
+                filters.append(MatcherProject.matcher_id == kwargs['matcher'])
 
         return filters
 

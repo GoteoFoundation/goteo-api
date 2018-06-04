@@ -19,8 +19,8 @@ class MatcherLang(AbstractLang, db.Model):
                    db.ForeignKey('matcher.id'), primary_key=True)
     lang = db.Column('lang', String(2), primary_key=True)
     name = db.Column('name', String(255))
-    terms = db.Column('description', Text)
-    pending = db.Column('pending', Integer)
+    terms = db.Column('terms', Text)
+    # pending = db.Column('pending', Integer)
     Matcher = relationship('Matcher', back_populates='Translations')
 
     def __repr__(self):
@@ -42,20 +42,26 @@ class Matcher(db.Model):
     # Total Amount provided by end users (not matchfunding)
     amount_peers = db.Column('crowd', Integer, nullable=False)
     # Selected projects
-    projects_total = db.Column('projects', Integer, nullable=False)
+    projects_active = db.Column('projects', Integer, nullable=False)
     vars = db.Column('vars', Text)
     lang = db.Column('lang', String(2))
     created = db.Column('created', Date)
     modified = db.Column('modified_at', DateTime)
     active = db.Column('active', Boolean)
     logo = db.Column('logo', String(255))
+    matcher_location = db.Column('matcher_location', String(255))
     Translations = relationship(
         "MatcherLang",
-        primaryjoin="and_(Matcher.id==MatcherLang.id, MatcherLang.pending==0)",
+        # primaryjoin="and_(Matcher.id==MatcherLang.id, MatcherLang.pending==0)",
+        primaryjoin="and_(Matcher.id==MatcherLang.id)",
         back_populates="Matcher", lazy='joined')  # Eager loading for catching
     Users = relationship(
         "MatcherUser",
         primaryjoin="Matcher.id==MatcherUser.matcher_id",
+        back_populates="Matcher", lazy='joined')  # Eager loading for catching
+    Projects = relationship(
+        "MatcherProject",
+        primaryjoin="Matcher.id==MatcherProject.matcher_id",
         back_populates="Matcher", lazy='joined')  # Eager loading for catching
 
     def __repr__(self):
@@ -82,12 +88,21 @@ class Matcher(db.Model):
         return image_url(self.logo, size="medium")
 
     @hybrid_property
+    def amount_remaining(self):
+        return self.amount_total - self.amount_committed
+
+    @hybrid_property
     def date_created(self):
         return utc_from_local(self.created)
 
     @hybrid_property
     def date_updated(self):
         return utc_from_local(self.modified)
+
+    @hybrid_property
+    def projects_total(self):
+        return self.projects_count()
+
 
     # Getting filters for this model
     @hybrid_method
@@ -117,17 +132,6 @@ class Matcher(db.Model):
             filters.append(self.id == MatcherProject.matcher_id)
             filters.append(MatcherProject.project_id == Project.id)
             filters.append(Project.node_id.in_(kwargs['node']))
-        # if 'location' in kwargs and kwargs['location'] is not None:
-        #     subquery = MatcherLocation.location_subquery(**kwargs['location'])
-        #     filters.append(MatcherLocation.id == self.id)
-        #     filters.append(MatcherLocation.id.in_(subquery))
-        # if 'loc_status' in kwargs and kwargs['loc_status'] is not None:
-        #     if kwargs['loc_status'] == 'located':
-        #         filters.append(self.id.in_(
-        #             db.session.query(MatcherLocation.id).subquery()))
-        #     if kwargs['loc_status'] == 'unlocated':
-        #         filters.append(~self.id.in_(
-        #             db.session.query(MatcherLocation.id).subquery()))
 
         return filters
 
@@ -201,16 +205,48 @@ class Matcher(db.Model):
     @hybrid_method
     @cacher
     def users_list(self):
+        from ..users.models import User
         users = []
-        for s in self.Sponsors:
+        for s in self.Users:
             users.append(s)
         try:
-            filters = [(self.id == MatcherUser.matcher_id)]
-            users = MatcherUser.query.filter(*filters) \
-                        .order_by(asc(MatcherUser.order)).all()
+            filters = [self.id == MatcherUser.matcher_id, MatcherUser.user_id==User.id]
+            users = User.query.filter(*filters).all()
             return users
         except NoResultFound:
             return []
+
+    @hybrid_method
+    @cacher
+    def projects_list(self, status=None):
+        from ..users.models import Project
+        projects = []
+        for s in self.Projects:
+            projects.append(s)
+        try:
+            filters = [self.id==MatcherProject.matcher_id,
+                       MatcherProject.status==status,
+                       MatcherProject.project_id==Project.id]
+            projects = Project.query.filter(*filters).all()
+            return projects
+        except NoResultFound:
+            return []
+
+    @hybrid_method
+    @cacher
+    def projects_count(self, status=None):
+        """Total number of projects on this matcher"""
+        try:
+            filters = []
+            if status:
+                filters.append(MatcherProject.status==status)
+            total = db.session.query(func.count(MatcherProject.project_id)) \
+                              .filter(*filters).scalar()
+            if total is None:
+                total = 0
+            return total
+        except MultipleResultsFound:
+            return 0
 
 # Matcher projects
 class MatcherProject(db.Model):
@@ -220,6 +256,8 @@ class MatcherProject(db.Model):
                         db.ForeignKey('matcher.id'), primary_key=True)
     project_id = db.Column('project_id', String(50),
                            db.ForeignKey('project.id'), primary_key=True)
+    status = db.Column('status', String(10))
+    Matcher = relationship('Matcher', back_populates='Projects')
 
     def __repr__(self):
         return '<MatcherProject from %s to project %s>' % (

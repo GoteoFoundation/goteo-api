@@ -197,6 +197,18 @@ class CallLocation(db.Model, ItemLocation):
             self.id, self.latitude, self.longitude)
 
 
+class MatcherLocation(db.Model, ItemLocation):
+    """Matcher location particular case"""
+    __tablename__ = 'matcher_location'
+
+    id = db.Column('id', String(50),
+                   db.ForeignKey('matcher.id'), primary_key=True)
+
+    def __repr__(self):
+        return '<MatcherLocation: (%s) in %f,%f>' % (
+            self.id, self.latitude, self.longitude)
+
+
 class InvestLocation(db.Model, ItemLocation):
     """Invest location particular case"""
     __tablename__ = 'invest_location'

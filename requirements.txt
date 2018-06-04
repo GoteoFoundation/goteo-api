@@ -1,5 +1,5 @@
 aniso8601==1.1.0
-bcrypt==2.0.0
+bcrypt==3.1.4
 cffi==1.6.0
 coverage==4.1
 https://github.com/microstudi/flasgger/archive/0.5.12.tar.gz
