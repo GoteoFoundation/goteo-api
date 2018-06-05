@@ -62,6 +62,7 @@ class Invest(db.Model):
     user_id = db.Column('user', String(50), db.ForeignKey('user.id'))
     project_id = db.Column('project', String(50), db.ForeignKey('project.id'))
     call_id = db.Column('call', String(50), db.ForeignKey('call.id'))
+    matcher_id = db.Column('matcher', String(50), db.ForeignKey('matcher.id'))
     status = db.Column('status', Integer)
     amount = db.Column('amount', Integer)
     method = db.Column('method', String(20))
@@ -179,6 +180,23 @@ class Invest(db.Model):
                 else:
                     filters.append(self.call_id == kwargs['call'])
 
+        # Can be used to get Invest applying to a Matcher
+        # or Invests not applying to any Matcher if None
+        #  matcher == False   => Invest not applying to any Matcher
+        #  matcher == True   => Invest applying to any Matcher
+        #  matcher == 'matcher-id'   => Invest applying to that specific Matcher
+        if 'matcher' in kwargs and kwargs['matcher'] is not None:
+            if kwargs['matcher'] is True:
+                filters.append(and_(self.matcher_id != None,
+                                    self.matcher_id != ''))
+            elif kwargs['matcher'] is False:
+                filters.append(or_(self.matcher_id == None, self.matcher_id == ''))
+            else:
+                if isinstance(kwargs['matcher'], (list, tuple)):
+                    filters.append(self.matcher_id.in_(kwargs['matcher']))
+                else:
+                    filters.append(self.matcher_id == kwargs['matcher'])
+
         # Can be used to get Invest applying to a Project
         # or Invests not applying to any Project if None
         #  project == False  => Invest not applying to any Project
@@ -291,6 +309,7 @@ class Invest(db.Model):
         """List of donors"""
         from ..users.models import User, UserRole
         from ..calls.models import Call
+        from ..matchers.models import Matcher
 
         limit = kwargs['limit'] if 'limit' in kwargs else 10
         page = kwargs['page'] if 'page' in kwargs else 0
@@ -304,12 +323,16 @@ class Invest(db.Model):
         calls = db.session.query(Call.user_id) \
                   .filter(Call.status > Call.STATUS_REVIEWING) \
                   .subquery()
+        matchers = db.session.query(Matcher.user_id) \
+                  .filter(Matcher.active == True) \
+                  .subquery()
         owners = db.session \
                    .query(Project.user_id) \
                    .filter(Project.status.in_(Project.PUBLISHED_PROJECTS)) \
                    .subquery()
         filters.append(~self.user_id.in_(admins))
         filters.append(~self.user_id.in_(calls))
+        filters.append(~self.user_id.in_(matchers))
         filters.append(~self.user_id.in_(owners))
         try:
             return db.session.query(self.user_id,
@@ -331,6 +354,7 @@ class Invest(db.Model):
         """List of multidonors"""
         from ..users.models import User, UserRole
         from ..calls.models import Call
+        from ..matchers.models import Matcher
 
         limit = kwargs['limit'] if 'limit' in kwargs else 10
         page = kwargs['page'] if 'page' in kwargs else 0
@@ -345,11 +369,15 @@ class Invest(db.Model):
         calls = db.session.query(Call.user_id) \
                   .filter(Call.status > Call.STATUS_REVIEWING) \
                   .subquery()
+        matchers = db.session.query(Matcher.user_id) \
+                  .filter(Matcher.active == True) \
+                  .subquery()
         owners = db.session.query(Project.user_id) \
                    .filter(Project.status.in_(Project.PUBLISHED_PROJECTS)) \
                    .subquery()
         filters.append(~self.user_id.in_(admins))
         filters.append(~self.user_id.in_(calls))
+        filters.append(~self.user_id.in_(matchers))
         filters.append(~self.user_id.in_(owners))
         try:
             return db.session.query(self.user_id,
@@ -459,6 +487,24 @@ class Invest(db.Model):
             filters.append(Call.status.in_(Call.PUBLIC_CALLS))
             filters.append(self.status.in_(self.VALID_INVESTS))
             total = db.session.query(func.count(func.distinct(self.call_id))) \
+                      .filter(*filters).scalar()
+            if total is None:
+                total = 0
+            return total
+        except MultipleResultsFound:
+            return 0
+
+    @hybrid_method
+    @cacher
+    def matchers_total(self, **kwargs):
+        """Total calls in the invest list Goteo"""
+        from ..matchers.models import Matcher
+        try:
+            filters = list(self.get_filters(**kwargs))
+            filters.append(self.matcher_id == Matcher.id)
+            filters.append(Matcher.active == True)
+            filters.append(self.status.in_(self.VALID_INVESTS))
+            total = db.session.query(func.count(func.distinct(self.matcher_id))) \
                       .filter(*filters).scalar()
             if total is None:
                 total = 0

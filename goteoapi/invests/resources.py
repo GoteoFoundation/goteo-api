@@ -28,7 +28,8 @@ invest_resource_fields = {
     # "anonymous": fields.Boolean,
     "type": fields.String,
     "project": fields.String,
-    "call": fields.String,
+    "call_id": fields.String,
+    "matcher_id": fields.String,
     "amount": fields.Float,
     "status": fields.String,
     "currency": fields.String,
@@ -58,6 +59,7 @@ class InvestsListAPI(BaseList):
         super().__init__()
         # Additional filters for this endpoint
         self.reqparse.add_argument('call', type=str, action='append')
+        self.reqparse.add_argument('matcher', type=str, action='append')
         self.reqparse.add_argument('type', type=type_sanitizer)
 
     @requires_auth()
@@ -98,7 +100,8 @@ class InvestsListAPI(BaseList):
                     'pledged': float(Invest.pledged_total(**args)),
                     'refunded': float(Invest.refunded_total(**args)),
                     'projects': Invest.projects_total(**args),
-                    'calls': Invest.calls_total(**args)
+                    'calls': Invest.calls_total(**args),
+                    'matchers': Invest.matchers_total(**args)
                 }
             },
             filters=args.items(),
