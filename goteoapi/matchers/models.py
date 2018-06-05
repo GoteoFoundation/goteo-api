@@ -193,7 +193,7 @@ class Matcher(db.Model):
         """
         try:
             filters = list(self.get_filters(**kwargs))
-            total = db.session.query(func.sum(Matcher.amount_total)) \
+            total = db.session.query(func.sum(Matcher.amount_available)) \
                       .filter(*filters).scalar()
             if total is None:
                 total = 0
