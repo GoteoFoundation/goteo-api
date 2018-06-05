@@ -42,7 +42,7 @@ class Matcher(db.Model):
     # Total Amount provided by end users (not matchfunding)
     amount_peers = db.Column('crowd', Integer, nullable=False)
     # Selected projects
-    projects_active = db.Column('projects', Integer, nullable=False)
+    projects_applied = db.Column('projects', Integer, nullable=False)
     vars = db.Column('vars', Text)
     lang = db.Column('lang', String(2))
     created = db.Column('created', Date)
@@ -219,7 +219,7 @@ class Matcher(db.Model):
     @hybrid_method
     @cacher
     def projects_list(self, status=None):
-        from ..users.models import Project
+        from ..projects.models import Project
         projects = []
         for s in self.Projects:
             projects.append(s)
@@ -234,12 +234,16 @@ class Matcher(db.Model):
 
     @hybrid_method
     @cacher
-    def projects_count(self, status=None):
+    def projects_count(self, status=None, project_status=None):
         """Total number of projects on this matcher"""
+        from ..projects.models import Project
         try:
             filters = []
             if status:
                 filters.append(MatcherProject.status==status)
+            if project_status:
+                filters.append(Project.id==MatcherProject.project_id)
+                filters.append(Project.status.in_(project_status))
             total = db.session.query(func.count(MatcherProject.project_id)) \
                               .filter(*filters).scalar()
             if total is None:

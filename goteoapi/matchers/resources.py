@@ -43,10 +43,12 @@ matcher_resource_fields = {
     "amount_remaining": fields.Float,
     "projects_total": fields.Integer,
     "projects_pending": fields.Integer,
+    "projects_applied": fields.Integer,
     "projects_active": fields.Integer,
     "projects_rejected": fields.Integer,
     "projects_discarded": fields.Integer,
     "projects_accepted": fields.Integer,
+    "projects_succeeded": fields.Integer,
     "date_created": DateTime,
     "active": fields.Boolean
 }
@@ -98,8 +100,9 @@ class MatchersListAPI(BaseList):
                     item['region'] = location.region
                 else:
                     item['region'] = location.country
+            item['projects-succeeded'] = m.projects_count(status='active', project_status=Project.SUCCESSFUL_PROJECTS)
             item['projects-pending'] = m.projects_count(status='pending')
-            item['projects-active'] = m.projects_count(status='active')
+            # item['projects-applied'] = m.projects_count(status='active') # Cached in "projects" field
             item['projects-accepted'] = m.projects_count(status='accepted')
             item['projects-rejected'] = m.projects_count(status='rejected')
             item['projects-discarded'] = m.projects_count(status='discarded')
