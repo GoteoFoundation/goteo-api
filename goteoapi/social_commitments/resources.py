@@ -9,13 +9,19 @@ from ..helpers import marshal
 from ..base_resources import BaseList, Response
 from .models import SocialCommitment
 
-socialcommitment_resource_fields = {
+category_resource_fields = {
+    "id": fields.Integer,
+    "name": fields.String,
+    "description": fields.String
+}
+social_commitment_resource_fields = {
     "id": fields.Integer,
     "name": fields.String,
     "description": fields.String,
     "icon_url": fields.String,
-    "total-projects": fields.Integer,
-    "total-users": fields.Integer
+    "category": fields.Nested(category_resource_fields),
+    "total_projects": fields.Integer,
+    "total_users": fields.Integer
 }
 
 
@@ -41,9 +47,9 @@ class SocialCommitmentsListAPI(BaseList):
 
         items = []
         for u in SocialCommitment.list(**args):
-            item = marshal(u, socialcommitment_resource_fields)
+            item = marshal(u, social_commitment_resource_fields)
             project_filter = args.copy()
-            project_filter['social_commitment'] = [item['id']]
+            project_filter['social_commitment'] = item['id']
             item['total-projects'] = Project.total(**project_filter)
             item['total-users'] = User.total(**project_filter)
             items.append(item)

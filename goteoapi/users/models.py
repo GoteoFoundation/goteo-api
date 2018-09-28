@@ -6,7 +6,7 @@ from sqlalchemy import asc, desc, and_, or_, distinct
 from sqlalchemy.orm import aliased, relationship
 
 from ..cacher import cacher
-from ..helpers import image_url, utc_from_local, user_url, get_lang
+from ..helpers import image_url, utc_from_local, user_url, get_lang, as_list
 from ..base_resources import AbstractLang
 
 from ..categories.models import Category, CategoryLang
@@ -143,20 +143,20 @@ class User(db.Model):
         # Filters by goteo node
         if 'node' in kwargs and kwargs['node'] is not None:
             # Old method: does not seems to be very reliable
-            # filters.append(self.node_id.in_(kwargs['node']))
+            # filters.append(self.node_id.in_(as_list(kwargs['node'])))
             #
             sub_invest1 = db.session.query(Invest.user_id).filter(
                 Invest.user_id == self.id,
                 Invest.project_id == Project.id,
                 Invest.status.in_(Invest.VALID_INVESTS),
-                Project.node_id.in_(kwargs['node']))
+                Project.node_id.in_(as_list(kwargs['node'])))
             sub_project1 = db.session.query(Project.user_id).filter(
                 Project.user_id == self.id,
-                Project.node_id.in_(kwargs['node']))
+                Project.node_id.in_(as_list(kwargs['node'])))
             # sub_message1 = db.session.query(Message.user_id).filter(
             #     Message.user_id == self.id,
             #     Message.project_id == Project.id,
-            #     Project.node_id.in_(kwargs['node']))
+            #     Project.node_id.in_(as_list(kwargs['node'])))
             filters.append(or_(self.id.in_(sub_invest1),
                 self.id.in_(sub_project1)
                 # , self.id.in_(sub_message1)
@@ -164,12 +164,12 @@ class User(db.Model):
         if 'call' in kwargs and kwargs['call'] is not None:
             sub_invest2 = db.session.query(Invest.user_id).filter(
                 Invest.user_id == self.id,
-                Invest.call_id.in_(kwargs['call']),
+                Invest.call_id.in_(as_list(kwargs['call'])),
                 Invest.status.in_(Invest.VALID_INVESTS))
             sub_project2 = db.session.query(Project.user_id).filter(
                 Project.user_id == self.id,
                 Project.id == CallProject.project_id,
-                CallProject.call_id.in_(kwargs['call']))
+                CallProject.call_id.in_(as_list(kwargs['call'])))
             filters.append(or_(self.id.in_(sub_invest2),
                 self.id.in_(sub_project2)))
         # Filters by "from date"
@@ -183,21 +183,28 @@ class User(db.Model):
         # Filters by "project"
         # counting attached (invested or collaborated) to some project(s)
         if 'project' in kwargs and kwargs['project'] is not None:
-            # TODO: solo usuarios que cuyo pago ha si "exitoso"
             # adding users "invested in"
             sub_invest = db.session.query(Invest.user_id).filter(
-                Invest.project_id.in_(kwargs['project']),
+                Invest.project_id.in_(as_list(kwargs['project'])),
                 Invest.status.in_(Invest.VALID_INVESTS))
             # adding users "collaborated in"
             sub_message = db.session.query(Message.user_id) \
-                            .filter(Message.project_id.in_(kwargs['project']))
+                            .filter(Message.project_id.in_(as_list(kwargs['project'])))
             filters.append(or_(self.id.in_(sub_invest),
                                self.id.in_(sub_message)))
+        # filter by user interests
+        if 'social_commitment' in kwargs and kwargs['social_commitment'] is not None:
+            # adding users "invested in"
+            sub_invest = db.session.query(Invest.user_id).filter(
+                Project.id==Invest.project_id,
+                Project.social_commitment_id.in_(as_list(kwargs['social_commitment'])),
+                Invest.status.in_(Invest.VALID_INVESTS))
+            filters.append(self.id.in_(sub_invest))
         # filter by user interests
         if 'category' in kwargs and kwargs['category'] is not None:
             sub_interest = db.session.query(UserInterest.user_id) \
                              .filter(UserInterest.category_id
-                                                 .in_(kwargs['category']))
+                                                 .in_(as_list(kwargs['category'])))
             filters.append(self.id.in_(sub_interest))
         # Filter by location
         if 'location' in kwargs and kwargs['location'] is not None:
@@ -368,20 +375,20 @@ class UserInterest(db.Model):
             filters.append(Invest.user_id == self.user_id)
             filters.append(Invest.status.in_(Invest.VALID_INVESTS))
         if 'project' in kwargs and kwargs['project'] is not None:
-            filters.append(Invest.project_id.in_(kwargs['project']))
+            filters.append(Invest.project_id.in_(as_list(kwargs['project'])))
             filters.append(Invest.user_id == self.user_id)
             filters.append(Invest.status.in_(Invest.VALID_INVESTS))
         if 'node' in kwargs and kwargs['node'] is not None:
             # TODO: project_node o invest_node?
             # Does not seems to be realiable
             filters.append(User.id == self.user_id)
-            filters.append(User.node_id.in_(kwargs['node']))
+            filters.append(User.node_id.in_(as_list(kwargs['node'])))
         if 'call' in kwargs and kwargs['call'] is not None:
-            filters.append(Invest.call_id.in_(kwargs['call']))
+            filters.append(Invest.call_id.in_(as_list(kwargs['call'])))
             filters.append(Invest.user_id == self.user_id)
             filters.append(Invest.status.in_(Invest.VALID_INVESTS))
         if 'category' in kwargs and kwargs['category'] is not None:
-            filters.append(self.category_id.in_(kwargs['category']))
+            filters.append(self.category_id.in_(as_list(kwargs['category'])))
         if 'location' in kwargs and kwargs['location'] is not None:
             # Filtra por la localización del usuario
             subquery = UserLocation.location_subquery(**kwargs['location'])

@@ -19,6 +19,10 @@ class objectview(object):
     def __init__(self, d):
         self.__dict__ = d
 
+def as_list(v):
+    if isinstance(v, (list, tuple)):
+        return v
+    return [v]
 
 def get_lang(obj, field, langs=[], root_lang=app.config['DEFAULT_DB_LANG']):
     """

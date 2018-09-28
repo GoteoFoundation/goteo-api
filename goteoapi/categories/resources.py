@@ -9,12 +9,20 @@ from ..helpers import marshal
 from ..base_resources import BaseList, Response
 from .models import Category
 
+social_commitment_resource_fields = {
+    "id": fields.Integer,
+    "name": fields.String,
+    "icon_url": fields.String,
+    "description": fields.String
+}
+
 category_resource_fields = {
     "id": fields.Integer,
     "name": fields.String,
     "description": fields.String,
-    "total-projects": fields.Integer,
-    "total-users": fields.Integer
+    "social_commitment": fields.Nested(social_commitment_resource_fields),
+    "total_projects": fields.Integer,
+    "total_users": fields.Integer
 }
 
 
@@ -42,7 +50,7 @@ class CategoriesListAPI(BaseList):
         for u in Category.list(**args):
             item = marshal(u, category_resource_fields)
             project_filter = args.copy()
-            project_filter['category'] = [item['id']]
+            project_filter['category'] = item['id']
             item['total-projects'] = Project.total(**project_filter)
             item['total-users'] = User.total(**project_filter)
             items.append(item)

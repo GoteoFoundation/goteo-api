@@ -7,7 +7,7 @@ from sqlalchemy import asc, distinct
 from sqlalchemy.orm import relationship
 
 from ..cacher import cacher
-from ..helpers import svg_image_url
+from ..helpers import svg_image_url, as_list
 from ..projects.models import Project, ProjectCategory
 from ..licenses.models import LicenseLang
 from ..base_resources import AbstractLang
@@ -119,7 +119,7 @@ class Reward(db.Model):
 
         filters = []
         prj_filters = (
-            'node', 'call', 'from_date', 'to_date', 'project', 'category', 'location')
+            'node', 'call', 'from_date', 'to_date', 'project', 'category', 'location', 'social_commitment')
         # Join project table if filters
         for i in prj_filters:
             if i in kwargs and kwargs[i] is not None:
@@ -130,21 +130,23 @@ class Reward(db.Model):
         if 'license_type' in kwargs and kwargs['license_type'] is not None:
             filters.append(self.type == kwargs['license_type'])
         if 'license' in kwargs and kwargs['license'] is not None:
-            filters.append(self.license_id.in_(kwargs['license']))
+            filters.append(self.license_id.in_(as_list(kwargs['license'])))
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
             filters.append(Project.published >= kwargs['from_date'])
         if 'to_date' in kwargs and kwargs['to_date'] is not None:
             filters.append(Project.published <= kwargs['to_date'])
         if 'project' in kwargs and kwargs['project'] is not None:
-            filters.append(self.project_id.in_(kwargs['project']))
+            filters.append(self.project_id.in_(as_list(kwargs['project'])))
         if 'node' in kwargs and kwargs['node'] is not None:
-            filters.append(Project.node_id.in_(kwargs['node']))
+            filters.append(Project.node_id.in_(as_list(kwargs['node'])))
         if 'call' in kwargs and kwargs['call'] is not None:
             filters.append(Project.id == CallProject.project_id)
-            filters.append(CallProject.call_id.in_(kwargs['call']))
+            filters.append(CallProject.call_id.in_(as_list(kwargs['call'])))
+        if 'social_commitment' in kwargs and kwargs['social_commitment'] is not None:
+            filters.append(Project.social_commitment_id.in_(as_list(kwargs['social_commitment'])))
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(Project.id == ProjectCategory.project_id)
-            filters.append(ProjectCategory.category_id.in_(kwargs['category']))
+            filters.append(ProjectCategory.category_id.in_(as_list(kwargs['category'])))
         if 'location' in kwargs and kwargs['location'] is not None:
             subquery = ProjectLocation.location_subquery(**kwargs['location'])
             filters.append(ProjectLocation.id == self.project_id)

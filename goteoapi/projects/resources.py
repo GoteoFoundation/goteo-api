@@ -13,6 +13,7 @@ from ..base_resources import BaseItem, BaseList, Response, project_status_saniti
 from .models import Project, ProjectImage, ProjectLang
 from ..users.models import User
 from ..users.resources import user_resource_fields
+from ..categories.resources import social_commitment_resource_fields
 from ..categories.models import Category
 from ..location.models import ProjectLocation, UserLocation
 from ..location.models import location_resource_fields
@@ -136,6 +137,8 @@ project_full_resource_fields["needs"] = fields.List(
     fields.Nested(project_need_resource_fields))
 project_full_resource_fields["categories"] = fields.List(
     fields.Nested(categories_resource_fields))
+project_full_resource_fields["social_commitment"] = fields.Nested(
+    social_commitment_resource_fields)
 
 project_full_translate_resource_fields = {
     k: v for k, v in project_full_resource_fields.items()

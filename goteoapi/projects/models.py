@@ -6,7 +6,7 @@ from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.orm import aliased, relationship
 
-from ..helpers import image_url, project_url, project_widget_url
+from ..helpers import image_url, project_url, project_widget_url,as_list
 from ..helpers import utc_from_local, get_lang
 from ..cacher import cacher
 from ..base_resources import AbstractLang
@@ -176,6 +176,7 @@ class Project(db.Model):
 
     social_commitment_id = db.Column('social_commitment', Integer, db.ForeignKey('social_commitment.id'))
     SocialCommitment = relationship("SocialCommitment", lazy='joined')  # Eager loading for catching
+
     #
     Translations = relationship(
         "ProjectLang",
@@ -185,13 +186,16 @@ class Project(db.Model):
     def __repr__(self):
         return '<Project %s: %s>' % (self.id, self.name)
 
+    @hybrid_property
+    def social_commitment(self):
+        from ..social_commitments.models import SocialCommitment
+        return SocialCommitment.get(self.social_commitment_id)
+
     @hybrid_method
     def status_number(self, status):
         """Returns apropiate numbers string statuses"""
         statuses = []
-        if not isinstance(status, (list, tuple)):
-            status = [status]
-        for s in status:
+        for s in as_list(status):
             if s == 'all':
                 return tuple(range(0, self.STATUS_UNFUNDED+1))
             if isinstance(s, str):
@@ -322,7 +326,7 @@ class Project(db.Model):
         if 'license_type' in kwargs and kwargs['license_type'] is not None:
             filters.append(Reward.type == kwargs['license_type'])
         if 'license' in kwargs and kwargs['license'] is not None:
-            filters.append(Reward.license_id.in_(kwargs['license']))
+            filters.append(Reward.license_id.in_(as_list(kwargs['license'])))
 
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
             if 'received' in kwargs:
@@ -355,19 +359,13 @@ class Project(db.Model):
 
         # Search by owner
         if 'owner' in kwargs and kwargs['owner'] is not None:
-            if isinstance(kwargs['owner'], (list, tuple)):
-                filters.append(self.user_id.in_(kwargs['owner']))
-            else:
-                filters.append(self.user_id == kwargs['owner'])
+            filters.append(self.user_id.in_(as_list(kwargs['owner'])))
 
         # Search by user invested in the project
         if 'user' in kwargs and kwargs['user'] is not None:
             filters.append(Invest.project_id == self.id)
             filters.append(Invest.status.in_(Invest.VALID_INVESTS))
-            if isinstance(kwargs['user'], (list, tuple)):
-                filters.append(Invest.user_id.in_(kwargs['user']))
-            else:
-                filters.append(Invest.user_id == kwargs['user'])
+            filters.append(Invest.user_id.in_(as_list(kwargs['user'])))
             # Filter by anonymous only has sense in case of user defined
             #  is_anonymous == False   => Not anonymous Invests
             #  is_anonymous == True   => Anonymous Invests
@@ -380,23 +378,17 @@ class Project(db.Model):
                                        Invest.anonymous == False))
 
         if 'project' in kwargs and kwargs['project'] is not None:
-            if isinstance(kwargs['project'], (list, tuple)):
-                filters.append(self.id.in_(kwargs['project']))
-            else:
-                filters.append(self.id == kwargs['project'])
+            filters.append(self.id.in_(as_list(kwargs['project'])))
 
         if 'node' in kwargs and kwargs['node'] is not None:
-            if isinstance(kwargs['node'], (list, tuple)):
-                filters.append(self.node_id.in_(kwargs['node']))
-            else:
-                filters.append(self.node_id == kwargs['node'])
+            filters.append(self.node_id.in_(as_list(kwargs['node'])))
 
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(self.id == ProjectCategory.project_id)
-            filters.append(ProjectCategory.category_id.in_(kwargs['category']))
+            filters.append(ProjectCategory.category_id.in_(as_list(kwargs['category'])))
 
         if 'social_commitment' in kwargs and kwargs['social_commitment'] is not None:
-            filters.append(self.social_commitment_id == kwargs['social_commitment'])
+            filters.append(self.social_commitment_id.in_(as_list(kwargs['social_commitment'])))
 
         if 'loc_status' in kwargs and kwargs['loc_status'] is not None:
             if kwargs['loc_status'] == 'located':
@@ -413,17 +405,11 @@ class Project(db.Model):
 
         if 'call' in kwargs and kwargs['call'] is not None:
             filters.append(self.id == CallProject.project_id)
-            if isinstance(kwargs['call'], (list, tuple)):
-                filters.append(CallProject.call_id.in_(kwargs['call']))
-            else:
-                filters.append(CallProject.call_id == kwargs['call'])
+            filters.append(CallProject.call_id.in_(as_list(kwargs['call'])))
 
         if 'matcher' in kwargs and kwargs['matcher'] is not None:
             filters.append(self.id == MatcherProject.project_id)
-            if isinstance(kwargs['matcher'], (list, tuple)):
-                filters.append(MatcherProject.matcher_id.in_(kwargs['matcher']))
-            else:
-                filters.append(MatcherProject.matcher_id == kwargs['matcher'])
+            filters.append(MatcherProject.matcher_id.in_(as_list(kwargs['matcher'])))
 
         return filters
 

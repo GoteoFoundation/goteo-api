@@ -136,7 +136,12 @@ parameters:
       format: date
     - in: query
       name: category
-      description: Filter by project category. Multiple categories can be specified. Restricts the list to the calls containing project with interests in that category(ies)
+      description: Filter by project category. Multiple categories can be specified. Restricts the list to the calls containing projects with interests in that category(ies)
+      type: integer
+      collectionFormat: multi
+    - in: query
+      name: social_commitment
+      description: Filter by project social commitment. Multiple social commitments can be specified. Restricts the list to the calls containing projects with that social commitment(s)
       type: integer
       collectionFormat: multi
     - in: query

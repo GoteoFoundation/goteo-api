@@ -11,7 +11,7 @@ from ..projects.models import Project, ProjectCategory
 from ..location.models import InvestLocation
 from ..models.reward import Reward
 from ..models.message import Message
-from ..helpers import utc_from_local
+from ..helpers import utc_from_local,as_list
 from .. import db
 
 
@@ -131,10 +131,7 @@ class Invest(db.Model):
         filters = []
 
         if 'status' in kwargs and kwargs['status'] is not None:
-            if isinstance(kwargs['status'], (list, tuple)):
-                filters.append(self.status.in_(kwargs['status']))
-            else:
-                filters.append(self.status == kwargs['status'])
+            filters.append(self.status.in_(as_list(kwargs['status'])))
         else:
             filters.append(self.status.in_(self.VALID_INVESTS))
 
@@ -158,10 +155,7 @@ class Invest(db.Model):
 
         # Search by user
         if 'user' in kwargs and kwargs['user'] is not None:
-            if isinstance(kwargs['user'], (list, tuple)):
-                filters.append(self.user_id.in_(kwargs['user']))
-            else:
-                filters.append(self.user_id == kwargs['user'])
+            filters.append(self.user_id.in_(as_list(kwargs['user'])))
 
         # Can be used to get Invest applying to a Call
         # or Invests not applying to any Call if None
@@ -175,10 +169,7 @@ class Invest(db.Model):
             elif kwargs['call'] is False:
                 filters.append(or_(self.call_id == None, self.call_id == ''))
             else:
-                if isinstance(kwargs['call'], (list, tuple)):
-                    filters.append(self.call_id.in_(kwargs['call']))
-                else:
-                    filters.append(self.call_id == kwargs['call'])
+                filters.append(self.call_id.in_(as_list(kwargs['call'])))
 
         # Can be used to get Invest applying to a Matcher
         # or Invests not applying to any Matcher if None
@@ -192,10 +183,7 @@ class Invest(db.Model):
             elif kwargs['matcher'] is False:
                 filters.append(or_(self.matcher_id == None, self.matcher_id == ''))
             else:
-                if isinstance(kwargs['matcher'], (list, tuple)):
-                    filters.append(self.matcher_id.in_(kwargs['matcher']))
-                else:
-                    filters.append(self.matcher_id == kwargs['matcher'])
+                filters.append(self.matcher_id.in_(as_list(kwargs['matcher'])))
 
         # Can be used to get Invest applying to a Project
         # or Invests not applying to any Project if None
@@ -210,10 +198,7 @@ class Invest(db.Model):
                 filters.append(or_(self.project_id != None,
                                    self.project_id == ''))
             else:
-                if isinstance(kwargs['project'], (list, tuple)):
-                    filters.append(self.project_id.in_(kwargs['project']))
-                else:
-                    filters.append(self.project_id == kwargs['project'])
+                filters.append(self.project_id.in_(as_list(kwargs['project'])))
 
         # instead of exposing raw payment method
         # we will show 3 main methods as 'type' property:
@@ -240,11 +225,15 @@ class Invest(db.Model):
 
         if 'node' in kwargs and kwargs['node'] is not None:
             filters.append(self.project_id == Project.id)
-            filters.append(Project.node.in_(kwargs['node']))
+            filters.append(Project.node.in_(as_list(kwargs['node'])))
+
+        if 'social_commitment' in kwargs and kwargs['social_commitment'] is not None:
+            filters.append(self.project_id == Project.id)
+            filters.append(Project.social_commitment_id.in_(as_list(kwargs['social_commitment'])))
 
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(self.project_id == ProjectCategory.project_id)
-            filters.append(ProjectCategory.category_id.in_(kwargs['category']))
+            filters.append(ProjectCategory.category_id.in_(as_list(kwargs['category'])))
 
         if 'location' in kwargs and kwargs['location'] is not None:
             filters.append(self.id == InvestLocation.id)

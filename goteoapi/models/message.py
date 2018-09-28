@@ -6,6 +6,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from ..projects.models import Project, ProjectCategory
 from ..cacher import cacher
+from ..helpers import as_list
 
 from .. import db
 
@@ -39,27 +40,27 @@ class Message(db.Model):
         if 'to_date' in kwargs and kwargs['to_date'] is not None:
             filters.append(self.date <= kwargs['to_date'])
         if 'project' in kwargs and kwargs['project'] is not None:
-            filters.append(self.project_id.in_(kwargs['project']))
+            filters.append(self.project_id.in_(as_list(kwargs['project'])))
         if 'node' in kwargs and kwargs['node'] is not None:
             filters.append(self.user_id == User.id)
-            filters.append(User.node_id.in_(kwargs['node']))
+            filters.append(User.node_id.in_(as_list(kwargs['node'])))
         if 'call' in kwargs and kwargs['call'] is not None:
             filters.append(self.project_id == CallProject.project_id)
-            filters.append(CallProject.call_id.in_(kwargs['call']))
+            filters.append(CallProject.call_id.in_(as_list(kwargs['call'])))
+        if 'social_commitment' in kwargs and kwargs['social_commitment'] is not None:
+            filters.append(self.project_id == Project.id)
+            filters.append(Project.social_commitment_id.in_(
+                as_list(kwargs['social_commitment'])))
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(self.project_id == ProjectCategory.project_id)
-            filters.append(ProjectCategory.category_id.in_(kwargs['category']))
+            filters.append(ProjectCategory.category_id.in_(as_list(kwargs['category'])))
         if 'location' in kwargs and kwargs['location'] is not None:
             filters.append(self.user_id == UserLocation.id)
             subquery = UserLocation.location_subquery(**kwargs['location'])
             filters.append(UserLocation.id.in_(subquery))
-
         # Search by owner
         if 'user' in kwargs and kwargs['user'] is not None:
-            if isinstance(kwargs['user'], (list, tuple)):
-                filters.append(self.user_id.in_(kwargs['user']))
-            else:
-                filters.append(self.user_id == kwargs['user'])
+            filters.append(self.user_id.in_(as_list(kwargs['user'])))
 
         return filters
 

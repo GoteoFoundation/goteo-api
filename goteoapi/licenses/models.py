@@ -5,7 +5,7 @@ from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy import asc, distinct
 
-from ..helpers import svg_image_url
+from ..helpers import svg_image_url, as_list
 from ..base_resources import AbstractLang
 from ..cacher import cacher
 
@@ -66,7 +66,7 @@ class License(db.Model):
                 break
         # Filters by goteo node
         if 'node' in kwargs and kwargs['node'] is not None:
-            filters.append(Project.node_id.in_(kwargs['node']))
+            filters.append(Project.node_id.in_(as_list(kwargs['node'])))
         # Filters by "from date"
         # counting license created after this date
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
@@ -78,16 +78,20 @@ class License(db.Model):
         # Filters by "project"
         # counting attached (invested or collaborated) to some project(s)
         if 'project' in kwargs and kwargs['project'] is not None:
-            filters.append(Project.id.in_(kwargs['project']))
+            filters.append(Project.id.in_(as_list(kwargs['project'])))
         # counting attached (invested or collaborated) to some project(s)
         # involving call
         if 'call' in kwargs and kwargs['call'] is not None:
             filters.append(Project.id == CallProject.project_id)
-            filters.append(CallProject.call_id.in_(kwargs['call']))
+            filters.append(CallProject.call_id.in_(as_list(kwargs['call'])))
         # filter by license interests
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(ProjectCategory.project_id == Reward.project_id)
-            filters.append(ProjectCategory.category_id.in_(kwargs['category']))
+            filters.append(ProjectCategory.category_id.in_(as_list(kwargs['category'])))
+        # filter by license social_commitment
+        if 'social_commitment' in kwargs and kwargs['social_commitment'] is not None:
+            filters.append(ProjectCategory.project_id == Reward.project_id)
+            filters.append(ProjectCategory.social_commitment_id.in_(as_list(kwargs['social_commitment'])))
         # Filter by location
         if 'location' in kwargs and kwargs['location'] is not None:
             filters.append(ProjectLocation.id == Reward.project_id)

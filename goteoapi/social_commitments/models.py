@@ -3,9 +3,10 @@
 from sqlalchemy import func, Integer, String, Text
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from sqlalchemy.orm import relationship
 from sqlalchemy import distinct
 
-from ..helpers import image_url,asset_url
+from ..helpers import image_url,asset_url,as_list
 from ..base_resources import AbstractLang
 from ..cacher import cacher
 
@@ -33,9 +34,17 @@ class SocialCommitment(db.Model):
     name = db.Column('name', Text)
     icon = db.Column('icon', String(255))
     description = db.Column('description', Text)
+    Category = relationship("Category",
+        primaryjoin="SocialCommitment.id==Category.social_commitment_id",
+        back_populates="SocialCommitment", lazy="joined")
 
     def __repr__(self):
         return '<SocialCommitment %s: %r>' % (self.id, self.name)
+
+    @hybrid_property
+    def category(self):
+        from ..categories.models import Category
+        return Category.query.filter(self.id==Category.social_commitment_id).first()
 
     @hybrid_property
     def icon_url(self):
@@ -59,20 +68,20 @@ class SocialCommitment(db.Model):
 
         from ..projects.models import Project
         from ..location.models import ProjectLocation
+        from ..categories.models import Category
         from ..calls.models import CallProject
 
         filters = self.filters
         # Join project table if filters
         for i in ('node', 'call', 'from_date', 'to_date', 'project', 'location'):
             if i in kwargs and kwargs[i] is not None:
-                filters.append(self.id == ProjectSocialCommitment.SocialCommitment_id)
-                filters.append(Project.id == ProjectSocialCommitment.project_id)
+                filters.append(self.id == Project.social_commitment_id)
                 filters.append(Project.status.in_(Project.PUBLISHED_PROJECTS))
                 break
 
         # Filters by goteo node
         if 'node' in kwargs and kwargs['node'] is not None:
-            filters.append(Project.node_id.in_(kwargs['node']))
+            filters.append(Project.node_id.in_(as_list(kwargs['node'])))
         # Filters by "from date"
         # counting SocialCommitment created after this date
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
@@ -84,18 +93,22 @@ class SocialCommitment(db.Model):
         # Filters by "project"
         # counting attached (invested or collaborated) to some project(s)
         if 'project' in kwargs and kwargs['project'] is not None:
-            filters.append(Project.id.in_(kwargs['project']))
+            filters.append(Project.id.in_(as_list(kwargs['project'])))
         # counting attached (invested or collaborated) to some project(s)
         # involving call
         if 'call' in kwargs and kwargs['call'] is not None:
-            filters.append(ProjectSocialCommitment.project_id == CallProject.project_id)
-            filters.append(CallProject.call_id.in_(kwargs['call']))
-        # filter by SocialCommitment interests
-        if 'SocialCommitment' in kwargs and kwargs['SocialCommitment'] is not None:
-            filters.append(self.id.in_(kwargs['SocialCommitment']))
+            filters.append(Project.id == CallProject.project_id)
+            filters.append(CallProject.call_id.in_(as_list(kwargs['call'])))
+        # filter by SocialCommitment
+        if 'social_commitment' in kwargs and kwargs['social_commitment'] is not None:
+            filters.append(self.id.in_(as_list(kwargs['social_commitment'])))
+        # filter by Category
+        if 'category' in kwargs and kwargs['category'] is not None:
+            filters.append(self.id==Category.social_commitment_id)
+            filters.append(Category.id.in_(as_list(kwargs['category'])))
         # Filter by location
         if 'location' in kwargs and kwargs['location'] is not None:
-            filters.append(ProjectLocation.id == ProjectSocialCommitment.project_id)
+            filters.append(ProjectLocation.id == Project.id)
             subquery = ProjectLocation.location_subquery(**kwargs['location'])
             filters.append(ProjectLocation.id.in_(subquery))
 

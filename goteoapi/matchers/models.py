@@ -5,7 +5,7 @@ from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 
-from ..helpers import image_url, utc_from_local, matcher_url
+from ..helpers import image_url, utc_from_local, matcher_url, as_list
 from ..base_resources import AbstractLang
 from ..cacher import cacher
 
@@ -120,18 +120,22 @@ class Matcher(db.Model):
             filters.append(self.created <= kwargs['to_date'])
         if 'project' in kwargs and kwargs['project'] is not None:
             filters.append(self.id == MatcherProject.matcher_id)
-            filters.append(MatcherProject.project_id.in_(kwargs['project']))
+            filters.append(MatcherProject.project_id.in_(as_list(kwargs['project'])))
+        if 'social_commitment' in kwargs and kwargs['social_commitment'] is not None:
+            filters.append(self.id == MatcherProject.matcher_id)
+            filters.append(MatcherProject.project_id == Project.id)
+            filters.append(Project.social_commitment_id.in_(as_list(kwargs['social_commitment'])))
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(self.id == MatcherProject.matcher_id)
             filters.append(
                 MatcherProject.project_id == ProjectCategory.project_id)
-            filters.append(ProjectCategory.category_id.in_(kwargs['category']))
+            filters.append(ProjectCategory.category_id.in_(as_list(kwargs['category'])))
         if 'matcher' in kwargs and kwargs['matcher'] is not None:
-            filters.append(self.id.in_(kwargs['matcher']))
+            filters.append(self.id.in_(as_list(kwargs['matcher'])))
         if 'node' in kwargs and kwargs['node'] is not None:
             filters.append(self.id == MatcherProject.matcher_id)
             filters.append(MatcherProject.project_id == Project.id)
-            filters.append(Project.node_id.in_(kwargs['node']))
+            filters.append(Project.node_id.in_(as_list(kwargs['node'])))
 
         return filters
 

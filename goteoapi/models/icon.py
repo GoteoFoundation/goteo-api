@@ -6,7 +6,7 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy import and_, desc, distinct
 
-from ..helpers import svg_image_url, get_lang
+from ..helpers import svg_image_url, get_lang, as_list
 from ..cacher import cacher
 
 from .. import db
@@ -67,15 +67,18 @@ class Icon(db.Model):
         if 'to_date' in kwargs and kwargs['to_date'] is not None:
             filters.append(Project.published <= kwargs['to_date'])
         if 'project' in kwargs and kwargs['project'] is not None:
-            filters.append(Reward.project_id.in_(kwargs['project']))
+            filters.append(Reward.project_id.in_(as_list(kwargs['project'])))
         if 'node' in kwargs and kwargs['node'] is not None:
-            filters.append(Project.node_id.in_(kwargs['node']))
+            filters.append(Project.node_id.in_(as_list(kwargs['node'])))
         if 'call' in kwargs and kwargs['call'] is not None:
             filters.append(Project.id == CallProject.project_id)
-            filters.append(CallProject.call_id.in_(kwargs['call']))
+            filters.append(CallProject.call_id.in_(as_list(kwargs['call'])))
+        if 'social_commitment' in kwargs and kwargs['social_commitment'] is not None:
+            filters.append(Project.id == ProjectCategory.project_id)
+            filters.append(Project.social_commitment_id.in_(as_list(kwargs['social_commitment'])))
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(Project.id == ProjectCategory.project_id)
-            filters.append(ProjectCategory.category_id.in_(kwargs['category']))
+            filters.append(ProjectCategory.category_id.in_(as_list(kwargs['category'])))
         if 'location' in kwargs and kwargs['location'] is not None:
             subquery = ProjectLocation.location_subquery(**kwargs['location'])
             filters.append(ProjectLocation.id == Reward.project_id)
