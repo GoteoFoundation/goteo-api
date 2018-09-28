@@ -11,6 +11,7 @@ from ..helpers import utc_from_local, get_lang
 from ..cacher import cacher
 from ..base_resources import AbstractLang
 from ..models.post import Post, Blog
+from ..categories.models import Category,CategoryLang
 from .. import db
 
 
@@ -41,6 +42,43 @@ class ProjectLang(AbstractLang, db.Model):
     def description_short(self):
         return self.subtitle
 
+class ProjectCategory(db.Model):
+    __tablename__ = 'project_category'
+
+    project_id = db.Column('project', String(50),
+                           db.ForeignKey('project.id'), primary_key=True)
+    category_id = db.Column('category', Integer,
+                            db.ForeignKey('category.id'), primary_key=True)
+
+    def __repr__(self):
+        return '<ProjectCategory %s-%s>' % (self.project_id, self.category_id)
+
+class ProjectImage(db.Model):
+    __tablename__ = 'project_image'
+
+    project_id = db.Column('project', String(50),
+                           db.ForeignKey('project.id'), primary_key=True)
+    image = db.Column('image', String(255), primary_key=True)
+    section = db.Column('section', String(50))
+    url = db.Column('url', Text)
+    order = db.Column('order', Integer)
+
+    def __repr__(self):
+        return '<ProjectImage %s-%s>' % (self.project_id, self.image)
+
+    @hybrid_method
+    @cacher
+    def get(self, id, section=''):
+        """Get a valid Location Item from id"""
+        try:
+            if section is None:
+                return self.query.get(id)
+            return self.query \
+                .filter(self.project_id == id, self.section == section) \
+                .order_by(asc(self.order)).all()
+        except Exception:
+            pass
+        return []
 
 class Project(db.Model):
     """
@@ -136,6 +174,9 @@ class Project(db.Model):
     closed = db.Column('closed', Date)  # fecha de cierre de proyecto
     success = db.Column('success', Date)  # fecha de éxito de proyecto
     node_id = db.Column('node', String(50), db.ForeignKey('node.id'))
+
+    social_commitment_id = db.Column('social_commitment', Integer, db.ForeignKey('social_commitment.id'))
+    SocialCommitment = relationship("SocialCommitment", lazy='joined')  # Eager loading for catching
     #
     Translations = relationship(
         "ProjectLang",
@@ -354,6 +395,9 @@ class Project(db.Model):
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(self.id == ProjectCategory.project_id)
             filters.append(ProjectCategory.category_id.in_(kwargs['category']))
+
+        if 'social_commitment' in kwargs and kwargs['social_commitment'] is not None:
+            filters.append(self.social_commitment_id == kwargs['social_commitment'])
 
         if 'loc_status' in kwargs and kwargs['loc_status'] is not None:
             if kwargs['loc_status'] == 'located':
@@ -659,41 +703,3 @@ class Project(db.Model):
 
         return ret
 
-
-class ProjectCategory(db.Model):
-    __tablename__ = 'project_category'
-
-    project_id = db.Column('project', String(50),
-                           db.ForeignKey('project.id'), primary_key=True)
-    category_id = db.Column('category', Integer,
-                            db.ForeignKey('category.id'), primary_key=True)
-
-    def __repr__(self):
-        return '<ProjectCategory %s-%s>' % (self.project_id, self.category_id)
-
-class ProjectImage(db.Model):
-    __tablename__ = 'project_image'
-
-    project_id = db.Column('project', String(50),
-                           db.ForeignKey('project.id'), primary_key=True)
-    image = db.Column('image', String(255), primary_key=True)
-    section = db.Column('section', String(50))
-    url = db.Column('url', Text)
-    order = db.Column('order', Integer)
-
-    def __repr__(self):
-        return '<ProjectImage %s-%s>' % (self.project_id, self.image)
-
-    @hybrid_method
-    @cacher
-    def get(self, id, section=''):
-        """Get a valid Location Item from id"""
-        try:
-            if section is None:
-                return self.query.get(id)
-            return self.query \
-                .filter(self.project_id == id, self.section == section) \
-                .order_by(asc(self.order)).all()
-        except Exception:
-            pass
-        return []

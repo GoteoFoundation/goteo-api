@@ -60,43 +60,43 @@ def image_url(img, size='medium', cut=False, default='la_gota.png'):
         s += 'c'
     i = img if img is not None else default
 
-    return 'https://goteo.org/img/' + s + '/' + i
+    return app.config['GOTEO_DATA_URL'] + 'img/' + s + '/' + i
 
+def asset_url(asset):
+    return  app.config['GOTEO_ASSET_URL'] + 'assets/' + asset;
 
 def image_resource_url(url):
     """Links for images"""
     if url:
         if url.startswith('http') and '://' in url:
             return url
-        if url.startswith('goteo.org'):
-            return 'http://' + url
         if not url.startswith('/'):
             url = '/' + url
-        return 'http://goteo.org' + url
+        return app.config['GOTEO_DATA_URL'] + url
     return None
 
 
 def project_url(project_id):
-    return 'https://goteo.org/project/' + project_id
+    return app.config['GOTEO_URL'] + 'project/' + project_id
 
 
 def call_url(call_id):
-    return 'https://goteo.org/call/' + call_id
+    return app.config['GOTEO_URL'] + 'call/' + call_id
 
 def matcher_url(matcher_id):
-    return 'https://goteo.org/matcher/' + matcher_id
+    return app.config['GOTEO_URL'] + 'matcher/' + matcher_id
 
 
 def project_widget_url(project_id):
-    return 'https://goteo.org/widget/project/' + project_id
+    return app.config['GOTEO_URL'] + 'widget/project/' + project_id
 
 
 def user_url(user_id):
-    return 'https://goteo.org/user/profile/' + user_id
+    return app.config['GOTEO_URL'] + 'user/profile/' + user_id
 
 
 def svg_image_url(img, type_='licenses'):
-    return 'https://goteoassets.org/api/svg/' + type_ + '/' + img
+    return app.config['GOTEO_ASSET_URL'] + 'api/svg/' + type_ + '/' + img
 
 
 def utc_from_local(date_time, local_tz=None):

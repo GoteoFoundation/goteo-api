@@ -38,6 +38,24 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 if app.debug:
     app.config['SQLALCHEMY_ECHO'] = True
 
+if 'GOTEO_URL' not in app.config:
+    app.config['GOTEO_URL'] = 'https://goteo.org'
+
+if not app.config['GOTEO_URL'].endswith('/'):
+    app.config['GOTEO_URL'] = app.config['GOTEO_URL'] + '/'
+
+if 'GOTEO_DATA_URL' not in app.config:
+    app.config['GOTEO_DATA_URL'] = app.config['GOTEO_URL']
+
+if not app.config['GOTEO_DATA_URL'].endswith('/'):
+    app.config['GOTEO_DATA_URL'] = app.config['GOTEO_DATA_URL'] + '/'
+
+if 'GOTEO_ASSET_URL' not in app.config:
+    app.config['GOTEO_ASSET_URL'] = app.config['GOTEO_URL']
+
+if not app.config['GOTEO_ASSET_URL'].endswith('/'):
+    app.config['GOTEO_ASSET_URL'] = app.config['GOTEO_ASSET_URL'] + '/'
+
 if 'CACHE' not in app.config:
     app.config['CACHE'] = {}
 

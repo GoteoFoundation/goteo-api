@@ -86,7 +86,10 @@ class Reward(db.Model):
 
     @hybrid_property
     def icon_url(self):
-        return svg_image_url(self.icon_id + '.svg', 'icons')
+        if(self.icon_id):
+            return svg_image_url(self.icon_id + '.svg', 'icons')
+        else:
+            return ''
 
     @hybrid_property
     def license(self):

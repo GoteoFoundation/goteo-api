@@ -188,6 +188,7 @@ class BaseList(Resource):
         self.reqparse.add_argument('call', type=str, action='append')
         self.reqparse.add_argument('project', type=str, action='append')
         self.reqparse.add_argument('category', type=int, action='append')
+        self.reqparse.add_argument('social_commitment', type=int, action='append')
         self.reqparse.add_argument('location', type=location_sanitizer)
         self.reqparse.add_argument('loc_status', type=loc_status_sanitizer)
         self.reqparse.add_argument('page', type=int, default=0)

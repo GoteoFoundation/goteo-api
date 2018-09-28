@@ -16,6 +16,12 @@ DB_URI = 'mysql://' + dbuser + ':' + dbpass + '@' + dbhost + '/' + dbname
 # A unique secret key for this application
 SECRET_KEY = 'a-super-secret-and-random-key'
 
+GOTEO_URL='https://goteo.org'
+# For CDN configuration, mostly routes prefixed by /img/
+GOTEO_DATA_URL='https://goteo.org'
+# routes prefixed by /assets/
+GOTEO_ASSET_URL='https://goteo.org'
+
 # Optional config:
 # ================
 # Number of seconds to auto-expire access tokens

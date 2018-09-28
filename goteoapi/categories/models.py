@@ -3,6 +3,7 @@
 from sqlalchemy import func, Integer, String, Text
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from sqlalchemy.orm import relationship
 from sqlalchemy import asc, distinct
 
 from ..base_resources import AbstractLang
@@ -20,6 +21,7 @@ class CategoryLang(AbstractLang, db.Model):
     name = db.Column('name', Text)
     description = db.Column('description', Text)
     pending = db.Column('pending', Integer)
+    Category = relationship('Category', back_populates='Translations')
 
     def __repr__(self):
         return '<CategoryLang %s(%s): %r>' % (self.id, self.lang, self.name)
@@ -32,6 +34,10 @@ class Category(db.Model):
     name = db.Column('name', Text)
     description = db.Column('description', Text)
     order = db.Column('order', Integer)
+    Translations = relationship(
+        "CategoryLang",
+        primaryjoin="Category.id==CategoryLang.id",
+        back_populates="Category", lazy='joined')  # Eager loading for catching
 
     def __repr__(self):
         return '<Category %s: %r>' % (self.id, self.name)
@@ -60,7 +66,11 @@ class Category(db.Model):
 
         # Filters by goteo node
         if 'node' in kwargs and kwargs['node'] is not None:
-            filters.append(Project.node_id.in_(kwargs['node']))
+            if isinstance(kwargs['node'], (list, tuple)):
+                filters.append(Project.node_id.in_(kwargs['node']))
+            else:
+                filters.append(Project.node_id==kwargs['node'])
+
         # Filters by "from date"
         # counting category created after this date
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
@@ -72,15 +82,20 @@ class Category(db.Model):
         # Filters by "project"
         # counting attached (invested or collaborated) to some project(s)
         if 'project' in kwargs and kwargs['project'] is not None:
-            filters.append(Project.id.in_(kwargs['project']))
+            if isinstance(kwargs['project'], (list, tuple)):
+                filters.append(Project.id.in_(kwargs['project']))
+            else:
+                filters.append(Project.id==kwargs['project'])
+
         # counting attached (invested or collaborated) to some project(s)
         # involving call
         if 'call' in kwargs and kwargs['call'] is not None:
             filters.append(ProjectCategory.project_id == CallProject.project_id)
-            filters.append(CallProject.call_id.in_(kwargs['call']))
-        # filter by category interests
-        if 'category' in kwargs and kwargs['category'] is not None:
-            filters.append(self.id.in_(kwargs['category']))
+            if isinstance(kwargs['call'], (list, tuple)):
+                filters.append(CallProject.call_id.in_(kwargs['call']))
+            else:
+                filters.append(CallProject.call_id==kwargs['call'])
+
         # Filter by location
         if 'location' in kwargs and kwargs['location'] is not None:
             filters.append(ProjectLocation.id == ProjectCategory.project_id)
@@ -135,3 +150,4 @@ class Category(db.Model):
             return count
         except MultipleResultsFound:
             return 0
+

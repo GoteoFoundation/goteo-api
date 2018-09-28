@@ -13,6 +13,7 @@ from ..base_resources import BaseItem, BaseList, Response, project_status_saniti
 from .models import Project, ProjectImage, ProjectLang
 from ..users.models import User
 from ..users.resources import user_resource_fields
+from ..categories.models import Category
 from ..location.models import ProjectLocation, UserLocation
 from ..location.models import location_resource_fields
 from ..models.reward import Reward
@@ -92,6 +93,11 @@ project_need_translate_resource_fields = {
     "name": fields.String,
     "description": fields.String,
 }
+categories_resource_fields = {
+    "id": fields.Integer,
+    "name": fields.String,
+    "description": fields.String
+}
 
 project_full_resource_fields = project_resource_fields.copy()
 project_full_resource_fields.pop('latitude')
@@ -124,6 +130,8 @@ project_full_resource_fields["costs"] = fields.List(
     fields.Nested(project_cost_resource_fields))
 project_full_resource_fields["needs"] = fields.List(
     fields.Nested(project_need_resource_fields))
+project_full_resource_fields["categories"] = fields.List(
+    fields.Nested(categories_resource_fields))
 
 project_full_translate_resource_fields = {
     k: v for k, v in project_full_resource_fields.items()
@@ -229,6 +237,12 @@ class ProjectAPI(BaseItem):
             if needs:
                 item['needs'] = marshal(needs,
                                         project_need_resource_fields,
+                                        remove_null=True)
+
+            categories = Category.list(project=p.id)
+            if categories:
+                item['categories'] = marshal(categories,
+                                        categories_resource_fields,
                                         remove_null=True)
 
             translations = {}
