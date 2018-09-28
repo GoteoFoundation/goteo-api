@@ -86,8 +86,14 @@ parameters:
       format: date
     - in: query
       name: category
-      description: Filter by project category. Multiple users can be specified. Restricts the list to the users that have interests in that category(ies)
+      description: Filter by project category. Multiple categories can be specified. Restricts the list to the users that have interests in that category(ies)
       type: integer
+      collectionFormat: multi
+    - in: query
+      name: social_commitment
+      description: Filter by project social commitment. Multiple social commitments can be specified. Restricts the list to the users that have invested in projects with that social commitment(s)
+      type: integer
+      collectionFormat: multi
     - in: query
       name: page
       description: Page number (starting at 1) if the result can be paginated

@@ -98,10 +98,15 @@ parameters:
       description: Filter until date.. Ex. "2014-01-01". Restricts the list to the categories used in projects created between that dates
       type: string
       format: date
-    # - in: query
-    #   name: category
-    #   description: Filter by project category. Multiple categories can be specified. Restricts the list to the categories used in projects in that categories
-    #   type: integer
+    - in: query
+      name: category
+      description: Filter by category. Multiple categories can be specified. Restricts the list to the categories specified
+      type: integer
+    - in: query
+      name: social_commitment
+      description: Filter by social commitment. Multiple social commitments can be specified. Restricts the list to the categories matching with that social commitment(s)
+      type: integer
+      collectionFormat: multi
     - in: query
       name: lang
       description: Get results by specified lang. Multiple langs can be specified

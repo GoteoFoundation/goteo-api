@@ -56,7 +56,7 @@ class License(db.Model):
 
         filters = []
         prj_filters = (
-            'node', 'call', 'from_date', 'to_date', 'project', 'category', 'location')
+            'node', 'call', 'from_date', 'to_date', 'project', 'category', 'location', 'social_commitment')
         # Join project table if filters
         for i in prj_filters:
             if i in kwargs and kwargs[i] is not None:
@@ -90,8 +90,7 @@ class License(db.Model):
             filters.append(ProjectCategory.category_id.in_(as_list(kwargs['category'])))
         # filter by license social_commitment
         if 'social_commitment' in kwargs and kwargs['social_commitment'] is not None:
-            filters.append(ProjectCategory.project_id == Reward.project_id)
-            filters.append(ProjectCategory.social_commitment_id.in_(as_list(kwargs['social_commitment'])))
+            filters.append(Project.social_commitment_id.in_(as_list(kwargs['social_commitment'])))
         # Filter by location
         if 'location' in kwargs and kwargs['location'] is not None:
             filters.append(ProjectLocation.id == Reward.project_id)

@@ -108,7 +108,12 @@ parameters:
       format: date
     - in: query
       name: category
-      description: Filter by call category. Multiple users can be specified. Restricts the list to the users that have interests in that category(ies)
+      description: Filter by call category. Multiple categories can be specified. Restricts the list to the users that have interests in that category(ies)
+      type: integer
+      collectionFormat: multi
+    - in: query
+      name: social_commitment
+      description: Filter by call social commitment. Multiple social commitments can be specified. Restricts the list to the users that have interests in that social commitment(s)
       type: integer
       collectionFormat: multi
     - in: query

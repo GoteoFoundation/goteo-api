@@ -53,6 +53,12 @@ parameters:
       name: category
       description: Filter by project category. Multiple categories can be specified
       type: integer
+      collectionFormat: multi
+    - in: query
+      name: social_commitment
+      description: Filter by project social commitment. Multiple social commitments can be specified
+      type: integer
+      collectionFormat: multi
     - in: query
       name: lang
       description: Get results by specified lang. Multiple langs can be specified
