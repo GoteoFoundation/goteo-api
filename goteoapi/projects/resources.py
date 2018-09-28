@@ -98,6 +98,10 @@ categories_resource_fields = {
     "name": fields.String,
     "description": fields.String
 }
+categories_translate_resource_fields = {
+    "name": fields.String,
+    "description": fields.String
+}
 
 project_full_resource_fields = project_resource_fields.copy()
 project_full_resource_fields.pop('latitude')
@@ -275,6 +279,15 @@ class ProjectAPI(BaseItem):
                         translations[k.lang]['needs'][r.id] = marshal(
                             r,
                             project_need_translate_resource_fields,
+                            remove_null=True)
+
+                categories = Category.list(project=p.id, lang=k.lang)
+                if categories:
+                    translations[k.lang]['categories'] = {}
+                    for r in categories:
+                        translations[k.lang]['categories'][r.id] = marshal(
+                            r,
+                            categories_translate_resource_fields,
                             remove_null=True)
 
             item['translations'] = translations

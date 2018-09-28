@@ -54,7 +54,6 @@ class Category(db.Model):
         from ..projects.models import Project, ProjectCategory
         from ..location.models import ProjectLocation
         from ..calls.models import CallProject
-
         filters = self.filters
         # Join project table if filters
         for i in ('node', 'call', 'from_date', 'to_date', 'project', 'location'):
@@ -125,10 +124,11 @@ class Category(db.Model):
             if 'lang' in kwargs and kwargs['lang'] is not None:
                 ret = []
                 for u in CategoryLang.get_query(kwargs['lang']) \
-                                     .filter(*filters) \
-                                     .order_by(asc(self.order)):
+                                    .filter(*filters) \
+                                    .order_by(asc(self.order)):
                     ret.append(CategoryLang.get_translated_object(
-                        u._asdict(), kwargs['lang']))
+                        u._asdict(),
+                        kwargs['lang']))
                 return ret
             # No langs, normal query
             return self.query.distinct().filter(*filters) \

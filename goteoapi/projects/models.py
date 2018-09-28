@@ -11,7 +11,6 @@ from ..helpers import utc_from_local, get_lang
 from ..cacher import cacher
 from ..base_resources import AbstractLang
 from ..models.post import Post, Blog
-from ..categories.models import Category,CategoryLang
 from .. import db
 
 

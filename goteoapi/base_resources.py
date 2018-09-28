@@ -94,6 +94,9 @@ class AbstractLang(object):
                               langs,
                               root_lang=app.config['DEFAULT_DB_LANG']):
         sub_class = cls.get_sub_class()
+
+        if not isinstance(langs, (list, tuple)):
+            langs = [langs]
         for k in cls.get_translate_keys():
             full_dict[k] = get_lang(full_dict, k, langs, root_lang)
             for l in langs:
@@ -109,6 +112,10 @@ class AbstractLang(object):
                 lambda c:
                     getattr(sub_class, c),
                     inspect(sub_class).columns.keys()))
+
+        if not isinstance(search_langs, (list, tuple)):
+            search_langs = [search_langs]
+
         for l in search_langs:
             alias = aliased(cls)
             for k in cls.get_translate_keys():
