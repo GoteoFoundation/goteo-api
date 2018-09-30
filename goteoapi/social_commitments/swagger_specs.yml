@@ -21,6 +21,9 @@ definitions:
             description:
                 type: string
                 description: SocialCommitment short description
+            icon-url:
+                type: string
+                description: URL for the image resource associated with this social commitment
             total-users:
                 type: integer
                 description: Number of users interested in the SocialCommitment
@@ -98,10 +101,15 @@ parameters:
       description: Filter until date.. Ex. "2014-01-01". Restricts the list to the social_commitments used in projects created between that dates
       type: string
       format: date
-    # - in: query
-    #   name: SocialCommitment
-    #   description: Filter by project SocialCommitment. Multiple social_commitments can be specified. Restricts the list to the social_commitments used in projects in that social_commitments
-    #   type: integer
+    - in: query
+      name: category
+      description: Filter by category. Multiple categories can be specified. Restricts the list to the social commitments matching with that category(ies)
+      type: integer
+    - in: query
+      name: social_commitment
+      description: Filter by social commitment. Multiple social commitments can be specified. Restricts the list to the social commitments specified
+      type: integer
+      collectionFormat: multi
     - in: query
       name: lang
       description: Get results by specified lang. Multiple langs can be specified
