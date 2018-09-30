@@ -38,7 +38,7 @@ class Category(db.Model):
     social_commitment_id = db.Column('social_commitment', Integer, db.ForeignKey('social_commitment.id'))
     SocialCommitment = relationship("SocialCommitment",
         primaryjoin="Category.social_commitment_id==SocialCommitment.id",
-        back_populates="Category", lazy="joined")
+        back_populates="Categories", lazy="joined")
     Translations = relationship(
         "CategoryLang",
         primaryjoin="Category.id==CategoryLang.id",
@@ -114,11 +114,16 @@ class Category(db.Model):
 
     @hybrid_method
     @cacher
-    def get(self, id_):
+    def get(self, id_, lang=None):
         """Get a valid category from id"""
         try:
             filters = list(self.filters)
             filters.append(self.id == id_)
+            # This model does not have lang embeded in the main table
+            if lang:
+                trans = CategoryLang.get_query(lang).filter(*filters).one()
+                return CategoryLang.get_translated_object(
+                        trans._asdict(), lang)
             return self.query.filter(*filters).one()
         except NoResultFound:
             return None

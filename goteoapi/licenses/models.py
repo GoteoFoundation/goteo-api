@@ -101,10 +101,15 @@ class License(db.Model):
 
     @hybrid_method
     @cacher
-    def get(self, id, lang=None):
+    def get(self, id_, lang=None):
         """Get a valid license form id"""
         try:
-            filters = [self.id == id]
+            filters = [self.id == id_]
+            # This model does not have lang embeded in the main table
+            if lang:
+                trans = LicenseLang.get_query(lang).filter(*filters).one()
+                return LicenseLang.get_translated_object(
+                        trans._asdict(), lang)
             return self.query.filter(*filters).one()
         except NoResultFound:
             return None

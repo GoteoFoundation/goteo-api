@@ -22,6 +22,7 @@ class SocialCommitmentLang(AbstractLang, db.Model):
     name = db.Column('name', Text)
     description = db.Column('description', Text)
     pending = db.Column('pending', Integer)
+    SocialCommitment = relationship('SocialCommitment', back_populates='Translations')
 
     def __repr__(self):
         return '<SocialCommitmentLang %s(%s): %r>' % (self.id, self.lang, self.name)
@@ -34,17 +35,17 @@ class SocialCommitment(db.Model):
     name = db.Column('name', Text)
     icon = db.Column('icon', String(255))
     description = db.Column('description', Text)
-    Category = relationship("Category",
+    Categories = relationship("Category",
         primaryjoin="SocialCommitment.id==Category.social_commitment_id",
         back_populates="SocialCommitment", lazy="joined")
+    Translations = relationship(
+        "SocialCommitmentLang",
+        primaryjoin="SocialCommitment.id==SocialCommitmentLang.id",
+        back_populates="SocialCommitment", lazy='joined')  # Eager loading for catching
 
     def __repr__(self):
         return '<SocialCommitment %s: %r>' % (self.id, self.name)
 
-    @hybrid_property
-    def category(self):
-        from ..categories.models import Category
-        return Category.query.filter(self.id==Category.social_commitment_id).first()
 
     @hybrid_property
     def icon_url(self):
@@ -116,11 +117,16 @@ class SocialCommitment(db.Model):
 
     @hybrid_method
     @cacher
-    def get(self, id_):
+    def get(self, id_, lang=None):
         """Get a valid SocialCommitment from id"""
         try:
             filters = list(self.filters)
             filters.append(self.id == id_)
+            # This model does not have lang embeded in the main table
+            if lang:
+                trans = SocialCommitmentLang.get_query(lang).filter(*filters).one()
+                return SocialCommitmentLang.get_translated_object(
+                        trans._asdict(), lang)
             return self.query.filter(*filters).one()
         except NoResultFound:
             return None

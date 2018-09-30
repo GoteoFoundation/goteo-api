@@ -19,7 +19,7 @@ social_commitment_resource_fields = {
     "name": fields.String,
     "description": fields.String,
     "icon_url": fields.String,
-    "category": fields.Nested(category_resource_fields),
+    "Categories": fields.List(fields.Nested(category_resource_fields)),
     "total_projects": fields.Integer,
     "total_users": fields.Integer
 }

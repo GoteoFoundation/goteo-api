@@ -30,6 +30,7 @@ class ProjectLang(AbstractLang, db.Model):
     keywords = db.Column('keywords', Text)
     video = db.Column('video', String(255))
     media = db.Column('media', String(255))
+    social_commitment_description = db.Column('social_commitment_description', Text)
     pending = db.Column('pending', Integer)
     Project = relationship('Project', back_populates='Translations')
 
@@ -174,6 +175,7 @@ class Project(db.Model):
     success = db.Column('success', Date)  # fecha de éxito de proyecto
     node_id = db.Column('node', String(50), db.ForeignKey('node.id'))
 
+    social_commitment_description = db.Column('social_commitment_description', Text)
     social_commitment_id = db.Column('social_commitment', Integer, db.ForeignKey('social_commitment.id'))
     SocialCommitment = relationship("SocialCommitment", lazy='joined')  # Eager loading for catching
 
@@ -189,7 +191,7 @@ class Project(db.Model):
     @hybrid_property
     def social_commitment(self):
         from ..social_commitments.models import SocialCommitment
-        return SocialCommitment.get(self.social_commitment_id)
+        return SocialCommitment.get(self.social_commitment_id, lang=self.lang)
 
     @hybrid_method
     def status_number(self, status):
