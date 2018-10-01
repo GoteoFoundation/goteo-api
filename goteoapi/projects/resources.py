@@ -14,7 +14,7 @@ from .models import Project, ProjectImage, ProjectLang
 from ..users.models import User
 from ..users.resources import user_resource_fields
 from ..categories.models import Category
-from ..social_commitments.models import SocialCommitment,SocialCommitmentLang
+from ..social_commitments.models import SocialCommitment
 from ..location.models import ProjectLocation, UserLocation
 from ..location.models import location_resource_fields
 from ..models.reward import Reward

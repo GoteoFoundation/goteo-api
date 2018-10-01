@@ -21,6 +21,7 @@ category_resource_fields = {
     "name": fields.String,
     "description": fields.String,
     "social_commitment": fields.Nested(social_commitment_resource_fields),
+    # "sdgs": fields.List(fields.Nested(social_commitment_resource_fields)),
     "total_projects": fields.Integer,
     "total_users": fields.Integer
 }

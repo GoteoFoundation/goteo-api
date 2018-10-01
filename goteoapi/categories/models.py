@@ -35,7 +35,8 @@ class Category(db.Model):
     name = db.Column('name', Text)
     description = db.Column('description', Text)
     order = db.Column('order', Integer)
-    social_commitment_id = db.Column('social_commitment', Integer, db.ForeignKey('social_commitment.id'))
+    social_commitment_id = db.Column('social_commitment',
+        Integer, db.ForeignKey('social_commitment.id'))
     SocialCommitment = relationship("SocialCommitment",
         primaryjoin="Category.social_commitment_id==SocialCommitment.id",
         back_populates="Categories", lazy="joined")
@@ -52,6 +53,11 @@ class Category(db.Model):
         from ..social_commitments.models import SocialCommitment
         return SocialCommitment.get(self.social_commitment_id)
 
+    @hybrid_property
+    def sdgs(self):
+        from ..sdgs.models import Sdg
+        return Sdg.list(category=self.id)
+
     # Filters for table category
     @hybrid_property
     def filters(self):
@@ -64,6 +70,7 @@ class Category(db.Model):
         from ..projects.models import Project, ProjectCategory
         from ..location.models import ProjectLocation
         from ..calls.models import CallProject
+        from ..sdgs.models import SdgCategory
         filters = self.filters
         # Join project table if filters
         for i in ('node', 'call', 'from_date', 'to_date', 'project', 'location'):
@@ -97,6 +104,11 @@ class Category(db.Model):
         # filter by Category
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(self.id.in_(as_list(kwargs['category'])))
+
+        # filter by Sdg
+        if 'sdg' in kwargs and kwargs['sdg'] is not None:
+            filters.append(self.id == SdgCategory.category_id)
+            filters.append(SdgCategory.sdg_id.in_(as_list(kwargs['sdg'])))
 
         # counting attached (invested or collaborated) to some project(s)
         # involving call
