@@ -127,6 +127,10 @@ class Invest(db.Model):
     # Getting filters for this model
     @hybrid_method
     def get_filters(self, **kwargs):
+        "Return filters to be used"
+        from ..projects.models import ProjectCategory
+        from ..sdgs.models import SdgSocialCommitment, SdgCategory
+        from ..footprints.models import FootprintSocialCommitment, FootprintCategory
 
         filters = []
 
@@ -234,6 +238,18 @@ class Invest(db.Model):
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(self.project_id == ProjectCategory.project_id)
             filters.append(ProjectCategory.category_id.in_(as_list(kwargs['category'])))
+
+        if 'sdg' in kwargs and kwargs['sdg'] is not None:
+            filters.append(self.project_id == Project.id)
+            sub1 = db.session.query(SdgSocialCommitment.social_commitment_id) \
+                .filter(SdgSocialCommitment.sdg_id.in_(as_list(kwargs['sdg'])))
+            filters.append(Project.social_commitment_id.in_(sub1))
+
+        if 'footprint' in kwargs and kwargs['footprint'] is not None:
+            filters.append(self.project_id == Project.id)
+            sub1 = db.session.query(FootprintSocialCommitment.social_commitment_id) \
+                .filter(FootprintSocialCommitment.footprint_id.in_(as_list(kwargs['footprint'])))
+            filters.append(Project.social_commitment_id.in_(sub1))
 
         if 'location' in kwargs and kwargs['location'] is not None:
             filters.append(self.id == InvestLocation.id)

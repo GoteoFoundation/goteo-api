@@ -48,6 +48,7 @@ class FootprintsListAPI(BaseList):
 
         from ..users.models import User
         from ..projects.models import Project
+        from ..invests.models import Invest
         from ..social_commitments.models import SocialCommitment
         from ..sdgs.models import Sdg
         from ..categories.models import Category
@@ -61,11 +62,12 @@ class FootprintsListAPI(BaseList):
             item = marshal(u, footprint_resource_fields)
             project_filter = args.copy()
             project_filter['footprint'] = item['id']
-            # item['categories'] = marshal(Category.list(**project_filter), category_resource_fields)
-            # item['social_commitments'] = marshal(SocialCommitment.list(**project_filter), social_commitment_resource_fields)
-            # item['sdgs'] = marshal(Sdg.list(**project_filter), sdg_resource_fields)
+            item['categories'] = marshal(Category.list(**project_filter), category_resource_fields)
+            item['social_commitments'] = marshal(SocialCommitment.list(**project_filter), social_commitment_resource_fields)
+            item['sdgs'] = marshal(Sdg.list(**project_filter), sdg_resource_fields)
             item['total-projects'] = Project.total(**project_filter)
             item['total-users'] = User.total(**project_filter)
+            item['total-invests'] = Invest.total(**project_filter)
             items.append(item)
 
         res = Response(
