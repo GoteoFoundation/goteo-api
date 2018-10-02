@@ -397,24 +397,28 @@ class Project(db.Model):
         if 'sdg' in kwargs and kwargs['sdg'] is not None:
             sub1 = db.session.query(SdgSocialCommitment.social_commitment_id) \
                 .filter(SdgSocialCommitment.sdg_id.in_(as_list(kwargs['sdg'])))
-            and1 = and_(self.social_commitment_id != None,
-                self.social_commitment_id.in_(sub1))
-            sub2 = db.session.query(ProjectCategory.project_id) \
-                .filter(ProjectCategory.project_id == SdgCategory.category_id, SdgCategory.sdg_id.in_(as_list(kwargs['sdg'])))
-            and2 = and_(self.social_commitment_id == None,
-                self.id.in_(sub2))
-            filters.append(or_(and1, and2))
+            filters.append(self.social_commitment_id.in_(sub1))
+            # Search using categories but highly inefficient:
+            # and1 = and_(self.social_commitment_id != None,
+            #     self.social_commitment_id.in_(sub1))
+            # sub2 = db.session.query(ProjectCategory.project_id) \
+            #     .filter(ProjectCategory.project_id == SdgCategory.category_id, SdgCategory.sdg_id.in_(as_list(kwargs['sdg'])))
+            # and2 = and_(self.social_commitment_id == None,
+            #     self.id.in_(sub2))
+            # filters.append(or_(and1, and2))
 
         if 'footprint' in kwargs and kwargs['footprint'] is not None:
             sub1 = db.session.query(FootprintSocialCommitment.social_commitment_id) \
                 .filter(FootprintSocialCommitment.footprint_id.in_(as_list(kwargs['footprint'])))
-            and1 = and_(self.social_commitment_id != None,
-                self.social_commitment_id.in_(sub1))
-            sub2 = db.session.query(ProjectCategory.project_id) \
-                .filter(ProjectCategory.project_id == FootprintCategory.category_id, FootprintCategory.footprint_id.in_(as_list(kwargs['footprint'])))
-            and2 = and_(self.social_commitment_id == None,
-                self.id.in_(sub2))
-            filters.append(or_(and1, and2))
+            filters.append(self.social_commitment_id.in_(sub1))
+            # Search using categories but highly inefficient:
+            # and1 = and_(self.social_commitment_id != None,
+            #     self.social_commitment_id.in_(sub1))
+            # sub2 = db.session.query(ProjectCategory.project_id) \
+            #     .filter(ProjectCategory.project_id == FootprintCategory.category_id, FootprintCategory.footprint_id.in_(as_list(kwargs['footprint'])))
+            # and2 = and_(self.social_commitment_id == None,
+            #     self.id.in_(sub2))
+            # filters.append(or_(and1, and2))
 
 
         if 'loc_status' in kwargs and kwargs['loc_status'] is not None:

@@ -136,6 +136,11 @@ class User(db.Model):
     # Getting filters for this model
     @hybrid_method
     def get_filters(self, **kwargs):
+        "Return filters to be used"
+        from ..projects.models import ProjectCategory
+        from ..sdgs.models import SdgSocialCommitment, SdgCategory
+        from ..footprints.models import FootprintSocialCommitment, FootprintCategory
+
         filters = self.filters
         if 'unsubscribed' in kwargs and kwargs['unsubscribed'] is not None:
             filters = [or_(self.hide == 1, self.active == 0)]
@@ -192,7 +197,7 @@ class User(db.Model):
                             .filter(Message.project_id.in_(as_list(kwargs['project'])))
             filters.append(or_(self.id.in_(sub_invest),
                                self.id.in_(sub_message)))
-        # filter by user interests
+        # filter by social commitments
         if 'social_commitment' in kwargs and kwargs['social_commitment'] is not None:
             # adding users "invested in"
             sub_invest = db.session.query(Invest.user_id).filter(
@@ -200,6 +205,40 @@ class User(db.Model):
                 Project.social_commitment_id.in_(as_list(kwargs['social_commitment'])),
                 Invest.status.in_(Invest.VALID_INVESTS))
             filters.append(self.id.in_(sub_invest))
+        # filter by sdgs
+        if 'sdg' in kwargs and kwargs['sdg'] is not None:
+            filters.append(self.id == Invest.user_id)
+            filters.append(Invest.project_id == Project.id)
+            filters.append(Invest.status.in_(Invest.VALID_INVESTS))
+
+            sub1 = db.session.query(SdgSocialCommitment.social_commitment_id) \
+                .filter(SdgSocialCommitment.sdg_id.in_(as_list(kwargs['sdg'])))
+            filters.append(Project.social_commitment_id.in_(sub1))
+            # Search using categories but highly inefficient:
+            # and1 = and_(Project.social_commitment_id != None,
+            #     Project.social_commitment_id.in_(sub1))
+            # sub2 = db.session.query(ProjectCategory.project_id) \
+            #     .filter(ProjectCategory.project_id == SdgCategory.category_id, SdgCategory.sdg_id.in_(as_list(kwargs['sdg'])))
+            # and2 = and_(Project.social_commitment_id == None,
+            #     Project.id.in_(sub2))
+            # filters.append(or_(and1, and2))
+        # filter by footprints
+        if 'footprint' in kwargs and kwargs['footprint'] is not None:
+            filters.append(self.id == Invest.user_id)
+            filters.append(Invest.project_id == Project.id)
+            filters.append(Invest.status.in_(Invest.VALID_INVESTS))
+
+            sub1 = db.session.query(FootprintSocialCommitment.social_commitment_id) \
+                .filter(FootprintSocialCommitment.footprint_id.in_(as_list(kwargs['footprint'])))
+            filters.append(Project.social_commitment_id.in_(sub1))
+            # Search using categories but highly inefficient:
+            # and1 = and_(Project.social_commitment_id != None,
+            #     Project.social_commitment_id.in_(sub1))
+            # sub2 = db.session.query(ProjectCategory.project_id) \
+            #     .filter(ProjectCategory.project_id == FootprintCategory.category_id, FootprintCategory.footprint_id.in_(as_list(kwargs['footprint'])))
+            # and2 = and_(Project.social_commitment_id == None,
+            #     Project.id.in_(sub2))
+            # filters.append(or_(and1, and2))
         # filter by user interests
         if 'category' in kwargs and kwargs['category'] is not None:
             sub_interest = db.session.query(UserInterest.user_id) \
