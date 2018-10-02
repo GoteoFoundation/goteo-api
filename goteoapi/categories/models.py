@@ -99,24 +99,20 @@ class Category(db.Model):
         if 'project' in kwargs and kwargs['project'] is not None:
             filters.append(Project.id.in_(as_list(kwargs['project'])))
 
-        # filter by SocialCommitment
-        if 'social_commitment' in kwargs and kwargs['social_commitment'] is not None:
-            filters.append(self.social_commitment_id.in_(as_list(kwargs['social_commitment'])))
-
         # filter by Category
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(self.id.in_(as_list(kwargs['category'])))
-
+        # filter by SocialCommitment
+        if 'social_commitment' in kwargs and kwargs['social_commitment'] is not None:
+            filters.append(self.social_commitment_id.in_(as_list(kwargs['social_commitment'])))
         # filter by Sdg
         if 'sdg' in kwargs and kwargs['sdg'] is not None:
             filters.append(self.id == SdgCategory.category_id)
             filters.append(SdgCategory.sdg_id.in_(as_list(kwargs['sdg'])))
-
         # filter by Footprint
         if 'footprint' in kwargs and kwargs['footprint'] is not None:
             filters.append(self.id == FootprintCategory.category_id)
             filters.append(FootprintCategory.footprint_id.in_(as_list(kwargs['footprint'])))
-
         # counting attached (invested or collaborated) to some project(s)
         # involving call
         if 'call' in kwargs and kwargs['call'] is not None:

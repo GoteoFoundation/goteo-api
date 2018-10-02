@@ -107,6 +107,7 @@ class Footprint(db.Model):
         from ..projects.models import Project
         from ..location.models import ProjectLocation
         from ..calls.models import CallProject
+        from ..sdgs.models import SdgFootprint
 
         filters = self.filters
         # Join project table if filters
@@ -136,13 +137,21 @@ class Footprint(db.Model):
         if 'call' in kwargs and kwargs['call'] is not None:
             filters.append(Project.id == CallProject.project_id)
             filters.append(CallProject.call_id.in_(as_list(kwargs['call'])))
-        # filter by SocialCommitment
-        if 'social_commitment' in kwargs and kwargs['social_commitment'] is not None:
-            filters.append(self.id.in_(as_list(kwargs['social_commitment'])))
         # filter by Category
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(self.id == FootprintCategory.footprint_id)
             filters.append(FootprintCategory.category_id.in_(as_list(kwargs['category'])))
+        # filter by SocialCommitment
+        if 'social_commitment' in kwargs and kwargs['social_commitment'] is not None:
+            filters.append(self.id == FootprintSocialCommitment.footprint_id)
+            filters.append(FootprintSocialCommitment.social_commitment_id.in_(as_list(kwargs['social_commitment'])))
+        # filter by Sdg
+        if 'sdg' in kwargs and kwargs['sdg'] is not None:
+            filters.append(self.id == SdgFootprint.footprint_id)
+            filters.append(SdgFootprint.sdg_id.in_(as_list(kwargs['sdg'])))
+        # filter by Footprint
+        if 'footprint' in kwargs and kwargs['footprint'] is not None:
+            filters.append(self.id.in_(as_list(kwargs['footprint'])))
         # Filter by location
         if 'location' in kwargs and kwargs['location'] is not None:
             filters.append(ProjectLocation.id == Project.id)

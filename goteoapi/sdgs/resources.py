@@ -20,6 +20,7 @@ social_commitment_resource_fields = {
     "icon_url": fields.String,
     "description": fields.String
 }
+footprint_resource_fields = social_commitment_resource_fields
 sdg_resource_fields = {
     "id": fields.Integer,
     "name": fields.String,
@@ -49,7 +50,8 @@ class SdgsListAPI(BaseList):
         from ..projects.models import Project
         from ..invests.models import Invest
         from ..social_commitments.models import SocialCommitment
-        from ..categories.models import Category
+        from ..footprints.models import Footprint
+        # from ..categories.models import Category
 
         time_start = time.time()
         # removing not-needed standard filters
@@ -58,13 +60,14 @@ class SdgsListAPI(BaseList):
         items = []
         for u in Sdg.list(**args):
             item = marshal(u, sdg_resource_fields)
-            project_filter = args.copy()
-            project_filter['sdg'] = item['id']
-            # item['categories'] = marshal(Category.list(**project_filter), category_resource_fields)
-            item['social_commitments'] = marshal(SocialCommitment.list(**project_filter), social_commitment_resource_fields)
-            item['total-projects'] = Project.total(**project_filter)
-            item['total-users'] = User.total(**project_filter)
-            item['total-invests'] = Invest.total(**project_filter)
+            sdg_filter = args.copy()
+            sdg_filter['sdg'] = item['id']
+            # item['categories'] = marshal(Category.list(**sdg_filter), category_resource_fields)
+            item['social_commitments'] = marshal(SocialCommitment.list(**sdg_filter), social_commitment_resource_fields)
+            item['footprints'] = marshal(Footprint.list(**sdg_filter), footprint_resource_fields)
+            item['total-projects'] = Project.total(**sdg_filter)
+            item['total-users'] = User.total(**sdg_filter)
+            item['total-invests'] = Invest.total(**sdg_filter)
             items.append(item)
 
         res = Response(

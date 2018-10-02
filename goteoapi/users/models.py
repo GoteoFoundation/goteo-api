@@ -200,11 +200,11 @@ class User(db.Model):
         # filter by social commitments
         if 'social_commitment' in kwargs and kwargs['social_commitment'] is not None:
             # adding users "invested in"
-            sub_invest = db.session.query(Invest.user_id).filter(
-                Project.id==Invest.project_id,
-                Project.social_commitment_id.in_(as_list(kwargs['social_commitment'])),
-                Invest.status.in_(Invest.VALID_INVESTS))
-            filters.append(self.id.in_(sub_invest))
+            filters.append(self.id == Invest.user_id)
+            filters.append(Invest.project_id == Project.id)
+            filters.append(Invest.status.in_(Invest.VALID_INVESTS))
+            filters.append(Project.social_commitment_id.in_(as_list(kwargs['social_commitment'])))
+
         # filter by sdgs
         if 'sdg' in kwargs and kwargs['sdg'] is not None:
             filters.append(self.id == Invest.user_id)

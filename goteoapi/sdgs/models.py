@@ -142,13 +142,17 @@ class Sdg(db.Model):
         if 'call' in kwargs and kwargs['call'] is not None:
             filters.append(Project.id == CallProject.project_id)
             filters.append(CallProject.call_id.in_(as_list(kwargs['call'])))
-        # filter by SocialCommitment
-        if 'social_commitment' in kwargs and kwargs['social_commitment'] is not None:
-            filters.append(self.id.in_(as_list(kwargs['social_commitment'])))
         # filter by Category
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(self.id == SdgCategory.sdg_id)
             filters.append(SdgCategory.category_id.in_(as_list(kwargs['category'])))
+        # filter by SocialCommitment
+        if 'social_commitment' in kwargs and kwargs['social_commitment'] is not None:
+            filters.append(self.id == SdgSocialCommitment.sdg_id)
+            filters.append(SdgSocialCommitment.social_commitment_id.in_(as_list(kwargs['social_commitment'])))
+        # filter by Sdg
+        if 'sdg' in kwargs and kwargs['sdg'] is not None:
+            filters.append(self.id.in_(as_list(kwargs['sdg'])))
         if 'footprint' in kwargs and kwargs['footprint'] is not None:
             filters.append(self.id == SdgFootprint.sdg_id)
             filters.append(SdgFootprint.footprint_id.in_(as_list(kwargs['footprint'])))
