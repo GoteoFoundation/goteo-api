@@ -50,6 +50,17 @@ class SdgSocialCommitment(db.Model):
     def __repr__(self):
         return '<SdgSocialCommitment %s(%s): %r>' % (self.sdg_id, self.social_commitment_id)
 
+class SdgFootprint(db.Model):
+    __tablename__ = 'sdg_footprint'
+
+    sdg_id = db.Column('sdg_id', Integer,
+                   db.ForeignKey('sdg.id'), primary_key=True)
+    footprint_id = db.Column('footprint_id', Integer,
+                   db.ForeignKey('footprint.id'), primary_key=True)
+
+    def __repr__(self):
+        return '<SdgFootprint %s(%s): %r>' % (self.sdg_id, self.footprint_id)
+
 
 class Sdg(db.Model):
     __tablename__ = 'sdg'
@@ -138,6 +149,9 @@ class Sdg(db.Model):
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(self.id == SdgCategory.sdg_id)
             filters.append(SdgCategory.category_id.in_(as_list(kwargs['category'])))
+        if 'footprint' in kwargs and kwargs['footprint'] is not None:
+            filters.append(self.id == SdgFootprint.sdg_id)
+            filters.append(SdgFootprint.footprint_id.in_(as_list(kwargs['footprint'])))
         # Filter by location
         if 'location' in kwargs and kwargs['location'] is not None:
             filters.append(ProjectLocation.id == Project.id)

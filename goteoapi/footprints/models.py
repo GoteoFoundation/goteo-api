@@ -13,56 +13,89 @@ from ..cacher import cacher
 from .. import db
 
 
-class SocialCommitmentLang(AbstractLang, db.Model):
-    __tablename__ = 'social_commitment_lang'
+class FootprintLang(AbstractLang, db.Model):
+    __tablename__ = 'footprint_lang'
 
     id = db.Column('id', Integer,
-                   db.ForeignKey('social_commitment.id'), primary_key=True)
+                   db.ForeignKey('footprint.id'), primary_key=True)
     lang = db.Column('lang', String(2), primary_key=True)
     name = db.Column('name', Text)
     description = db.Column('description', Text)
     pending = db.Column('pending', Integer)
-    SocialCommitment = relationship('SocialCommitment', back_populates='Translations')
+    Footprint = relationship('Footprint', back_populates='Translations')
 
     def __repr__(self):
-        return '<SocialCommitmentLang %s(%s): %r>' % (self.id, self.lang, self.name)
+        return '<FootprintLang %s(%s): %r>' % (self.id, self.lang, self.name)
 
 
-class SocialCommitment(db.Model):
-    __tablename__ = 'social_commitment'
+class FootprintCategory(db.Model):
+    __tablename__ = 'category_footprint'
+
+    footprint_id = db.Column('footprint_id', Integer,
+                   db.ForeignKey('footprint.id'), primary_key=True)
+    category_id = db.Column('category_id', Integer,
+                   db.ForeignKey('category.id'), primary_key=True)
+
+    def __repr__(self):
+        return '<FootprintCategory %s(%s): %r>' % (self.footprint_id, self.category_id)
+
+class FootprintSocialCommitment(db.Model):
+    __tablename__ = 'social_commitment_footprint'
+
+    footprint_id = db.Column('footprint_id', Integer,
+                   db.ForeignKey('footprint.id'), primary_key=True)
+    social_commitment_id = db.Column('social_commitment_id', Integer,
+                   db.ForeignKey('social_commitment.id'), primary_key=True)
+
+    def __repr__(self):
+        return '<FootprintSocialCommitment %s(%s): %r>' % (self.footprint_id, self.social_commitment_id)
+
+
+class Footprint(db.Model):
+    __tablename__ = 'footprint'
 
     id = db.Column('id', Integer, primary_key=True)
     name = db.Column('name', Text)
     icon = db.Column('icon', String(255))
     description = db.Column('description', Text)
-    Categories = relationship("Category",
-        primaryjoin="SocialCommitment.id==Category.social_commitment_id",
-        back_populates="SocialCommitment", lazy="joined")
+    # Categories = relationship("Category",
+    #     primaryjoin="Footprint.id==Category.footprint_id",
+    #     back_populates="Footprint", lazy="joined")
     Translations = relationship(
-        "SocialCommitmentLang",
-        primaryjoin="SocialCommitment.id==SocialCommitmentLang.id",
-        back_populates="SocialCommitment", lazy='joined')  # Eager loading for catching
+        "FootprintLang",
+        primaryjoin="Footprint.id==FootprintLang.id",
+        back_populates="Footprint", lazy='joined')  # Eager loading for catching
 
     def __repr__(self):
-        return '<SocialCommitment %s: %r>' % (self.id, self.name)
+        return '<Footprint %s: %r>' % (self.id, self.name)
 
     @hybrid_property
     def sdgs(self):
         from ..sdgs.models import Sdg
-        return Sdg.list(social_commitment=self.id)
+        return Sdg.list(footprint=self.id)
+
+    @hybrid_property
+    def categories(self):
+        from ..categories.models import Category
+        return Category.list(footprint=self.id)
+
+    @hybrid_property
+    def social_commitments(self, lang=None):
+        from ..social_commitments.models import SocialCommitment
+        return SocialCommitment.list(footprint=self.id, lang=lang)
 
     @hybrid_property
     def icon_url(self):
         if(self.icon):
             return image_url(self.icon, size="medium")
         else:
-            return asset_url('img/social-commitment/square/' + str(self.id) + '.png')
+            return asset_url('img/footprint/' + str(self.id) + '.svg')
 
     @hybrid_property
     def icon_url_big(self):
         return image_url(self.icon, size="big")
 
-    # Filters for table SocialCommitment
+    # Filters for table Footprint
     @hybrid_property
     def filters(self):
         return [self.name != '']
@@ -73,16 +106,13 @@ class SocialCommitment(db.Model):
 
         from ..projects.models import Project
         from ..location.models import ProjectLocation
-        from ..categories.models import Category
-        from ..sdgs.models import SdgSocialCommitment
         from ..calls.models import CallProject
-        from ..footprints.models import FootprintSocialCommitment
 
         filters = self.filters
         # Join project table if filters
         for i in ('node', 'call', 'from_date', 'to_date', 'project', 'location'):
             if i in kwargs and kwargs[i] is not None:
-                filters.append(self.id == Project.social_commitment_id)
+                filters.append(self.id == Project.footprint_id)
                 filters.append(Project.status.in_(Project.PUBLISHED_PROJECTS))
                 break
 
@@ -90,11 +120,11 @@ class SocialCommitment(db.Model):
         if 'node' in kwargs and kwargs['node'] is not None:
             filters.append(Project.node_id.in_(as_list(kwargs['node'])))
         # Filters by "from date"
-        # counting SocialCommitment created after this date
+        # counting Footprint created after this date
         if 'from_date' in kwargs and kwargs['from_date'] is not None:
             filters.append(Project.published >= kwargs['from_date'])
         # Filters by "to date"
-        # counting SocialCommitment created before this date
+        # counting Footprint created before this date
         if 'to_date' in kwargs and kwargs['to_date'] is not None:
             filters.append(Project.published <= kwargs['to_date'])
         # Filters by "project"
@@ -111,16 +141,8 @@ class SocialCommitment(db.Model):
             filters.append(self.id.in_(as_list(kwargs['social_commitment'])))
         # filter by Category
         if 'category' in kwargs and kwargs['category'] is not None:
-            filters.append(self.id==Category.social_commitment_id)
-            filters.append(Category.id.in_(as_list(kwargs['category'])))
-        # filter by Sdg
-        if 'sdg' in kwargs and kwargs['sdg'] is not None:
-            filters.append(self.id==SdgSocialCommitment.social_commitment_id)
-            filters.append(SdgSocialCommitment.sdg_id.in_(as_list(kwargs['sdg'])))
-        # filter by Footprint
-        if 'footprint' in kwargs and kwargs['footprint'] is not None:
-            filters.append(self.id==FootprintSocialCommitment.social_commitment_id)
-            filters.append(FootprintSocialCommitment.footprint_id.in_(as_list(kwargs['footprint'])))
+            filters.append(self.id == FootprintCategory.footprint_id)
+            filters.append(FootprintCategory.category_id.in_(as_list(kwargs['category'])))
         # Filter by location
         if 'location' in kwargs and kwargs['location'] is not None:
             filters.append(ProjectLocation.id == Project.id)
@@ -132,14 +154,14 @@ class SocialCommitment(db.Model):
     @hybrid_method
     @cacher
     def get(self, id_, lang=None):
-        """Get a valid SocialCommitment from id"""
+        """Get a valid Footprint from id"""
         try:
             filters = list(self.filters)
             filters.append(self.id == id_)
             # This model does not have lang embeded in the main table
             if lang:
-                trans = SocialCommitmentLang.get_query(lang).filter(*filters).one()
-                return SocialCommitmentLang.get_translated_object(
+                trans = FootprintLang.get_query(lang).filter(*filters).one()
+                return FootprintLang.get_translated_object(
                         trans._asdict(), lang)
             return self.query.filter(*filters).one()
         except NoResultFound:
@@ -148,15 +170,15 @@ class SocialCommitment(db.Model):
     @hybrid_method
     @cacher
     def list(self, **kwargs):
-        """Get a list of valid SocialCommitment"""
+        """Get a list of valid Footprint"""
         try:
             filters = list(self.get_filters(**kwargs))
             # In case of requiring languages, a LEFT JOIN must be generated
             if 'lang' in kwargs and kwargs['lang'] is not None:
                 ret = []
-                for u in SocialCommitmentLang.get_query(kwargs['lang']) \
+                for u in FootprintLang.get_query(kwargs['lang']) \
                                      .filter(*filters):
-                    ret.append(SocialCommitmentLang.get_translated_object(
+                    ret.append(FootprintLang.get_translated_object(
                         u._asdict(), kwargs['lang']))
                 return ret
             # No langs, normal query
@@ -168,7 +190,7 @@ class SocialCommitment(db.Model):
     @hybrid_method
     @cacher
     def total(self, **kwargs):
-        """Returns the total number of valid SocialCommitment"""
+        """Returns the total number of valid Footprint"""
         try:
             filters = list(self.get_filters(**kwargs))
             count = db.session.query(func.count(distinct(self.id))) \

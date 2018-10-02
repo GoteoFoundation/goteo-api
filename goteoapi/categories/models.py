@@ -71,6 +71,8 @@ class Category(db.Model):
         from ..location.models import ProjectLocation
         from ..calls.models import CallProject
         from ..sdgs.models import SdgCategory
+        from ..footprints.models import FootprintCategory
+
         filters = self.filters
         # Join project table if filters
         for i in ('node', 'call', 'from_date', 'to_date', 'project', 'location'):
@@ -109,6 +111,11 @@ class Category(db.Model):
         if 'sdg' in kwargs and kwargs['sdg'] is not None:
             filters.append(self.id == SdgCategory.category_id)
             filters.append(SdgCategory.sdg_id.in_(as_list(kwargs['sdg'])))
+
+        # filter by Footprint
+        if 'footprint' in kwargs and kwargs['footprint'] is not None:
+            filters.append(self.id == FootprintCategory.category_id)
+            filters.append(FootprintCategory.footprint_id.in_(as_list(kwargs['footprint'])))
 
         # counting attached (invested or collaborated) to some project(s)
         # involving call
