@@ -25,6 +25,7 @@ project_resource_fields = {
     "id": fields.String,
     "name": fields.String,
     "description_short": fields.String,
+    "social_commitment_id": fields.String,
     "lang": fields.String,
     "node": fields.String,
     "date_created": DateTime,
