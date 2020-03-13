@@ -526,7 +526,8 @@ class Invest(db.Model):
             # filters.append(self.project_id == Project.id)
             # filters.append(Project.status.in_(Project.PUBLISHED_PROJECTS))
             filters.append(self.status.in_(self.VALID_INVESTS))
-            # filters.append(self.method != self.METHOD_POOL)
+            if 'method' not in kwargs or kwargs['method'] != Invest.METHOD_POOL:
+                filters.append(self.method != self.METHOD_POOL)
             total = db.session.query(func.sum(self.amount)) \
                       .filter(*filters).scalar()
             if total is None:
