@@ -206,7 +206,8 @@ class MatcherProjectsListAPI(BaseList):
             item = marshal(p, matcher_project_resource_fields)
             item['status'] = p.status_string
             item['amount-matcher'] = float(Invest.pledged_total(project=p.id,
-                                                             user=matcher.owner))
+                                                             user=matcher.owner,
+                                                             method=Invest.METHOD_POOL))
             item['image-url'] = image_url(p.image, 'medium', False)
             location = ProjectLocation.get(p.id)
             if location:
