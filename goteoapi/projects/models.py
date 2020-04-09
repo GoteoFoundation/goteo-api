@@ -289,8 +289,8 @@ class Project(db.Model):
         from ..location.models import ProjectLocation
         from ..calls.models import CallProject
         from ..matchers.models import MatcherProject
-        from ..sdgs.models import SdgSocialCommitment, SdgCategory
-        from ..footprints.models import FootprintSocialCommitment, FootprintCategory
+        from ..sdgs.models import SdgSocialCommitment
+        from ..footprints.models import FootprintSocialCommitment
 
         # Filters by default only published projects
         filters = []

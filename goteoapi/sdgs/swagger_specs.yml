@@ -82,11 +82,6 @@ parameters:
       description: Filter by individual node(s). Multiple nodes can be specified. Restricts the list to the sdgs used in projects assigned in that nodes
       collectionFormat: multi
     - in: query
-      type: string
-      name: call
-      description: Filter by individual matchfunding call(s). Multiple calls can be specified. Restricts the list to the projects originally created in that call(s)
-      collectionFormat: multi
-    - in: query
       name: project
       description: Filter by individual project(s). Multiple projects can be specified. Restricts the list to the sdgs used in that projects
       type: string
@@ -111,6 +106,16 @@ parameters:
       type: integer
       collectionFormat: multi
     - in: query
+      name: social_commitment
+      description: Filter by project social commitment. Multiple social commitments can be specified. Restricts the list to the licenses used in rewards of projects with that social commitment(s)
+      type: integer
+      collectionFormat: multi
+    - in: query
+      name: footprint
+      description: Filter by project footprint. Multiple footprint can be specified. Restricts the list to the licenses used in rewards of projects with that footprint(s)
+      type: integer
+      collectionFormat: multi
+    - in: query
       name: lang
       description: Get results by specified lang. Multiple langs can be specified
       type: string
@@ -120,14 +125,6 @@ parameters:
       description: Filter by project location (Latitude,longitude,Radius in Km). Restricts the list to the sdgs used in projects geolocated in that area
       type: number
       collectionFormat: csv
-    # - in: query
-    #   name: page
-    #   description: Page number (starting at 1) if the result can be paginated
-    #   type: integer
-    # - in: query
-    #   name: limit
-    #   description: Page limit (maximum 50 results, defaults to 10) if the result can be paginated
-    #   type: integer
 
 responses:
     200:
