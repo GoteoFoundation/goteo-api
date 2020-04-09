@@ -186,11 +186,6 @@ parameters:
       type: integer
       collectionFormat: multi
     - in: query
-      name: social_commitment
-      description: Filter by project social commitment. Multiple social commitments can be specified. Restricts the list to the licenses used in rewards of projects with that social commitment(s)
-      type: integer
-      collectionFormat: multi
-    - in: query
       name: footprint
       description: Filter by project footprint. Multiple footprint can be specified. Restricts the list to the licenses used in rewards of projects with that footprint(s)
       type: integer

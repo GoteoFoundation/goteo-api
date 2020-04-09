@@ -111,6 +111,16 @@ parameters:
       type: integer
       collectionFormat: multi
     - in: query
+      name: sdg
+      description: Filter by project Sustainable Development Goal. Multiple SDGs can be specified. Restricts the list to the social commitments matching that SDG(s)
+      type: integer
+      collectionFormat: multi
+    - in: query
+      name: footprint
+      description: Filter by project footprint. Multiple footprints can be specified. Restricts the list to social commitments with that footprint(s)
+      type: integer
+      collectionFormat: multi
+    - in: query
       name: lang
       description: Get results by specified lang. Multiple langs can be specified
       type: string
@@ -120,14 +130,6 @@ parameters:
       description: Filter by project location (Latitude,longitude,Radius in Km). Restricts the list to the socialcommitments used in projects geolocated in that area
       type: number
       collectionFormat: csv
-    # - in: query
-    #   name: page
-    #   description: Page number (starting at 1) if the result can be paginated
-    #   type: integer
-    # - in: query
-    #   name: limit
-    #   description: Page limit (maximum 50 results, defaults to 10) if the result can be paginated
-    #   type: integer
 
 responses:
     200:

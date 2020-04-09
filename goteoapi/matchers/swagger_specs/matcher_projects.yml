@@ -112,6 +112,11 @@ parameters:
       type: integer
       collectionFormat: multi
     - in: query
+      name: sdg
+      description: Filter by matcher Sustainable Development Goal. Multiple SDGs can be specified. Restricts the list to the users that have interests in that SDG(s)
+      type: integer
+      collectionFormat: multi
+    - in: query
       name: social_commitment
       description: Filter by matcher social commitment. Multiple social commitments can be specified. Restricts the list to the users that have interests in that social commitment(s)
       type: integer

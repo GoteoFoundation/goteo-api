@@ -111,6 +111,16 @@ parameters:
       type: integer
       collectionFormat: multi
     - in: query
+      name: sdg
+      description: Filter by Sustainable Development Goal. Multiple SDGs can be specified. Restricts the list to the categories in that SDG(s)
+      type: integer
+      collectionFormat: multi
+    - in: query
+      name: footprint
+      description: Filter by footprint. Multiple footprints can be specified. Restricts the list to the categories in that footprint(s)
+      type: integer
+      collectionFormat: multi
+    - in: query
       name: lang
       description: Get results by specified lang. Multiple langs can be specified
       type: string

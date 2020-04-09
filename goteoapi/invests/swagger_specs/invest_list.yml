@@ -128,6 +128,16 @@ parameters:
       type: integer
       collectionFormat: multi
     - in: query
+      name: sdg
+      description: Filter by project Sustainable Development Goal. Multiple SDGs can be specified. Restricts the list to the invests of projects with that SDG(s)
+      type: integer
+      collectionFormat: multi
+    - in: query
+      name: footprint
+      description: Filter by project footprint. Multiple footprints can be specified. Restricts the list to the invests of projects with that footprint(s)
+      type: integer
+      collectionFormat: multi
+    - in: query
       name: location
       description: Filter by project location (Latitude,longitude,Radius in Km). Restricts the list to the invests used in projects geolocated in that area
       type: number
