@@ -102,6 +102,15 @@ definitions:
             scope:
                 type: string
                 description: Scope of the project
+            social-commitment-id:
+                type: string
+                description: SocialCommitment unique identifier of the project
+            social-commitment:
+                type: string
+                description: SocialCommitment title for the project
+            social-commitment-description:
+                type: string
+                description: SocialCommitment description for the project
             location:
                 type: array
                 description: Location of the project
@@ -112,6 +121,11 @@ definitions:
                 description: List of images for the project
                 items:
                     $ref: '#/definitions/api_projects_project_get_ProjectGallery'
+            categories:
+                type: array
+                description: Non-economical detailed list of necessities
+                items:
+                    $ref: '#/definitions/api_categories_categories_get_Category'
             rewards:
                 type: array
                 description: List of rewards for the project

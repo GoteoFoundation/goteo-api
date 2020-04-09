@@ -1,38 +1,38 @@
-SocialCommitment API
+FootPrint API
 This resource returns social commitments information.
-http://developers.goteo.org/doc/social_commitments
+"http://developers.goteo.org/doc/footprints"
 ---
 tags:
-    - social_commitments
+    - footprints
 
 security:
     - basic: []
 
 definitions:
     - schema:
-        id: SocialCommitment
+        id: FootPrint
         properties:
             id:
                 type: string
-                description: SocialCommitment unique identifier
+                description: FootPrint unique identifier
             name:
                 type: string
-                description: SocialCommitment name
+                description: FootPrint name
             description:
                 type: string
-                description: SocialCommitment short description
+                description: FootPrint short description
             icon-url:
                 type: string
                 description: URL for the image resource associated with this social commitment
             total-users:
                 type: integer
-                description: Number of users interested in the SocialCommitment
+                description: Number of users interested in the FootPrint
             total-projects:
                 type: integer
-                description: Number of published projects in the SocialCommitment
+                description: Number of published projects in the FootPrint
 
     - schema:
-        id: MetaSocialCommitment
+        id: MetaFootPrint
         properties:
             total:
                 type: integer
@@ -66,20 +66,20 @@ definitions:
 
 
     - schema:
-        id: ResponseSocialCommitment
+        id: ResponseFootPrint
         properties:
             items:
                 type: array
                 items:
-                    $ref: '#/definitions/api_social_commitments_social_commitments_get_SocialCommitment'
+                    $ref: '#/definitions/api_footprints_footprints_get_FootPrint'
             meta:
-                $ref: '#/definitions/api_social_commitments_social_commitments_get_MetaSocialCommitment'
+                $ref: '#/definitions/api_footprints_footprints_get_MetaFootPrint'
 
 parameters:
     - in: query
       type: string
       name: node
-      description: Filter by individual node(s). Multiple nodes can be specified. Restricts the list to the social_commitments used in projects assigned in that nodes
+      description: Filter by individual node(s). Multiple nodes can be specified. Restricts the list to the footprints used in projects assigned in that nodes
       collectionFormat: multi
     - in: query
       type: string
@@ -88,17 +88,17 @@ parameters:
       collectionFormat: multi
     - in: query
       name: project
-      description: Filter by individual project(s). Multiple projects can be specified. Restricts the list to the social_commitments used in that projects
+      description: Filter by individual project(s). Multiple projects can be specified. Restricts the list to the footprints used in that projects
       type: string
       collectionFormat: multi
     - in: query
       name: from_date
-      description: Filter from date. Ex. "2013-01-01". Restricts the list to the social_commitments used in projects created between that dates
+      description: Filter from date. Ex. "2013-01-01". Restricts the list to the footprints used in projects created between that dates
       type: string
       format: date
     - in: query
       name: to_date
-      description: Filter until date.. Ex. "2014-01-01". Restricts the list to the social_commitments used in projects created between that dates
+      description: Filter until date.. Ex. "2014-01-01". Restricts the list to the footprints used in projects created between that dates
       type: string
       format: date
     - in: query
@@ -117,7 +117,7 @@ parameters:
       collectionFormat: multi
     - in: query
       name: location
-      description: Filter by project location (Latitude,longitude,Radius in Km). Restricts the list to the social_commitments used in projects geolocated in that area
+      description: Filter by project location (Latitude,longitude,Radius in Km). Restricts the list to the footprints used in projects geolocated in that area
       type: number
       collectionFormat: csv
     # - in: query
@@ -131,9 +131,9 @@ parameters:
 
 responses:
     200:
-        description: List of available social_commitments
+        description: List of available footprints
         schema:
-            $ref: '#/definitions/api_social_commitments_social_commitments_get_ResponseSocialCommitment'
+            $ref: '#/definitions/api_footprints_footprints_get_ResponseFootPrint'
     401:
         description: Resource requires authorization
     400:

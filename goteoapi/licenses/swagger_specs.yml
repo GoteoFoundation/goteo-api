@@ -33,7 +33,6 @@ definitions:
             total-projects:
                 type: integer
                 description: Number of rewards using the license for all published projects
-
     - schema:
         id: MetaLicense
         properties:
@@ -118,7 +117,7 @@ parameters:
       description: Filter by project category. Multiple categories can be specified. Restricts the list to the licenses used in rewards of projects with that category(ies)
       type: integer
       collectionFormat: multi
-  - in: query
+    - in: query
       name: social_commitment
       description: Filter by project social commitment. Multiple social commitments can be specified. Restricts the list to the licenses used in rewards of projects with that social commitment(s)
       type: integer
@@ -136,6 +135,7 @@ parameters:
     #   name: limit
     #   description: Page limit (maximum 50 results, defaults to 10) if the result can be paginated
     #   type: integer
+
 responses:
     200:
         description: List of available licenses

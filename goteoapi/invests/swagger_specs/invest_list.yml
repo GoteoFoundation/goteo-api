@@ -48,9 +48,12 @@ definitions:
             project:
                 type: string
                 description: Id of the invest where applies the invests
-            call:
+            call-id:
                 type: string
                 description: Id of the matchfunding call if this invest belongs to a invest in selected
+            matcher-id:
+                type: string
+                description: Id of the matchfunding matcher if this invest belongs to a invest in selected
             type:
                 type: string
                 description: Type of the payment, one of `payment`, `drop`, `pool`

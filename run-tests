@@ -69,8 +69,7 @@ if [ "$RESET_DATABASE" != "" ]; then
         PASS="-p$PASS"
     fi
 
-    mysql -h $HOST -u $USER $PASS $DATABASE < goteoapi/tests/sql/schema_mysql.sql
-    mysql -h $HOST -u $USER $PASS $DATABASE < goteoapi/tests/sql/data_mysql.sql
+    mysql -h $HOST -u $USER $PASS $DATABASE < goteoapi/tests/sql/goteo.sql
 
 
     if [ "$?" != '0' ]; then

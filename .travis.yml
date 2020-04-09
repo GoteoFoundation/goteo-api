@@ -7,8 +7,7 @@ services:
     - redis-server
 before_script:
   - mysql -e 'create database goteotest;'
-  - mysql goteotest < goteoapi/tests/sql/schema_mysql.sql
-  - mysql goteotest < goteoapi/tests/sql/data_mysql.sql
+  - mysql goteotest < goteoapi/tests/sql/goteo.sql
 install:
     - pip install -r requirements.txt
     - pip install -r goteoapi_*/requirements.txt

@@ -21,10 +21,8 @@ fi
 # Install goteodev & goteotest database
 mysql -uroot -proot -e "CREATE DATABASE goteodev;"
 mysql -uroot -proot -e "CREATE DATABASE goteotest;"
-mysql -uroot -proot goteodev < /home/ubuntu/goteo-api/goteoapi/tests/sql/schema_mysql.sql
-mysql -uroot -proot goteodev < /home/ubuntu/goteo-api/goteoapi/tests/sql/data_mysql.sql
-mysql -utravis goteotest < /home/ubuntu/goteo-api/goteoapi/tests/sql/schema_mysql.sql
-mysql -utravis goteotest < /home/ubuntu/goteo-api/goteoapi/tests/sql/data_mysql.sql
+mysql -uroot -proot goteodev < /home/ubuntu/goteo-api/goteoapi/tests/sql/goteo.sql
+mysql -utravis goteotest < /home/ubuntu/goteo-api/goteoapi/tests/sql/goteo.sql
 
 # Install Python libs
 sudo apt-get install -y python3-setuptools python3-dev build-essential

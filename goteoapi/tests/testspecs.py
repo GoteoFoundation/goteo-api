@@ -3,8 +3,10 @@
 # Minimal tests for main routes
 #
 from nose.tools import *
-from . import app, test_app, get_swagger
+from . import app, test_app
 from ..cacher import cache
+import glob
+import yaml
 
 old_redis_url = app.config['REDIS_URL']
 old_cache_min_timeout = app.config['CACHE_MIN_TIMEOUT']

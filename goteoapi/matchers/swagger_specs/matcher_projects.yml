@@ -1,16 +1,16 @@
-Call API
+Matcher API
 This resource returns user projects information.
-http://developers.goteo.org/calls#projects
+http://developers.goteo.org/matchers#projects
 ---
 tags:
-    - call_projects
+    - matcher_projects
 
 security:
     - basic: []
 
 definitions:
     - schema:
-        id: ProjectCall
+        id: ProjectMatcher
         properties:
             id:
                 type: string
@@ -57,9 +57,6 @@ definitions:
             status:
                 type: string
                 description: Status of the project
-            social-commitment-id:
-                type: string
-                description: SocialCommitment ID for this project
             minimum:
                 type: number
                 description: Minimum amount to achieve to consider the project succeeded
@@ -69,15 +66,15 @@ definitions:
             amount:
                 type: number
                 description: Currently achieved amount for the project
-            amount-call:
+            amount-matcher:
                 type: number
                 description: Only the matchfunding part of the achieved amount for the project
 
 parameters:
     - in: path
       type: string
-      name: call_id
-      description: Unique ID for the call
+      name: matcher_id
+      description: Unique ID for the matcher
       required: true
     - in: query
       type: string
@@ -86,13 +83,13 @@ parameters:
       collectionFormat: multi
     - in: query
       type: string
-      name: call
-      description: Filter by individual matchfunding call(s). Multiple calls can be specified. Restricts the list to the projects originally created in that call(s)
+      name: matcher
+      description: Filter by individual matchfunding matcher(s). Multiple matchers can be specified. Restricts the list to the projects originally created in that matcher(s)
       collectionFormat: multi
     - in: query
       type: string
-      name: call
-      description: Filter by individual matchfunding call(s). Multiple calls can be specified. Restricts the list to the projects originally created in that call(s)
+      name: matcher
+      description: Filter by individual matchfunding matcher(s). Multiple matchers can be specified. Restricts the list to the projects originally created in that matcher(s)
       collectionFormat: multi
     - in: query
       name: lang
@@ -111,12 +108,12 @@ parameters:
       format: date
     - in: query
       name: category
-      description: Filter by call category. Multiple categories can be specified. Restricts the list to the users that have interests in that category(ies)
+      description: Filter by matcher category. Multiple categories can be specified. Restricts the list to the users that have interests in that category(ies)
       type: integer
       collectionFormat: multi
     - in: query
       name: social_commitment
-      description: Filter by call social commitment. Multiple social commitments can be specified. Restricts the list to the users that have interests in that social commitment(s)
+      description: Filter by matcher social commitment. Multiple social commitments can be specified. Restricts the list to the users that have interests in that social commitment(s)
       type: integer
       collectionFormat: multi
     - in: query

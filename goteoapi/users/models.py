@@ -335,7 +335,7 @@ class User(db.Model):
                 self.updated)
                 .filter(*filters) \
                 # .order_by(asc(self.id)) \
-                .group_by(self.id) \
+                .group_by(self.id, Invest.anonymous) \
                 .offset(page * limit) \
                 .limit(limit)
             ]

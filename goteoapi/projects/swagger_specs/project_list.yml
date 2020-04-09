@@ -66,6 +66,9 @@ definitions:
             amount:
                 type: number
                 description: Currently achieved amount for the project
+            social-commitment-id:
+                type: string
+                description: SocialCommitment unique identifier of the project
 
     - schema:
         id: MetaProject

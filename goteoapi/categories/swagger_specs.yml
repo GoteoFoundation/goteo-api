@@ -27,6 +27,9 @@ definitions:
             total-projects:
                 type: integer
                 description: Number of published projects in the category
+            social-commitment:
+                $ref: '#/definitions/api_social_commitments_social_commitments_get_SocialCommitment'
+                description: Non-economical detailed list of necessities
 
     - schema:
         id: MetaCategory
