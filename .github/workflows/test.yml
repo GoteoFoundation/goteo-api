@@ -45,4 +45,4 @@ jobs:
       - name: Nosetests
         run: nosetests --with-coverage --cover-erase --cover-package=goteoapi --cover-package=goteoapi_reports --cover-package=goteoapi_digests
         env:
-          GOTEO_API_CONFIG_FILE: config_test.py.dist
+          GOTEO_API_CONFIG_FILE: ./config_test.py.dist
