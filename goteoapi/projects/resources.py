@@ -54,6 +54,7 @@ project_reward_resource_fields = {
     "description": fields.String,
     "type": fields.String,
     "amount": fields.Integer,
+    "units": fields.Integer,
     "icon_url": fields.String,
     "license": fields.String,
     "license_description": fields.String,
