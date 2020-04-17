@@ -28,8 +28,7 @@ class RewardInvest(db.Model):
     @hybrid_method
     @cacher
     def reward_available_units(self, reward_id):
-        """Number of available units of a reward
-        """
+        """Number of available units of a reward"""
         filters = [(self.reward_id == reward_id)]
         total = db.session.query(func.count(self.invest_id)) \
                       .filter(*filters).scalar()
@@ -181,9 +180,6 @@ class Reward(db.Model):
             subquery = ProjectLocation.location_subquery(**kwargs['location'])
             filters.append(ProjectLocation.id == self.project_id)
             filters.append(ProjectLocation.id.in_(subquery))
-        if 'units' in kwargs and kwargs['units'] is not None:
-            filters.append(self.units == kwargs['units'])
-
         return filters
 
     @hybrid_method

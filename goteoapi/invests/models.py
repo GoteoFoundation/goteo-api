@@ -713,15 +713,3 @@ class InvestNode(db.Model):
     def __repr__(self):
         return '<InvestNode %d in node %s>' % (
             self.invest_id, self.invest_node)
-
-
-# class InvestReward(db.Model):
-#     __tablename__ = 'invest_reward'
-
-#     invest_id = db.Column('invest', Integer,
-#                           db.ForeignKey('invest.id'), primary_key=True)
-#     reward_id = db.Column('reward', Integer,
-#                           db.ForeignKey('reward.id'), primary_key=True)
-
-#     def __repr__(self):
-#         return '<InvestReward(%d) - Reward(%d)>' % (self.invest, self.reward)

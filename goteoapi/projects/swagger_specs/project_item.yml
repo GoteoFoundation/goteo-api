@@ -200,6 +200,12 @@ definitions:
             amount:
                 type: number
                 description: Minimum amount required for a invest to apply this reward
+            units:
+                type: integer
+                description: Reward's item units
+            available_units:
+                type: integer
+                description: Reward's item units that are still available to choose.
             license:
                 type: string
                 description: Reward's associated license ID (if any, only for `type=social`)
