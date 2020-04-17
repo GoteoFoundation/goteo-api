@@ -104,8 +104,10 @@ def cacher(f):
         elif delta.total_seconds() > app.config['CACHE_MIN_TIMEOUT']:
             timeout = int(delta.total_seconds())
 
-        app.logger.debug('CACHER FOR FUNCTION: {0} TIMEOUT: {1}s KEY: {2}'
-                         .format(f.__name__, timeout, key))
+        # app.logger.debug('CACHER FOR FUNCTION: {0} TIMEOUT: {1}s KEY: {2}'
+        #                  .format(f.__name__, timeout, key))
+        app.logger.debug('CACHER FOR FUNCTION: {0} TIMEOUT: {1}s'
+                         .format(f.__name__, timeout))
 
         cached = cache.get(str(key))
         if cached is not None:

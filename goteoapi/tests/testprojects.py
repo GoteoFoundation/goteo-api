@@ -72,6 +72,7 @@ def test_projects():
 
         eq_(len(set(map(lambda x: str(x), resp.keys()))
                 - set(fields.keys())) >= 0, True)
+        print(len(resp['items']))
         eq_(len(resp['items']) >= 1, True)
         eq_(rv.status_code, 200)
         # Swagger test
@@ -79,6 +80,7 @@ def test_projects():
 
 
 def test_projects_cached():
+    print("repeat test")
     test_projects()
 
 
