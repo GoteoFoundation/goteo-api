@@ -43,7 +43,9 @@ jobs:
           pip install -r goteoapi_*/requirements.txt
 
       - name: Install test database
-        run: mysql -utravis -ptest goteotest < goteoapi/tests/sql/goteo.sql
+        run: |
+          sudo systemctl start mysql
+          mysql -utravis -ptest goteotest < goteoapi/tests/sql/goteo.sql
 
       - name: Setup Code Climate test-reporter
         run: |
