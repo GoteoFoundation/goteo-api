@@ -42,7 +42,26 @@ jobs:
           pip install -r requirements.txt
           pip install -r goteoapi_*/requirements.txt
 
+      - name: Install test database
+        run: mysql goteotest < goteoapi/tests/sql/goteo.sql
+
+      - name: Setup Code Climate test-reporter
+        run: |
+          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+          chmod +x ./cc-test-reporter
+          ./cc-test-reporter before-build
+
       - name: Nosetests
-        run: nosetests --with-coverage --cover-erase --cover-package=goteoapi --cover-package=goteoapi_reports --cover-package=goteoapi_digests
+        run: |
+          echo "Using $(realpath $GOTEO_API_CONFIG_FILE) in $(pwd)"
+          more $GOTEO_API_CONFIG_FILE
+          nosetests --with-coverage --cover-erase --cover-package=goteoapi --cover-package=goteoapi_reports --cover-package=goteoapi_digests
         env:
           GOTEO_API_CONFIG_FILE: ./config_test.py.dist
+
+      - name: Publish code coverage
+        run: |
+          export GIT_BRANCH="${GITHUB_REF/refs\/heads\//}"
+          ./cc-test-reporter after-build -r "$CC_TEST_REPORTER_ID"
+        env:
+          CC_TEST_REPORTER_ID:  8c7af11c559532be7ab76257bcb79f9c135db9cecb66fb5025a7f40942f9a101
