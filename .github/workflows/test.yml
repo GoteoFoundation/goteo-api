@@ -4,6 +4,9 @@ name: Test
 on: [push, pull_request]
 
 jobs:
+  env:
+    GOTEO_API_CONFIG_FILE: config_test.py.dist
+
   build:
     runs-on: ubuntu-latest
     strategy:
