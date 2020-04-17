@@ -2,7 +2,7 @@
 # Dist. test file
 # Create a new config_test.py with your customization
 #
-DB_URI = 'mysql://travis:@localhost/goteotest'
+DB_URI = 'mysql://travis:test@localhost/goteotest'
 
 TESTING = True
 DEBUG = False

@@ -1,0 +1,43 @@
+name: Test
+
+# Trigger the workflow on push or pull request
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.5, 3.6, 3.7, 3.8]
+
+    services:
+      mariadb:
+        image: mariadb:latest
+        ports:
+          - 3306
+        env:
+          MYSQL_USER: travis
+          MYSQL_PASSWORD: test
+          MYSQL_DATABASE: goteotest
+          MYSQL_ROOT_PASSWORD: test
+        options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+
+      redis:
+        image: redis
+        ports:
+          - 6379
+  steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r goteoapi_*/requirements.txt
+
+    - name: Nosetests
+      run: nosetests --with-coverage --cover-erase --cover-package=goteoapi --cover-package=goteoapi_reports --cover-package=goteoapi_digests
