@@ -26,18 +26,20 @@ jobs:
         image: redis
         ports:
           - 6379
-  steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
-      with:
-        python-version: ${{ matrix.python-version }}
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -r goteoapi_*/requirements.txt
+    steps:
+      - uses: actions/checkout@v2
 
-    - name: Nosetests
-      run: nosetests --with-coverage --cover-erase --cover-package=goteoapi --cover-package=goteoapi_reports --cover-package=goteoapi_digests
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r goteoapi_*/requirements.txt
+
+      - name: Nosetests
+        run: nosetests --with-coverage --cover-erase --cover-package=goteoapi --cover-package=goteoapi_reports --cover-package=goteoapi_digests
