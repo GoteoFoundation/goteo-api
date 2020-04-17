@@ -9,7 +9,7 @@ from ..cacher import cacher
 
 from ..projects.models import Project, ProjectCategory
 from ..location.models import InvestLocation
-from ..models.reward import Reward
+from ..models.reward import Reward, RewardInvest
 from ..models.message import Message
 from ..helpers import utc_from_local,as_list
 from .. import db
@@ -316,6 +316,7 @@ class Invest(db.Model):
         from ..calls.models import Call
         from ..matchers.models import Matcher
 
+
         limit = kwargs['limit'] if 'limit' in kwargs else 10
         page = kwargs['page'] if 'page' in kwargs else 0
         filters = list(self.get_filters(**kwargs))
@@ -580,8 +581,8 @@ class Invest(db.Model):
         """Num. of users choosing rewards from {minim} € to {maxim} € """
         filters = list(self.get_filters(**kwargs))
         # filters.append(Reward.id != None)
-        filters.append(InvestReward.invest_id == self.id)
-        filters.append(InvestReward.reward_id == Reward.id)
+        filters.append(RewardInvest.invest_id == self.id)
+        filters.append(RewardInvest.reward_id == Reward.id)
         filters.append(or_(self.resign == None,
                            self.resign == False,
                            self.resign == 0))

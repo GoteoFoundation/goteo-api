@@ -202,8 +202,8 @@ definitions:
                 description: Minimum amount required for a invest to apply this reward
             units:
                 type: integer
-                description: Reward's item units
-            available_units:
+                description: Total units for this reward
+            available-units:
                 type: integer
                 description: Reward's item units that are still available to choose.
             license:
