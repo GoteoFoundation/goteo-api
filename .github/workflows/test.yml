@@ -38,7 +38,7 @@ jobs:
       - name: Install test database
         run: |
           sudo /etc/init.d/mysql start
-          mysql -h 127.0.0.1 -utravis -ptest goteotest < goteoapi/tests/sql/goteo.sql
+          mysql -h 127.0.0.1 -utravis goteotest < goteoapi/tests/sql/goteo.sql
 
       - name: Install dependencies
         run: |
