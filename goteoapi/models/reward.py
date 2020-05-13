@@ -28,9 +28,13 @@ class RewardInvest(db.Model):
     @hybrid_method
     @cacher
     def reward_available_units(self, reward_id):
+        from goteoapi.invests.models import Invest
+
         """Number of available units of a reward"""
         filters = [(self.reward_id == reward_id)]
+        filters.append(Invest.status.in_(Invest.VALID_INVESTS))
         total = db.session.query(func.count(self.invest_id)) \
+                      .join(Invest, Invest.id == self.invest_id) \
                       .filter(*filters).scalar()
         if total is None:
             total = 0
