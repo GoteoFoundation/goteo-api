@@ -2,7 +2,7 @@
 # Dist. test file
 # Create a new config_test.py with your customization
 #
-DB_URI = 'mysql://root@127.0.0.1/goteotest'
+DB_URI = 'mysql://goteo@127.0.0.1/goteo'
 
 TESTING = True
 DEBUG = False

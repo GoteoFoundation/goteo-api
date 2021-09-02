@@ -49,8 +49,7 @@ jobs:
 
       - name: Install test database
         run: |
-          sudo apt-get install -y mysql-client
-          mysql -h127.0.0.1 -P3306 -uroot goteotest < goteoapi/tests/sql/goteo.sql
+          mysql -h127.0.0.1 -P3306 -ugoteo goteo -pgoteo < goteoapi/tests/sql/goteo.sql
 
       - name: Install dependencies
         run: |
