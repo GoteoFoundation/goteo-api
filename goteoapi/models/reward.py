@@ -14,6 +14,31 @@ from ..base_resources import AbstractLang
 
 from .. import db
 
+class RewardInvest(db.Model):
+    __tablename__ = 'invest_reward'
+
+    invest_id = db.Column('invest', Integer,
+                          db.ForeignKey('invest.id'), primary_key=True)
+    reward_id = db.Column('reward', Integer,
+                          db.ForeignKey('reward.id'), primary_key=True)
+
+    def __repr__(self):
+        return '<RewardInvest(%d) - Reward(%d)>' % (self.invest, self.reward)
+
+    @hybrid_method
+    @cacher
+    def reward_available_units(self, reward_id):
+        from goteoapi.invests.models import Invest
+
+        """Number of available units of a reward"""
+        filters = [(self.reward_id == reward_id)]
+        filters.append(Invest.status.in_(Invest.VALID_INVESTS))
+        total = db.session.query(func.count(self.invest_id)) \
+                      .join(Invest, Invest.id == self.invest_id) \
+                      .filter(*filters).scalar()
+        if total is None:
+            total = 0
+        return total
 
 class RewardLang(AbstractLang, db.Model):
     __tablename__ = 'reward_lang'
@@ -85,6 +110,14 @@ class Reward(db.Model):
             self.id, self.project_id, self.type, self.name)
 
     @hybrid_property
+    def available_units(self):
+        if self.units is None:
+            return 0
+        if self.units == 0:
+            return 0
+        return self.units - RewardInvest.reward_available_units(self.id)
+
+    @hybrid_property
     def icon_url(self):
         if(self.icon_id):
             return svg_image_url(self.icon_id + '.svg', 'icons')
@@ -151,7 +184,6 @@ class Reward(db.Model):
             subquery = ProjectLocation.location_subquery(**kwargs['location'])
             filters.append(ProjectLocation.id == self.project_id)
             filters.append(ProjectLocation.id.in_(subquery))
-
         return filters
 
     @hybrid_method
@@ -201,3 +233,4 @@ class Reward(db.Model):
             return total
         except MultipleResultsFound:
             return 0
+
