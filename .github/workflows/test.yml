@@ -53,6 +53,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          apt-get install mysql-devel
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r goteoapi_*/requirements.txt
