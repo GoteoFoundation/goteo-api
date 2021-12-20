@@ -5,6 +5,7 @@ from sqlalchemy import func, Integer, String, Text, Date, Float
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.orm import aliased, relationship
+from datetime import date
 
 from ..helpers import image_url, project_url, project_widget_url,as_list
 from ..helpers import utc_from_local, get_lang
@@ -52,6 +53,28 @@ class ProjectCategory(db.Model):
 
     def __repr__(self):
         return '<ProjectCategory %s-%s>' % (self.project_id, self.category_id)
+
+class ProjectConf(db.Model):
+    __tablename__ = 'project_conf'
+
+    project_id = db.Column('project', String(50),
+                           db.ForeignKey('project.id'), primary_key=True)
+    days_round1 = db.Column('days_round1', Integer)
+    days_round2 = db.Column('days_round2', Integer)
+    one_round = db.Column('one_round', Integer)
+
+    def __repr__(self):
+        return '<ProjectConf %s-%s>' % (self.project_id, self.days_round1, self.days_round2, self.one_round)
+
+    @hybrid_method
+    @cacher
+    def get(self, project_id):
+        """Get a valid project form id"""
+        try:
+            filters =  [self.project_id == project_id]
+            return self.query.one()
+        except NoResultFound:
+            return None
 
 class ProjectImage(db.Model):
     __tablename__ = 'project_image'
@@ -178,6 +201,7 @@ class Project(db.Model):
     social_commitment_description = db.Column('social_commitment_description', Text)
     social_commitment_id = db.Column('social_commitment', Integer, db.ForeignKey('social_commitment.id'))
     SocialCommitment = relationship("SocialCommitment", lazy='joined')  # Eager loading for catching
+    ProjectConf = relationship("ProjectConf", lazy='joined')  # Eager loading for catching
 
     #
     Translations = relationship(
@@ -192,6 +216,10 @@ class Project(db.Model):
     def social_commitment(self):
         from ..social_commitments.models import SocialCommitment
         return SocialCommitment.get(self.social_commitment_id, lang=self.lang)
+
+    @hybrid_property
+    def project_conf(self):
+        return ProjectConf.get(self.id)
 
     @hybrid_method
     def status_number(self, status):
@@ -213,6 +241,22 @@ class Project(db.Model):
     @hybrid_property
     def owner(self):
         return self.user_id
+
+    @hybrid_property
+    def rounds(self):
+        conf = self.project_conf
+        one_round = conf.one_round if conf else 0
+        days_round1 = conf.days_round1 if conf else 40
+        days_round2 = conf.days_round2 if conf else 40
+        days_passed = (date.today() - self.published).days
+        remaining = days_round1 - days_passed
+        if not one_round:
+            remaining += days_round2 
+        return { 
+            "round1": days_round1,
+            "round2": 0 if one_round else days_round2,
+            "days-remaining": remaining if remaining > 0 else 0
+        }
 
     @hybrid_property
     def owner_name(self):

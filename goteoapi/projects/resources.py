@@ -102,6 +102,11 @@ categories_resource_fields = {
     "name": fields.String,
     "description": fields.String
 }
+rounds_resource_fields = {
+    "round1": fields.Integer,
+    "round2": fields.Integer,
+    "days-remaining": fields.Integer
+}
 categories_translate_resource_fields = {
     "name": fields.String,
     "description": fields.String
@@ -134,6 +139,7 @@ project_full_resource_fields["date_updated"] = DateTime
 project_full_resource_fields["date_succeeded"] = DateTime
 project_full_resource_fields["date_closed"] = DateTime
 project_full_resource_fields["date_passed"] = DateTime
+project_full_resource_fields["rounds"] = fields.Nested(rounds_resource_fields)
 project_full_resource_fields["location"] = fields.List(
     fields.Nested(location_resource_fields))
 project_full_resource_fields["user"] = fields.Nested(user_resource_fields)
