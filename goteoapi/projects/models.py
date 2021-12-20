@@ -72,7 +72,7 @@ class ProjectConf(db.Model):
         """Get a valid project form id"""
         try:
             filters =  [self.project_id == project_id]
-            return self.query.one()
+            return self.query.first()
         except NoResultFound:
             return None
 
