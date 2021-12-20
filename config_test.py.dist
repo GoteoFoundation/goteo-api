@@ -2,7 +2,7 @@
 # Dist. test file
 # Create a new config_test.py with your customization
 #
-DB_URI = 'mysql://travis:@localhost/goteotest'
+DB_URI = 'mysql://goteo@127.0.0.1/goteo'
 
 TESTING = True
 DEBUG = False
@@ -14,7 +14,7 @@ SECRET_KEY = 'not-a-very-secret-key'
 REQUESTS_LIMIT = 300
 REQUESTS_TIME = 30
 
-REDIS_URL = "redis://localhost:6379/0"
+REDIS_URL = "redis://127.0.0.1:6379/0"
 CACHE_TYPE = 'null'
 CACHING = False
 CACHE_KEY_PREFIX = 'Test/'
