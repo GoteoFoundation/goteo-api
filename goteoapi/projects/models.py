@@ -249,12 +249,16 @@ class Project(db.Model):
         days_round1 = conf.days_round1 if conf else 40
         days_round2 = conf.days_round2 if conf else 40
         days_passed = (date.today() - self.published).days
-        remaining = days_round1 - days_passed
+        remaining = remaining_round1 = days_round1 - days_passed
+        remaining_round2 = 0
         if not one_round:
-            remaining += days_round2 
+            remaining += days_round2  
+            remaining_round2 = days_round2 if remaining_round1 > 0 else remaining  
         return { 
             "round1": days_round1,
+            "round1-remaining": remaining_round1 if remaining_round1 > 0 else 0,
             "round2": 0 if one_round else days_round2,
+            "round2-remaining": remaining_round2 if remaining_round2 > 0 else 0,
             "days-remaining": remaining if remaining > 0 else 0
         }
 

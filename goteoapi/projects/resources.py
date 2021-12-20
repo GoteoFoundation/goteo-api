@@ -105,7 +105,9 @@ categories_resource_fields = {
 rounds_resource_fields = {
     "round1": fields.Integer,
     "round2": fields.Integer,
-    "days-remaining": fields.Integer
+    "days-remaining": fields.Integer,
+    "round1-remaining": fields.Integer,
+    "round2-remaining": fields.Integer
 }
 categories_translate_resource_fields = {
     "name": fields.String,
