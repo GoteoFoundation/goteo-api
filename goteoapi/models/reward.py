@@ -27,7 +27,7 @@ class RewardInvest(db.Model):
 
     @hybrid_method
     @cacher
-    def reward_available_units(self, reward_id):
+    def reward_purchased_units(self, reward_id):
         from goteoapi.invests.models import Invest
 
         """Number of available units of a reward"""
@@ -110,12 +110,16 @@ class Reward(db.Model):
             self.id, self.project_id, self.type, self.name)
 
     @hybrid_property
+    def purchased_units(self):
+        return RewardInvest.reward_purchased_units(self.id)
+
+    @hybrid_property
     def available_units(self):
         if self.units is None:
             return 0
         if self.units == 0:
             return 0
-        return self.units - RewardInvest.reward_available_units(self.id)
+        return self.units - RewardInvest.reward_purchased_units(self.id)
 
     @hybrid_property
     def icon_url(self):
