@@ -71,8 +71,8 @@ class ProjectConf(db.Model):
     def get(self, project_id):
         """Get a valid project form id"""
         try:
-            filters =  [self.project_id == project_id]
-            return self.query.first()
+            return self.query \
+                       .filter(self.project_id == project_id).one()
         except NoResultFound:
             return None
 
