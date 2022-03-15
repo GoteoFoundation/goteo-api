@@ -53,6 +53,17 @@ class ProjectCategory(db.Model):
     def __repr__(self):
         return '<ProjectCategory %s-%s>' % (self.project_id, self.category_id)
 
+class NodeProject(db.Model):
+    __tablename__ = 'node_project'
+
+    node_id = db.Column('node_id', String(50),
+                        db.ForeignKey('node.id'), primary_key=True)
+    project_id = db.Column('project_id', String(50),
+                           db.ForeignKey('project.id'), primary_key=True)
+
+    def __repr__(self):
+        return '<NodeProject %s-%s>' % (self.node_id, self.project_id)
+
 class ProjectImage(db.Model):
     __tablename__ = 'project_image'
 
@@ -385,7 +396,7 @@ class Project(db.Model):
             filters.append(self.id.in_(as_list(kwargs['project'])))
 
         if 'node' in kwargs and kwargs['node'] is not None:
-            filters.append(self.node_id.in_(as_list(kwargs['node'])))
+            filters.append(or_(self.node_id.in_(as_list(kwargs['node'])), NodeProject.node_id.in_(as_list(kwargs['node']))))
 
         if 'category' in kwargs and kwargs['category'] is not None:
             filters.append(self.id == ProjectCategory.project_id)
